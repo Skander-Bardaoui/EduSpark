@@ -1,0 +1,615 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduSpark &mdash; Sign In / Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'landing/css/style.css' %}" />
+
+  <style>
+    :root {
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+    }
+
+    .font-serif-custom { font-family: var(--font-serif); }
+
+    /* ============ LIQUID GLASS ============ */
+    .auth-glass {
+      background: rgba(255, 255, 255, 0.02);
+      background-blend-mode: luminosity;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: none;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 50px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.2px;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.15) 20%,
+        rgba(255, 255, 255, 0.02) 40%,
+        rgba(255, 255, 255, 0.02) 60%,
+        rgba(255, 255, 255, 0.15) 80%,
+        rgba(255, 255, 255, 0.45) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .auth-glass-subtle {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .auth-glass-subtle:focus-within {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Error state on the input wrapper */
+    .auth-glass-subtle.has-error {
+      border-color: rgba(251, 113, 133, 0.5);
+      box-shadow: inset 0 1px 2px rgba(251, 113, 133, 0.12), 0 0 20px rgba(251, 113, 133, 0.08);
+    }
+
+    /* ============ INPUTS ============ */
+    .auth-input {
+      background: transparent !important;
+      border: 0;
+      outline: none;
+      color: #fff;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      height: 24px;
+    }
+    .auth-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+    /* Chrome/Safari yellow-white autofill box on a black theme */
+    .auth-input:-webkit-autofill,
+    .auth-input:-webkit-autofill:hover,
+    .auth-input:-webkit-autofill:focus {
+      -webkit-text-fill-color: #fff;
+      -webkit-box-shadow: 0 0 0 1000px #101010 inset;
+      transition: background-color 9999s ease-in-out 0s;
+      caret-color: #fff;
+      border-radius: inherit;
+    }
+
+    /* IE/Edge */
+    .auth-input:-ms-input-placeholder { color: rgba(255, 255, 255, 0.3); }
+    .auth-input::selection { background: rgba(255,255,255,0.25); }
+
+    /* ============ AMBIENT ANIMATION ============ */
+    @keyframes float-slow {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(25px, -30px) scale(1.08); }
+    }
+    @keyframes float-reverse {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(-30px, 20px) scale(0.95); }
+    }
+    .animate-float-slow { animation: float-slow 18s ease-in-out infinite; }
+    .animate-float-reverse { animation: float-reverse 22s ease-in-out infinite; }
+
+    .tab-indicator { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    .form-panel {
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .form-hidden-left {
+      opacity: 0;
+      transform: translateX(-24px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+    .form-hidden-right {
+      opacity: 0;
+      transform: translateX(24px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+    .form-active {
+      opacity: 1;
+      transform: translateX(0);
+      position: relative;
+      width: 100%;
+    }
+
+    .btn-shine { position: relative; overflow: hidden; }
+    .btn-shine::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: linear-gradient(60deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(25deg);
+      transition: all 0.75s ease;
+    }
+    .btn-shine:hover::after { left: 140%; }
+
+    #cursor-glow {
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      background: radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.035), transparent 70%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-float-slow, .animate-float-reverse { animation: none; }
+      .form-panel, .tab-indicator { transition: none; }
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-white selection:text-black" data-auth-mode="{{ mode }}">
+
+  <!-- Ambient Cursor Glow Tracker -->
+  <div id="cursor-glow" class="fixed inset-0 z-0"></div>
+
+  <!-- Background Ambient Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/[0.025] rounded-full blur-[140px] animate-float-slow"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-white/[0.018] rounded-full blur-[160px] animate-float-reverse"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.04)_0%,_transparent_75%)]"></div>
+  </div>
+
+  <!-- Top Floating Navbar -->
+  <header class="relative z-20 px-6 py-6 w-full">
+    <nav class="auth-glass rounded-full max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
+      <a href="{% url 'landing:index' %}" class="flex items-center gap-3 group transition-transform duration-300 hover:scale-105">
+        <div class="w-8 h-8 rounded-full auth-glass-subtle flex items-center justify-center text-white/90 group-hover:text-white transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+            <path d="M2 12h20" />
+          </svg>
+        </div>
+        <span class="text-white font-semibold text-lg tracking-tight">EduSpark</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-8 text-sm font-medium text-white/60">
+        <a href="{% url 'landing:index' %}" class="hover:text-white transition-colors">Features</a>
+        <a href="{% url 'landing:index' %}" class="hover:text-white transition-colors">About</a>
+      </div>
+
+      <a href="{% url 'landing:index' %}" class="text-xs tracking-wider uppercase text-white/60 hover:text-white flex items-center gap-1.5 transition-colors group">
+        <span>Back to site</span>
+        <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 7h10v10" /><path d="M7 17 17 7" />
+        </svg>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Auth Section -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-8 sm:px-6">
+    <div class="w-full max-w-[460px] mx-auto flex flex-col items-center">
+
+      <!-- Headline & Tagline -->
+      <div class="text-center mb-7 space-y-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full auth-glass-subtle text-[11px] font-medium uppercase tracking-widest text-white/60 mb-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Access EduSpark</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl text-white tracking-tight font-serif-custom">
+          Know it then <span class="italic text-white/80">all.</span>
+        </h1>
+        <p class="text-white/50 text-xs sm:text-sm font-normal max-w-sm mx-auto leading-relaxed">
+          Sign in to your workspace, or create an account in seconds.
+        </p>
+      </div>
+
+      <!-- Liquid Glass Auth Card -->
+      <div class="w-full auth-glass rounded-3xl p-7 sm:p-9 shadow-2xl">
+
+        <!-- Django messages (success / errors) -->
+        {% if messages %}
+          <div class="mb-5 space-y-2">
+            {% for message in messages %}
+              <div class="p-3 rounded-2xl auth-glass-subtle text-xs {% if message.tags == 'success' %}text-emerald-300{% elif message.tags == 'error' %}text-rose-300{% else %}text-white/70{% endif %} flex items-center gap-2">
+                <i data-lucide="{% if message.tags == 'success' %}check-circle-2{% elif message.tags == 'error' %}alert-circle{% else %}info{% endif %}" class="w-4 h-4 shrink-0"></i>
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Toggle Pill Switcher -->
+        <div class="relative p-1 rounded-full auth-glass-subtle flex items-center mb-7 text-xs font-medium">
+          <div
+            id="tab-slider"
+            class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-white shadow-md tab-indicator"
+            {% if mode == 'signup' %}style="transform: translateX(100%);"{% endif %}
+          ></div>
+
+          <button
+            type="button"
+            id="tab-login-btn"
+            onclick="switchAuthMode('login')"
+            class="relative z-10 w-1/2 py-2 text-center rounded-full transition-colors duration-300 font-medium {% if mode == 'signup' %}text-white/60{% else %}text-black{% endif %}"
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            id="tab-signup-btn"
+            onclick="switchAuthMode('signup')"
+            class="relative z-10 w-1/2 py-2 text-center rounded-full transition-colors duration-300 font-medium {% if mode == 'signup' %}text-black{% else %}text-white/60{% endif %}"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <!-- Social Quick Actions -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <button type="button" class="auth-glass-subtle rounded-xl py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-medium text-white/80 hover:text-white hover:bg-white/[0.06] transition-all group">
+            <svg class="w-4 h-4 fill-current opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+              <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+            </svg>
+            <span>Google</span>
+          </button>
+
+          <button type="button" class="auth-glass-subtle rounded-xl py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-medium text-white/80 hover:text-white hover:bg-white/[0.06] transition-all group">
+            <svg class="w-4 h-4 fill-current opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24">
+              <path d="M16.365 1.43c0 1.14-.462 2.204-1.21 3.006-.9.98-2.356 1.736-3.62 1.644-.144-1.1.44-2.27 1.165-3.03.8-.86 2.27-1.57 3.665-1.62zM20.94 17.1c-.57 1.3-.844 1.878-1.578 3.026-1.026 1.612-2.476 3.62-4.27 3.636-1.596.016-2.007-1.042-4.174-1.03-2.166.012-2.618 1.05-4.214 1.032-1.794-.016-3.166-1.828-4.192-3.44C-.19 15.666.356 10.634 3.08 9.013c1.29-.775 2.72-.79 4.085-.06.99.54 1.76.54 2.75 0 1.36-.73 2.9-.755 4.2.06.66.4 1.32 1.02 1.83 1.02.55 0 1.63-.66 2.6-.87 1.13-.24 2.28-.05 3.26.68-.52.62-1.55 1.35-2.03 2.14-.35.58-.63 1.3-.83 2.11z"/>
+            </svg>
+            <span>Apple</span>
+          </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="relative flex items-center justify-center mb-6">
+          <div class="w-full border-t border-white/10"></div>
+          <span class="absolute bg-[#0a0a0a] px-3 text-[11px] uppercase tracking-widest text-white/40">or continue with email</span>
+        </div>
+
+        <!-- Forms Container -->
+        <div class="relative overflow-hidden min-h-[300px]">
+
+          <!-- ============ LOGIN FORM ============ -->
+          <form id="form-login" method="post" action="{% url 'accounts:auth' %}" class="form-panel space-y-4 {% if mode == 'login' %}form-active{% else %}form-hidden-right{% endif %}">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="login" />
+
+            <!-- Email Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-medium text-white/70" for="{{ signin_form.username.id_for_label }}">Email Address</label>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signin_form.username.errors %}has-error{% endif %}">
+                <i data-lucide="mail" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signin_form.username }}
+              </div>
+              {% for error in signin_form.username.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <!-- Password Input -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-medium text-white/70" for="{{ signin_form.password.id_for_label }}">Password</label>
+                <a href="#" class="text-[11px] text-white/50 hover:text-white transition-colors">Forgot password?</a>
+              </div>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signin_form.password.errors or signin_form.non_field_errors %}has-error{% endif %}">
+                <i data-lucide="lock" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signin_form.password }}
+                <button
+                  type="button"
+                  onclick="togglePasswordVisibility('{{ signin_form.password.id_for_label }}', this)"
+                  class="text-white/40 hover:text-white transition-colors ml-2 focus:outline-none shrink-0"
+                  aria-label="Show password"
+                >
+                  <span data-eye><i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i></span>
+                  <span data-eye-off class="hidden"><i data-lucide="eye-off" class="w-4 h-4 pointer-events-none"></i></span>
+                </button>
+              </div>
+              {% for error in signin_form.password.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+              {% for error in signin_form.non_field_errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between pt-1">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" name="remember" class="w-3.5 h-3.5 rounded bg-white/10 border-white/20 focus:ring-0 focus:ring-offset-0 cursor-pointer accent-white" />
+                <span class="text-xs text-white/60 hover:text-white/80 transition-colors">Remember for 30 days</span>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="w-full btn-shine bg-white hover:bg-neutral-200 text-black font-semibold text-sm rounded-full py-3.5 px-6 flex items-center justify-center gap-2 shadow-lg transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] mt-2 group"
+            >
+              <span>Sign In</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"></i>
+            </button>
+
+            <p class="text-center text-xs text-white/50 pt-1">
+              Don&rsquo;t have an account?
+              <button type="button" onclick="switchAuthMode('signup')" class="text-white hover:underline font-medium transition-colors">Create one</button>
+            </p>
+          </form>
+
+          <!-- ============ SIGN UP FORM ============ -->
+          <form id="form-signup" method="post" action="{% url 'accounts:auth' %}" class="form-panel space-y-4 {% if mode == 'signup' %}form-active{% else %}form-hidden-right{% endif %}">
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="signup" />
+
+            <!-- Full Name Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-medium text-white/70" for="{{ signup_form.full_name.id_for_label }}">Full Name</label>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signup_form.full_name.errors %}has-error{% endif %}">
+                <i data-lucide="user" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signup_form.full_name }}
+              </div>
+              {% for error in signup_form.full_name.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <!-- Email Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-medium text-white/70" for="{{ signup_form.email.id_for_label }}">Email</label>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signup_form.email.errors %}has-error{% endif %}">
+                <i data-lucide="mail" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signup_form.email }}
+              </div>
+              {% for error in signup_form.email.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <!-- Create Password Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-medium text-white/70" for="{{ signup_form.password1.id_for_label }}">Create Password</label>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signup_form.password1.errors %}has-error{% endif %}">
+                <i data-lucide="shield-check" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signup_form.password1 }}
+                <button
+                  type="button"
+                  onclick="togglePasswordVisibility('{{ signup_form.password1.id_for_label }}', this)"
+                  class="text-white/40 hover:text-white transition-colors ml-2 focus:outline-none shrink-0"
+                  aria-label="Show password"
+                >
+                  <span data-eye><i data-lucide="eye" class="w-4 h-4 pointer-events-none"></i></span>
+                  <span data-eye-off class="hidden"><i data-lucide="eye-off" class="w-4 h-4 pointer-events-none"></i></span>
+                </button>
+              </div>
+
+              <!-- Password Strength Mini Meter -->
+              <div class="pt-1.5 space-y-1">
+                <div class="grid grid-cols-4 gap-1.5 h-1">
+                  <div id="bar-1" class="rounded-full bg-white/10 transition-colors duration-300"></div>
+                  <div id="bar-2" class="rounded-full bg-white/10 transition-colors duration-300"></div>
+                  <div id="bar-3" class="rounded-full bg-white/10 transition-colors duration-300"></div>
+                  <div id="bar-4" class="rounded-full bg-white/10 transition-colors duration-300"></div>
+                </div>
+                <p id="strength-text" class="text-[10px] text-white/40">Enter 8+ characters with numbers &amp; symbols</p>
+              </div>
+              {% for error in signup_form.password1.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            <!-- Confirm Password Input -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-medium text-white/70" for="{{ signup_form.password2.id_for_label }}">Confirm Password</label>
+              <div class="relative auth-glass-subtle rounded-2xl flex items-center px-4 py-3 {% if signup_form.password2.errors %}has-error{% endif %}">
+                <i data-lucide="lock" class="w-4 h-4 text-white/40 mr-3 shrink-0"></i>
+                {{ signup_form.password2 }}
+              </div>
+              {% for error in signup_form.password2.errors %}
+                <p class="text-[11px] text-rose-400">{{ error }}</p>
+              {% endfor %}
+            </div>
+
+            {% for error in signup_form.non_field_errors %}
+              <p class="text-[11px] text-rose-400">{{ error }}</p>
+            {% endfor %}
+
+            <!-- Terms agreement -->
+            <div class="flex items-start gap-2 pt-1">
+              <input type="checkbox" required class="mt-0.5 w-3.5 h-3.5 rounded bg-white/10 border-white/20 focus:ring-0 cursor-pointer accent-white" />
+              <span class="text-xs text-white/60 leading-tight">
+                I accept the <a href="#" class="text-white underline hover:text-white/80">Terms of Service</a> &amp; <a href="#" class="text-white underline hover:text-white/80">Privacy Policy</a>.
+              </span>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="w-full btn-shine bg-white hover:bg-neutral-200 text-black font-semibold text-sm rounded-full py-3.5 px-6 flex items-center justify-center gap-2 shadow-lg transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] mt-2 group"
+            >
+              <span>Create Account</span>
+              <i data-lucide="sparkles" class="w-4 h-4 transition-transform duration-300 group-hover:rotate-12"></i>
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Security Guarantee & Features Badge -->
+      <div class="mt-8 flex items-center justify-center gap-6 text-[11px] text-white/40 uppercase tracking-wider">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-white/50"></i>
+          <span>End-to-End Encrypted</span>
+        </div>
+        <span class="w-1 h-1 rounded-full bg-white/20"></span>
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="fingerprint" class="w-3.5 h-3.5 text-white/50"></i>
+          <span>Biometric Passkey Ready</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Clean Minimalist Footer -->
+  <footer class="relative z-10 px-6 py-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-xs text-white/40 max-w-6xl mx-auto w-full gap-4">
+    <div class="flex items-center gap-4">
+      <span>&copy; 2026 EduSpark.</span>
+      <span class="hidden sm:inline text-white/20">&bull;</span>
+      <span class="hidden sm:inline">Crafted for minds that create, build, and inspire.</span>
+    </div>
+    <div class="flex items-center gap-5">
+      <a href="#" class="hover:text-white transition-colors">Privacy</a>
+      <a href="#" class="hover:text-white transition-colors">Security</a>
+      <a href="#" class="hover:text-white transition-colors">Contact</a>
+    </div>
+  </footer>
+
+  <!-- Interactivity Scripts -->
+  <script>
+    function initIcons() {
+      if (window.lucide && window.lucide.createIcons) {
+        window.lucide.createIcons();
+      }
+    }
+    initIcons();
+
+    // Mouse glow follower
+    document.addEventListener('mousemove', (e) => {
+      const glow = document.getElementById('cursor-glow');
+      if (!glow) return;
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      glow.style.setProperty('--mouse-x', `${x}%`);
+      glow.style.setProperty('--mouse-y', `${y}%`);
+    });
+
+    // ---- Tab switcher: fully declarative, no stale classes possible ----
+    const MODES = ['login', 'signup'];
+
+    function applyAuthMode(mode) {
+      MODES.forEach((m) => {
+        const btn = document.getElementById(`tab-${m}-btn`);
+        const form = document.getElementById(`form-${m}`);
+        const active = m === mode;
+
+        // Button: white pill active = black text, inactive = muted white
+        btn.classList.toggle('text-black', active);
+        btn.classList.toggle('text-white/60', !active);
+
+        // Form: exactly one state class, always
+        form.classList.remove('form-active', 'form-hidden-left', 'form-hidden-right');
+        form.classList.add(active ? 'form-active' : 'form-hidden-right');
+      });
+
+      const slider = document.getElementById('tab-slider');
+      if (slider) {
+        slider.style.transform = mode === 'signup' ? 'translateX(100%)' : 'translateX(0%)';
+      }
+    }
+
+    function switchAuthMode(mode) {
+      applyAuthMode(mode);
+    }
+
+    // Restore server-side mode on load (e.g. ?mode=signup or validation errors)
+    document.addEventListener('DOMContentLoaded', () => {
+      const initial = document.body.dataset.authMode || 'login';
+      applyAuthMode(initial);
+      initIcons();
+      // The login email input carries `autofocus`; if we started on the
+      // sign-up tab, don't steal focus into the hidden login form.
+      if (initial === 'signup' && document.activeElement) {
+        document.activeElement.blur();
+      }
+    });
+
+    // ---- Password visibility toggle (icon swap via two icons, no re-render) ----
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      const eye = btn.querySelector('[data-eye]');
+      const eyeOff = btn.querySelector('[data-eye-off]');
+      if (eye) eye.classList.toggle('hidden', show);
+      if (eyeOff) eyeOff.classList.toggle('hidden', !show);
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    }
+
+    // ---- Password strength meter ----
+    function updateStrengthIndicator(password) {
+      const bars = [
+        document.getElementById('bar-1'),
+        document.getElementById('bar-2'),
+        document.getElementById('bar-3'),
+        document.getElementById('bar-4'),
+      ];
+      const txt = document.getElementById('strength-text');
+      if (!txt || bars.some((b) => !b)) return;
+
+      let score = 0;
+      if (password.length >= 6) score++;
+      if (password.length >= 10) score++;
+      if (/[0-9]/.test(password)) score++;
+      if (/[^A-Za-z0-9]/.test(password)) score++;
+
+      const idle = 'rounded-full bg-white/10 transition-colors duration-300';
+      bars.forEach((b) => { b.className = idle; });
+
+      const colors = ['bg-rose-500', 'bg-amber-500', 'bg-blue-400', 'bg-emerald-400'];
+      const labels = [
+        ['Enter 8+ characters with numbers & symbols', 'text-white/40'],
+        ['Weak password', 'text-rose-400'],
+        ['Moderate security', 'text-amber-400'],
+        ['Strong password', 'text-blue-400'],
+        ['Very strong & secure', 'text-emerald-400'],
+      ];
+
+      for (let i = 0; i < score; i++) {
+        bars[i].className = `rounded-full ${colors[i]} transition-colors duration-300`;
+      }
+      txt.textContent = labels[score][0];
+      txt.className = `text-[10px] ${labels[score][1]}`;
+    }
+
+    // Wire the strength meter to the real Django-rendered input
+    document.addEventListener('DOMContentLoaded', () => {
+      const pw1 = document.querySelector('input[name="password1"]');
+      if (pw1) {
+        pw1.setAttribute('oninput', 'updateStrengthIndicator(this.value)');
+      }
+    });
+  </script>
+</body>
+</html>

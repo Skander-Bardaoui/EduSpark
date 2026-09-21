@@ -1,0 +1,214 @@
+{
+  "name": "projects/17395238336519909111",
+  "title": "Liquid Glass Studio Landing Page",
+  "visibility": "PRIVATE",
+  "createTime": "2026-09-21T16:48:15.384669Z",
+  "updateTime": "2026-09-21T17:36:59.361342Z",
+  "projectType": "TEXT_TO_UI_PRO",
+  "thumbnailScreenshot": {
+    "name": "projects/17395238336519909111/screens/e479829547804aaa97cb25b143fb2198/fileEntries/screenshot",
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1VZdpy5JMxRSeO6lQumWyanaB14NZnuUhEKKJSMani8qH_r03iiLqnL9LxbCZYIZnO7wJ0cy4t4rXTsyE_ArzEgS_-UiKvYkwlwZI7TaWS-dONpaJVSG1qNsYgXGYqBbDHGoIspmcS_knUEbtOievPyNTg-KMn4pUutFDQykBM6pCgl4PFdy6eNLV9MGv46gESk018ovKGyp0qYlq4rF0mc5UxkI99_27H9PCaIRA7vaA"
+  },
+  "origin": "STITCH",
+  "deviceType": "DESKTOP",
+  "designTheme": {
+    "colorMode": "DARK",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#ffffff",
+    "bodyFont": "GEIST",
+    "labelFont": "GEIST",
+    "namedColors": {
+      "surface_container_lowest": "#0e0e0e",
+      "outline_variant": "#444748",
+      "tertiary": "#ffffff",
+      "on_primary_fixed": "#1a1c1c",
+      "background": "#131313",
+      "primary_fixed": "#e2e2e2",
+      "inverse_on_surface": "#303030",
+      "surface_container": "#1f1f1f",
+      "inverse_primary": "#5d5f5f",
+      "on_secondary": "#2f3034",
+      "surface_container_highest": "#353535",
+      "on_secondary_fixed": "#1a1c1f",
+      "inverse_surface": "#e2e2e2",
+      "on_surface": "#e2e2e2",
+      "on_secondary_fixed_variant": "#45474b",
+      "on_error_container": "#ffdad6",
+      "secondary_fixed": "#e2e2e7",
+      "on_surface_variant": "#c4c7c8",
+      "secondary_container": "#45474b",
+      "outline": "#8e9192",
+      "on_tertiary_container": "#636469",
+      "tertiary_fixed": "#e3e2e7",
+      "on_tertiary_fixed": "#1a1b1f",
+      "surface": "#131313",
+      "error_container": "#93000a",
+      "on_background": "#e2e2e2",
+      "on_secondary_container": "#b4b5ba",
+      "on_primary": "#2f3131",
+      "surface_dim": "#131313",
+      "surface_variant": "#353535",
+      "on_tertiary": "#2f3034",
+      "on_primary_fixed_variant": "#454747",
+      "surface_tint": "#c6c6c7",
+      "on_error": "#690005",
+      "primary_container": "#e2e2e2",
+      "primary_fixed_dim": "#c6c6c7",
+      "surface_bright": "#393939",
+      "secondary_fixed_dim": "#c6c6cb",
+      "tertiary_fixed_dim": "#c6c6cb",
+      "error": "#ffb4ab",
+      "on_primary_container": "#636565",
+      "secondary": "#c6c6cb",
+      "on_tertiary_fixed_variant": "#46464b",
+      "tertiary_container": "#e3e2e7",
+      "primary": "#ffffff",
+      "surface_container_high": "#2a2a2a",
+      "surface_container_low": "#1b1b1b"
+    },
+    "designMd": "---\nname: Nocturne Liquid Luxe\ncolors:\n  surface: '#131313'\n  surface-dim: '#131313'\n  surface-bright: '#393939'\n  surface-container-lowest: '#0e0e0e'\n  surface-container-low: '#1b1b1b'\n  surface-container: '#1f1f1f'\n  surface-container-high: '#2a2a2a'\n  surface-container-highest: '#353535'\n  on-surface: '#e2e2e2'\n  on-surface-variant: '#c4c7c8'\n  inverse-surface: '#e2e2e2'\n  inverse-on-surface: '#303030'\n  outline: '#8e9192'\n  outline-variant: '#444748'\n  surface-tint: '#c6c6c7'\n  primary: '#ffffff'\n  on-primary: '#2f3131'\n  primary-container: '#e2e2e2'\n  on-primary-container: '#636565'\n  inverse-primary: '#5d5f5f'\n  secondary: '#c6c6cb'\n  on-secondary: '#2f3034'\n  secondary-container: '#45474b'\n  on-secondary-container: '#b4b5ba'\n  tertiary: '#ffffff'\n  on-tertiary: '#2f3034'\n  tertiary-container: '#e3e2e7'\n  on-tertiary-container: '#636469'\n  error: '#ffb4ab'\n  on-error: '#690005'\n  error-container: '#93000a'\n  on-error-container: '#ffdad6'\n  primary-fixed: '#e2e2e2'\n  primary-fixed-dim: '#c6c6c7'\n  on-primary-fixed: '#1a1c1c'\n  on-primary-fixed-variant: '#454747'\n  secondary-fixed: '#e2e2e7'\n  secondary-fixed-dim: '#c6c6cb'\n  on-secondary-fixed: '#1a1c1f'\n  on-secondary-fixed-variant: '#45474b'\n  tertiary-fixed: '#e3e2e7'\n  tertiary-fixed-dim: '#c6c6cb'\n  on-tertiary-fixed: '#1a1b1f'\n  on-tertiary-fixed-variant: '#46464b'\n  background: '#131313'\n  on-background: '#e2e2e2'\n  surface-variant: '#353535'\ntypography:\n  display-hero:\n    fontFamily: Instrument Serif\n    fontSize: 80px\n    fontWeight: '400'\n    lineHeight: 84px\n    letterSpacing: -0.03em\n  display-hero-mobile:\n    fontFamily: Instrument Serif\n    fontSize: 44px\n    fontWeight: '400'\n    lineHeight: 48px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Instrument Serif\n    fontSize: 56px\n    fontWeight: '400'\n    lineHeight: 60px\n    letterSpacing: -0.02em\n  headline-lg-mobile:\n    fontFamily: Instrument Serif\n    fontSize: 34px\n    fontWeight: '400'\n    lineHeight: 38px\n    letterSpacing: -0.015em\n  headline-md:\n    fontFamily: Instrument Serif\n    fontSize: 36px\n    fontWeight: '400'\n    lineHeight: 42px\n    letterSpacing: -0.01em\n  headline-md-mobile:\n    fontFamily: Instrument Serif\n    fontSize: 26px\n    fontWeight: '400'\n    lineHeight: 32px\n    letterSpacing: -0.01em\n  headline-italic-accent:\n    fontFamily: Instrument Serif\n    fontSize: 36px\n    fontWeight: '400'\n    lineHeight: 42px\n    letterSpacing: -0.01em\n  body-lead:\n    fontFamily: Geist\n    fontSize: 18px\n    fontWeight: '300'\n    lineHeight: 28px\n    letterSpacing: -0.01em\n  body-base:\n    fontFamily: Geist\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 24px\n    letterSpacing: 0em\n  body-sm:\n    fontFamily: Geist\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 20px\n    letterSpacing: 0.01em\n  label-caps:\n    fontFamily: Geist\n    fontSize: 11px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: 0.12em\n  label-mono:\n    fontFamily: Geist\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 16px\n    letterSpacing: 0.04em\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  gutter-mobile: 1rem\n  margin: 4rem\n  margin-mobile: 1.25rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n  space-2xl: 4rem\n  space-3xl: 6rem\n---\n\n## Brand & Style\nThis design system defines a high-end, editorial, cinematic digital space built on tension between pure void and luminous liquid glass. It targets discerning clientele, creators, and patrons of modern luxury, haute horlogerie, high architecture, and bespoke digital artifacts. \n\nThe emotional response is quiet authority, intimacy, and architectural precision. The visual style merges **Atmospheric Minimalism** with **Liquid Glassmorphism**:\n- Obsidian canvas (`#000000`) grounding the entire viewport to eliminate digital noise.\n- Translucent, light-refracting glass panels that mimic cut optical crystal floating in complete darkness.\n- Controlled monochrome white reflections, high-specular rim lighting, and whispering typography that prioritizes editorial pacing over aggressive visual density.\n\n## Colors\nThe palette is rigorously monochrome, deriving hierarchy through opacity scales, refraction indices, and luminance rather than hue:\n\n- **Base Void**: `#000000` serves as the absolute canvas. No tinted grays or dark blues are permitted as base backgrounds.\n- **Pure Specular**: `#FFFFFF` reserved strictly for active elements, primary headlines, keyframe borders, and luminous gleams.\n- **Glass Core Tiers**: \n  - `Surface Glass Ultra-Thin`: `rgba(255, 255, 255, 0.02)` for broad background section dividers and subtle card canvases.\n  - `Surface Glass Standard`: `rgba(255, 255, 255, 0.05)` for floating interactive cards and media panels.\n  - `Surface Glass Elevated`: `rgba(255, 255, 255, 0.09)` for modal overlays, floating dock navigations, and hover-state focus layers.\n- **Liquid Rim Edges**:\n  - `Border Idle`: Linear gradient transitioning from `rgba(255, 255, 255, 0.18)` at the top light-incidence source to `rgba(255, 255, 255, 0.02)` at the baseline shadow.\n  - `Border Active / Specular Hit`: Dual layered stroke peaking at `rgba(255, 255, 255, 0.50)` for interactive feedback.\n- **Muted Hierarchy**: Secondary text at `#D1D1D6`, sub-captions and metadata at `#8E8E93`, and passive micro-rules at `rgba(255, 255, 255, 0.08)`.\n\n## Typography\nTypographic discipline pairs the bespoke, haute-couture cadence of `Instrument Serif` (both Regular and Italic) with the hyper-refined, neutral precision of `Geist`.\n\n- **Display & Headings**: `Instrument Serif` carries the editorial weight. Use italicized variants selectively\u2014ideal for pivotal words within a title (e.g., \"The *Atmospheric* Continuum\") to evoke couture provenance.\n- **Body & Structural Text**: `Geist` provides invisible, high-legibility support. The light weight (`300`) is leveraged across narrative summaries to avoid competing with glass refraction lines.\n- **Labels & Micro-Metrics**: `label-caps` enforces high letter-spacing (0.12em) and uppercase transformation for badges, video timestamps, categories, and luxury specification data.\n\n## Layout & Spacing\nThe layout follows an airy, structural 12-column grid system designed for expansive widescreen resolutions while scaling fluidly down to single-column handheld screens.\n\n- **Desktop (1200px and up)**: 12-column grid with a maximum bounded content container of `1440px`. Exterior margins expand to `margin` (4rem) or float centered. Gutters remain fixed at `1.5rem` to keep video assets tightly composed.\n- **Tablet (768px \u2013 1199px)**: 8-column grid with `margin: 2.5rem` and `gutter: 1.25rem`. Two-column layouts compress cleanly into stacked 4-column blocks.\n- **Mobile (< 768px)**: 4-column grid with `margin-mobile: 1.25rem` and `gutter-mobile: 1rem`. Hero headlines swap automatically to `-mobile` typography scale tokens.\n- **Rhythm**: Generous vertical section spacing (`space-3xl`) isolates each visual chapter against the pitch-black void, avoiding visual clutter and amplifying focus on single interactive showcases.\n\n## Elevation & Depth\nDepth is produced through light physics\u2014transmission, optical diffusion, and acute directional rim lights\u2014rather than traditional drop shadows.\n\n1. **Backdrop Filtration**:\n   All elevated surfaces enforce backdrop filters with a blur of `24px` to `40px` and saturate multiplier of `140%`.\n2. **The \"Liquid Specular\" Border**:\n   Surfaces do not use static borders. They utilize a 1px pseudo-inner stroke or gradient border:\n   - `top`: `rgba(255, 255, 255, 0.25)` catching phantom directional light.\n   - `sides`: `rgba(255, 255, 255, 0.08)`.\n   - `bottom`: `rgba(255, 255, 255, 0.02)` sinking back into the `#000000` canvas.\n3. **Ambient Halo (Glow Tier)**:\n   Video cards and floating interaction bars cast an ethereal, extra-diffused luminance:\n   `box-shadow: 0 20px 80px -20px rgba(255, 255, 255, 0.06), 0 0 1px 1px rgba(255, 255, 255, 0.12) inset`.\n4. **Z-Index Layering**:\n   - Level 0: Pure pitch background canvas (`#000000`).\n   - Level 1: Inactive video/editorial containers (backdrop blur `16px`).\n   - Level 2: Active or hovered liquid glass surfaces (backdrop blur `32px`, top specular rim illumination).\n   - Level 3: Navigation floating capsule and bespoke media modals (backdrop blur `48px`, full rim light).\n\n## Shapes\nShapes evoke precision-machined crystal and smooth liquid lens profiles. The system anchors to `roundedness: 2` (base `0.5rem` / 8px).\n\n- **Standard Interactive Elements**: Buttons, text inputs, and dropdown selectors sit at `0.5rem` (8px).\n- **Cards & Video Viewports (`rounded-lg`)**: `1rem` (16px) corner radius to ensure media corners feel organic yet architectural.\n- **Floating Controls & Badges (`rounded-xl` / Pill)**: Audio pills, timeline indicators, and floating navigation bars adopt an ultra-soft curve (`1.5rem` to full pill `9999px`) to visually soften technical controls.\n\n## Components\n\n### Ultra-Refined Video Cards\n- **Base Canvas**: 16:9 or 4:5 aspect ratio wrapper with `1rem` radius. Background sits at `rgba(255, 255, 255, 0.02)` before load.\n- **Liquid Border**: Dual gradient outline with top-edge white luminosity (`rgba(255, 255, 255, 0.22)`) tapering into the black void.\n- **Video Surface**: Masked with a fine micro-vignette (`linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.85) 100%)`).\n- **Interactive State**: On hover, the inner glass border lightens to `rgba(255, 255, 255, 0.45)`, and an ambient back-glow (`0 0 50px rgba(255, 255, 255, 0.08)`) emerges smoothly over 600ms.\n- **Overlay HUD**: Timestamps, chapter titles, and audio indicators utilize `label-mono` and `label-caps` in frosted pill badges resting in the bottom-left and bottom-right corners.\n\n### Buttons\n- **Primary Glass Action**:\n  - Background: `rgba(255, 255, 255, 0.08)`.\n  - Border: 1px liquid gradient border with upper white specular highlight.\n  - Backdrop blur: `20px`.\n  - Text: `Geist` Medium, `#FFFFFF`, tracking +0.02em.\n  - Hover: Background transitions to `rgba(255, 255, 255, 0.16)`; subtle inset shadow bloom (`inset 0 1px 1px rgba(255, 255, 255, 0.4)`).\n- **Secondary Ghost Action**:\n  - Background: Transparent.\n  - Text: `Geist` Regular, `#D1D1D6`.\n  - Underline: Micro-hairline (0.5px) in `rgba(255, 255, 255, 0.3)` that expands on hover to `#FFFFFF`.\n\n### Chips & Metadata Tags\n- Built with a full pill radius.\n- Height: 26px with vertical padding `space-xs` and horizontal padding `space-sm`.\n- Glass surface: `rgba(255, 255, 255, 0.04)` with `backdrop-filter: blur(12px)`.\n- Typography: `label-caps` in `#D1D1D6`.\n\n### Inputs & Text Fields\n- Background: `rgba(255, 255, 255, 0.03)`.\n- Border: 1px stroke at `rgba(255, 255, 255, 0.1)`.\n- Text: `#FFFFFF`, placeholder in `#8E8E93`.\n- Focus State: Border color moves to `#FFFFFF` with a localized directional gleam; glow diffuse `0 0 20px rgba(255, 255, 255, 0.1)`. No default browser rings.\n\n### Checkboxes & Radios\n- Size: 18px by 18px.\n- Unchecked: Frosted void (`rgba(255, 255, 255, 0.05)`) with 1px rim border.\n- Checked: Pure `#FFFFFF` fill with an optical pitch-black (`#000000`) inner checkmark or pip.\n\n### Floating Dock Navigation (Special Component)\n- Positioned fixed along the viewport bottom.\n- Pill-shaped frame with `backdrop-filter: blur(32px)`, background `rgba(255, 255, 255, 0.05)`, and continuous liquid edge reflection.\n- Houses navigation anchors set in `label-caps` separated by hairline dividers (`rgba(255, 255, 255, 0.12)`).",
+    "colorVariant": "FIDELITY",
+    "overridePrimaryColor": "#ffffff",
+    "overrideSecondaryColor": "#d1d1d6",
+    "overrideTertiaryColor": "#8e8e93",
+    "overrideNeutralColor": "#000000",
+    "spacingScale": 2,
+    "typography": {
+      "body-base": {
+        "fontFamily": "Geist",
+        "fontSize": "15px",
+        "fontWeight": "400",
+        "lineHeight": "24px",
+        "letterSpacing": "0em"
+      },
+      "display-hero-mobile": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "44px",
+        "fontWeight": "400",
+        "lineHeight": "48px",
+        "letterSpacing": "-0.02em"
+      },
+      "headline-md": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "36px",
+        "fontWeight": "400",
+        "lineHeight": "42px",
+        "letterSpacing": "-0.01em"
+      },
+      "headline-lg-mobile": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "34px",
+        "fontWeight": "400",
+        "lineHeight": "38px",
+        "letterSpacing": "-0.015em"
+      },
+      "label-mono": {
+        "fontFamily": "Geist",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "16px",
+        "letterSpacing": "0.04em"
+      },
+      "body-lead": {
+        "fontFamily": "Geist",
+        "fontSize": "18px",
+        "fontWeight": "300",
+        "lineHeight": "28px",
+        "letterSpacing": "-0.01em"
+      },
+      "headline-lg": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "56px",
+        "fontWeight": "400",
+        "lineHeight": "60px",
+        "letterSpacing": "-0.02em"
+      },
+      "headline-italic-accent": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "36px",
+        "fontWeight": "400",
+        "lineHeight": "42px",
+        "letterSpacing": "-0.01em"
+      },
+      "display-hero": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "80px",
+        "fontWeight": "400",
+        "lineHeight": "84px",
+        "letterSpacing": "-0.03em"
+      },
+      "body-sm": {
+        "fontFamily": "Geist",
+        "fontSize": "13px",
+        "fontWeight": "400",
+        "lineHeight": "20px",
+        "letterSpacing": "0.01em"
+      },
+      "label-caps": {
+        "fontFamily": "Geist",
+        "fontSize": "11px",
+        "fontWeight": "500",
+        "lineHeight": "16px",
+        "letterSpacing": "0.12em"
+      },
+      "headline-md-mobile": {
+        "fontFamily": "Instrument Serif",
+        "fontSize": "26px",
+        "fontWeight": "400",
+        "lineHeight": "32px",
+        "letterSpacing": "-0.01em"
+      }
+    },
+    "spacing": {
+      "margin-mobile": "1.25rem",
+      "space-xl": "2.5rem",
+      "space-sm": "0.5rem",
+      "space-2xl": "4rem",
+      "gutter": "1.5rem",
+      "space-lg": "1.5rem",
+      "margin": "4rem",
+      "space-xs": "0.25rem",
+      "space-md": "1rem",
+      "gutter-mobile": "1rem",
+      "space-3xl": "6rem"
+    },
+    "headlineFontFamily": "Instrument Serif",
+    "bodyFontFamily": "Geist",
+    "labelFontFamily": "Geist"
+  },
+  "screenInstances": [
+    {
+      "id": "8ac6049ae0cc40bdb70c58d47e0cb39a",
+      "sourceScreen": "projects/17395238336519909111/screens/8ac6049ae0cc40bdb70c58d47e0cb39a",
+      "y": 4414,
+      "width": 1280,
+      "height": 1001
+    },
+    {
+      "id": "assets_f7f142da0c794856959686bfc612db98",
+      "x": -1033,
+      "y": 4690,
+      "width": 960,
+      "height": 540,
+      "sourceAsset": "assets/f7f142da0c794856959686bfc612db98",
+      "type": "DESIGN_SYSTEM_INSTANCE"
+    },
+    {
+      "id": "c4def07988ff4a99a84efb4f05549414",
+      "sourceScreen": "projects/17395238336519909111/screens/c4def07988ff4a99a84efb4f05549414",
+      "y": 5672,
+      "width": 1280,
+      "height": 1117
+    },
+    {
+      "id": "e479829547804aaa97cb25b143fb2198",
+      "sourceScreen": "projects/17395238336519909111/screens/e479829547804aaa97cb25b143fb2198",
+      "x": 1024,
+      "width": 1280,
+      "height": 4158
+    }
+  ],
+  "metadata": {
+    "userRole": "OWNER"
+  }
+}

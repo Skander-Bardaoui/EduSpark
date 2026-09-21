@@ -1,0 +1,50 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+wheels/
+
+# --- Virtual environment ---
+venv/
+.venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+
+# --- Django ---
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+*.mo
+*.po~
+local_settings.py
+
+# --- Tests / tooling ---
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.benchmarks/
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

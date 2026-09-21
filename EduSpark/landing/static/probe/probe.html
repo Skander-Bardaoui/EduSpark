@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --font-serif: 'Instrument Serif', Georgia, serif; --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    body { background-color: #000; color: #fff; font-family: var(--font-sans); }
+    .auth-glass {
+      background: rgba(255,255,255,.02); backdrop-filter: blur(16px);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.15), 0 20px 50px rgba(0,0,0,.6);
+      position: relative; overflow: hidden;
+    }
+    .auth-glass-subtle {
+      background: rgba(255,255,255,.03); backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.08);
+      position: relative; border: 1px solid rgba(255,255,255,.08);
+    }
+    .auth-input {
+      background: transparent !important; border: 0; outline: none; color: #fff;
+      font-size: 0.875rem; line-height: 1.4; width: 100%; min-width: 0; padding: 0; height: 24px;
+    }
+  </style>
+</head>
+<body>
+  <main style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;">
+    <div style="width:100%;max-width:460px;margin:0 auto;display:flex;flex-direction:column;align-items:center;">
+
+      <div class="auth-glass" style="width:100%;border-radius:24px;padding:28px 36px;">
+        <form class="space-y-4" style="width:100%">
+
+          <!-- email field in current (fixed) state: class="auth-input ..." -->
+          <div class="space-y-1.5">
+            <label style="display:block;font-size:12px;color:rgba(255,255,255,.7);">Email Address</label>
+            <div class="auth-glass-subtle" style="border-radius:16px;display:flex;align-items:center;padding:12px 16px;">
+              <span style="width:16px;height:16px;margin-right:12px;color:rgba(255,255,255,.4);">@</span>
+              <input id="in-email" type="email" placeholder="name@company.com" class="auth-input" style="background:transparent;" />
+            </div>
+          </div>
+
+          <!-- email field in PREVIOUS (broken) state: no auth-input -->
+          <div class="space-y-1.5" style="margin-top:16px;">
+            <label style="display:block;font-size:12px;color:rgba(255,255,255,.7);">Email Address (old, no auth-input)</label>
+            <div class="auth-glass-subtle" style="border-radius:16px;display:flex;align-items:center;padding:12px 16px;">
+              <span style="width:16px;height:16px;margin-right:12px;color:rgba(255,255,255,.4);">@</span>
+              <input id="in-email-old" type="email" placeholder="name@company.com" style="width:100%;background:transparent;font-size:14px;color:#fff;" />
+            </div>
+          </div>
+
+          <!-- password field (always had auth-input) -->
+          <div class="space-y-1.5" style="margin-top:16px;">
+            <label style="display:block;font-size:12px;color:rgba(255,255,255,.7);">Password</label>
+            <div class="auth-glass-subtle" style="border-radius:16px;display:flex;align-items:center;padding:12px 16px;">
+              <span style="width:16px;height:16px;margin-right:12px;color:rgba(255,255,255,.4);">#</span>
+              <input id="in-pw" type="password" placeholder="........" class="auth-input" style="background:transparent;" />
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <pre id="metrics" style="white-space:pre;font-size:12px;color:#0f0;margin-top:24px;max-width:100%;"></pre>
+    </div>
+  </main>
+
+  <script>
+    window.addEventListener('load', function () {
+      var card = document.querySelector('.auth-glass');
+      var out = [];
+      function m(id) {
+        var el = document.getElementById(id);
+        if (!el) { out.push(id + ': MISSING'); return; }
+        var wrap = el.closest('.auth-glass-subtle');
+        var cardW = card.getBoundingClientRect().width;
+        var wrapRect = wrap.getBoundingClientRect();
+        var inputRect = el.getBoundingClientRect();
+        out.push(id + ' :: card=' + Math.round(cardW) + ' wrap=' + Math.round(wrapRect.width) +
+          ' input=' + Math.round(inputRect.width) +
+          ' inputLeft-gap=' + Math.round(el.offsetLeft) +
+          ' inputW-vs-wrap=' + (inputRect.width - wrapRect.width).toFixed(0) +
+          ' scrollWidth=' + el.scrollWidth);
+      }
+      m('in-email');
+      m('in-email-old');
+      m('in-pw');
+      out.push('wrap scrollWidth vs clientWidth (padded)');
+      ['in-email-old'].forEach(function(id){
+        var el = document.getElementById(id);
+        var wrap = el.closest('.auth-glass-subtle');
+        out.push('wrap-old scroll=' + wrap.scrollWidth + ' client=' + wrap.clientWidth);
+      });
+      document.getElementById('metrics').textContent = out.join('\n');
+    });
+  </script>
+</body>
+</html>

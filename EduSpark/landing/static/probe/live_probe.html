@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Probe</title>
+  <style>
+    body { background: #111; color: #fff; font: 13px monospace; }
+    #metrics { white-space: pre; margin: 16px; }
+  </style>
+</head>
+<body>
+<iframe id="page" src="/accounts/auth/?mode=signup" style="width:1280px;height:2200px;border:0;" onload="go()"></iframe>
+<pre id="metrics" style="color:#0f0;">waiting...</pre>
+<script>
+  function go() {
+    var win, doc;
+    try { win = document.getElementById('page').contentWindow; doc = win.document; } catch (e) { print('CROSSORIGIN ' + e); return; }
+    var out = [];
+    var cardList = doc.querySelectorAll('.auth-glass');
+    var card = cardList[cardList.length - 1]; // the auth card
+    if (!card) { print('no card'); return; }
+    var cardR = card.getBoundingClientRect();
+    out.push('VIEWPORT ' + win.innerWidth + 'x' + win.innerHeight);
+    out.push('CARD  left=' + Math.round(cardR.left) + ' right=' + Math.round(cardR.right) + ' width=' + Math.round(cardR.width) + ' top=' + Math.round(cardR.top) + ' height=' + Math.round(cardR.height));
+    out.push('CARD computed width=' + win.getComputedStyle(card).width);
+    var forms = doc.querySelectorAll('form');
+    forms.forEach(function (f, fi) {
+      out.push('FORM[' + fi + '] id=' + f.id + ' computedWidth=' + win.getComputedStyle(f).width + ' position=' + win.getComputedStyle(f).position);
+    });
+    doc.querySelectorAll('form .auth-glass-subtle').forEach(function (wrap, i) {
+      var wr = wrap.getBoundingClientRect();
+      var ws = win.getComputedStyle(wrap);
+      var inp = wrap.querySelector('input');
+      out.push('WRAP ' + i + ' class=' + wrap.className.split(' ').slice(0,3).join(' ') + ' w=' + Math.round(wr.width) + ' left=' + Math.round(wr.left) + ' cardRightDelta=' + Math.round(wr.right - cardR.right) + ' display=' + ws.display + ' visibility=' + ws.visibility + ' opacity=' + ws.opacity);
+    });
+    // measure every input vs its wrapper
+    doc.querySelectorAll('form input[type="email"], form input[type="password"], form input[name="full_name"]').forEach(function (inp, i) {
+      var wrap = inp.closest('.auth-glass-subtle');
+      if (!wrap) return;
+      var wr = wrap.getBoundingClientRect();
+      var ir = inp.getBoundingClientRect();
+      out.push('INPUT ' + i + ' name=' + inp.name + ' w=' + Math.round(ir.width) + ' wrap=' + Math.round(wr.width) + ' delta=' + (ir.width - wr.width).toFixed(0) + ' h=' + Math.round(ir.height) + ' scrollW=' + inp.scrollWidth);
+    });
+    print(out.join('\n'));
+  }
+  function print(s) { document.getElementById('metrics').textContent = s; }
+</script>
+</body>
+</html>

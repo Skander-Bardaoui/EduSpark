@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Asme &mdash; Know it all.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'landing/css/style.css' %}" />
+</head>
+<body class="bg-black">
+
+  {% if messages %}
+  <!-- Flash messages (e.g. welcome after sign in / sign up) -->
+  <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2">
+    {% for message in messages %}
+      <div class="liquid-glass rounded-2xl px-5 py-3 text-sm flex items-center gap-3 {% if message.tags == 'success' %}text-emerald-300{% elif message.tags == 'error' %}text-rose-300{% else %}text-white/80{% endif %}"
+           data-flash>
+        {% if message.tags == 'success' %}
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+        {% elif message.tags == 'error' %}
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        {% else %}
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        {% endif %}
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ============================================================
+       SECTION 1 -- HERO
+       ============================================================ -->
+  <section class="min-h-screen overflow-hidden relative flex flex-col">
+
+    <!-- Background video (opacity animated by main.js) -->
+    <video
+      id="hero-video"
+      class="absolute inset-0 w-full h-full object-cover object-bottom"
+      style="opacity: 0"
+      muted
+      autoplay
+      playsinline
+      preload="auto">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Scrim: keeps the hero copy legible over the video and blends
+         the bottom edge into the next (black) section. -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/90 pointer-events-none"></div>
+
+    <!-- Navbar -->
+    <nav class="relative z-20 px-6 py-6">
+      <div class="liquid-glass rounded-full max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+
+        <!-- Left -->
+        <div class="flex items-center">
+          <div class="flex items-center gap-2">
+            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+            <span class="text-white font-semibold text-lg">Asme</span>
+          </div>
+
+          <div class="hidden md:flex items-center gap-8 ml-8">
+            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">Features</a>
+            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">Pricing</a>
+            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">About</a>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div class="flex items-center gap-4">
+          <a href="{% url 'accounts:auth' %}?mode=signup" class="text-white text-sm font-medium">Sign Up</a>
+          <a href="{% url 'accounts:auth' %}" class="liquid-glass rounded-full px-6 py-2 text-white text-sm font-medium">Login</a>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- Hero content -->
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+
+      <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white tracking-tight whitespace-nowrap font-serif-display">
+        Know it <em class="italic">all</em>.
+      </h1>
+
+      <!-- Email capture -->
+      <form data-newsletter class="liquid-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-3 max-w-xl w-full mt-12">
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          class="flex-1 min-w-0 bg-transparent border-none outline-none text-white placeholder:text-white/40 text-sm"
+        />
+        <button type="submit" class="bg-white rounded-full p-3 text-black shrink-0" aria-label="Subscribe">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </button>
+      </form>
+
+      <p class="text-white text-sm leading-relaxed px-4 max-w-md mt-6">
+        Stay updated with the latest news and insights. Subscribe to our newsletter today and never miss out on exciting updates.
+      </p>
+
+      <button type="button" class="liquid-glass rounded-full px-8 py-3 text-white text-sm font-medium hover:bg-white/5 transition-colors mt-10">
+        Manifesto
+      </button>
+
+    </div>
+
+    <!-- Social icons -->
+    <div class="relative z-10 flex justify-center gap-4 pb-10 md:pb-12">
+      <button type="button" aria-label="Instagram" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+        </svg>
+      </button>
+      <button type="button" aria-label="Twitter" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+        </svg>
+      </button>
+      <button type="button" aria-label="Website" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+          <path d="M2 12h20" />
+        </svg>
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       SECTION 2 -- ABOUT
+       ============================================================ -->
+  <section class="relative bg-black pt-20 md:pt-32 pb-10 md:pb-14 px-6 overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-6xl">
+      <p class="reveal text-white/40 text-sm tracking-widest uppercase"
+         style="--reveal-y: 20px; --reveal-duration: 0.6s;">
+        About Us
+      </p>
+
+      <h2 class="reveal text-4xl md:text-6xl lg:text-7xl text-white leading-[1.1] tracking-tight mt-6"
+          style="--reveal-y: 40px; --reveal-duration: 0.8s; --reveal-delay: 0.1s;">
+        Pioneering <em class="italic font-serif-display text-white/60">ideas</em> for<br class="hidden md:block" />
+        minds that <em class="italic font-serif-display text-white/60">create, build, and inspire.</em>
+      </h2>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 3 -- FEATURED VIDEO
+       ============================================================ -->
+  <section class="bg-black pt-6 md:pt-10 pb-12 md:pb-20 px-6 overflow-hidden">
+    <div class="mx-auto max-w-6xl">
+
+      <div class="reveal rounded-3xl overflow-hidden aspect-video relative"
+           style="--reveal-y: 60px; --reveal-duration: 0.9s;">
+        <video
+          class="w-full h-full object-cover"
+          muted
+          autoplay
+          loop
+          playsinline
+          preload="auto">
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4" type="video/mp4" />
+        </video>
+
+        <!-- Gradient overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+
+        <!-- Bottom overlay content -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+
+          <div class="liquid-glass rounded-2xl p-6 md:p-8 max-w-md">
+            <p class="text-white/50 text-xs tracking-widest uppercase mb-3">Our Approach</p>
+            <p class="text-white text-sm md:text-base leading-relaxed">
+              We believe in the power of curiosity-driven exploration. Every project starts with a question, and every answer opens a new door to innovation.
+            </p>
+          </div>
+
+          <button type="button" class="liquid-glass rounded-full px-8 py-3 text-white text-sm font-medium press-scale self-start md:self-auto shrink-0">
+            Explore more
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 4 -- PHILOSOPHY / INNOVATION x VISION
+       ============================================================ -->
+  <section class="bg-black py-16 md:py-24 px-6 overflow-hidden">
+    <div class="mx-auto max-w-6xl">
+
+      <h2 class="reveal text-5xl md:text-7xl lg:text-8xl text-white tracking-tight mb-10 md:mb-14"
+          style="--reveal-y: 40px; --reveal-duration: 0.8s;">
+        Innovation <em class="italic font-serif-display text-white/40">x</em> Vision
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+
+        <div class="reveal rounded-3xl overflow-hidden aspect-[4/3]"
+             style="--reveal-x: -40px; --reveal-duration: 0.9s;">
+          <video
+            class="w-full h-full object-cover"
+            muted
+            autoplay
+            loop
+            playsinline
+            preload="auto">
+            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <div class="reveal flex flex-col justify-center"
+             style="--reveal-x: 40px; --reveal-duration: 0.9s;">
+
+          <div>
+            <p class="text-white/40 text-xs tracking-widest uppercase mb-4">Choose your space</p>
+            <p class="text-white/70 text-base md:text-lg leading-relaxed">
+              Every meaningful breakthrough begins at the intersection of disciplined strategy and remarkable creative vision. We operate at that crossroads, turning bold thinking into tangible outcomes that move people and reshape industries.
+            </p>
+          </div>
+
+          <div class="w-full h-px bg-white/10 my-8 md:my-10"></div>
+
+          <div>
+            <p class="text-white/40 text-xs tracking-widest uppercase mb-4">Shape the future</p>
+            <p class="text-white/70 text-base md:text-lg leading-relaxed">
+              We believe that the best work emerges when curiosity meets conviction. Our process is designed to uncover hidden opportunities and translate them into experiences that resonate long after the first impression.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 5 -- SERVICES / WHAT WE DO
+       ============================================================ -->
+  <section class="relative bg-black py-16 md:py-24 px-6 overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)] pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-6xl">
+      <div class="relative">
+
+        <!-- Header row -->
+        <div class="reveal flex items-end justify-between mb-8 md:mb-12"
+             style="--reveal-y: 30px; --reveal-duration: 0.7s;">
+          <h2 class="text-3xl md:text-5xl text-white tracking-tight">What we do</h2>
+          <p class="hidden md:block text-white/40 text-sm">Our services</p>
+        </div>
+
+        <!-- Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+
+          <!-- Card 1 -->
+          <div class="reveal liquid-glass rounded-3xl overflow-hidden group"
+               style="--reveal-y: 50px; --reveal-duration: 0.8s;">
+            <div class="relative aspect-video overflow-hidden">
+              <video
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                muted
+                autoplay
+                loop
+                playsinline
+                preload="auto">
+                <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" type="video/mp4" />
+              </video>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+            </div>
+
+            <div class="p-6 md:p-8">
+              <div class="flex items-center justify-between mb-4">
+                <span class="uppercase tracking-widest text-white/40 text-xs">Strategy</span>
+                <span class="liquid-glass rounded-full p-2 text-white">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7 7h10v10" />
+                    <path d="M7 17 17 7" />
+                  </svg>
+                </span>
+              </div>
+              <h3 class="text-white text-xl md:text-2xl mb-3 tracking-tight">Research &amp; Insight</h3>
+              <p class="text-white/50 text-sm leading-relaxed">
+                We dig deep into data, culture, and human behavior to surface the insights that drive meaningful, lasting change.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="reveal liquid-glass rounded-3xl overflow-hidden group"
+               style="--reveal-y: 50px; --reveal-duration: 0.8s; --reveal-delay: 0.15s;">
+            <div class="relative aspect-video overflow-hidden">
+              <video
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                muted
+                autoplay
+                loop
+                playsinline
+                preload="auto">
+                <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4" type="video/mp4" />
+              </video>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+            </div>
+
+            <div class="p-6 md:p-8">
+              <div class="flex items-center justify-between mb-4">
+                <span class="uppercase tracking-widest text-white/40 text-xs">Craft</span>
+                <span class="liquid-glass rounded-full p-2 text-white">
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7 7h10v10" />
+                    <path d="M7 17 17 7" />
+                  </svg>
+                </span>
+              </div>
+              <h3 class="text-white text-xl md:text-2xl mb-3 tracking-tight">Design &amp; Execution</h3>
+              <p class="text-white/50 text-sm leading-relaxed">
+                From concept to launch, we obsess over every detail to deliver experiences that feel effortless and look extraordinary.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script src="{% static 'landing/js/main.js' %}"></script>
+  <script>
+    // Auto-dismiss flash toasts after 5s with a fade-out
+    document.querySelectorAll('[data-flash]').forEach((el) => {
+      setTimeout(() => {
+        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-8px)';
+        setTimeout(() => el.remove(), 500);
+      }, 5000);
+    });
+  </script>
+</body>
+</html>
