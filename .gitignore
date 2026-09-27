@@ -29,6 +29,10 @@ db.sqlite3-journal
 *.po~
 local_settings.py
 
+# --- Exécution locale (dev server) ---
+*.pid
+runserver*.log
+
 # --- Tests / tooling ---
 .coverage
 .coverage.*

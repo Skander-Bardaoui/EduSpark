@@ -10,22 +10,56 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
+from datetime import timedelta
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Charge les variables d'environnement depuis .env (fichier situé à côté de
+# manage.py). Ce fichier porte les secrets et n'est pas versionné ;
+# .env.example sert de modèle. Les variables déjà définies dans
+# l'environnement du système restent prioritaires sur .env.
+load_dotenv(BASE_DIR / '.env')
+
+
+def env_bool(name, default=False):
+    """Lit un booléen depuis l'environnement : 1/true/yes/on -> True."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def env_list(name, default=''):
+    """Lit une liste de valeurs séparées par des virgules."""
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qd#y7h99+&hppzih$aq4b&$#(vb=f$@f*zp%yr)d2f(*a0#)-6'
+# Aucun secret n'est écrit dans ce fichier : la clé est lue dans .env
+# (DJANGO_SECRET_KEY). Si elle manque, on refuse de démarrer plutôt que de
+# retomber sur une clé de développement codée en dur.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '').strip()
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY est absent. Copiez .env.example en .env puis "
+        "générez une clé : python -c \"from django.core.management.utils import "
+        "get_random_secret_key; print(get_random_secret_key())\""
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Défaut False : c'est .env qui active explicitement le debug en local.
+DEBUG = env_bool('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '')
 
 
 # Application definition
@@ -107,9 +141,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = os.environ.get('DJANGO_LANGUAGE_CODE', 'en-us')
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'UTC')
 
 USE_I18N = True
 
@@ -128,9 +162,16 @@ LOGOUT_REDIRECT_URL = '/'
 
 # E-mails : console en développement. En production, configurer un
 # backend SMTP (host, port, user, password, TLS) via variables
-# d'environnement.
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'EduSpark <no-reply@eduspark.local>'
+# d'environnement (.env) — aucun identifiant n'est écrit ici.
+EMAIL_BACKEND = os.environ.get(
+    'DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DJANGO_DEFAULT_FROM_EMAIL', 'EduSpark <no-reply@eduspark.local>')
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env_bool('DJANGO_EMAIL_USE_TLS', True)
 
 # API : JWT (access court + refresh) en authentification par défaut.
 REST_FRAMEWORK = {
@@ -141,8 +182,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
-
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
