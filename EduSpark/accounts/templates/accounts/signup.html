@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_blank" name="shell-type"/><link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://assets.mixkit.co" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"secondary-fixed":"#e2dfff","on-error-container":"#93000a","on-background":"#06164b","on-primary-fixed":"#001a42","on-secondary-fixed-variant":"#3323cc","surface-container-high":"#e4e7ff","tertiary-fixed-dim":"#f9bd22","on-error":"#ffffff","on-tertiary-fixed":"#261a00","on-primary":"#ffffff","on-tertiary-fixed-variant":"#5c4300","tertiary-container":"#956e00","surface-container-lowest":"#ffffff","primary-container":"#2170e4","surface-bright":"#fbf8ff","surface-container":"#ecedff","background":"#fbf8ff","surface-dim":"#d1d8ff","tertiary-fixed":"#ffdf9f","secondary":"#4b41e1","primary-fixed":"#d8e2ff","on-secondary-container":"#fffbff","inverse-surface":"#1f2d60","tertiary":"#765700","primary":"#0058be","on-secondary-fixed":"#0f0069","on-secondary":"#ffffff","on-surface":"#06164b","surface-container-low":"#f3f2ff","on-tertiary":"#ffffff","secondary-fixed-dim":"#c3c0ff","outline":"#727785","primary-fixed-dim":"#adc6ff","on-surface-variant":"#424754","inverse-on-surface":"#efefff","surface-tint":"#005ac2","on-tertiary-container":"#fffbff","inverse-primary":"#adc6ff","outline-variant":"#c2c6d6","surface-container-highest":"#dde1ff","surface":"#fbf8ff","on-primary-fixed-variant":"#004395","error-container":"#ffdad6","error":"#ba1a1a","secondary-container":"#645efb","on-primary-container":"#fefcff","surface-variant":"#dde1ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-mobile":"1rem","space-lg":"1.5rem","space-md":"1rem","space-xs":"0.25rem","space-xl":"2.5rem","margin-mobile":"1.25rem","margin":"3rem","space-sm":"0.5rem","gutter":"1.5rem"},"fontFamily":{"headline-sm":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Inter"],"display":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-mobile":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"data-metric":["JetBrains Mono"],"body-lg":["Inter"],"label-sm":["Plus Jakarta Sans"]},"fontSize":{"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}]}}}}</script><style id="a11y-wcag">.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.skip-link:focus{position:absolute;top:.5rem;left:.5rem;z-index:100;width:auto;height:auto;clip:auto;white-space:normal;background:#fff;color:#06164b;padding:.5rem 1rem;border-radius:.75rem;box-shadow:0 8px 24px rgba(6,22,75,.25);font-weight:600;font-size:.875rem;text-decoration:none;}:focus-visible{outline:3px solid #0058be;outline-offset:2px;}@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}</style></head><body class="min-h-screen bg-surface font-body-md text-on-surface antialiased flex flex-col justify-between selection:bg-primary-fixed selection:text-on-primary-fixed"><a href="#contenu-principal" class="sr-only skip-link">Aller au contenu principal</a><header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-margin-mobile md:px-margin flex items-center justify-between"><a class="flex items-center gap-space-sm group transition-transform duration-150 hover:scale-[1.01]" href="{% url 'landing:index' %}"><img src="{% static 'landing/img/logo.png' %}" alt="EduSpark logo" width="256" height="256" class="w-9 h-9 rounded-lg object-cover shadow-[0_4px_16px_-2px_rgba(0,88,190,0.35)]"/><div class="flex flex-col"><img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-6 w-auto object-contain object-left"/><span class="font-label-sm text-label-sm text-tertiary -mt-1 font-semibold uppercase tracking-wider">Spark your Potential</span></div></a><div class="flex items-center gap-space-md"><a class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="{% url 'landing:index' %}">Accueil</a><a class="inline-flex items-center justify-center px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_14px_rgba(0,88,190,0.35)] hover:bg-primary-container transition-colors" href="{% url 'accounts:login' %}">Se connecter</a></div></div></header><main id="contenu-principal" class="w-full pt-16 bg-surface flex-1 flex flex-col"><div class="flex flex-col w-full">
+<div class="w-full min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row bg-surface-container-lowest">
+<!-- GAUCHE : Showcase Immersif & Vidéo Contextuelle -->
+<div class="relative w-full lg:w-1/2 min-h-[480px] lg:min-h-full overflow-hidden flex flex-col justify-between p-space-md sm:p-space-lg lg:p-margin bg-on-background text-on-primary">
+<!-- Fond Vidéo HD Fluide -->
+<video aria-hidden="true" autoplay="" class="absolute inset-0 w-full h-full object-cover z-0" loop="" muted="" playsinline="">
+<source src="https://assets.mixkit.co/videos/preview/mixkit-student-typing-on-a-laptop-keyboard-41315-large.mp4" type="video/mp4"/>
+</video>
+<!-- Overlay sombre neutre & texturé (sans teinte mauve) -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/95 via-on-background/75 to-on-background/50 backdrop-blur-[2px] z-10"></div>
+<!-- Halo d'énergie bleu discret -->
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/30 rounded-full blur-3xl pointer-events-none z-10"></div>
+<!-- En-tête panneau gauche -->
+<div class="relative z-20 flex items-center justify-between">
+<a class="inline-flex items-center gap-space-xs text-on-primary/90 hover:text-on-primary transition-colors" href="{% url 'landing:index' %}">
+
+<img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-5 w-auto object-contain brightness-0 invert"/>
+</a>
+<!-- Badge Accès Anticipé -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/10 backdrop-blur-md shadow-sm">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+<span class="font-data-metric text-data-metric uppercase tracking-wider text-tertiary-fixed font-bold">🚀 Accès Anticipé Privilégié</span>
+</div>
+</div>
+<!-- Corps Narratif & Bénéfices -->
+<div class="relative z-20 my-auto py-space-lg">
+<div class="max-w-xl space-y-space-md">
+<div class="inline-block px-2.5 py-0.5 rounded-full bg-primary/40 text-primary-fixed font-label-sm text-label-sm uppercase tracking-widest font-semibold">
+            Intelligence Augmentée
+          </div>
+<h2 class="font-headline-lg text-headline-lg text-on-primary font-extrabold leading-tight tracking-tight">
+            Rejoignez la nouvelle génération d'apprentissage <span class="text-tertiary-fixed-dim">cognitif</span>.
+          </h2>
+<p class="font-body-md text-body-md text-surface-container-high/90 leading-relaxed">
+            Activez un environnement d'apprentissage sur-mesure qui synthétise la voix, le schéma conceptuel et l'analyse sémantique pour décupler votre assimilation.
+          </p>
+<!-- Liste des atouts majeurs -->
+<div class="pt-space-sm space-y-space-sm">
+<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
+<div class="w-7 h-7 rounded-lg bg-primary/30 flex items-center justify-center shrink-0 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[18px]">check_indeterminate_small</span>
+</div>
+<div class="min-w-0">
+<div class="font-title-md text-title-md text-on-primary font-semibold">Assistant multimodal vocal &amp; visuel</div>
+<div class="font-body-sm text-body-sm text-surface-container-high/70">Interaction conversationnelle instantanée et reconnaissance de schémas.</div>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
+<div class="w-7 h-7 rounded-lg bg-tertiary/40 flex items-center justify-center shrink-0 text-tertiary-fixed">
+<span class="material-symbols-outlined text-[18px]">neurology</span>
+</div>
+<div class="min-w-0">
+<div class="font-title-md text-title-md text-on-primary font-semibold">Génération d'exercices &amp; quiz adaptatifs</div>
+<div class="font-body-sm text-body-sm text-surface-container-high/70">Modélisation en temps réel de vos courbes d'ancrage mémoriel.</div>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high/20 flex items-center justify-center shrink-0 text-surface-bright">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<div class="min-w-0">
+<div class="font-title-md text-title-md text-on-primary font-semibold">Correction prédictive à 98.4%</div>
+<div class="font-body-sm text-body-sm text-surface-container-high/70">Feedback didactique empathique, contextualisé et immédiat.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bas de page gauche : Souveraineté & Chiffrement -->
+<div class="relative z-20 flex flex-wrap items-center justify-between gap-space-sm pt-space-md">
+<div class="flex items-center gap-space-xs text-surface-container-highest/80 font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">lock</span>
+<span>100% Chiffré de bout en bout</span>
+<span class="mx-1 opacity-40">•</span>
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">dns</span>
+<span>Hébergé en Union Européenne (RGPD)</span>
+</div>
+<div class="flex items-center -space-x-2">
+<div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">FR</div>
+<div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">DE</div>
+<div class="w-7 h-7 rounded-full bg-tertiary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">+48k</div>
+</div>
+</div>
+</div>
+<!-- DROITE : Formulaire d'Inscription Haute Précision -->
+<div class="w-full lg:w-1/2 flex flex-col justify-center px-space-md sm:px-space-lg lg:px-margin py-space-lg bg-surface-container-lowest overflow-y-auto">
+<div class="max-w-md w-full mx-auto space-y-space-md">
+<!-- Redirection connexion -->
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant font-bold">Inscription</span>
+<div class="text-right">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Déjà membre ? </span>
+<a class="font-label-md text-label-md font-bold text-primary hover:text-primary-container transition-colors ml-1" href="{% url 'accounts:login' %}">
+              Se connecter
+            </a>
+</div>
+</div>
+<!-- Titre & Sous-titre -->
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-on-surface tracking-tight">
+            Créer votre compte <span class="bg-gradient-to-r from-primary via-primary-container to-secondary bg-clip-text text-transparent">EduSpark</span>
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            Commencez gratuitement en quelques secondes. <span class="text-tertiary font-semibold">Aucune carte requise.</span>
+</p>
+</div>
+<!-- Sélecteur de profil (Onglets) -->
+<div class="space-y-1.5">
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider">Type d'espace de travail</label>
+<div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-surface-container-low" id="roleSelector" role="group" aria-label="Choisir votre profil">
+<button class="role-btn py-2 px-1 rounded-lg text-center font-label-md text-label-md transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1" data-role="etudiant" type="button" aria-pressed="true">
+<span class="text-[16px]">👨‍🎓</span>
+<span class="truncate">Apprenant</span>
+</button>
+<button class="role-btn py-2 px-1 rounded-lg text-center font-label-md text-label-md transition-all duration-200 text-on-surface-variant hover:text-on-surface flex flex-col sm:flex-row items-center justify-center gap-1" data-role="prof" type="button" aria-pressed="false">
+<span class="text-[16px]">👩‍🏫</span>
+<span class="truncate">Enseignant</span>
+</button>
+
+</div>
+<input type="hidden" name="role" id="roleInput" value="{{ form.role.value|default:'etudiant' }}">
+</div>
+<!-- Boutons d'Authentification Rapide (OAuth) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs pt-1">
+<!-- Google -->
+<button class="w-full flex items-center justify-center gap-2.5 px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-all duration-150 shadow-sm active:scale-[0.99]" type="button">
+<svg class="w-4 h-4 shrink-0" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.36 7.35 24 12 24z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.14-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.27 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
+</svg>
+<span class="truncate">Via Google</span>
+</button>
+<!-- Microsoft Académique -->
+<button class="w-full flex items-center justify-center gap-2.5 px-space-md py-2.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface-container-low transition-all duration-150 shadow-sm active:scale-[0.99]" type="button">
+<svg class="w-4 h-4 shrink-0" viewbox="0 0 23 23">
+<path d="M1 1h10v10H1z" fill="#f35325"></path>
+<path d="M12 1h10v10H12z" fill="#81bc06"></path>
+<path d="M1 12h10v10H1z" fill="#05a6f0"></path>
+<path d="M12 12h10v10H12z" fill="#ffba08"></path>
+</svg>
+<span class="truncate">Via Académie</span>
+</button>
+</div>
+<!-- Séparateur Stylisé -->
+<div class="relative flex items-center justify-center">
+<div class="w-full h-px bg-surface-container-high"></div>
+<span class="absolute px-3 bg-surface-container-lowest font-label-sm text-label-sm text-on-surface-variant font-medium">
+            ou par e-mail professionnel / étudiant
+          </span>
+</div>
+<!-- Formulaire Standard -->
+<form method="post" action="{% url 'accounts:signup' %}" class="space-y-3">
+{% csrf_token %}
+{% if messages %}<div class="flex flex-col gap-2">{% for message in messages %}<div class="p-3 rounded-lg font-label-md text-label-md {% if message.tags == 'success' %}bg-surface-container-high text-primary{% elif message.tags == 'error' %}bg-error-container text-error{% else %}bg-surface-container-high text-on-surface{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% if form.non_field_errors %}<div class="p-3 rounded-lg bg-error-container font-label-md text-label-md text-error">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+<!-- Nom Complet -->
+<div class="space-y-1">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="fullName">
+              Nom complet
+            </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">badge</span>
+{{ form.full_name }}{% if form.full_name.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.full_name.errors %}{{ e }} {% endfor %}</p>{% endif %}
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-1">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="email">
+              Adresse e-mail institutionnelle ou personnelle
+            </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">mail</span>
+{{ form.email }}{% if form.email.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.email.errors %}{{ e }} {% endfor %}</p>{% endif %}
+</div>
+</div>
+<!-- Mot de passe & Indicateur de Complexité -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="password">
+                Mot de passe maître
+              </label>
+<span class="font-data-metric text-data-metric text-outline" id="strengthText" aria-live="polite">Sécurisé</span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">key</span>
+{{ form.password1 }}{% if form.password1.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.password1.errors %}{{ e }} {% endfor %}</p>{% endif %}{% if form.password2.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.password2.errors %}{{ e }} {% endfor %}</p>{% endif %}{{ form.password2 }}
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface" id="togglePassword" type="button">
+<span class="material-symbols-outlined text-[18px]" id="eyeIcon">visibility</span>
+</button>
+</div>
+<!-- Jauge Tripartite Dynamique -->
+<div class="grid grid-cols-3 gap-1 pt-1" id="strengthBars">
+<div class="h-1.5 rounded-full bg-surface-container-high transition-colors" id="bar1"></div>
+<div class="h-1.5 rounded-full bg-surface-container-high transition-colors" id="bar2"></div>
+<div class="h-1.5 rounded-full bg-surface-container-high transition-colors" id="bar3"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">info</span>
+              Au moins 8 caractères, 1 chiffre et 1 symbole recommandé.
+            </p>
+</div>
+<!-- Consentement CGU -->
+<div class="pt-1">
+<label class="flex items-start gap-2.5 cursor-pointer">
+<input class="mt-1 w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" required="" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+                J'accepte les <a class="text-primary underline hover:text-primary-container" data-path="conditions" href="#">Conditions Générales</a> et la <a class="text-primary underline hover:text-primary-container" data-path="confidentialite" href="#">Politique de protection des données</a> d'EduSpark.
+              </span>
+</label>
+</div>
+<!-- CTA Principal -->
+<div class="pt-2">
+<button class="w-full py-3 px-space-md rounded-lg bg-gradient-to-r from-primary to-primary-container text-on-primary font-label-md text-label-md font-bold tracking-wide flex items-center justify-center gap-2 shadow-[0_8px_20px_-4px_rgba(0,88,190,0.4)] hover:shadow-[0_12px_28px_-4px_rgba(0,88,190,0.55)] hover:scale-[1.008] active:scale-[0.995] transition-all duration-150" type="submit">
+<span>Créer mon compte gratuitement</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</form>
+<!-- Bas de Formulaire Réconfortant -->
+<div class="flex items-center justify-center gap-4 text-center font-label-sm text-label-sm text-on-surface-variant pt-2 border-t-0">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-tertiary text-[16px]">verified_user</span>
+<span>Essai gratuit de 14 jours</span>
+</div>
+<span class="opacity-30">•</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[16px]">cancel</span>
+<span>Résiliation en un clic</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Gestion du sélecteur de rôle
+    const roleButtons = document.querySelectorAll('.role-btn');
+    const roleInput = document.getElementById('roleInput');
+    const setRole = (val) => { if (roleInput) roleInput.value = val; };
+    const initialRole = roleInput ? roleInput.value : 'etudiant';
+    roleButtons.forEach(b => { const active = b.dataset.role === initialRole; b.classList.toggle('bg-surface-container-lowest', active); b.classList.toggle('text-primary', active); b.classList.toggle('shadow-sm', active); b.classList.toggle('font-bold', active); b.classList.toggle('text-on-surface-variant', !active); b.setAttribute('aria-pressed', active); });
+    roleButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        roleButtons.forEach(b => {
+          b.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-bold');
+          b.classList.add('text-on-surface-variant');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm', 'font-bold');
+        btn.classList.remove('text-on-surface-variant');
+        btn.setAttribute('aria-pressed', 'true');
+        setRole(btn.dataset.role);
+      });
+    });
+
+    // Bascule affichage mot de passe
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        eyeIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+      });
+    }
+
+    // Analyseur de force du mot de passe en temps réel
+    const bar1 = document.getElementById('bar1');
+    const bar2 = document.getElementById('bar2');
+    const bar3 = document.getElementById('bar3');
+    const strengthText = document.getElementById('strengthText');
+
+    if (passwordInput && bar1 && bar2 && bar3 && strengthText) {
+      passwordInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val) || val.length >= 12) score++;
+
+        // Reset
+        bar1.className = 'h-1.5 rounded-full bg-surface-container-high transition-colors';
+        bar2.className = 'h-1.5 rounded-full bg-surface-container-high transition-colors';
+        bar3.className = 'h-1.5 rounded-full bg-surface-container-high transition-colors';
+
+        if (val.length === 0) {
+          strengthText.textContent = 'Sécurisé';
+          strengthText.className = 'font-data-metric text-data-metric text-outline';
+          return;
+        }
+
+        if (score === 1) {
+          bar1.className = 'h-1.5 rounded-full bg-error transition-colors';
+          strengthText.textContent = 'Faible';
+          strengthText.className = 'font-data-metric text-data-metric text-error font-bold';
+        } else if (score === 2) {
+          bar1.className = 'h-1.5 rounded-full bg-tertiary transition-colors';
+          bar2.className = 'h-1.5 rounded-full bg-tertiary transition-colors';
+          strengthText.textContent = 'Moyen';
+          strengthText.className = 'font-data-metric text-data-metric text-tertiary font-bold';
+        } else if (score >= 3) {
+          bar1.className = 'h-1.5 rounded-full bg-primary transition-colors';
+          bar2.className = 'h-1.5 rounded-full bg-primary transition-colors';
+          bar3.className = 'h-1.5 rounded-full bg-primary-container transition-colors';
+          strengthText.textContent = 'Robuste';
+          strengthText.className = 'font-data-metric text-data-metric text-primary font-bold';
+        }
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-low py-space-md"><div class="w-full px-margin-mobile md:px-margin flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm"><span>© 2025 EduSpark — Hub Éducatif &amp; Créatif Multimodal. Tous droits réservés.</span><div class="flex items-center gap-space-md"><a class="hover:text-on-surface transition-colors" data-path="confidentialite" href="#">Confidentialité</a><a class="hover:text-on-surface transition-colors" data-path="conditions" href="#">Conditions d'utilisation</a><a class="hover:text-on-surface transition-colors" data-path="aide" href="#">Assistance</a></div></div></footer><script>(function(){try{if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.querySelectorAll('video').forEach(function(v){v.pause();v.removeAttribute('autoplay');});}}catch(e){}})();</script></body></html>
