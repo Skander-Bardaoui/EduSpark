@@ -1,51 +1,70 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
+from .decorators import role_home_url
 from .forms import SignInForm, SignUpForm
 
 
 @require_http_methods(["GET", "POST"])
-def auth_view(request):
-    """
-    Combined Sign In / Create Account page.
-
-    Shows the sign-in panel by default; when the visitor arrives from the
-    "Sign Up" button on the landing page (?mode=signup) the create-account
-    panel is shown instead. Both forms post back to this same URL.
-    """
-    mode = "signup" if request.GET.get("mode") == "signup" else "login"
-
+def login_view(request):
+    """Page Connexion — maquette stitch eduspark_connexion."""
+    if request.user.is_authenticated:
+        return redirect("landing:index")
     if request.method == "POST":
-        mode = request.POST.get("mode", "login")
-
-        if mode == "signup":
-            signup_form = SignUpForm(request.POST)
-            signin_form = SignInForm()
-            if signup_form.is_valid():
-                user = signup_form.save()
-                login(request, user)
-                messages.success(request, "Welcome to EduSpark! Your account has been created.")
-                return redirect("landing:index")
-        else:
-            signin_form = SignInForm(request, data=request.POST)
-            signup_form = SignUpForm()
-            if signin_form.is_valid():
-                user = signin_form.get_user()
-                login(request, user)
-                messages.success(request, f"Welcome back, {user.get_full_name() or user.email}!")
-                return redirect("landing:index")
+        form = SignInForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            # "Se souvenir de moi" : session persistante (2 semaines) ou
+            # expiration a la fermeture du navigateur.
+            if request.POST.get("remember"):
+                request.session.set_expiry(1209600)
+            else:
+                request.session.set_expiry(0)
+            messages.success(request, f"Bon retour parmi nous, {user.first_name or user.email} !")
+            return redirect(role_home_url(user))
     else:
-        signin_form = SignInForm()
-        signup_form = SignUpForm()
+        form = SignInForm()
+    return render(request, "accounts/login.html", {"form": form})
 
-    return render(
-        request,
-        "accounts/auth.html",
-        {
-            "signin_form": signin_form,
-            "signup_form": signup_form,
-            "mode": mode,
-        },
-    )
+
+@require_http_methods(["GET", "POST"])
+def signup_view(request):
+    """Page Inscription — maquette stitch eduspark_inscription."""
+    if request.user.is_authenticated:
+        return redirect("landing:index")
+    if request.method == "POST":
+        data = request.POST.copy()
+        # La maquette n'a qu'un seul champ password visible : on synchronise
+        # password2 côté serveur aussi (en plus du JS) pour UserCreationForm.
+        if data.get("password1") and not data.get("password2"):
+            data["password2"] = data["password1"]
+        form = SignUpForm(data)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Bienvenue sur EduSpark ! Votre compte a été créé.")
+            return redirect(role_home_url(user))
+    else:
+        initial = {}
+        # Pré-remplissage depuis la landing (hero email -> ?email=...)
+        if request.GET.get("email"):
+            initial["email"] = request.GET.get("email")
+        form = SignUpForm(initial=initial)
+    return render(request, "accounts/signup.html", {"form": form})
+
+
+@require_http_methods(["GET", "POST"])
+def auth_view(request):
+    """Ancienne route combinée : redirige vers login ou signup selon ?mode=."""
+    if request.GET.get("mode") == "signup":
+        return redirect("accounts:signup")
+    return redirect("accounts:login")
+
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Vous êtes déconnecté. À bientôt !")
+    return redirect("landing:index")

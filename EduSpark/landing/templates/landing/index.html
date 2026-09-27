@@ -1,360 +1,378 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Asme &mdash; Know it all.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="{% static 'landing/css/style.css' %}" />
-</head>
-<body class="bg-black">
 
-  {% if messages %}
-  <!-- Flash messages (e.g. welcome after sign in / sign up) -->
-  <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 space-y-2">
-    {% for message in messages %}
-      <div class="liquid-glass rounded-2xl px-5 py-3 text-sm flex items-center gap-3 {% if message.tags == 'success' %}text-emerald-300{% elif message.tags == 'error' %}text-rose-300{% else %}text-white/80{% endif %}"
-           data-flash>
-        {% if message.tags == 'success' %}
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-        {% elif message.tags == 'error' %}
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
-        {% else %}
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        {% endif %}
-        <span>{{ message }}</span>
-      </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>EduSpark - Hub Éducatif et Créatif Multimodal</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;600&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"outline-variant":"#c2c6d6","on-error":"#ffffff","on-background":"#06164b","on-tertiary-container":"#fffbff","primary-container":"#2170e4","surface-container-lowest":"#ffffff","error":"#ba1a1a","on-secondary-container":"#fffbff","surface-tint":"#005ac2","on-error-container":"#93000a","surface-container-low":"#f3f2ff","tertiary-fixed-dim":"#f9bd22","on-surface-variant":"#424754","on-primary-fixed":"#001a42","on-secondary":"#ffffff","secondary-fixed-dim":"#c3c0ff","outline":"#727785","secondary-fixed":"#e2dfff","surface":"#fbf8ff","primary-fixed":"#d8e2ff","secondary-container":"#645efb","inverse-on-surface":"#efefff","inverse-primary":"#adc6ff","tertiary":"#765700","primary-fixed-dim":"#adc6ff","on-secondary-fixed-variant":"#3323cc","surface-bright":"#fbf8ff","on-tertiary-fixed":"#261a00","inverse-surface":"#1f2d60","on-tertiary-fixed-variant":"#5c4300","primary":"#0058be","surface-container-high":"#e4e7ff","on-surface":"#06164b","surface-variant":"#dde1ff","on-tertiary":"#ffffff","on-secondary-fixed":"#0f0069","error-container":"#ffdad6","on-primary-fixed-variant":"#004395","on-primary":"#ffffff","on-primary-container":"#fefcff","surface-container":"#ecedff","surface-container-highest":"#dde1ff","secondary":"#4b41e1","tertiary-fixed":"#ffdf9f","surface-dim":"#d1d8ff","tertiary-container":"#956e00","background":"#fbf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-md":"1rem","space-xl":"2.5rem","space-xs":"0.25rem","gutter-mobile":"1rem","margin":"3rem","space-sm":"0.5rem","gutter":"1.5rem","space-lg":"1.5rem","margin-mobile":"1.25rem"},"fontFamily":{"label-md":["Plus Jakarta Sans"],"display-mobile":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-md":["Inter"],"title-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-sm":["Inter"],"body-lg":["Inter"],"headline-md":["Plus Jakarta Sans"],"data-metric":["JetBrains Mono"]},"fontSize":{"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}]}}}}</script><style id="a11y-wcag">.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.skip-link:focus{position:absolute;top:.5rem;left:.5rem;z-index:100;width:auto;height:auto;clip:auto;white-space:normal;background:#fff;color:#06164b;padding:.5rem 1rem;border-radius:.75rem;box-shadow:0 8px 24px rgba(6,22,75,.25);font-weight:600;font-size:.875rem;text-decoration:none;}:focus-visible{outline:3px solid #0058be;outline-offset:2px;}@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}</style></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><a href="#contenu-principal" class="sr-only skip-link">Aller au contenu principal</a><header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-gutter-mobile md:px-gutter py-space-sm"><div class="w-full max-w-7xl h-14 px-4 md:px-5 flex items-center justify-between bg-surface-container-lowest/80 backdrop-blur-xl rounded-full shadow-[0_4px_24px_rgba(6,22,75,0.06)]"><a href="{% url 'landing:index' %}" class="flex items-center gap-2"><img src="{% static 'landing/img/logo.png' %}" alt="EduSpark logo" width="256" height="256" class="w-8 h-8 rounded-full object-cover shadow-[0_2px_10px_rgba(100,94,251,0.35)]"/><div class="flex flex-col"><img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-4 w-auto object-contain object-left"/><span class="font-label-sm text-label-sm text-tertiary-container uppercase tracking-wider">Spark your Potential</span></div></a><div class="flex items-center gap-space-sm">{% if user.is_authenticated %}<span class="hidden sm:inline-flex items-center justify-center px-space-md py-space-xs rounded-full font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors font-bold">{{ user.first_name|default:user.email }}</span><a class="inline-flex items-center justify-center px-space-md py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_14px_rgba(0,88,190,0.35)] hover:bg-primary-container transition-colors" href="{% url 'accounts:logout' %}">Déconnexion</a>{% else %}<a class="hidden sm:inline-flex items-center justify-center px-space-md py-space-xs rounded-full font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-colors" href="{% url 'accounts:login' %}">Connexion</a><a class="inline-flex items-center justify-center px-space-md py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_14px_rgba(0,88,190,0.35)] hover:bg-primary-container transition-colors" href="{% url 'accounts:signup' %}">Inscription</a>{% endif %}</div></div></header><main id="contenu-principal" class="w-full pt-20 bg-surface">{% if messages %}<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin pt-6 space-y-2">{% for message in messages %}<div class="p-4 rounded-xl font-label-md text-label-md {% if message.tags == 'success' %}bg-surface-container-high text-primary{% elif message.tags == 'error' %}bg-error-container text-on-error{% else %}bg-surface-container-high text-on-surface{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}<div class="flex flex-col w-full">
+<!-- Micro-decorations & Glass styles injected via inline Tailwind arbitrary classes -->
 
-  <!-- ============================================================
-       SECTION 1 -- HERO
-       ============================================================ -->
-  <section class="min-h-screen overflow-hidden relative flex flex-col">
-
-    <!-- Background video (opacity animated by main.js) -->
-    <video
-      id="hero-video"
-      class="absolute inset-0 w-full h-full object-cover object-bottom"
-      style="opacity: 0"
-      muted
-      autoplay
-      playsinline
-      preload="auto">
-      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4" type="video/mp4" />
-    </video>
-
-    <!-- Scrim: keeps the hero copy legible over the video and blends
-         the bottom edge into the next (black) section. -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/90 pointer-events-none"></div>
-
-    <!-- Navbar -->
-    <nav class="relative z-20 px-6 py-6">
-      <div class="liquid-glass rounded-full max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-
-        <!-- Left -->
-        <div class="flex items-center">
-          <div class="flex items-center gap-2">
-            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-              <path d="M2 12h20" />
-            </svg>
-            <span class="text-white font-semibold text-lg">Asme</span>
-          </div>
-
-          <div class="hidden md:flex items-center gap-8 ml-8">
-            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">Features</a>
-            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">Pricing</a>
-            <a href="#" class="text-white/80 hover:text-white text-sm font-medium">About</a>
-          </div>
-        </div>
-
-        <!-- Right -->
-        <div class="flex items-center gap-4">
-          <a href="{% url 'accounts:auth' %}?mode=signup" class="text-white text-sm font-medium">Sign Up</a>
-          <a href="{% url 'accounts:auth' %}" class="liquid-glass rounded-full px-6 py-2 text-white text-sm font-medium">Login</a>
-        </div>
-
-      </div>
-    </nav>
-
-    <!-- Hero content -->
-    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-
-      <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white tracking-tight whitespace-nowrap font-serif-display">
-        Know it <em class="italic">all</em>.
+<!-- ========================================================================= -->
+<!-- SECTION 1 : HERO (FULLSCREEN MULTIMODAL CANVAS WITH EXCHANGED VIDEO 1)    -->
+<!-- ========================================================================= -->
+<section class="relative w-full overflow-hidden bg-on-background text-on-primary -mt-20 pt-24 pb-10 md:pb-14 min-h-[560px] flex items-center justify-center">
+<!-- Exchanged Video (bottom-right video promoted to main Hero background) -->
+<div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+<video aria-hidden="true" autoplay="" class="w-full h-full object-cover scale-105 filter saturate-[1.15] contrast-[1.05]" loop="" muted="" playsinline="" preload="metadata">
+<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4" type="video/mp4"/>
+</video>
+</div>
+<!-- Radiant Ambient Light Blobs -->
+<div class="absolute -top-24 left-1/4 w-96 h-96 bg-primary/25 rounded-full blur-[90px] pointer-events-none"></div>
+<div class="absolute -bottom-24 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="relative z-10 w-full max-w-7xl mx-auto px-gutter-mobile md:px-margin flex flex-col items-center text-center">
+<!-- Liquid-Glass Pill Badge -->
+<div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] mb-4">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-ping"></span>
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim -ml-space-xs"></span>
+<span class="font-data-metric text-data-metric tracking-wider uppercase text-on-primary">
+          ✨ NOUVELLE GÉNÉRATION D'APPRENTISSAGE IA
+        </span>
+</div>
+<!-- Main Headline with Instrument Serif in luminous gold -->
+<h1 class="font-display text-display-mobile md:text-display max-w-5xl tracking-tight leading-[1.08] text-[#0B1B4F] drop-shadow-sm">
+        L'apprentissage réinventé par l'<span class="italic font-normal text-[#3B82F6] font-['Instrument_Serif',serif] drop-shadow-[0_2px_12px_rgba(59,130,246,0.35)]">intelligence</span>.
       </h1>
-
-      <!-- Email capture -->
-      <form data-newsletter class="liquid-glass rounded-full pl-6 pr-2 py-2 flex items-center gap-3 max-w-xl w-full mt-12">
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter your email"
-          class="flex-1 min-w-0 bg-transparent border-none outline-none text-white placeholder:text-white/40 text-sm"
-        />
-        <button type="submit" class="bg-white rounded-full p-3 text-black shrink-0" aria-label="Subscribe">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </button>
-      </form>
-
-      <p class="text-white text-sm leading-relaxed px-4 max-w-md mt-6">
-        Stay updated with the latest news and insights. Subscribe to our newsletter today and never miss out on exciting updates.
+<!-- Subtitle -->
+<p class="mt-4 font-body-lg text-body-lg text-[#0B1B4F] max-w-3xl leading-relaxed">
+        Assistant virtuel multimodal pour l'éducation, coaching personnalisé en temps réel, évaluation adaptative continue et génération instantanée d'exercices sur-mesure.
       </p>
-
-      <button type="button" class="liquid-glass rounded-full px-8 py-3 text-white text-sm font-medium hover:bg-white/5 transition-colors mt-10">
-        Manifesto
-      </button>
-
-    </div>
-
-    <!-- Social icons -->
-    <div class="relative z-10 flex justify-center gap-4 pb-10 md:pb-12">
-      <button type="button" aria-label="Instagram" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
-        </svg>
-      </button>
-      <button type="button" aria-label="Twitter" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
-        </svg>
-      </button>
-      <button type="button" aria-label="Website" class="liquid-glass rounded-full p-4 text-white/80 hover:text-white hover:bg-white/5 transition-all">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-          <path d="M2 12h20" />
-        </svg>
-      </button>
-    </div>
-
-  </section>
-
-  <!-- ============================================================
-       SECTION 2 -- ABOUT
-       ============================================================ -->
-  <section class="relative bg-black pt-20 md:pt-32 pb-10 md:pb-14 px-6 overflow-hidden">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.03)_0%,_transparent_70%)] pointer-events-none"></div>
-
-    <div class="relative mx-auto max-w-6xl">
-      <p class="reveal text-white/40 text-sm tracking-widest uppercase"
-         style="--reveal-y: 20px; --reveal-duration: 0.6s;">
-        About Us
-      </p>
-
-      <h2 class="reveal text-4xl md:text-6xl lg:text-7xl text-white leading-[1.1] tracking-tight mt-6"
-          style="--reveal-y: 40px; --reveal-duration: 0.8s; --reveal-delay: 0.1s;">
-        Pioneering <em class="italic font-serif-display text-white/60">ideas</em> for<br class="hidden md:block" />
-        minds that <em class="italic font-serif-display text-white/60">create, build, and inspire.</em>
-      </h2>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       SECTION 3 -- FEATURED VIDEO
-       ============================================================ -->
-  <section class="bg-black pt-6 md:pt-10 pb-12 md:pb-20 px-6 overflow-hidden">
-    <div class="mx-auto max-w-6xl">
-
-      <div class="reveal rounded-3xl overflow-hidden aspect-video relative"
-           style="--reveal-y: 60px; --reveal-duration: 0.9s;">
-        <video
-          class="w-full h-full object-cover"
-          muted
-          autoplay
-          loop
-          playsinline
-          preload="auto">
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4" type="video/mp4" />
-        </video>
-
-        <!-- Gradient overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-
-        <!-- Bottom overlay content -->
-        <div class="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-
-          <div class="liquid-glass rounded-2xl p-6 md:p-8 max-w-md">
-            <p class="text-white/50 text-xs tracking-widest uppercase mb-3">Our Approach</p>
-            <p class="text-white text-sm md:text-base leading-relaxed">
-              We believe in the power of curiosity-driven exploration. Every project starts with a question, and every answer opens a new door to innovation.
+<!-- Liquid Glass Email Action Input + Arrow Button -->
+<div class="mt-6 w-full max-w-xl">
+<form method="get" action="{% url 'accounts:signup' %}" class="p-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-2xl shadow-[0_12px_40px_rgba(6,22,75,0.4)] flex items-center justify-between gap-space-xs transition-all focus-within:bg-surface-container-lowest/25">
+<div class="flex items-center pl-space-md gap-space-xs w-full">
+<span class="material-symbols-outlined text-outline-variant text-[20px]">alternate_email</span>
+<input aria-label="Adresse email" class="w-full bg-transparent text-surface-container-lowest placeholder:text-outline-variant font-body-md text-body-md focus:outline-none" name="email" placeholder="Entrez votre email académique ou professionnel" type="email"/>
+</div>
+<button aria-label="Lancer l'inscription" class="shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-on-primary shadow-[0_4px_20px_rgba(33,112,228,0.5)] hover:scale-105 active:scale-95 transition-transform" type="submit">
+<span class="material-symbols-outlined text-[22px]">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- Additional CTAs and Trust Markers -->
+<div class="mt-4 flex flex-wrap items-center justify-center gap-space-md">
+<a class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container-lowest/20 hover:bg-surface-container-lowest/30 backdrop-blur-md text-on-primary font-label-md text-label-md transition-all shadow-[0_4px_16px_rgba(0,0,0,0.15)]" href="#modules-section">
+<span class="material-symbols-outlined text-[18px]">explore</span>
+<span>Explorer le Hub interactif</span>
+</a>
+<div class="flex items-center gap-space-xs text-surface-variant font-data-metric text-data-metric bg-surface-container-lowest/10 backdrop-blur-md px-space-md py-2 rounded-full">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">verified</span>
+<span>45k+ étudiants &amp; 180+ facultés connectées</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 2 : VISION DU HUB & PILIERS FONDAMENTAUX                         -->
+<!-- ========================================================================= -->
+<section class="relative w-full py-8 md:py-12 bg-surface">
+<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin flex flex-col items-center">
+<div class="text-center max-w-4xl flex flex-col items-center">
+<span class="font-data-metric text-data-metric uppercase tracking-widest text-primary-container px-space-md py-1 rounded-full bg-surface-container-high">
+          HUB ÉDUCATIF &amp; CRÉATIF MULTIMODAL
+        </span>
+<h2 class="mt-space-md font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface leading-tight">
+          Un copilote multimodal conçu pour les esprits qui <span class="italic font-normal text-primary font-['Instrument_Serif',serif]">apprennent, enseignent et créent</span>.
+        </h2>
+<p class="mt-space-md font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+          Fini le cloisonnement textuel. EduSpark analyse simultanément vos enregistrements oraux, équations manuscrites, schémas vectoriels et corpus documentaires pour dynamiser chaque étape de votre progression.
+        </p>
+</div>
+<!-- 4 Piliers Clés en Badges Flottants Glassmorphism -->
+<div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md w-full">
+<!-- Pilier 1 -->
+<div class="p-5 rounded-2xl bg-surface-container-lowest shadow-[0_8px_24px_rgba(6,22,75,0.04)] hover:shadow-[0_16px_36px_rgba(33,112,228,0.1)] transition-all hover:-translate-y-1 flex flex-col justify-between group">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-primary flex items-center justify-center mb-space-md group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[26px]">mic_double</span>
+</div>
+<div>
+<div class="font-data-metric text-data-metric text-primary uppercase mb-1">PILIER 01</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Assistant Virtuel Vocal &amp; Visuel</h3>
+<p class="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">Interactions orales naturelles et reconnaissance instantanée de calculs ou schémas manuscrits.</p>
+</div>
+</div>
+<!-- Pilier 2 -->
+<div class="p-5 rounded-2xl bg-surface-container-lowest shadow-[0_8px_24px_rgba(6,22,75,0.04)] hover:shadow-[0_16px_36px_rgba(100,94,251,0.1)] transition-all hover:-translate-y-1 flex flex-col justify-between group">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-secondary flex items-center justify-center mb-space-md group-hover:bg-secondary group-hover:text-on-secondary transition-colors">
+<span class="material-symbols-outlined text-[26px]">psychology</span>
+</div>
+<div>
+<div class="font-data-metric text-data-metric text-secondary uppercase mb-1">PILIER 02</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Coaching Personnalisé 24/7</h3>
+<p class="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">Régulation métacognitive, encouragement bienveillant et stimulation par la méthode socratique.</p>
+</div>
+</div>
+<!-- Pilier 3 -->
+<div class="p-5 rounded-2xl bg-surface-container-lowest shadow-[0_8px_24px_rgba(6,22,75,0.04)] hover:shadow-[0_16px_36px_rgba(149,110,0,0.1)] transition-all hover:-translate-y-1 flex flex-col justify-between group">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-tertiary-container flex items-center justify-center mb-space-md group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-colors">
+<span class="material-symbols-outlined text-[26px]">insights</span>
+</div>
+<div>
+<div class="font-data-metric text-data-metric text-tertiary-container uppercase mb-1">PILIER 03</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Évaluation Formative Continue</h3>
+<p class="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">Diagnostics granulaires des compétences sans stress sommatif et recommandations de révision ciblées.</p>
+</div>
+</div>
+<!-- Pilier 4 -->
+<div class="p-5 rounded-2xl bg-surface-container-lowest shadow-[0_8px_24px_rgba(6,22,75,0.04)] hover:shadow-[0_16px_36px_rgba(33,112,228,0.1)] transition-all hover:-translate-y-1 flex flex-col justify-between group">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-primary-container flex items-center justify-center mb-space-md group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined text-[26px]">quiz</span>
+</div>
+<div>
+<div class="font-data-metric text-data-metric text-primary-container uppercase mb-1">PILIER 04</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Génération Automatisée d'Exercices</h3>
+<p class="mt-space-xs font-body-sm text-body-sm text-on-surface-variant">Matrices génératives créant en quelques secondes des devoirs, quiz et études de cas contextualisés.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 3 : VIDÉO À LA UNE (APPROCHE COGNITIVE PÉDAGOGIQUE)               -->
+<!-- ========================================================================= -->
+<section class="relative w-full py-8 bg-surface-container-low overflow-hidden">
+<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin">
+<!-- Elevated 3XL Container for Main Showcase Video -->
+<div class="relative w-full aspect-[16/10] md:aspect-[21/9] rounded-[2.5rem] overflow-hidden shadow-[0_24px_70px_rgba(6,22,75,0.12)] bg-on-background">
+<video aria-hidden="true" data-lazy class="w-full h-full object-cover scale-[1.02]" loop="" muted="" playsinline="" preload="none">
+<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260402_054547_9875cfc5-155a-4229-8ec8-b7ba7125cbf8.mp4" type="video/mp4"/>
+</video>
+<!-- Subtle gradient overlay on bottom-left for card readability -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#06164b]/80 via-transparent to-transparent pointer-events-none"></div>
+<!-- Floating Liquid-Glass Explanatory Card -->
+<div class="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-auto md:max-w-lg p-5 rounded-3xl bg-surface-container-lowest/80 backdrop-blur-2xl shadow-[0_16px_40px_rgba(0,0,0,0.18)]">
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-data-metric text-data-metric uppercase tracking-wider text-secondary">
+              NOTRE APPROCHE PÉDAGOGIQUE
+            </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+            Nous combinons la puissance des modèles multimodaux (audio, texte, schémas manuscrits) aux sciences de l'apprentissage pour créer une expérience d'étude immersive et stimulante.
+          </p>
+<div class="mt-space-md flex items-center justify-between">
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-[0_4px_14px_rgba(0,88,190,0.3)]" type="button">
+<span class="material-symbols-outlined text-[18px]">play_circle</span>
+<span>Voir la démonstration</span>
+</button>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Multi-inférence • Latence 280ms</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 4 : PHILOSOPHIE / PÉDAGOGIE X TECHNOLOGIE                        -->
+<!-- ========================================================================= -->
+<section class="relative w-full py-8 md:py-12 bg-surface">
+<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin">
+<div class="flex flex-col md:flex-row items-baseline justify-between mb-6">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+          Pédagogie <span class="italic font-normal text-tertiary-fixed-dim font-['Instrument_Serif',serif] text-5xl md:text-6xl mx-1">x</span> Technologie
+        </h2>
+<p class="mt-space-xs md:mt-0 font-data-metric text-data-metric text-on-surface-variant uppercase tracking-widest">
+          Convergence des sciences cognitives et des LLMs d'élite
+        </p>
+</div>
+<!-- Asymmetrical 2-Column Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+<!-- Left: 4/3 Aspect Video Container -->
+<div class="lg:col-span-6 relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(6,22,75,0.08)] bg-on-background aspect-[4/3]">
+<video aria-hidden="true" data-lazy class="w-full h-full object-cover" loop="" muted="" playsinline="" preload="none">
+<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4" type="video/mp4"/>
+</video>
+<div class="absolute top-4 left-4 px-space-md py-1.5 rounded-full bg-surface-container-lowest/80 backdrop-blur-md font-data-metric text-data-metric text-on-surface flex items-center gap-space-xs shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>Flux multimodal synchrone</span>
+</div>
+</div>
+<!-- Right: Two Expressive Cognitive Blocks -->
+<div class="lg:col-span-6 flex flex-col gap-5">
+<!-- Block 1 -->
+<div class="p-5 rounded-3xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-sm">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-on-secondary shrink-0">
+<span class="material-symbols-outlined text-[20px]">record_voice_over</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Assistant Virtuel &amp; Coaching Multimodal</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed pl-12">
+              Interagissez par la voix, résolvez des équations en photographiant vos notes, et bénéficiez d'un accompagnateur qui décortique vos raisonnements pas à pas. Le modèle s'adapte à votre rythme cognitif sans jamais donner la réponse brute.
             </p>
-          </div>
-
-          <button type="button" class="liquid-glass rounded-full px-8 py-3 text-white text-sm font-medium press-scale self-start md:self-auto shrink-0">
-            Explore more
-          </button>
-
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============================================================
-       SECTION 4 -- PHILOSOPHY / INNOVATION x VISION
-       ============================================================ -->
-  <section class="bg-black py-16 md:py-24 px-6 overflow-hidden">
-    <div class="mx-auto max-w-6xl">
-
-      <h2 class="reveal text-5xl md:text-7xl lg:text-8xl text-white tracking-tight mb-10 md:mb-14"
-          style="--reveal-y: 40px; --reveal-duration: 0.8s;">
-        Innovation <em class="italic font-serif-display text-white/40">x</em> Vision
-      </h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-
-        <div class="reveal rounded-3xl overflow-hidden aspect-[4/3]"
-             style="--reveal-x: -40px; --reveal-duration: 0.9s;">
-          <video
-            class="w-full h-full object-cover"
-            muted
-            autoplay
-            loop
-            playsinline
-            preload="auto">
-            <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4" type="video/mp4" />
-          </video>
-        </div>
-
-        <div class="reveal flex flex-col justify-center"
-             style="--reveal-x: 40px; --reveal-duration: 0.9s;">
-
-          <div>
-            <p class="text-white/40 text-xs tracking-widest uppercase mb-4">Choose your space</p>
-            <p class="text-white/70 text-base md:text-lg leading-relaxed">
-              Every meaningful breakthrough begins at the intersection of disciplined strategy and remarkable creative vision. We operate at that crossroads, turning bold thinking into tangible outcomes that move people and reshape industries.
+<div class="mt-space-md pl-12 flex items-center gap-space-xs text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Modulation socratique activée</span>
+</div>
+</div>
+<!-- Block 2 -->
+<div class="p-5 rounded-3xl bg-surface-container-low hover:bg-surface-container transition-colors shadow-sm">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<div class="w-10 h-10 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">neurology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Évaluation Dynamique &amp; Génération d'Exercices</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed pl-12">
+              Générez des séries d'exercices calibrés par compétence et niveau de difficulté. L'évaluation formative fournit un feedback bienveillant et actionnable, identifiant précisément la faille conceptuelle pour vous guider vers la maîtrise.
             </p>
-          </div>
-
-          <div class="w-full h-px bg-white/10 my-8 md:my-10"></div>
-
-          <div>
-            <p class="text-white/40 text-xs tracking-widest uppercase mb-4">Shape the future</p>
-            <p class="text-white/70 text-base md:text-lg leading-relaxed">
-              We believe that the best work emerges when curiosity meets conviction. Our process is designed to uncover hidden opportunities and translate them into experiences that resonate long after the first impression.
-            </p>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       SECTION 5 -- SERVICES / WHAT WE DO
-       ============================================================ -->
-  <section class="relative bg-black py-16 md:py-24 px-6 overflow-hidden">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)] pointer-events-none"></div>
-
-    <div class="relative mx-auto max-w-6xl">
-      <div class="relative">
-
-        <!-- Header row -->
-        <div class="reveal flex items-end justify-between mb-8 md:mb-12"
-             style="--reveal-y: 30px; --reveal-duration: 0.7s;">
-          <h2 class="text-3xl md:text-5xl text-white tracking-tight">What we do</h2>
-          <p class="hidden md:block text-white/40 text-sm">Our services</p>
-        </div>
-
-        <!-- Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-
-          <!-- Card 1 -->
-          <div class="reveal liquid-glass rounded-3xl overflow-hidden group"
-               style="--reveal-y: 50px; --reveal-duration: 0.8s;">
-            <div class="relative aspect-video overflow-hidden">
-              <video
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                muted
-                autoplay
-                loop
-                playsinline
-                preload="auto">
-                <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" type="video/mp4" />
-              </video>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
-            </div>
-
-            <div class="p-6 md:p-8">
-              <div class="flex items-center justify-between mb-4">
-                <span class="uppercase tracking-widest text-white/40 text-xs">Strategy</span>
-                <span class="liquid-glass rounded-full p-2 text-white">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M7 7h10v10" />
-                    <path d="M7 17 17 7" />
-                  </svg>
-                </span>
-              </div>
-              <h3 class="text-white text-xl md:text-2xl mb-3 tracking-tight">Research &amp; Insight</h3>
-              <p class="text-white/50 text-sm leading-relaxed">
-                We dig deep into data, culture, and human behavior to surface the insights that drive meaningful, lasting change.
+<div class="mt-space-md pl-12 flex items-center gap-space-xs text-tertiary-container font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+<span>Barèmes adaptatifs conformes aux standards</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 5 : LES MODULES CLÉS (SERVICES / WHAT WE DO - EXCHANGED VIDEO 2) -->
+<!-- ========================================================================= -->
+<section class="relative w-full py-8 md:py-12 bg-surface-container-lowest" id="modules-section">
+<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin">
+<div class="text-center max-w-3xl mx-auto mb-6">
+<span class="font-data-metric text-data-metric uppercase tracking-widest text-primary-container px-space-md py-1 rounded-full bg-surface-container-high">
+          ARCHITECTURE DU HUB
+        </span>
+<h2 class="mt-space-sm font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+          Fonctionnalités Clés du Hub
+        </h2>
+<p class="mt-space-xs font-body-lg text-body-lg text-on-surface-variant">
+          Un écosystème 4-en-1 pour apprenants, enseignants et professionnels de la formation.
+        </p>
+</div>
+<!-- 2 Major Liquid-Glass Cards Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+<!-- CARD 1 (Gauche) : Tutorat & Coaching -->
+<div class="flex flex-col rounded-3xl bg-surface-container-low overflow-hidden shadow-[0_12px_36px_rgba(6,22,75,0.06)] hover:shadow-[0_20px_48px_rgba(6,22,75,0.1)] transition-all">
+<div class="relative w-full aspect-video overflow-hidden bg-on-background">
+<video aria-hidden="true" data-lazy class="w-full h-full object-cover" loop="" muted="" playsinline="" preload="none">
+<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4" type="video/mp4"/>
+</video>
+<!-- Badge Turquoise / Mint -->
+<div class="absolute top-4 left-4 px-space-md py-1 rounded-full bg-surface-container-lowest/85 backdrop-blur-md shadow-sm">
+<span class="font-data-metric text-data-metric text-primary tracking-wide font-bold">
+                TUTORAT &amp; COACHING
+              </span>
+</div>
+</div>
+<div class="p-5 flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Assistant Virtuel &amp; Mentor Interactif</h3>
+<p class="mt-space-xs font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Dialogue naturel en temps réel, reformulation pédagogique et soutien émotionnel pour surmonter les blocages d'apprentissage sans jugement.
               </p>
-            </div>
-          </div>
-
-          <!-- Card 2 -->
-          <div class="reveal liquid-glass rounded-3xl overflow-hidden group"
-               style="--reveal-y: 50px; --reveal-duration: 0.8s; --reveal-delay: 0.15s;">
-            <div class="relative aspect-video overflow-hidden">
-              <video
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                muted
-                autoplay
-                loop
-                playsinline
-                preload="auto">
-                <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4" type="video/mp4" />
-              </video>
-              <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
-            </div>
-
-            <div class="p-6 md:p-8">
-              <div class="flex items-center justify-between mb-4">
-                <span class="uppercase tracking-widest text-white/40 text-xs">Craft</span>
-                <span class="liquid-glass rounded-full p-2 text-white">
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M7 7h10v10" />
-                    <path d="M7 17 17 7" />
-                  </svg>
-                </span>
-              </div>
-              <h3 class="text-white text-xl md:text-2xl mb-3 tracking-tight">Design &amp; Execution</h3>
-              <p class="text-white/50 text-sm leading-relaxed">
-                From concept to launch, we obsess over every detail to deliver experiences that feel effortless and look extraordinary.
+</div>
+<div class="mt-4 pt-space-md border-t border-outline-variant/30 flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary flex items-center gap-1 cursor-pointer hover:gap-2 transition-all">
+                Explorer l'assistant <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</span>
+<span class="font-data-metric text-data-metric text-outline">Latence vocale &lt; 300ms</span>
+</div>
+</div>
+</div>
+<!-- CARD 2 (Droite - EXCHANGED VIDEO : initial Hero video placed here) -->
+<div class="flex flex-col rounded-3xl bg-surface-container-low overflow-hidden shadow-[0_12px_36px_rgba(6,22,75,0.06)] hover:shadow-[0_20px_48px_rgba(6,22,75,0.1)] transition-all">
+<div class="relative w-full aspect-video overflow-hidden bg-on-background">
+<video aria-hidden="true" data-lazy class="w-full h-full object-cover" loop="" muted="" playsinline="" preload="none">
+<source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4" type="video/mp4"/>
+</video>
+<!-- Badge Violet & Or -->
+<div class="absolute top-4 left-4 px-space-md py-1 rounded-full bg-surface-container-lowest/85 backdrop-blur-md shadow-sm flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-data-metric text-data-metric text-secondary-container tracking-wide font-bold">
+                ÉVALUATION &amp; CRÉATION
+              </span>
+</div>
+</div>
+<div class="p-5 flex flex-col justify-between flex-grow">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Génération d'Exercices &amp; Évaluation Automatique</h3>
+<p class="mt-space-xs font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                Création instantanée de quiz, études de cas et parcours d'exercices évolutifs avec correction intelligente et analyse granulaire de la progression.
               </p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <script src="{% static 'landing/js/main.js' %}"></script>
-  <script>
-    // Auto-dismiss flash toasts after 5s with a fade-out
-    document.querySelectorAll('[data-flash]').forEach((el) => {
-      setTimeout(() => {
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(-8px)';
-        setTimeout(() => el.remove(), 500);
-      }, 5000);
-    });
-  </script>
-</body>
-</html>
+</div>
+<div class="mt-4 pt-space-md border-t border-outline-variant/30 flex items-center justify-between">
+<span class="font-label-md text-label-md text-secondary-container flex items-center gap-1 cursor-pointer hover:gap-2 transition-all">
+                Générer un module didactique <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</span>
+<span class="font-data-metric text-data-metric text-outline">Formats QCM, Rédaction, Code</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature Metrics Sparkline Strip -->
+<div class="mt-6 p-5 rounded-3xl bg-surface-container-high/60 backdrop-blur-md flex flex-wrap items-center justify-around gap-space-md">
+<div class="flex flex-col items-center">
+<span class="font-display text-headline-lg text-primary font-bold">98.4%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Précision de correction didactique</span>
+</div>
+<div class="hidden sm:block w-px h-12 bg-outline-variant/40"></div>
+<div class="flex flex-col items-center">
+<span class="font-display text-headline-lg text-secondary font-bold">12s</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Création d'un examen complet</span>
+</div>
+<div class="hidden sm:block w-px h-12 bg-outline-variant/40"></div>
+<div class="flex flex-col items-center">
+<span class="font-display text-headline-lg text-tertiary-container font-bold">+42%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Rétention mnésique observée</span>
+</div>
+<div class="hidden sm:block w-px h-12 bg-outline-variant/40"></div>
+<div class="flex flex-col items-center">
+<span class="font-display text-headline-lg text-on-surface font-bold">100%</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Souveraineté des données (RGPD)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ========================================================================= -->
+<!-- SECTION 6 : CALL TO ACTION FINAL                                         -->
+<!-- ========================================================================= -->
+<section class="relative w-full py-8 md:py-12 bg-surface overflow-hidden">
+<div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin">
+<!-- Luminous Midnight-to-Electric Liquid Glass Banner -->
+<div class="relative w-full rounded-[2.5rem] bg-gradient-to-br from-[#06164b] via-[#10246a] to-[#2170e4] p-6 md:p-10 overflow-hidden shadow-[0_24px_80px_rgba(6,22,75,0.25)] text-center flex flex-col items-center">
+<!-- Radiant background glows inside CTA -->
+<div class="absolute -top-32 -left-32 w-80 h-80 bg-secondary/40 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="absolute -bottom-32 -right-32 w-80 h-80 bg-tertiary-fixed-dim/20 rounded-full blur-[80px] pointer-events-none"></div>
+<div class="relative z-10 max-w-3xl flex flex-col items-center">
+<div class="inline-flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-lowest/15 backdrop-blur-md mb-space-md">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]">spark</span>
+<span class="font-data-metric text-data-metric text-tertiary-fixed-dim uppercase tracking-wider">ACCÈS ANTICIPÉ PRIVILÉGIÉ</span>
+</div>
+<h2 class="font-display text-headline-lg-mobile md:text-headline-lg text-surface-container-lowest leading-tight">
+            Prêt à transformer votre manière d'apprendre et d'enseigner ?
+          </h2>
+<p class="mt-space-md font-body-lg text-body-lg text-surface-variant max-w-xl">
+            Rejoignez des milliers de formateurs, chercheurs et étudiants qui décuplent leur potentiel pédagogique avec EduSpark.
+          </p>
+<div class="mt-6 flex flex-col sm:flex-row items-center gap-space-md w-full justify-center">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs px-space-xl py-space-md rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-[0_8px_24px_rgba(255,255,255,0.25)] hover:bg-surface hover:scale-[1.02] active:scale-95 transition-all" href="{% url 'accounts:signup' %}">
+<span>Démarrer l'expérience gratuite</span>
+<span class="material-symbols-outlined text-[20px] text-primary">arrow_forward</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-space-xs px-space-lg py-space-md rounded-full bg-surface-container-lowest/15 hover:bg-surface-container-lowest/25 backdrop-blur-md text-surface-container-lowest font-label-md text-label-md transition-all" data-path="documentation" href="#">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Demander une démo institutionnelle</span>
+</a>
+</div>
+<!-- Trust Mentions -->
+<div class="mt-4 flex flex-wrap items-center justify-center gap-x-space-md gap-y-space-xs text-surface-variant font-data-metric text-data-metric">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim">check_circle</span>
+              Sans engagement
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim">check_circle</span>
+              Déploiement instantané
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim">check_circle</span>
+              Conforme RGPD &amp; Souveraineté UE
+            </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div></main><footer class="w-full bg-surface-container-lowest border-t border-outline-variant/20 py-2"><div class="max-w-7xl mx-auto px-gutter-mobile md:px-margin flex flex-col sm:flex-row items-center justify-between gap-1.5"><div class="flex items-center gap-2"><img src="{% static 'landing/img/logo.png' %}" alt="EduSpark logo" width="256" height="256" class="w-6 h-6 rounded-full object-cover"/><img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-4 w-auto object-contain object-left"/><span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 EduSpark Technologies.</span></div><div class="flex items-center gap-4 font-label-sm text-label-sm text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">Mentions Légales</span><span class="hover:text-on-surface cursor-pointer">Conditions Générales</span><span class="hover:text-on-surface cursor-pointer">Confidentialité</span></div></div></footer><script>(function(){try{if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.querySelectorAll('video').forEach(function(v){v.pause();v.removeAttribute('autoplay');});}}catch(e){}})();</script><script>(function(){try{var rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;var vs=document.querySelectorAll('video[data-lazy]');if(!('IntersectionObserver' in window)){if(!rm){vs.forEach(function(v){v.play().catch(function(){});});}return;}var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var v=e.target;io.unobserve(v);if(!rm){v.play().catch(function(){});}}});},{rootMargin:'200px'});vs.forEach(function(v){io.observe(v);});}catch(e){}})();</script></body></html>
