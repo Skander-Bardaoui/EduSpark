@@ -7,85 +7,73 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 <style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"secondary-fixed":"#e2dfff","on-error-container":"#93000a","on-background":"#06164b","on-primary-fixed":"#001a42","on-secondary-fixed-variant":"#3323cc","surface-container-high":"#e4e7ff","tertiary-fixed-dim":"#f9bd22","on-error":"#ffffff","on-tertiary-fixed":"#261a00","on-primary":"#ffffff","on-tertiary-fixed-variant":"#5c4300","tertiary-container":"#956e00","surface-container-lowest":"#ffffff","primary-container":"#2170e4","surface-bright":"#fbf8ff","surface-container":"#ecedff","background":"#fbf8ff","surface-dim":"#d1d8ff","tertiary-fixed":"#ffdf9f","secondary":"#4b41e1","primary-fixed":"#d8e2ff","on-secondary-container":"#fffbff","inverse-surface":"#1f2d60","tertiary":"#765700","primary":"#0058be","on-secondary-fixed":"#0f0069","on-secondary":"#ffffff","on-surface":"#06164b","surface-container-low":"#f3f2ff","on-tertiary":"#ffffff","secondary-fixed-dim":"#c3c0ff","outline":"#727785","primary-fixed-dim":"#adc6ff","on-surface-variant":"#424754","inverse-on-surface":"#efefff","surface-tint":"#005ac2","on-tertiary-container":"#fffbff","inverse-primary":"#adc6ff","outline-variant":"#c2c6d6","surface-container-highest":"#dde1ff","surface":"#fbf8ff","on-primary-fixed-variant":"#004395","error-container":"#ffdad6","error":"#ba1a1a","secondary-container":"#645efb","on-primary-container":"#fefcff","surface-variant":"#dde1ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-mobile":"1rem","space-lg":"1.5rem","space-md":"1rem","space-xs":"0.25rem","space-xl":"2.5rem","margin-mobile":"1.25rem","margin":"3rem","space-sm":"0.5rem","gutter":"1.5rem"},"fontFamily":{"headline-sm":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Inter"],"display":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-mobile":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"data-metric":["JetBrains Mono"],"body-lg":["Inter"],"label-sm":["Plus Jakarta Sans"]},"fontSize":{"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}]}}}}</script><style id="a11y-wcag">.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}.skip-link:focus{position:absolute;top:.5rem;left:.5rem;z-index:100;width:auto;height:auto;clip:auto;white-space:normal;background:#fff;color:#06164b;padding:.5rem 1rem;border-radius:.75rem;box-shadow:0 8px 24px rgba(6,22,75,.25);font-weight:600;font-size:.875rem;text-decoration:none;}:focus-visible{outline:3px solid #0058be;outline-offset:2px;}@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}}</style></head><body class="min-h-screen bg-surface font-body-md text-on-surface antialiased flex flex-col justify-between selection:bg-primary-fixed selection:text-on-primary-fixed"><a href="#contenu-principal" class="sr-only skip-link">Aller au contenu principal</a><header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-margin-mobile md:px-margin flex items-center justify-between"><a class="flex items-center gap-space-sm group transition-transform duration-150 hover:scale-[1.01]" href="{% url 'landing:index' %}"><img src="{% static 'landing/img/logo.png' %}" alt="EduSpark logo" width="256" height="256" class="w-9 h-9 rounded-lg object-cover shadow-[0_4px_16px_-2px_rgba(0,88,190,0.35)]"/><div class="flex flex-col"><img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-6 w-auto object-contain object-left"/><span class="font-label-sm text-label-sm text-tertiary -mt-1 font-semibold uppercase tracking-wider">Spark your Potential</span></div></a><div class="flex items-center gap-space-md"><a class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md" href="{% url 'landing:index' %}">Accueil</a><a class="inline-flex items-center justify-center px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_14px_rgba(0,88,190,0.35)] hover:bg-primary-container transition-colors" href="{% url 'accounts:login' %}">Se connecter</a></div></div></header><main id="contenu-principal" class="w-full pt-16 bg-surface flex-1 flex flex-col"><div class="flex flex-col w-full">
 <div class="w-full min-h-[calc(100vh-4rem)] flex flex-col lg:flex-row bg-surface-container-lowest">
-<!-- GAUCHE : Showcase Immersif & Vidéo Contextuelle -->
-<div class="relative w-full lg:w-1/2 min-h-[480px] lg:min-h-full overflow-hidden flex flex-col justify-between p-space-md sm:p-space-lg lg:p-margin bg-on-background text-on-primary">
-<!-- Fond Vidéo HD Fluide -->
-<video aria-hidden="true" autoplay="" class="absolute inset-0 w-full h-full object-cover z-0" loop="" muted="" playsinline="">
-<source src="https://assets.mixkit.co/videos/preview/mixkit-student-typing-on-a-laptop-keyboard-41315-large.mp4" type="video/mp4"/>
-</video>
-<!-- Overlay sombre neutre & texturé (sans teinte mauve) -->
-<div class="absolute inset-0 bg-gradient-to-t from-on-background/95 via-on-background/75 to-on-background/50 backdrop-blur-[2px] z-10"></div>
-<!-- Halo d'énergie bleu discret -->
-<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-container/30 rounded-full blur-3xl pointer-events-none z-10"></div>
-<!-- En-tête panneau gauche -->
-<div class="relative z-20 flex items-center justify-between">
-<a class="inline-flex items-center gap-space-xs text-on-primary/90 hover:text-on-primary transition-colors" href="{% url 'landing:index' %}">
-
-<img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-5 w-auto object-contain brightness-0 invert"/>
+<!-- LEFT PANEL: Dynamic Media & Social Proof -->
+<div class="w-full lg:w-1/2 p-4 lg:p-6 flex flex-col min-h-[520px] lg:min-h-[calc(100vh-4rem)]">
+<div class="relative w-full h-full flex-1 rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl border border-surface-container-highest/20 flex flex-col justify-between bg-on-surface text-surface">
+<!-- Photographic Background -->
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-6t_E_rOPZT85GkCJTvU60hz9BTEVpwRzsSfcPIn1rziNmioLschZTe2I4NCQNUfgYudGDIPcKruxte8UQYV197jk5yl3L9qVrEgG3UCpF6thhAlR2TSwO-ExzhsJAY2oID5ci5Rb43NEecmXi39tUv0Tb2SnXXC-fBNqvdU1-SwLO03E4JFqoGt4cspGV1_ePbqmy9DOu8SOXmtte-yNFgLYls3lQqhRyV3uzsY1FmReZYXoz0Xn" alt="EduSpark Multimodal Learning" class="absolute inset-0 w-full h-full object-cover"/>
+<!-- Contrast Gradient Overlay with Subtle Blur -->
+<div class="absolute inset-0 bg-gradient-to-b from-[#06164b]/85 via-[#06164b]/60 to-[#06164b]/95 backdrop-blur-[2px]"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-[#06164b]/80 via-transparent to-transparent"></div>
+<div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-primary/25 blur-3xl pointer-events-none"></div>
+<!-- Content Layer -->
+<div class="relative z-10 flex flex-col justify-between h-full p-6 md:p-8 lg:p-10 text-surface">
+<!-- Top Bar -->
+<div class="flex items-center justify-between gap-space-sm">
+<a class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-lowest/15 hover:bg-surface-container-lowest/25 backdrop-blur-md text-surface transition-all duration-200 shadow-sm" href="{% url 'landing:index' %}">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">keyboard_backspace</span>
+<span class="font-label-md text-label-md">Portail Général</span>
 </a>
-<!-- Badge Accès Anticipé -->
-<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/10 backdrop-blur-md shadow-sm">
-<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
-<span class="font-data-metric text-data-metric uppercase tracking-wider text-tertiary-fixed font-bold">🚀 Accès Anticipé Privilégié</span>
+<div class="flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-lowest/10 backdrop-blur-md border border-white/10 text-tertiary-fixed font-data-metric text-data-metric">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed animate-pulse"></span>
+<span>SYSTEM ONLINE 99.98%</span>
 </div>
 </div>
-<!-- Corps Narratif & Bénéfices -->
-<div class="relative z-20 my-auto py-space-lg">
-<div class="max-w-xl space-y-space-md">
-<div class="inline-block px-2.5 py-0.5 rounded-full bg-primary/40 text-primary-fixed font-label-sm text-label-sm uppercase tracking-widest font-semibold">
-            Intelligence Augmentée
-          </div>
-<h2 class="font-headline-lg text-headline-lg text-on-primary font-extrabold leading-tight tracking-tight">
-            Rejoignez la nouvelle génération d'apprentissage <span class="text-tertiary-fixed-dim">cognitif</span>.
-          </h2>
-<p class="font-body-md text-body-md text-surface-container-high/90 leading-relaxed">
-            Activez un environnement d'apprentissage sur-mesure qui synthétise la voix, le schéma conceptuel et l'analyse sémantique pour décupler votre assimilation.
-          </p>
-<!-- Liste des atouts majeurs -->
-<div class="pt-space-sm space-y-space-sm">
-<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
-<div class="w-7 h-7 rounded-lg bg-primary/30 flex items-center justify-center shrink-0 text-primary-fixed-dim">
-<span class="material-symbols-outlined text-[18px]">check_indeterminate_small</span>
+<!-- Middle Section: Testimonial & Value Pill -->
+<div class="my-auto py-space-lg flex flex-col gap-space-md max-w-xl">
+<!-- Floating Pill Tag -->
+<div class="self-start inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-lowest/20 backdrop-blur-xl border border-white/15 shadow-lg">
+<span class="material-symbols-outlined text-tertiary-fixed text-[18px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-sm text-label-sm text-surface tracking-wider uppercase font-bold">IA Multimodale &amp; Coaching Cognitif</span>
 </div>
-<div class="min-w-0">
-<div class="font-title-md text-title-md text-on-primary font-semibold">Assistant multimodal vocal &amp; visuel</div>
-<div class="font-body-sm text-body-sm text-surface-container-high/70">Interaction conversationnelle instantanée et reconnaissance de schémas.</div>
+<!-- Quote Frosted Glass Card -->
+<div class="p-space-lg rounded-xl bg-surface-container-lowest/15 backdrop-blur-2xl border border-white/15 shadow-xl flex flex-col gap-space-md">
+<div class="flex gap-space-xs text-tertiary-fixed">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
 </div>
+<blockquote class="font-headline-sm text-headline-sm text-surface leading-snug font-normal">
+« EduSpark a révolutionné notre pédagogie universitaire en adaptant chaque synthèse et atelier conceptuel en temps réel au rythme neuronal de chaque étudiant. »
+</blockquote>
+<div class="flex items-center gap-space-md pt-space-xs">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container-high shrink-0 shadow-md ring-2 ring-white/30">
+<img class="w-full h-full object-cover" alt="Portrait photography of Dr Valerie Mercier, distinguished academic researcher in cognitive neuroscience, natural soft studio illumination, warm composed confident smile, midnight blue and crisp white environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE6AVaB98fFMlq4HQpM6xJ-1KdlWuD5x0tPakIISCbBkB3x4CQWmPU_Fcqb6ZIY7IEvOCV5PO71Lb6j9eBRfNL8ETCzE4XRmPbIWyYhkSmri4Yw6FA-3sByUMgnKxJ9NnB_UqNHiUBcL6cAP_AZr6psfgL49mfjdvDN7mcpydWSaD2U0ENMUTsuJW7UBkl182NPyRGv1gAmN7vU9EgyOlR2u0Xwv9zf0-rCCRWCtLVHAAiv7nY66oC"/>
 </div>
-<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
-<div class="w-7 h-7 rounded-lg bg-tertiary/40 flex items-center justify-center shrink-0 text-tertiary-fixed">
-<span class="material-symbols-outlined text-[18px]">neurology</span>
-</div>
-<div class="min-w-0">
-<div class="font-title-md text-title-md text-on-primary font-semibold">Génération d'exercices &amp; quiz adaptatifs</div>
-<div class="font-body-sm text-body-sm text-surface-container-high/70">Modélisation en temps réel de vos courbes d'ancrage mémoriel.</div>
-</div>
-</div>
-<div class="flex items-start gap-space-sm p-3 rounded-xl bg-surface-container-lowest/10 backdrop-blur-md transition-all hover:bg-surface-container-lowest/15">
-<div class="w-7 h-7 rounded-lg bg-surface-container-high/20 flex items-center justify-center shrink-0 text-surface-bright">
-<span class="material-symbols-outlined text-[18px]">verified</span>
-</div>
-<div class="min-w-0">
-<div class="font-title-md text-title-md text-on-primary font-semibold">Correction prédictive à 98.4%</div>
-<div class="font-body-sm text-body-sm text-surface-container-high/70">Feedback didactique empathique, contextualisé et immédiat.</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md font-bold text-surface">Dr. Valérie Mercier</span>
+<span class="font-label-sm text-label-sm text-primary-fixed">Enseignante-chercheuse en Sciences Cognitives</span>
 </div>
 </div>
 </div>
 </div>
+<!-- Bottom Bar: Trust Indicators -->
+<div class="pt-space-md flex flex-wrap items-center gap-space-md">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-surface-container-lowest/15 backdrop-blur-md border border-white/10 font-label-sm text-label-sm text-surface">
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">verified</span>
+<span>45k+ étudiants actifs</span>
 </div>
-<!-- Bas de page gauche : Souveraineté & Chiffrement -->
-<div class="relative z-20 flex flex-wrap items-center justify-between gap-space-sm pt-space-md">
-<div class="flex items-center gap-space-xs text-surface-container-highest/80 font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-primary-fixed text-[18px]">lock</span>
-<span>100% Chiffré de bout en bout</span>
-<span class="mx-1 opacity-40">•</span>
-<span class="material-symbols-outlined text-primary-fixed text-[18px]">dns</span>
-<span>Hébergé en Union Européenne (RGPD)</span>
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-surface-container-lowest/15 backdrop-blur-md border border-white/10 font-label-sm text-label-sm text-surface">
+<span class="material-symbols-outlined text-tertiary-fixed text-[16px]">security</span>
+<span>Conforme RGPD &amp; Cloud UE</span>
 </div>
-<div class="flex items-center -space-x-2">
-<div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">FR</div>
-<div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">DE</div>
-<div class="w-7 h-7 rounded-full bg-tertiary-container flex items-center justify-center text-[10px] font-bold text-on-primary shadow-sm ring-2 ring-on-background">+48k</div>
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-surface-container-lowest/15 backdrop-blur-md border border-white/10 font-data-metric text-data-metric text-primary-fixed">
+<span class="material-symbols-outlined text-surface text-[16px]">bolt</span>
+<span>Latence &lt; 300ms</span>
+</div>
+</div>
 </div>
 </div>
 </div>
