@@ -109,12 +109,22 @@ WSGI_APPLICATION = 'EduSpark.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# PostgreSQL : comme pour la clé secrète, aucun identifiant n'est écrit ici.
+# Tout vient de .env (voir .env.example) : DJANGO_DB_NAME, DJANGO_DB_USER,
+# DJANGO_DB_PASSWORD, DJANGO_DB_HOST, DJANGO_DB_PORT.
+# Le moteur a besoin du driver psycopg 3 (cf. requirements.txt) ; Django 5.2
+# exige psycopg >= 3.1.8.
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'eduspark'),
+        'USER': os.environ.get('DJANGO_DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
+        'HOST': os.environ.get('DJANGO_DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DJANGO_DB_PORT', '5432'),
     }
 }
 

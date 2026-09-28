@@ -4,3 +4,8 @@ Django==5.2.17
 djangorestframework==3.18.1
 djangorestframework-simplejwt==5.5.1
 python-dotenv==1.2.3
+# Driver PostgreSQL. psycopg 3 est le driver recommandé pour Django 5.2
+# (psycopg >= 3.1.8 exigé par le backend django.db.backends.postgresql).
+# La variante "binary" embarque libpq : rien à compiler côté Python.
+# En production, préférer psycopg[c] (compilé localement, plus rapide).
+psycopg[binary]==3.3.6

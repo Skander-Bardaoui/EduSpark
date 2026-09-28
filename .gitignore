@@ -23,6 +23,9 @@ ENV/
 *.log
 db.sqlite3
 db.sqlite3-journal
+# Export de l'ancienne base SQLite (voir README : reprise des données) :
+# contient des hachés de mots de passe et des e-mails, donc hors versionnement.
+backup_sqlite.json
 /staticfiles/
 /media/
 *.mo
