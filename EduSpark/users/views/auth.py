@@ -1,12 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordResetConfirmView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
 from ..forms import InvitationSignupForm, SignInForm, SignUpForm
 from ..models import Invitation
 from ..tenancy import switch_tenant
+from ..verification import mark_email_verified, read_token, send_verification_email
 from .mixins import redirect_next
 
 User = get_user_model()
@@ -55,9 +58,14 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            send_verification_email(request, user)
             membership = user.memberships.first()
-            if membership and membership.is_active:
-                messages.success(request, f"Bienvenue sur EduSpark ! Vous avez rejoint {membership.university}.")
+            if membership and membership.awaiting_email_verification:
+                messages.info(
+                    request,
+                    f"Votre compte est créé. Ouvrez le lien envoyé à {user.email} : "
+                    f"votre accès à {membership.university} sera activé dès la confirmation de l'adresse.",
+                )
             else:
                 messages.info(
                     request,
@@ -134,3 +142,43 @@ def invitation_accept(request, token):
         return redirect("users:dashboard")
     context.update({"state": "signup", "form": form})
     return render(request, "users/invitation_accept.html", context)
+
+
+@require_http_methods(["GET"])
+def verify_email(request, token):
+    """Lien reçu par e-mail : prouve la possession de l'adresse et active les
+    appartenances qui n'attendaient que cette preuve."""
+    user = read_token(token)
+    if user is None:
+        messages.error(request, "Lien de vérification invalide ou expiré. Demandez-en un nouveau.")
+        return redirect("users:dashboard" if request.user.is_authenticated else "users:login")
+    activated = mark_email_verified(user)
+    if activated:
+        names = ", ".join(str(m.university) for m in activated)
+        messages.success(request, f"Adresse e-mail confirmée : votre accès à {names} est activé.")
+        if request.user == user:
+            switch_tenant(request, activated[0].university)
+    else:
+        messages.success(request, "Adresse e-mail confirmée.")
+    return redirect("users:dashboard" if request.user.is_authenticated else "users:login")
+
+
+@login_required
+@require_POST
+def resend_verification(request):
+    if request.user.email_verified:
+        messages.info(request, "Votre adresse e-mail est déjà confirmée.")
+    else:
+        send_verification_email(request, request.user)
+        messages.success(request, f"Un nouveau lien de vérification a été envoyé à {request.user.email}.")
+    return redirect("users:dashboard")
+
+
+class VerifiedPasswordResetConfirmView(PasswordResetConfirmView):
+    """Le lien de réinitialisation a été reçu à l'adresse du compte : il en
+    prouve la possession, au même titre que le lien de vérification."""
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        mark_email_verified(form.user)
+        return response

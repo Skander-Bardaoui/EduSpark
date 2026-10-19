@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -57,6 +59,11 @@ class User(AbstractUser):
     """
 
     email = models.EmailField("Adresse e-mail", unique=True)
+    email_verified = models.BooleanField(
+        "E-mail vérifié", default=False,
+        help_text="Vrai une fois la possession de l'adresse prouvée (lien de vérification, invitation, "
+                  "réinitialisation du mot de passe).",
+    )
     phone = models.CharField("Téléphone", max_length=30, blank=True)
     bio = models.TextField("Présentation", blank=True)
 
@@ -95,6 +102,11 @@ class Membership(TenantModel):
     is_active = models.BooleanField(
         "Actif", default=True,
         help_text="Décoché : en attente de validation par l'admin université.",
+    )
+    awaiting_email_verification = models.BooleanField(
+        "Activation à la vérification de l'e-mail", default=False,
+        help_text="Inscription d'un étudiant avec le domaine officiel : activée automatiquement "
+                  "dès que l'utilisateur prouve qu'il possède l'adresse.",
     )
     created_at = models.DateTimeField("Créé le", auto_now_add=True)
 
@@ -309,10 +321,28 @@ class Invitation(TenantModel):
         if not created:
             membership.role = self.role
             membership.is_active = True
-            membership.save(update_fields=["role", "is_active"])
+            membership.awaiting_email_verification = False
+            membership.save(update_fields=["role", "is_active", "awaiting_email_verification"])
         membership.ensure_profile()
+        # Le lien a été reçu à cette adresse : sa possession est prouvée.
+        if not user.email_verified:
+            user.email_verified = True
+            user.save(update_fields=["email_verified"])
         self.status = self.STATUS_ACCEPTED
         self.accepted_by = user
         self.accepted_at = timezone.now()
         self.save(update_fields=["status", "accepted_by", "accepted_at"])
         return membership
+
+
+@receiver(m2m_changed, sender=SchoolClass.professors.through)
+@receiver(m2m_changed, sender=StudentGroup.students.through)
+def forbid_cross_university_links(sender, instance, action, model, pk_set, **kwargs):
+    """Une classe / un groupe ne peut référencer que des profils de sa propre
+    université — quelle que soit l'origine du lien (vue, back-office, import,
+    ORM) et dans les deux sens (classe.professors.add / profil.classes.add)."""
+    if action != "pre_add" or not pk_set:
+        return
+    foreign = model._default_manager.filter(pk__in=pk_set).exclude(university_id=instance.university_id)
+    if foreign.exists():
+        raise ValidationError("Impossible de lier des données de deux universités différentes.")

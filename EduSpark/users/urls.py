@@ -13,6 +13,8 @@ urlpatterns = [
     # Compatibilité avec l'ancienne route unique.
     path("accounts/auth/", auth.auth_view, name="auth"),
     path("accounts/invitation/<uuid:token>/", auth.invitation_accept, name="invitation_accept"),
+    path("accounts/verifier-email/renvoyer/", auth.resend_verification, name="resend_verification"),
+    path("accounts/verifier-email/<str:token>/", auth.verify_email, name="verify_email"),
     # Mot de passe oublié (vues Django + envoi d'e-mail).
     path("accounts/mot-de-passe-oublie/", auth_views.PasswordResetView.as_view(
         template_name="users/password_reset_form.html",
@@ -23,7 +25,7 @@ urlpatterns = [
     path("accounts/mot-de-passe-oublie/envoye/", auth_views.PasswordResetDoneView.as_view(
         template_name="users/password_reset_done.html",
     ), name="password_reset_done"),
-    path("accounts/reinitialiser/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+    path("accounts/reinitialiser/<uidb64>/<token>/", auth.VerifiedPasswordResetConfirmView.as_view(
         template_name="users/password_reset_confirm.html",
         success_url=reverse_lazy("users:password_reset_complete"),
     ), name="password_reset_confirm"),

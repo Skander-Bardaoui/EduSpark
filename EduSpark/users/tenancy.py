@@ -21,7 +21,7 @@ from functools import wraps
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models
 from django.shortcuts import redirect
 
@@ -65,7 +65,11 @@ class TenantQuerySet(models.QuerySet):
 
 
 class TenantModel(models.Model):
-    """Ajoute la colonne « university » obligatoire à une table métier."""
+    """Ajoute la colonne « university » obligatoire à une table métier.
+
+    Une ligne enregistrée ne change jamais d'université : sinon ses liens
+    (FK, M2M) pointeraient vers les données d'une autre université.
+    """
 
     university = models.ForeignKey(
         settings.TENANT_MODEL,
@@ -78,6 +82,19 @@ class TenantModel(models.Model):
 
     class Meta:
         abstract = True
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_university_id = instance.__dict__.get("university_id")
+        return instance
+
+    def save(self, *args, **kwargs):
+        loaded = getattr(self, "_loaded_university_id", None)
+        if loaded is not None and self.university_id != loaded:
+            raise ValidationError("Un enregistrement ne peut pas changer d'université.")
+        super().save(*args, **kwargs)
+        self._loaded_university_id = self.university_id
 
 
 # ---------------------------------------------------------------------------

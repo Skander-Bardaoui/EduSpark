@@ -21,7 +21,7 @@
   </section>
   <section class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
     <h2 class="font-title-md text-title-md mb-space-sm">Classes</h2>
-    <ul class="flex flex-col gap-space-xs">{% for c in profile.classes.all %}<li><a href="{% url 'users:class_detail' c.pk %}" class="font-label-md text-label-md text-primary hover:underline">{{ c }}</a></li>{% empty %}<li class="font-body-sm text-body-sm text-on-surface-variant">Aucune classe.</li>{% endfor %}</ul>
+    <ul class="flex flex-col gap-space-xs">{% for c in classes %}<li><a href="{% url 'users:class_detail' c.pk %}" class="font-label-md text-label-md text-primary hover:underline">{{ c }}</a></li>{% empty %}<li class="font-body-sm text-body-sm text-on-surface-variant">Aucune classe.</li>{% endfor %}</ul>
   </section>
 </div>
 {% endblock %}

@@ -1,0 +1,8 @@
+Bonjour {{ user.first_name|default:user.email }},
+
+Pour confirmer que l'adresse {{ user.email }} vous appartient, ouvrez ce lien :
+{{ link }}
+
+Ce lien est valable 3 jours. Si vous n'avez pas créé de compte EduSpark, ignorez cet e-mail.
+
+L’équipe EduSpark

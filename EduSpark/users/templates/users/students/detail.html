@@ -20,7 +20,7 @@
   </section>
   <section class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
     <h2 class="font-title-md text-title-md mb-space-sm">Groupes</h2>
-    <ul class="flex flex-col gap-space-xs">{% for g in profile.groups.all %}<li><a href="{% url 'users:class_detail' g.school_class_id %}" class="font-label-md text-label-md text-primary hover:underline">{{ g }}</a></li>{% empty %}<li class="font-body-sm text-body-sm text-on-surface-variant">Aucun groupe.</li>{% endfor %}</ul>
+    <ul class="flex flex-col gap-space-xs">{% for g in groups %}<li><a href="{% url 'users:class_detail' g.school_class_id %}" class="font-label-md text-label-md text-primary hover:underline">{{ g }}</a></li>{% empty %}<li class="font-body-sm text-body-sm text-on-surface-variant">Aucun groupe.</li>{% endfor %}</ul>
   </section>
 </div>
 {% endblock %}
