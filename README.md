@@ -151,6 +151,13 @@ vérification de l'adresse** (lien envoyé par e-mail ; une invitation acceptée
 un mot de passe réinitialisé valent aussi preuve). Une décision explicite de
 l'admin (validation, suspension) prime sur cette activation automatique.
 
+> Base existante : la migration `0003_secure_legacy_memberships` repasse « en
+> attente de vérification » les étudiants encore actifs dont l'adresse, non
+> vérifiée, correspond au domaine officiel (ancienne règle d'activation
+> immédiate). Ils retrouvent l'accès en ouvrant le lien de vérification
+> (bouton « Renvoyer le lien » sur leur tableau de bord) ou via « mot de passe
+> oublié ». Les comptes ayant accepté une invitation sont, eux, marqués vérifiés.
+
 **Intégrité entre universités** : une ligne d'un `TenantModel` ne peut pas
 changer d'université, et les liens M2M classe ↔ professeurs / groupe ↔ étudiants
 sont refusés au niveau du modèle s'ils mélangent deux universités ; les pages

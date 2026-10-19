@@ -2,9 +2,10 @@ from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import connection, transaction
+from django.db.migrations.executor import MigrationExecutor
 from django.core import mail
-from django.test import TestCase, override_settings
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from .models import (
@@ -653,3 +654,54 @@ class SelfProfileTests(TenantTestCase):
         self.assertRedirects(response, reverse("users:profile"))
         self.admin1.refresh_from_db()
         self.assertEqual(self.admin1.first_name, "Nadia")
+
+
+class LegacyMembershipMigrationTests(TransactionTestCase):
+    """0003 : une base conservée de l'ancienne règle (domaine = accès immédiat)
+    ne doit plus garder d'appartenance active sans adresse vérifiée."""
+
+    before = [("users", "0002_email_verification")]
+    after = [("users", "0003_secure_legacy_memberships")]
+
+    def tearDown(self):
+        executor = MigrationExecutor(connection)
+        executor.migrate(executor.loader.graph.leaf_nodes())
+
+    def test_legacy_auto_activated_students_must_verify(self):
+        executor = MigrationExecutor(connection)
+        executor.migrate(self.before)
+        old = executor.loader.project_state(self.before).apps
+        University, OldUser = old.get_model("users", "University"), old.get_model("users", "User")
+        OldMembership, OldInvitation = old.get_model("users", "Membership"), old.get_model("users", "Invitation")
+
+        alpha = University.objects.create(name="Alpha", slug="alpha", email_domain="alpha.tn")
+        beta = University.objects.create(name="Beta", slug="beta")
+
+        def member(email, university, role="etudiant", **user_fields):
+            user = OldUser.objects.create(username=email, email=email, **user_fields)
+            return OldMembership.objects.create(user=user, university=university, role=role, is_active=True)
+
+        legacy = member("invente@alpha.tn", alpha)                 # ancienne règle : à sécuriser
+        other_domain = member("jean@gmail.com", alpha)              # validé par l'admin
+        professor = member("prof@alpha.tn", alpha, role="professeur")
+        no_domain = member("etu@beta.tn", beta)                     # université sans domaine officiel
+        root = member("root@alpha.tn", alpha, is_superuser=True)
+        invited = member("invite@alpha.tn", alpha)                  # invitation acceptée = preuve
+        OldInvitation.objects.create(
+            university=alpha, email="invite@alpha.tn", role="etudiant", status="accepted",
+            accepted_by=invited.user, expires_at="2099-01-01T00:00Z",
+        )
+
+        executor = MigrationExecutor(connection)
+        executor.migrate(self.after)
+        new = executor.loader.project_state(self.after).apps
+        Membership = new.get_model("users", "Membership")
+
+        def state(m):
+            m = Membership.objects.select_related("user").get(pk=m.pk)
+            return m.is_active, m.awaiting_email_verification, m.user.email_verified
+
+        self.assertEqual(state(legacy), (False, True, False))
+        for untouched in (other_domain, professor, no_domain, root):
+            self.assertEqual(state(untouched)[:2], (True, False), untouched.user.email)
+        self.assertEqual(state(invited), (True, False, True))
