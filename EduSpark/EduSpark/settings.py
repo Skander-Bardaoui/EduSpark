@@ -74,8 +74,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'landing',
-    'accounts',
+    'users',
 ]
+
+# Modèles partagés entre les 6 modules (les SEULS liens autorisés entre modules).
+# Définis avant toute migration : ne pas les changer ensuite.
+AUTH_USER_MODEL = 'users.User'
+TENANT_MODEL = 'users.University'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,6 +88,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # Multi-tenant : place l'université courante dans request.university.
+    'users.tenancy.TenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -100,6 +107,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.tenant',
             ],
         },
     },
@@ -151,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = os.environ.get('DJANGO_LANGUAGE_CODE', 'en-us')
+LANGUAGE_CODE = os.environ.get('DJANGO_LANGUAGE_CODE', 'fr')
 
 TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'UTC')
 
@@ -166,8 +174,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Authentification : pages du projet.
-LOGIN_URL = '/accounts/connexion/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = '/tableau-de-bord/'
 LOGOUT_REDIRECT_URL = '/'
 
 # E-mails : console en développement. En production, configurer un

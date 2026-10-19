@@ -1,0 +1,29 @@
+{% extends "users/base_app.html" %}
+{% block title %}Invitations{% endblock %}
+{% block content %}
+{% url 'users:invitation_create' as create_url %}
+{% include "users/partials/page_header.html" with title="Invitations" subtitle="Le lien reçu par e-mail permet de rejoindre l'université avec le rôle prévu (valable 7 jours par défaut)." eyebrow=current_university.name icon="forward_to_inbox" action_url=create_url action_label="Nouvelle invitation" action_icon="send" %}
+{% include "users/partials/list_toolbar.html" %}
+{% if invitations %}
+<div class="relative overflow-x-auto rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+  <table class="w-full text-left">
+    <thead class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant bg-surface-container-low"><tr><th class="px-space-md py-3">E-mail</th><th class="px-space-md py-3">Rôle</th><th class="px-space-md py-3">Statut</th><th class="px-space-md py-3">Expire le</th><th class="px-space-md py-3">Invité par</th><th class="px-space-md py-3"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody class="divide-y divide-surface-container font-body-sm text-body-sm">
+      {% for inv in invitations %}
+      <tr class="hover:bg-surface-container-low/60">
+        <td class="px-space-md py-3"><a href="{% url 'users:invitation_detail' inv.pk %}" class="font-label-md text-label-md text-on-surface hover:text-primary break-all">{{ inv.email }}</a></td>
+        <td class="px-space-md py-3">{{ inv.get_role_display }}</td>
+        <td class="px-space-md py-3">{% include "users/invitations/_status.html" %}</td>
+        <td class="px-space-md py-3 font-data-metric text-data-metric">{{ inv.expires_at|date:"d/m/Y H:i" }}</td>
+        <td class="px-space-md py-3 text-on-surface-variant">{{ inv.invited_by.display_name|default:"—" }}</td>
+        <td class="px-space-md py-3 text-right whitespace-nowrap">{% if inv.status == "pending" %}<a href="{% url 'users:invitation_update' inv.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-primary" title="Modifier"><span class="material-symbols-outlined text-[20px]">edit</span></a>{% endif %}<a href="{% url 'users:invitation_delete' inv.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-error" title="Supprimer"><span class="material-symbols-outlined text-[20px]">delete</span></a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "users/partials/pagination.html" %}
+{% else %}
+{% include "users/partials/empty.html" with icon="forward_to_inbox" message="Aucune invitation." %}
+{% endif %}
+{% endblock %}

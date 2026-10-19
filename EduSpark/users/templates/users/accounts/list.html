@@ -1,0 +1,27 @@
+{% extends "users/base_app.html" %}
+{% block title %}Comptes{% endblock %}
+{% block content %}
+{% include "users/partials/page_header.html" with title="Comptes" subtitle="Tous les comptes de la plateforme et leurs universités." eyebrow="Admin plateforme" icon="manage_accounts" %}
+{% include "users/partials/list_toolbar.html" %}
+{% if accounts %}
+<div class="relative overflow-x-auto rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+  <table class="w-full text-left">
+    <thead class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant bg-surface-container-low"><tr><th class="px-space-md py-3">Nom</th><th class="px-space-md py-3">E-mail</th><th class="px-space-md py-3">Universités</th><th class="px-space-md py-3">Statut</th><th class="px-space-md py-3"><span class="sr-only">Actions</span></th></tr></thead>
+    <tbody class="divide-y divide-surface-container font-body-sm text-body-sm">
+      {% for a in accounts %}
+      <tr class="hover:bg-surface-container-low/60">
+        <td class="px-space-md py-3"><a href="{% url 'users:account_detail' a.pk %}" class="font-label-md text-label-md text-on-surface hover:text-primary">{{ a.get_full_name|default:"—" }}</a>{% if a.is_superuser %}<span class="ml-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm">Admin plateforme</span>{% endif %}</td>
+        <td class="px-space-md py-3 text-on-surface-variant break-all">{{ a.email }}</td>
+        <td class="px-space-md py-3"><div class="flex flex-wrap gap-1">{% for m in a.memberships.all %}<span class="px-2 py-0.5 rounded-full {% if m.is_active %}bg-surface-container{% else %}bg-surface-container-low text-on-surface-variant{% endif %} font-label-sm text-label-sm">{{ m.university.code|default:m.university.name }} · {{ m.get_role_display }}</span>{% empty %}<span class="text-on-surface-variant">—</span>{% endfor %}</div></td>
+        <td class="px-space-md py-3">{{ a.is_active|yesno:"Actif,Désactivé" }}</td>
+        <td class="px-space-md py-3 text-right whitespace-nowrap"><a href="{% url 'users:account_update' a.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-primary" title="Modifier"><span class="material-symbols-outlined text-[20px]">edit</span></a>{% if a != user %}<a href="{% url 'users:account_delete' a.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-error" title="Supprimer"><span class="material-symbols-outlined text-[20px]">delete</span></a>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "users/partials/pagination.html" %}
+{% else %}
+{% include "users/partials/empty.html" with icon="manage_accounts" message="Aucun compte ne correspond." %}
+{% endif %}
+{% endblock %}

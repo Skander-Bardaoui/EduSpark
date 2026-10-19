@@ -1,0 +1,24 @@
+{% if field.is_hidden %}{{ field }}{% else %}
+<div class="flex flex-col gap-1.5">
+  {% if field.widget_type == "checkbox" %}
+    <label class="flex items-start gap-space-sm cursor-pointer select-none" for="{{ field.id_for_label }}">
+      <span class="pt-1">{{ field }}</span>
+      <span class="flex flex-col"><span class="font-label-md text-label-md text-on-surface">{{ field.label }}</span>{% if field.help_text %}<span class="font-body-sm text-body-sm text-on-surface-variant">{{ field.help_text }}</span>{% endif %}</span>
+    </label>
+  {% elif field.widget_type == "checkboxselectmultiple" %}
+    <fieldset class="flex flex-col gap-space-xs">
+      <legend class="font-label-md text-label-md text-on-surface mb-1">{{ field.label }}</legend>
+      {% if field.field.queryset.exists %}
+      <div class="grid sm:grid-cols-2 gap-1 max-h-72 overflow-y-auto p-space-sm rounded-lg bg-surface-container-low">
+        {% for option in field %}<label class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-md hover:bg-surface-container cursor-pointer font-body-sm text-body-sm">{{ option.tag }}<span>{{ option.choice_label }}</span></label>{% endfor %}
+      </div>
+      {% else %}<p class="font-body-sm text-body-sm text-on-surface-variant p-space-sm rounded-lg bg-surface-container-low">Aucun choix disponible pour le moment.</p>{% endif %}
+    </fieldset>
+  {% else %}
+    <label class="font-label-md text-label-md text-on-surface flex justify-between" for="{{ field.id_for_label }}"><span>{{ field.label }}</span>{% if field.field.required %}<span class="text-tertiary font-label-sm text-label-sm">Requis</span>{% endif %}</label>
+    {{ field }}
+    {% if field.help_text %}<p class="font-body-sm text-body-sm text-on-surface-variant">{{ field.help_text }}</p>{% endif %}
+  {% endif %}
+  {% for error in field.errors %}<p class="font-label-sm text-label-sm text-error">{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
