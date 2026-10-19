@@ -1,0 +1,28 @@
+{% extends "users/base_app.html" %}
+{% block title %}Classes & groupes{% endblock %}
+{% block content %}
+{% if is_university_admin %}{% url 'users:class_create' as create_url %}{% endif %}
+{% include "users/partials/page_header.html" with title="Classes & groupes" subtitle="Les autres modules s'y réfèrent par champs simples (niveau, filière)." eyebrow=current_university.name icon="groups" action_url=create_url action_label="Nouvelle classe" %}
+{% include "users/partials/list_toolbar.html" %}
+{% if classes %}
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-space-md">
+  {% for c in classes %}
+  <article class="flex flex-col gap-space-sm p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+    <div class="flex items-start justify-between gap-space-sm">
+      <a href="{% url 'users:class_detail' c.pk %}" class="font-title-md text-title-md text-on-surface hover:text-primary">{{ c.name }}</a>
+      {% if c.academic_year %}<span class="shrink-0 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric">{{ c.academic_year }}</span>{% endif %}
+    </div>
+    <p class="font-body-sm text-body-sm text-on-surface-variant">{{ c.level|default:"Niveau —" }} · {{ c.program|default:"Filière —" }}</p>
+    <div class="flex flex-wrap gap-1">{% for g in c.groups.all %}<span class="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm">{{ g.name }} · {{ g.students.all|length }}</span>{% empty %}<span class="font-body-sm text-body-sm text-on-surface-variant">Aucun groupe</span>{% endfor %}</div>
+    <div class="mt-auto flex items-center justify-between pt-space-sm">
+      <span class="font-body-sm text-body-sm text-on-surface-variant truncate">{% for p in c.professors.all %}{{ p.user.display_name }}{% if not forloop.last %}, {% endif %}{% empty %}Aucun professeur{% endfor %}</span>
+      {% if is_university_admin %}<span class="shrink-0 whitespace-nowrap"><a href="{% url 'users:class_update' c.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-primary" title="Modifier"><span class="material-symbols-outlined text-[20px]">edit</span></a><a href="{% url 'users:class_delete' c.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-error" title="Supprimer"><span class="material-symbols-outlined text-[20px]">delete</span></a></span>{% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% include "users/partials/pagination.html" %}
+{% else %}
+{% include "users/partials/empty.html" with icon="groups" message="Aucune classe." %}
+{% endif %}
+{% endblock %}

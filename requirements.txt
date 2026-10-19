@@ -9,3 +9,6 @@ python-dotenv==1.2.3
 # La variante "binary" embarque libpq : rien à compiler côté Python.
 # En production, préférer psycopg[c] (compilé localement, plus rapide).
 psycopg[binary]==3.3.6
+# SDK officiel de l'API Claude : utilisé uniquement par users/services/ai.py
+# (bouton « Générer ma bio »). Sans clé ANTHROPIC_API_KEY, l'IA est simplement désactivée.
+anthropic==1.15.0

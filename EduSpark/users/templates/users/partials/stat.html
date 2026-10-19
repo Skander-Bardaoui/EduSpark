@@ -1,0 +1,4 @@
+<a href="{{ url|default:'#' }}" class="group flex items-center gap-space-md p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] hover:shadow-[0_12px_32px_rgba(6,22,75,0.12)] transition-shadow">
+  <span class="w-11 h-11 shrink-0 rounded-lg flex items-center justify-center {{ tone|default:'bg-primary-fixed text-on-primary-fixed' }}"><span class="material-symbols-outlined">{{ icon }}</span></span>
+  <span class="flex flex-col min-w-0"><span class="font-headline-md text-headline-md text-on-background leading-none">{{ value }}</span><span class="font-label-md text-label-md text-on-surface-variant truncate">{{ label }}</span></span>
+</a>

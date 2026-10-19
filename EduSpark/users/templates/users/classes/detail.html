@@ -1,0 +1,43 @@
+{% extends "users/base_app.html" %}
+{% block title %}{{ school_class }}{% endblock %}
+{% block content %}
+{% include "users/partials/page_header.html" with title=school_class.name subtitle=school_class.description eyebrow=school_class.academic_year|default:"Classe" icon="groups" %}
+<div class="flex flex-wrap items-center gap-space-sm -mt-space-sm">
+  <span class="px-space-sm py-1 rounded-lg bg-surface-container font-label-md text-label-md">Niveau : {{ school_class.level|default:"—" }}</span>
+  <span class="px-space-sm py-1 rounded-lg bg-surface-container font-label-md text-label-md">Filière : {{ school_class.program|default:"—" }}</span>
+  {% if is_university_admin %}
+  <a href="{% url 'users:class_update' school_class.pk %}" class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</a>
+  <a href="{% url 'users:class_delete' school_class.pk %}" class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-error-container hover:text-error font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</a>
+  {% endif %}
+</div>
+
+<section class="p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+  <h2 class="font-title-md text-title-md mb-space-sm">Professeurs</h2>
+  <div class="flex flex-wrap gap-space-sm">{% for p in professors %}<a href="{% url 'users:professor_detail' p.pk %}" class="px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md hover:opacity-90">{{ p.user.display_name }}{% if p.speciality %} · {{ p.speciality }}{% endif %}</a>{% empty %}<span class="font-body-sm text-body-sm text-on-surface-variant">Aucun professeur affecté.</span>{% endfor %}</div>
+</section>
+
+<section class="flex flex-col gap-space-sm">
+  <div class="flex items-center justify-between gap-space-sm">
+    <h2 class="font-headline-sm text-headline-sm text-on-background">Groupes</h2>
+    {% if is_university_admin %}<a href="{% url 'users:group_create' school_class.pk %}" class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold"><span class="material-symbols-outlined text-[18px]">add</span>Nouveau groupe</a>{% endif %}
+  </div>
+  {% if groups %}
+  <div class="grid md:grid-cols-2 gap-space-md">
+    {% for g in groups %}
+    <article class="p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] flex flex-col gap-space-sm">
+      <div class="flex items-center justify-between gap-space-sm">
+        <h3 class="font-title-md text-title-md">{{ g.name }}</h3>
+        <span class="font-data-metric text-data-metric text-on-surface-variant">{{ g.students.all|length }}{% if g.capacity %} / {{ g.capacity }}{% endif %} étudiant{{ g.students.all|length|pluralize }}</span>
+      </div>
+      <ul class="flex flex-col gap-1 font-body-sm text-body-sm">
+        {% for s in g.students.all %}<li>{% if is_professor_or_admin %}<a href="{% url 'users:student_detail' s.pk %}" class="hover:text-primary">{{ s.user.display_name }}</a>{% else %}{{ s.user.display_name }}{% endif %}{% if s.student_number %} <span class="font-data-metric text-data-metric text-on-surface-variant">{{ s.student_number }}</span>{% endif %}</li>{% empty %}<li class="text-on-surface-variant">Aucun étudiant.</li>{% endfor %}
+      </ul>
+      {% if is_university_admin %}<div class="flex justify-end gap-1"><a href="{% url 'users:group_update' school_class.pk g.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-primary" title="Modifier le groupe"><span class="material-symbols-outlined text-[20px]">edit</span></a><a href="{% url 'users:group_delete' school_class.pk g.pk %}" class="p-1 rounded-md text-on-surface-variant hover:text-error" title="Supprimer le groupe"><span class="material-symbols-outlined text-[20px]">delete</span></a></div>{% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  {% include "users/partials/empty.html" with icon="diversity_3" message="Aucun groupe dans cette classe." %}
+  {% endif %}
+</section>
+{% endblock %}

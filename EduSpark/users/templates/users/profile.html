@@ -1,0 +1,79 @@
+{% extends "users/base_app.html" %}
+{% block title %}Mon profil{% endblock %}
+{% block content %}
+{% include "users/partials/page_header.html" with title="Mon profil" subtitle=user.email eyebrow="Compte personnel" icon="person" %}
+
+<div class="grid lg:grid-cols-3 gap-space-lg items-start">
+  <form method="post" class="lg:col-span-2 flex flex-col gap-space-md p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]" novalidate>
+    {% csrf_token %}
+    {# Bouton par défaut (touche Entrée) : enregistrer, jamais l'IA. #}
+    <button type="submit" name="action" value="save" class="sr-only" tabindex="-1" aria-hidden="true">Enregistrer</button>
+    {% if form.non_field_errors %}<div class="p-3 rounded-lg bg-error-container font-label-md text-label-md text-on-error-container">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+    <div class="grid sm:grid-cols-2 gap-space-md">
+      {% include "users/partials/field.html" with field=form.first_name %}
+      {% include "users/partials/field.html" with field=form.last_name %}
+    </div>
+    {% include "users/partials/field.html" with field=form.phone %}
+    {% include "users/partials/field.html" with field=form.bio %}
+
+    {# --- Fonctionnalité IA : un seul bouton, suggestion à garder / modifier / refuser --- #}
+    <div class="flex flex-col gap-space-sm p-space-md rounded-xl bg-surface-container-low">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+        <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span><p class="font-body-sm text-body-sm text-on-surface-variant">Rien n'est enregistré sans votre accord. Astuce : écrivez quelques mots-clés dans la présentation pour guider l'IA.</p></div>
+        <button type="submit" name="action" value="ai_bio" class="shrink-0 inline-flex items-center justify-center gap-space-xs px-space-md py-2 rounded-full bg-gradient-to-r from-secondary to-primary text-on-primary font-label-md text-label-md font-bold shadow-[0_6px_18px_-4px_rgba(75,65,225,0.45)] hover:scale-[1.01] transition-transform"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Générer ma bio avec l'IA</button>
+      </div>
+      {% if ai_error %}
+      <div class="flex items-start gap-space-sm p-3 rounded-lg bg-tertiary-fixed/60 text-on-tertiary-fixed font-label-md text-label-md" role="status"><span class="material-symbols-outlined text-[20px]">cloud_off</span><span>{{ ai_error }} Vous pouvez continuer à rédiger votre présentation manuellement.</span></div>
+      {% endif %}
+      {% if suggestion %}
+      <div id="ai-suggestion" class="flex flex-col gap-space-sm p-space-md rounded-lg bg-surface-container-lowest border border-secondary-fixed-dim" role="status">
+        <p class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Suggestion de l'IA</p>
+        <p id="ai-suggestion-text" class="font-body-md text-body-md text-on-surface whitespace-pre-line">{{ suggestion }}</p>
+        <div class="flex flex-wrap gap-space-sm">
+          <button type="button" data-ai="keep" class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">check</span>Garder</button>
+          <button type="button" data-ai="edit" class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</button>
+          <button type="button" data-ai="reject" class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">close</span>Refuser</button>
+        </div>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">« Garder » ou « Modifier » copie le texte dans votre présentation : cliquez ensuite sur Enregistrer.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="flex justify-end pt-space-sm">
+      <button type="submit" name="action" value="save" class="inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-[0_8px_20px_-4px_rgba(0,88,190,0.35)]"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer</button>
+    </div>
+  </form>
+
+  <aside class="flex flex-col gap-space-md">
+    <div class="p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+      <h2 class="font-title-md text-title-md text-on-surface mb-space-sm">Mes universités</h2>
+      <ul class="flex flex-col gap-space-sm">
+        {% for m in memberships %}
+        <li class="flex items-center justify-between gap-space-sm"><span class="min-w-0"><span class="block font-label-md text-label-md text-on-surface truncate">{{ m.university }}</span><span class="font-body-sm text-body-sm text-on-surface-variant">{{ m.get_role_display }}</span></span>{% if m.is_active %}<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">Actif</span>{% else %}<span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm">En attente</span>{% endif %}</li>
+        {% empty %}<li class="font-body-sm text-body-sm text-on-surface-variant">{% if is_platform_admin %}Admin plateforme : accès à toutes les universités.{% else %}Aucune université.{% endif %}</li>{% endfor %}
+      </ul>
+    </div>
+    <a href="{% url 'users:password_reset' %}" class="flex items-center gap-space-sm p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container font-label-md text-label-md text-on-surface"><span class="material-symbols-outlined text-primary">key</span>Changer mon mot de passe</a>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var box = document.getElementById('ai-suggestion');
+  if (!box) return;
+  var bio = document.getElementById('id_bio');
+  var text = document.getElementById('ai-suggestion-text').textContent.trim();
+  box.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-ai]');
+    if (!btn) return;
+    var action = btn.getAttribute('data-ai');
+    if (action === 'keep' || action === 'edit') {
+      bio.value = text;
+      if (action === 'edit') { bio.focus(); bio.setSelectionRange(bio.value.length, bio.value.length); }
+    }
+    box.remove();
+  });
+})();
+</script>
+{% endblock %}

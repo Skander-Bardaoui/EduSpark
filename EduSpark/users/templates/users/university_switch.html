@@ -1,0 +1,19 @@
+{% extends "users/base_app.html" %}
+{% block title %}Changer d'université{% endblock %}
+{% block content %}
+{% include "users/partials/page_header.html" with title="Choisir une université" subtitle="Toutes les pages de gestion n'affichent que les données de l'université choisie." eyebrow="Multi-universités" icon="account_balance" %}
+{% if choices %}
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-space-md">
+  {% for u in choices %}
+  <form method="post" class="contents">{% csrf_token %}<input type="hidden" name="university" value="{{ u.pk }}"/>{% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}"/>{% endif %}
+    <button type="submit" class="text-left p-space-md rounded-xl transition-shadow flex items-start gap-space-sm {% if u == current_university %}bg-primary-fixed ring-2 ring-primary{% else %}bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] hover:shadow-[0_12px_32px_rgba(6,22,75,0.12)]{% endif %}">
+      <span class="w-10 h-10 shrink-0 rounded-lg bg-surface-container flex items-center justify-center font-data-metric text-data-metric text-primary">{{ u.code|default:u.name|slice:":3"|upper }}</span>
+      <span class="flex flex-col min-w-0"><span class="font-title-md text-title-md text-on-surface">{{ u.name }}</span><span class="font-body-sm text-body-sm text-on-surface-variant">{{ u.city|default:"—" }}{% if not u.is_active %} · désactivée{% endif %}</span>{% if u == current_university %}<span class="font-label-sm text-label-sm text-primary uppercase mt-1">Université courante</span>{% endif %}</span>
+    </button>
+  </form>
+  {% endfor %}
+</div>
+{% else %}
+{% include "users/partials/empty.html" with icon="account_balance" message="Aucune université accessible." hint="Demandez une invitation à l'administration de votre université." %}
+{% endif %}
+{% endblock %}
