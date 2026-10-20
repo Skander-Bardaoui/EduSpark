@@ -1,13 +1,25 @@
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from ..forms import SchoolClassForm, StudentGroupForm
-from ..models import SchoolClass, StudentGroup
+from ..models import ProfessorProfile, SchoolClass, StudentGroup, StudentProfile
 from ..tenancy import Role, TenantScopedMixin
 from .mixins import GenericDeleteMixin, GenericFormMixin, SearchFilterMixin, SuccessMessageMixin, distinct_choices
 
 ADMIN = (Role.UNIVERSITY_ADMIN,)
+
+
+def _tenant_prefetches(university):
+    """Groupes, étudiants et professeurs d'une classe, refiltrés sur l'université :
+    même un lien incohérent (import, back-office) n'expose rien d'une autre université."""
+    students = StudentProfile.objects.filter(university=university)
+    groups = StudentGroup.objects.filter(university=university).prefetch_related(
+        Prefetch("students", queryset=students)
+    )
+    professors = ProfessorProfile.objects.filter(university=university).select_related("membership__user")
+    return [Prefetch("groups", queryset=groups), Prefetch("professors", queryset=professors)]
 
 
 class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
@@ -20,7 +32,7 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
     search_placeholder = "Nom, filière, niveau…"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("groups__students", "professors__membership__user")
+        return super().get_queryset().prefetch_related(*_tenant_prefetches(self.request.university))
 
     def get_filters(self):
         base = SchoolClass.objects.filter(university=self.request.university)
@@ -39,8 +51,14 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["groups"] = self.object.groups.prefetch_related("students__membership__user")
-        context["professors"] = self.object.professors.select_related("membership__user")
+        university = self.request.university
+        students = StudentProfile.objects.filter(university=university).select_related("membership__user")
+        context["groups"] = self.object.groups.filter(university=university).prefetch_related(
+            Prefetch("students", queryset=students)
+        )
+        context["professors"] = (
+            self.object.professors.filter(university=university).select_related("membership__user")
+        )
         return context
 
 

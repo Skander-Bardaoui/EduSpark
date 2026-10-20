@@ -161,9 +161,12 @@ class SignUpForm(UserCreationForm):
         university = self.cleaned_data["university"]
         role = self.cleaned_data.get("role") or Role.STUDENT.value
         domain = email.rsplit("@", 1)[-1]
-        auto_validated = role == Role.STUDENT and bool(university.email_domain) and domain == university.email_domain
+        # Le domaine déclaré ne suffit pas : l'appartenance reste inactive tant
+        # que la possession de l'adresse n'est pas prouvée (users.verification).
+        official_domain = role == Role.STUDENT and bool(university.email_domain) and domain == university.email_domain
         membership = Membership.objects.create(
-            user=user, university=university, role=role, is_active=auto_validated,
+            user=user, university=university, role=role, is_active=False,
+            awaiting_email_verification=official_domain,
         )
         membership.ensure_profile()
         return user
@@ -246,6 +249,8 @@ class AccountForm(StyledFormMixin, forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.username = user.email
+        if "email" in self.changed_data:
+            user.email_verified = False
         user.is_superuser = user.is_staff = self.cleaned_data["is_platform_admin"]
         if commit:
             user.save()
@@ -261,6 +266,32 @@ class ProfileForm(StyledFormMixin, forms.ModelForm):
         labels = {"first_name": "Prénom", "last_name": "Nom"}
         widgets = {"bio": forms.Textarea(attrs={"rows": 6, "id": "id_bio"})}
         help_texts = {"bio": "Quelques phrases visibles par les membres de vos universités."}
+
+
+class ProfessorSelfForm(StyledFormMixin, forms.ModelForm):
+    """Le professeur édite son profil dans l'université courante."""
+
+    class Meta:
+        model = ProfessorProfile
+        fields = ("department", "speciality", "grade")
+
+
+class StudentSelfForm(StyledFormMixin, forms.ModelForm):
+    """L'étudiant édite filière et promotion (le matricule reste géré par l'administration)."""
+
+    class Meta:
+        model = StudentProfile
+        fields = ("program", "promotion")
+
+
+class UniversitySwitchForm(forms.Form):
+    """Valide l'université demandée parmi celles accessibles (id invalide → erreur de formulaire)."""
+
+    university = forms.ModelChoiceField(queryset=University.objects.none())
+
+    def __init__(self, *args, queryset, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["university"].queryset = queryset
 
 
 # ---------------------------------------------------------------------------
@@ -347,7 +378,9 @@ class _MemberProfileForm(StyledFormMixin, forms.ModelForm):
         profile = super().save(commit=commit)
         membership = profile.membership
         membership.is_active = self.cleaned_data["is_active"]
-        membership.save(update_fields=["is_active"])
+        # Décision explicite de l'admin : elle prime sur l'activation automatique.
+        membership.awaiting_email_verification = False
+        membership.save(update_fields=["is_active", "awaiting_email_verification"])
         return profile
 
 

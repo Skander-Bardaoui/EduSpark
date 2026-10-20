@@ -1,8 +1,11 @@
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db import connection, transaction
+from django.db.migrations.executor import MigrationExecutor
 from django.core import mail
-from django.test import TestCase, override_settings
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from .models import (
@@ -73,7 +76,15 @@ class MiddlewareTests(TenantTestCase):
     def test_cannot_switch_to_university_without_membership(self):
         self.login(self.prof1)
         response = self.client.post(reverse("users:university_switch"), {"university": self.u2.pk})
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.client.session[SESSION_KEY], self.u1.pk)
+
+    def test_invalid_university_id_is_a_controlled_error(self):
+        self.login(self.prof1)
+        for value in ("invalid-id", "", "1.5", "999999"):
+            with self.subTest(value=value):
+                response = self.client.post(reverse("users:university_switch"), {"university": value})
+                self.assertContains(response, "Université invalide ou inaccessible.", status_code=400)
 
     def test_pending_membership_gives_no_university(self):
         pending = make_user("pending@x.tn")
@@ -303,11 +314,78 @@ class SignupTests(TenantTestCase):
             "role": role, "university": (university or self.u1).pk,
         })
 
-    def test_student_with_official_domain_is_validated(self):
-        self._signup("jean@alpha.tn")
-        membership = Membership.objects.get(user__email="jean@alpha.tn")
+    def _verification_link(self):
+        link = [line for m in mail.outbox for line in m.body.splitlines() if "/verifier-email/" in line][-1]
+        return link.replace("http://testserver", "")
+
+    def test_official_domain_requires_email_verification(self):
+        """Un domaine déclaré ne suffit pas : pas d'accès avant la preuve de possession."""
+        self._signup("invente@alpha.tn")
+        membership = Membership.objects.get(user__email="invente@alpha.tn")
+        self.assertFalse(membership.is_active)
+        self.assertTrue(membership.awaiting_email_verification)
+        self.assertRedirects(self.client.get(reverse("users:class_list")), reverse("users:university_switch"))
+        self.assertContains(self.client.get(reverse("users:dashboard")), "Confirmez votre adresse e-mail")
+
+        response = self.client.get(self._verification_link())
+        self.assertRedirects(response, reverse("users:dashboard"))
+        membership.refresh_from_db()
         self.assertTrue(membership.is_active)
+        self.assertTrue(membership.user.email_verified)
         self.assertTrue(StudentProfile.objects.filter(membership=membership).exists())
+        self.assertEqual(self.client.get(reverse("users:class_list")).status_code, 200)
+
+    def test_tampered_or_stale_verification_link_is_rejected(self):
+        self._signup("invente@alpha.tn")
+        link = self._verification_link()
+        self.assertRedirects(self.client.get(link[:-4] + "xyz/"), reverse("users:dashboard"))
+        user = User.objects.get(email="invente@alpha.tn")
+        with mock.patch("users.verification.MAX_AGE", -1):
+            self.client.get(link)
+        self.assertFalse(Membership.objects.get(user=user).is_active)
+        user.email = "autre@alpha.tn"  # changer d'adresse invalide les anciens liens
+        user.save()
+        self.client.get(link)
+        self.assertFalse(Membership.objects.get(user=user).is_active)
+        self.assertFalse(User.objects.get(pk=user.pk).email_verified)
+
+    def test_verification_does_not_activate_other_domains(self):
+        self._signup("jean@gmail.com")
+        self.client.get(self._verification_link())
+        membership = Membership.objects.get(user__email="jean@gmail.com")
+        self.assertTrue(membership.user.email_verified)
+        self.assertFalse(membership.is_active)  # reste soumis à l'admin université
+
+    def test_admin_decision_overrides_pending_verification(self):
+        self._signup("invente@alpha.tn")
+        membership = Membership.objects.get(user__email="invente@alpha.tn")
+        link = self._verification_link()
+        self.client.logout()
+        self.login(self.admin1)
+        self.client.post(reverse("users:student_update", args=[membership.student_profile.pk]), {"is_active": ""})
+        self.client.logout()
+        self.client.get(link)
+        membership.refresh_from_db()
+        self.assertFalse(membership.is_active)  # suspendu par l'admin : le lien ne réactive pas
+
+    def test_password_reset_also_proves_email_ownership(self):
+        self._signup("invente@alpha.tn")
+        self.client.logout()
+        mail.outbox.clear()
+        self.client.post(reverse("users:password_reset"), {"email": "invente@alpha.tn"})
+        link = next(line for line in mail.outbox[0].body.splitlines() if "/reinitialiser/" in line)
+        response = self.client.get(link.replace("http://testserver", ""), follow=True)
+        self.client.post(response.redirect_chain[-1][0], {
+            "new_password1": "Encore-Plus-Secret-2026", "new_password2": "Encore-Plus-Secret-2026",
+        })
+        self.assertTrue(Membership.objects.get(user__email="invente@alpha.tn").is_active)
+
+    def test_resend_verification(self):
+        self._signup("invente@alpha.tn")
+        mail.outbox.clear()
+        self.client.post(reverse("users:resend_verification"))
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/verifier-email/", mail.outbox[0].body)
 
     def test_other_signups_wait_for_validation(self):
         self._signup("jean@gmail.com")
@@ -402,7 +480,9 @@ class AIFeatureTests(TenantTestCase):
         self.prof1_profile.save()
         self.login(self.prof1)
         with mock.patch("users.views.core.generate_profile_bio", return_value="Je suis Ada.") as generate:
-            response = self.client.post(reverse("users:profile"), {"action": "ai_bio", "bio": ""})
+            response = self.client.post(reverse("users:profile"), {
+                "action": "ai_bio", "bio": "", "academic-speciality": "Algorithmique",
+            })
         self.assertContains(response, "Je suis Ada.")
         self.assertEqual(generate.call_args.kwargs["extra"]["Spécialité"], "Algorithmique")
         self.assertEqual(generate.call_args.kwargs["university"], self.u1)
@@ -411,6 +491,24 @@ class AIFeatureTests(TenantTestCase):
         self.client.post(reverse("users:profile"), {"action": "save", "first_name": "Ada", "bio": "Je suis Ada."})
         self.prof1.refresh_from_db()
         self.assertEqual(self.prof1.bio, "Je suis Ada.")
+
+    def test_sdk_initialisation_error_shows_message(self):
+        self.login(self.prof1)
+        with mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}), \
+                mock.patch("anthropic.Anthropic", side_effect=RuntimeError("SDK cassé")):
+            response = self.client.post(reverse("users:profile"), {"action": "ai_bio", "bio": "brouillon"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "ne peut pas démarrer")
+        self.assertContains(response, "brouillon")
+
+    def test_unexpected_api_error_shows_message(self):
+        self.login(self.prof1)
+        with mock.patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-test"}), \
+                mock.patch("anthropic.Anthropic") as client_class:
+            client_class.return_value.beta.messages.create.side_effect = ValueError("réponse inattendue")
+            response = self.client.post(reverse("users:profile"), {"action": "ai_bio"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "erreur inattendue")
 
     def test_ai_error_from_service_is_displayed(self):
         self.login(self.student1)
@@ -435,3 +533,175 @@ class APITests(TenantTestCase):
         foreign = University.objects.create(name="Gamma")
         me = self.client.get(reverse("users:me"), HTTP_X_UNIVERSITY=foreign.slug, **auth).json()
         self.assertNotEqual(me["current_university"]["id"], foreign.pk)
+
+
+class CrossUniversityIntegrityTests(TenantTestCase):
+    """Le modèle refuse tout lien entre deux universités, quelle que soit l'origine."""
+
+    def setUp(self):
+        self.foreign_class = SchoolClass.objects.create(university=self.u2, name="Classe-Beta")
+        self.foreign_group = StudentGroup.objects.create(school_class=self.foreign_class, name="G1")
+
+    def test_orm_rejects_cross_university_links_in_both_directions(self):
+        attempts = [
+            lambda: self.foreign_class.professors.add(self.prof1_profile),
+            lambda: self.prof1_profile.classes.add(self.foreign_class),
+            lambda: self.foreign_class.professors.set([self.prof2_profile, self.prof1_profile]),
+            lambda: self.foreign_group.students.add(self.student1_profile),
+        ]
+        for attempt in attempts:
+            with self.assertRaises(ValidationError), transaction.atomic():
+                attempt()
+        self.assertFalse(self.foreign_class.professors.exists())
+        self.foreign_class.professors.add(self.prof2_profile)  # même université : accepté
+        self.assertEqual(list(self.foreign_class.professors.all()), [self.prof2_profile])
+
+    def test_records_cannot_move_to_another_university(self):
+        school_class = SchoolClass.objects.get(pk=self.foreign_class.pk)
+        school_class.university = self.u1
+        with self.assertRaises(ValidationError):
+            school_class.save()
+        membership = Membership.objects.get(user=self.prof1, university=self.u1)
+        membership.university = self.u2
+        with self.assertRaises(ValidationError):
+            membership.save()
+
+    def test_admin_form_rejects_foreign_professor(self):
+        from .admin import SchoolClassAdminForm
+        form = SchoolClassAdminForm(data={"university": self.u2.pk, "name": "B2", "professors": [self.prof1_profile.pk]})
+        self.assertFalse(form.is_valid())
+        self.assertIn("professors", form.errors)
+
+    def test_inconsistent_link_is_never_displayed(self):
+        """Lien incohérent inséré en contournant l'ORM (import SQL) : rien ne fuit."""
+        SchoolClass.professors.through.objects.create(
+            schoolclass=self.foreign_class, professorprofile=self.prof1_profile,
+        )
+        StudentGroup.students.through.objects.create(
+            studentgroup=self.foreign_group, studentprofile=self.student1_profile,
+        )
+        self.login(self.prof1)
+        self.assertNotContains(self.client.get(reverse("users:dashboard")), "Classe-Beta")
+        self.assertNotContains(
+            self.client.get(reverse("users:professor_detail", args=[self.prof1_profile.pk])), "Classe-Beta",
+        )
+        self.login(self.student1)
+        self.assertNotContains(self.client.get(reverse("users:dashboard")), "Classe-Beta")
+        self.login(self.admin1)
+        self.assertNotContains(
+            self.client.get(reverse("users:student_detail", args=[self.student1_profile.pk])), "Classe-Beta",
+        )
+        self.assertNotContains(self.client.get(reverse("users:student_list")), "Classe-Beta")
+        self.login(self.admin2)
+        for url in (reverse("users:class_detail", args=[self.foreign_class.pk]), reverse("users:class_list")):
+            response = self.client.get(url)
+            self.assertNotContains(response, "Lovelace")
+            self.assertNotContains(response, "etu@alpha.tn")
+
+
+class SelfProfileTests(TenantTestCase):
+    """Chacun édite son profil, y compris son profil académique."""
+
+    def test_professor_edits_department_speciality_grade(self):
+        self.login(self.prof1)
+        response = self.client.post(reverse("users:profile"), {
+            "action": "save", "first_name": "Ada", "last_name": "Lovelace",
+            "academic-department": "Informatique", "academic-speciality": "Algorithmique",
+            "academic-grade": "professeur",
+        })
+        self.assertRedirects(response, reverse("users:profile"))
+        self.prof1_profile.refresh_from_db()
+        self.assertEqual(
+            (self.prof1_profile.department, self.prof1_profile.speciality, self.prof1_profile.grade),
+            ("Informatique", "Algorithmique", "professeur"),
+        )
+
+    def test_student_edits_program_and_promotion_but_not_student_number(self):
+        self.student1_profile.student_number = "A001"
+        self.student1_profile.save()
+        self.login(self.student1)
+        self.assertContains(self.client.get(reverse("users:profile")), "Mon profil à Université Alpha")
+        self.client.post(reverse("users:profile"), {
+            "action": "save", "academic-program": "Data science", "academic-promotion": "2027",
+            "academic-student_number": "PIRATE",
+        })
+        self.student1_profile.refresh_from_db()
+        self.assertEqual(
+            (self.student1_profile.program, self.student1_profile.promotion, self.student1_profile.student_number),
+            ("Data science", "2027", "A001"),
+        )
+
+    def test_invalid_grade_is_rejected_and_nothing_saved(self):
+        self.login(self.prof1)
+        response = self.client.post(reverse("users:profile"), {
+            "action": "save", "first_name": "Changé", "academic-grade": "doyen",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.prof1.refresh_from_db()
+        self.assertEqual(self.prof1.first_name, "Ada")
+
+    def test_profile_edits_only_current_university(self):
+        other = add_member(self.prof1, self.u2, Role.PROFESSOR).professor_profile
+        self.login(self.prof1, university=self.u2)
+        self.client.post(reverse("users:profile"), {"action": "save", "academic-department": "Physique"})
+        other.refresh_from_db()
+        self.prof1_profile.refresh_from_db()
+        self.assertEqual((other.department, self.prof1_profile.department), ("Physique", ""))
+
+    def test_admin_without_academic_profile_still_edits_account(self):
+        self.login(self.admin1)
+        response = self.client.post(reverse("users:profile"), {"action": "save", "first_name": "Nadia"})
+        self.assertRedirects(response, reverse("users:profile"))
+        self.admin1.refresh_from_db()
+        self.assertEqual(self.admin1.first_name, "Nadia")
+
+
+class LegacyMembershipMigrationTests(TransactionTestCase):
+    """0003 : une base conservée de l'ancienne règle (domaine = accès immédiat)
+    ne doit plus garder d'appartenance active sans adresse vérifiée."""
+
+    before = [("users", "0002_email_verification")]
+    after = [("users", "0003_secure_legacy_memberships")]
+
+    def tearDown(self):
+        executor = MigrationExecutor(connection)
+        executor.migrate(executor.loader.graph.leaf_nodes())
+
+    def test_legacy_auto_activated_students_must_verify(self):
+        executor = MigrationExecutor(connection)
+        executor.migrate(self.before)
+        old = executor.loader.project_state(self.before).apps
+        University, OldUser = old.get_model("users", "University"), old.get_model("users", "User")
+        OldMembership, OldInvitation = old.get_model("users", "Membership"), old.get_model("users", "Invitation")
+
+        alpha = University.objects.create(name="Alpha", slug="alpha", email_domain="alpha.tn")
+        beta = University.objects.create(name="Beta", slug="beta")
+
+        def member(email, university, role="etudiant", **user_fields):
+            user = OldUser.objects.create(username=email, email=email, **user_fields)
+            return OldMembership.objects.create(user=user, university=university, role=role, is_active=True)
+
+        legacy = member("invente@alpha.tn", alpha)                 # ancienne règle : à sécuriser
+        other_domain = member("jean@gmail.com", alpha)              # validé par l'admin
+        professor = member("prof@alpha.tn", alpha, role="professeur")
+        no_domain = member("etu@beta.tn", beta)                     # université sans domaine officiel
+        root = member("root@alpha.tn", alpha, is_superuser=True)
+        invited = member("invite@alpha.tn", alpha)                  # invitation acceptée = preuve
+        OldInvitation.objects.create(
+            university=alpha, email="invite@alpha.tn", role="etudiant", status="accepted",
+            accepted_by=invited.user, expires_at="2099-01-01T00:00Z",
+        )
+
+        executor = MigrationExecutor(connection)
+        executor.migrate(self.after)
+        new = executor.loader.project_state(self.after).apps
+        Membership = new.get_model("users", "Membership")
+
+        def state(m):
+            m = Membership.objects.select_related("user").get(pk=m.pk)
+            return m.is_active, m.awaiting_email_verification, m.user.email_verified
+
+        self.assertEqual(state(legacy), (False, True, False))
+        for untouched in (other_domain, professor, no_domain, root):
+            self.assertEqual(state(untouched)[:2], (True, False), untouched.user.email)
+        self.assertEqual(state(invited), (True, False, True))

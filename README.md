@@ -114,6 +114,7 @@ base créée avec l'ancienne app `accounts` est **incompatible**. En local :
 | --- | --- | --- |
 | `/` | Landing page (`landing:index`) | public |
 | `/accounts/connexion/`, `/accounts/inscription/`, `/accounts/deconnexion/` | Authentification (l'inscription crée une demande d'adhésion à une université) | public |
+| `/accounts/verifier-email/<jeton>/` | Confirme la possession de l'adresse e-mail (lien signé, valable 3 jours) | public |
 | `/accounts/mot-de-passe-oublie/` | Réinitialisation du mot de passe (e-mail en console) | public |
 | `/accounts/invitation/<token>/` | Accepter une invitation | public |
 | `/tableau-de-bord/` | Tableau de bord selon le rôle (+ inscriptions à valider) | connecté |
@@ -138,7 +139,29 @@ Toutes les listes ont une recherche (`?q=`), des filtres et une pagination.
 | Professeur | `Membership(role="professeur")` + `ProfessorProfile` | consulter professeurs, étudiants, classes — un même compte peut enseigner dans plusieurs universités |
 | Étudiant | `Membership(role="etudiant")` + `StudentProfile` | consulter professeurs et classes |
 
-Chacun édite son propre profil (`/profil/`).
+Chacun édite son propre profil (`/profil/`) : nom, téléphone, présentation, et
+son profil académique dans l'université courante (département, spécialité et
+grade pour un professeur ; filière et promotion pour un étudiant — le matricule
+reste géré par l'administration).
+
+**Inscription publique** : l'appartenance est toujours créée inactive. Elle est
+activée soit par l'admin université, soit automatiquement pour un étudiant dont
+l'e-mail correspond au domaine officiel de l'université — **mais seulement après
+vérification de l'adresse** (lien envoyé par e-mail ; une invitation acceptée ou
+un mot de passe réinitialisé valent aussi preuve). Une décision explicite de
+l'admin (validation, suspension) prime sur cette activation automatique.
+
+> Base existante : la migration `0003_secure_legacy_memberships` repasse « en
+> attente de vérification » les étudiants encore actifs dont l'adresse, non
+> vérifiée, correspond au domaine officiel (ancienne règle d'activation
+> immédiate). Ils retrouvent l'accès en ouvrant le lien de vérification
+> (bouton « Renvoyer le lien » sur leur tableau de bord) ou via « mot de passe
+> oublié ». Les comptes ayant accepté une invitation sont, eux, marqués vérifiés.
+
+**Intégrité entre universités** : une ligne d'un `TenantModel` ne peut pas
+changer d'université, et les liens M2M classe ↔ professeurs / groupe ↔ étudiants
+sont refusés au niveau du modèle s'ils mélangent deux universités ; les pages
+refiltrent malgré tout chaque relation affichée sur l'université courante.
 
 ## Multi-tenant : guide pour les autres modules
 

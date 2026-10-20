@@ -5,13 +5,14 @@ par le modèle de profil, déclinée pour chaque rôle.
 """
 
 from django.contrib import messages
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, DetailView, FormView, ListView, UpdateView
 
 from ..forms import ProfessorCreateForm, ProfessorProfileForm, StudentCreateForm, StudentProfileForm
-from ..models import Membership, ProfessorProfile, SchoolClass, StudentProfile
+from ..models import Membership, ProfessorProfile, SchoolClass, StudentGroup, StudentProfile
 from ..tenancy import Role, TenantScopedMixin, has_role, tenant_required
 from .mixins import (
     GenericDeleteMixin, GenericFormMixin, SearchFilterMixin, SuccessMessageMixin, distinct_choices,
@@ -115,6 +116,11 @@ class ProfessorDetailView(_MemberQuerysetMixin, DetailView):
     template_name = "users/professors/detail.html"
     context_object_name = "profile"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["classes"] = self.object.classes.filter(university=self.request.university)
+        return context
+
 
 class ProfessorCreateView(_MemberCreateView):
     form_class = ProfessorCreateForm
@@ -154,7 +160,8 @@ class StudentListView(_MemberListView):
     search_placeholder = "Nom, e-mail, matricule, filière…"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("groups__school_class")
+        groups = StudentGroup.objects.filter(university=self.request.university).select_related("school_class")
+        return super().get_queryset().prefetch_related(Prefetch("groups", queryset=groups))
 
     def extra_filters(self, base):
         classes = SchoolClass.objects.filter(university=self.request.university)
@@ -172,6 +179,13 @@ class StudentDetailView(_MemberQuerysetMixin, DetailView):
     template_name = "users/students/detail.html"
     context_object_name = "profile"
     allowed_roles = (Role.UNIVERSITY_ADMIN, Role.PROFESSOR)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["groups"] = (
+            self.object.groups.filter(university=self.request.university).select_related("school_class")
+        )
+        return context
 
 
 class StudentCreateView(_MemberCreateView):
@@ -210,7 +224,8 @@ def membership_decide(request, pk):
     )
     if request.POST.get("decision") == "approve":
         membership.is_active = True
-        membership.save(update_fields=["is_active"])
+        membership.awaiting_email_verification = False
+        membership.save(update_fields=["is_active", "awaiting_email_verification"])
         membership.ensure_profile()
         messages.success(request, f"Inscription de {membership.user} validée.")
     else:

@@ -14,6 +14,20 @@
       {% include "users/partials/field.html" with field=form.last_name %}
     </div>
     {% include "users/partials/field.html" with field=form.phone %}
+
+    {% if academic_form %}
+    <fieldset class="flex flex-col gap-space-md p-space-md rounded-xl border border-surface-container-high">
+      <legend class="sr-only">Profil académique</legend>
+      <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-primary">{% if current_role == "professeur" %}school{% else %}badge{% endif %}</span><p class="font-title-md text-title-md text-on-surface">Mon profil à {{ current_university.name }}</p></div>
+      {% if academic_form.non_field_errors %}<div class="p-3 rounded-lg bg-error-container font-label-md text-label-md text-on-error-container">{% for e in academic_form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+      <div class="grid sm:grid-cols-2 gap-space-md">
+        {% for field in academic_form %}{% include "users/partials/field.html" %}{% endfor %}
+      </div>
+      {% if academic_form.instance.student_number %}<p class="font-body-sm text-body-sm text-on-surface-variant">Matricule : <span class="font-data-metric text-data-metric text-on-surface">{{ academic_form.instance.student_number }}</span> (géré par l'administration)</p>{% endif %}
+      {% if can_switch_university %}<p class="font-body-sm text-body-sm text-on-surface-variant">Ce profil est propre à cette université : changez d'université pour modifier les autres.</p>{% endif %}
+    </fieldset>
+    {% endif %}
+
     {% include "users/partials/field.html" with field=form.bio %}
 
     {# --- Fonctionnalité IA : un seul bouton, suggestion à garder / modifier / refuser --- #}
