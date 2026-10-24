@@ -1,8 +1,0 @@
-<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
-  <div class="min-w-0">
-    {% if eyebrow %}<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric mb-space-xs uppercase"><span class="material-symbols-outlined text-[14px]">{{ icon|default:"apps" }}</span><span>{{ eyebrow }}</span></div>{% endif %}
-    <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background tracking-tight break-words">{{ title }}</h1>
-    {% if subtitle %}<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">{{ subtitle }}</p>{% endif %}
-  </div>
-  {% if action_url %}<a href="{{ action_url }}" class="shrink-0 inline-flex items-center justify-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-bold shadow-[0_8px_20px_-4px_rgba(0,88,190,0.35)] transition-all"><span class="material-symbols-outlined text-[20px]">{{ action_icon|default:"add" }}</span>{{ action_label }}</a>{% endif %}
-</div>
