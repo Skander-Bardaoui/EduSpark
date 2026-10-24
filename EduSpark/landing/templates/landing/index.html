@@ -9,7 +9,7 @@
 <!-- ========================================================================= -->
 <!-- SECTION 1 : HERO (FULLSCREEN MULTIMODAL CANVAS WITH EXCHANGED VIDEO 1)    -->
 <!-- ========================================================================= -->
-<section class="relative w-full overflow-hidden bg-on-background text-on-primary -mt-20 pt-24 pb-10 md:pb-14 min-h-[560px] flex items-center justify-center">
+<section class="relative w-full overflow-hidden bg-on-background text-on-primary -mt-20 pt-24 pb-10 md:pb-14 min-h-[100svh] flex items-center justify-center">
 <!-- Exchanged Video (bottom-right video promoted to main Hero background) -->
 <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
 <video aria-hidden="true" autoplay="" class="w-full h-full object-cover scale-105 filter saturate-[1.15] contrast-[1.05]" loop="" muted="" playsinline="" preload="metadata">
@@ -19,7 +19,7 @@
 <!-- Radiant Ambient Light Blobs -->
 <div class="absolute -top-24 left-1/4 w-96 h-96 bg-primary/25 rounded-full blur-[90px] pointer-events-none"></div>
 <div class="absolute -bottom-24 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-[100px] pointer-events-none"></div>
-<div class="relative z-10 w-full max-w-7xl mx-auto px-gutter-mobile md:px-margin flex flex-col items-center text-center">
+<div class="relative z-10 w-full max-w-7xl mx-auto px-gutter-mobile md:px-margin flex flex-col items-center text-center -translate-y-6">
 <!-- Liquid-Glass Pill Badge -->
 <div class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)] mb-4">
 <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-ping"></span>
@@ -36,18 +36,6 @@
 <p class="mt-4 font-body-lg text-body-lg text-[#0B1B4F] max-w-3xl leading-relaxed">
         Assistant virtuel multimodal pour l'éducation, coaching personnalisé en temps réel, évaluation adaptative continue et génération instantanée d'exercices sur-mesure.
       </p>
-<!-- Liquid Glass Email Action Input + Arrow Button -->
-<div class="mt-6 w-full max-w-xl">
-<form method="get" action="{% url 'accounts:signup' %}" class="p-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-2xl shadow-[0_12px_40px_rgba(6,22,75,0.4)] flex items-center justify-between gap-space-xs transition-all focus-within:bg-surface-container-lowest/25">
-<div class="flex items-center pl-space-md gap-space-xs w-full">
-<span class="material-symbols-outlined text-outline-variant text-[20px]">alternate_email</span>
-<input aria-label="Adresse email" class="w-full bg-transparent text-surface-container-lowest placeholder:text-outline-variant font-body-md text-body-md focus:outline-none" name="email" placeholder="Entrez votre email académique ou professionnel" type="email"/>
-</div>
-<button aria-label="Lancer l'inscription" class="shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-on-primary shadow-[0_4px_20px_rgba(33,112,228,0.5)] hover:scale-105 active:scale-95 transition-transform" type="submit">
-<span class="material-symbols-outlined text-[22px]">arrow_forward</span>
-</button>
-</form>
-</div>
 <!-- Additional CTAs and Trust Markers -->
 <div class="mt-4 flex flex-wrap items-center justify-center gap-space-md">
 <a class="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container-lowest/20 hover:bg-surface-container-lowest/30 backdrop-blur-md text-on-primary font-label-md text-label-md transition-all shadow-[0_4px_16px_rgba(0,0,0,0.15)]" href="#modules-section">
@@ -320,7 +308,7 @@
 <span class="font-display text-headline-lg text-on-surface font-bold">100%</span>
 <span class="font-label-md text-label-md text-on-surface-variant">Souveraineté des données (RGPD)</span>
 </div>
-</div>
+</div>    
 </div>
 </section>
 <!-- ========================================================================= -->
