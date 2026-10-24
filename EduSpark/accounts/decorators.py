@@ -2,6 +2,7 @@ from functools import wraps
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.urls import reverse
 
 from .models import Profil
 
@@ -43,5 +44,7 @@ def role_home_url(user):
     """URL d'accueil selon le rôle après connexion / inscription."""
     role = get_user_role(user)
     if role == Profil.ROLE_ADMIN:
-        return "/admin/"
-    return "/"
+        return reverse("coaching:admin_dashboard")
+    if role == Profil.ROLE_PROF:
+        return reverse("coaching:prof_dashboard")
+    return reverse("coaching:student_dashboard")

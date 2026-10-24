@@ -1,0 +1,138 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Emploi du temps — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Organisation</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Emploi du temps</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Vos enseignements de la semaine. <span class="font-semibold text-on-surface" data-week-label>Semaine 8 · 21 – 25 octobre 2024</span></p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-week-step="-1" type="button"><span class="material-symbols-outlined text-[18px]">chevron_left</span>Précédente</button>
+<button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-week-step="1" type="button">Suivante<span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Emploi du temps exporté au format iCal." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+</div>
+</header>
+<section class="grid gap-4 lg:grid-cols-[1fr_340px]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Prochaine séance · Aujourd'hui</p>
+<h2 class="font-headline-sm text-headline-sm mt-1 text-on-surface">Réseaux de neurones profonds</h2>
+<p class="mt-1 text-sm text-on-surface-variant">CM · 14h00 – 15h30 · Amphi Turing · M1 Intelligence Artificielle</p>
+</div>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1 text-[11px] font-bold text-primary"><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>Dans 1 h 20</span>
+</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'courses:prof_course' %}"><span class="material-symbols-outlined text-[16px]">menu_book</span>Ouvrir le cours</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Support de la séance téléchargé." type="button"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>Support</button>
+</div>
+</div>
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">Filtrer les séances</p>
+<div class="mt-3 grid gap-2">
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Type de séance<select class="tt-filter rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm font-normal normal-case tracking-normal text-on-surface outline-none focus:border-primary" data-tt-filter><option value="all">Toutes les séances</option><option value="cm">Cours magistraux</option><option value="tp">Travaux pratiques</option><option value="tutorat">Tutorat</option></select></label>
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Classe<select class="rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm font-normal normal-case tracking-normal text-on-surface outline-none focus:border-primary"><option>Toutes les classes</option><option>M1 Intelligence Artificielle</option><option>L3 Informatique</option><option>M2 Data Science</option></select></label>
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Salle<select class="rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm font-normal normal-case tracking-normal text-on-surface outline-none focus:border-primary"><option>Toutes les salles</option><option>Amphi Turing</option><option>B204</option><option>C112</option><option>B301</option></select></label>
+</div>
+<p class="mt-3 border-t border-outline-variant/40 pt-3 text-xs leading-relaxed text-on-surface-variant">Les séances grisées ne correspondent pas au filtre actif.</p>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Semaine en un coup d'œil</h2>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-tt-chip="all" type="button">Tout</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-tt-chip="cm" type="button">CM</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-tt-chip="tp" type="button">TP</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-tt-chip="tutorat" type="button">Tutorat</button>
+</div>
+</div>
+<div class="overflow-x-auto p-4">
+<div class="grid min-w-[900px] grid-cols-[88px_repeat(5,minmax(0,1fr))] gap-2">
+<div></div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Lundi 21</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Mardi 22</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Mercredi 23</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Jeudi 24</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Vendredi 25</div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">08:30<br/><span class="font-normal text-outline">10:00</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-tt-cell data-tt-type="cm"><p class="text-xs font-bold leading-tight text-on-surface">Algorithmique avancée</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · L3 Info · Amphi Turing</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-tt-cell data-tt-type="cm"><p class="text-xs font-bold leading-tight text-on-surface">Réseaux de neurones</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · M1 IA · Amphi Turing</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-tt-cell data-tt-type="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Algorithmique</p><p class="mt-1 text-[11px] text-on-surface-variant">TP1 · L3 Info · B204</p></div></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">10:15<br/><span class="font-normal text-outline">11:45</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-tt-cell data-tt-type="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Réseaux de neurones</p><p class="mt-1 text-[11px] text-on-surface-variant">TP2 · M1 IA · B205</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-tt-cell data-tt-type="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Data Science</p><p class="mt-1 text-[11px] text-on-surface-variant">TP1 · M2 Data · C112</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">13:30<br/><span class="font-normal text-outline">15:00</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-tertiary-fixed-dim bg-tertiary-fixed/40 p-2.5" data-tt-cell data-tt-type="tutorat"><p class="text-xs font-bold leading-tight text-on-surface">Tutorat · Camille Martin</p><p class="mt-1 text-[11px] text-on-surface-variant">Entretien · B301</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-tt-cell data-tt-type="cm"><p class="text-xs font-bold leading-tight text-on-surface">Systèmes distribués</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · M1 IA · Amphi Turing</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">15:15<br/><span class="font-normal text-outline">16:45</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-tertiary-fixed-dim bg-tertiary-fixed/40 p-2.5" data-tt-cell data-tt-type="tutorat"><p class="text-xs font-bold leading-tight text-on-surface">Tutorat · Yanis Bensaïd</p><p class="mt-1 text-[11px] text-on-surface-variant">Entretien · B301</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+</div>
+<p class="hidden px-5 py-8 text-center text-sm text-on-surface-variant" data-tt-empty>Aucune séance ne correspond à ce filtre.</p>
+</div>
+</section>
+<section class="grid gap-4 lg:grid-cols-3">
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Charge cette semaine</p><p class="mt-2 font-data-metric text-2xl font-bold text-on-surface">12 h 30</p><p class="text-xs text-on-surface-variant">6 séances · 3 classes</p></article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Prochaine correction</p><p class="mt-2 font-data-metric text-2xl font-bold text-on-surface">14 copies</p><p class="text-xs text-on-surface-variant"><a class="font-semibold text-primary hover:underline" href="{% url 'exams:prof_corrections' %}">Jury INF501 · 3 jours</a></p></article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Tutorats à venir</p><p class="mt-2 font-data-metric text-2xl font-bold text-on-surface">2</p><p class="text-xs text-on-surface-variant"><a class="font-semibold text-primary hover:underline" href="{% url 'coaching:prof_tutoring' %}">Voir les rendez-vous</a></p></article>
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var labels = [
+    'Semaine 7 · 14 – 18 octobre 2024',
+    'Semaine 8 · 21 – 25 octobre 2024',
+    'Semaine 9 · 28 octobre – 1 novembre 2024'
+  ];
+  var index = 1;
+  var weekLabel = document.querySelector('[data-week-label]');
+  document.querySelectorAll('[data-week-step]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      index = Math.min(labels.length - 1, Math.max(0, index + parseInt(btn.getAttribute('data-week-step'), 10)));
+      if (weekLabel) weekLabel.textContent = labels[index];
+      window.portalToast('Planning mis à jour : ' + labels[index] + '.', 'info');
+    });
+  });
+
+  var cells = Array.prototype.slice.call(document.querySelectorAll('[data-tt-cell]'));
+  var empty = document.querySelector('[data-tt-empty]');
+  function applyType(value) {
+    var shown = 0;
+    cells.forEach(function (cell) {
+      var match = value === 'all' || cell.getAttribute('data-tt-type') === value;
+      cell.classList.toggle('opacity-25', !match);
+      if (match) shown += 1;
+    });
+    if (empty) empty.classList.toggle('hidden', shown !== 0);
+    document.querySelectorAll('[data-tt-chip]').forEach(function (chip) {
+      var on = chip.getAttribute('data-tt-chip') === value;
+      chip.classList.toggle('is-active', on);
+      chip.setAttribute('aria-pressed', String(on));
+    });
+  }
+  document.querySelectorAll('[data-tt-chip]').forEach(function (chip) {
+    chip.addEventListener('click', function () { applyType(chip.getAttribute('data-tt-chip')); });
+  });
+  var typeSelect = document.querySelector('[data-tt-filter]');
+  if (typeSelect) typeSelect.addEventListener('change', function () { applyType(typeSelect.value); });
+})();
+</script>
+{% endblock %}

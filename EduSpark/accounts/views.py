@@ -3,8 +3,9 @@ from django.contrib.auth import login, logout
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from .decorators import role_home_url
+from .decorators import role_home_url, role_required
 from .forms import SignInForm, SignUpForm
+from .models import Profil
 
 
 @require_http_methods(["GET", "POST"])
@@ -68,3 +69,18 @@ def logout_view(request):
     logout(request)
     messages.success(request, "Vous êtes déconnecté. À bientôt !")
     return redirect("landing:index")
+
+
+@role_required(Profil.ROLE_ETUDIANT)
+def student_profile(request):
+    return render(request, "accounts/student_profile.html")
+
+
+@role_required(Profil.ROLE_PROF)
+def prof_profile(request):
+    return render(request, "accounts/prof_profile.html")
+
+
+@role_required(Profil.ROLE_ADMIN)
+def admin_students(request):
+    return render(request, "accounts/admin_students.html")

@@ -1,0 +1,577 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Devoirs — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+
+<!-- Section En-tête de page & Contexte Master 1 -->
+<section class="flex flex-col gap-space-sm mb-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">Master 1 Informatique &amp; IA</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Semestre 1 • 2024-2025</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Devoirs &amp; Entraînement Pratique</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Suivi des livrables de TP, devoirs maison et séries d'entraînement multimodal.
+        </p>
+</div>
+<!-- Quick Action: Accessible Modal Trigger for AI Assistance -->
+<div class="flex items-center gap-space-sm">
+<button aria-controls="ai-panel-drawer" aria-expanded="false" class="inline-flex items-center gap-2 h-11 px-space-md rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:opacity-95 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary" onclick="document.getElementById('ai-panel-drawer').classList.remove('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Générer un entraînement IA</span>
+</button>
+</div>
+</div>
+<!-- Quick Metrics Strip / Donut progress cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mt-space-sm">
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Travaux urgents</span>
+<span class="font-data-metric text-[20px] font-bold text-primary">3</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Devoirs à rendre</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">alarm</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">En cours</span>
+<span class="font-data-metric text-[20px] font-bold text-secondary">1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Brouillon / TP actif</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[26px]">pending_actions</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Livrables validés</span>
+<span class="font-data-metric text-[20px] font-bold text-on-surface">14</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Notés ce semestre</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Moyenne actuelle</span>
+<div class="flex items-baseline gap-1">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">16.2</span>
+<span class="font-data-metric text-data-metric text-outline">/ 20</span>
+</div>
+<span class="font-body-sm text-body-sm text-tertiary-container font-medium block mt-0.5">+0.8 vs promo</span>
+</div>
+<!-- Progress mini gauge SVG -->
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-12 h-12 -rotate-90" viewbox="0 0 36 36">
+<circle class="text-surface-container stroke-current" cx="18" cy="18" fill="none" r="15.5" stroke-width="3"></circle>
+<circle class="text-primary stroke-current" cx="18" cy="18" fill="none" r="15.5" stroke-dasharray="100" stroke-dashoffset="19" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<span class="absolute font-data-metric text-[11px] font-bold text-primary">81%</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Onglets principaux -->
+<section aria-label="Sections devoirs" class="flex flex-col gap-space-md mb-space-lg">
+<div class="flex max-w-full items-center gap-space-xs overflow-x-auto rounded-full bg-surface-container-low p-1.5">
+<button aria-current="page" class="h-10 px-space-md rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-xs focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">assignment</span>
+<span>Devoirs notés (4)</span>
+</button>
+<button class="h-10 px-space-md rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">model_training</span>
+<span>Banque d'entraînement libre</span>
+</button>
+<button class="h-10 px-space-md rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+<span>Historique des corrigés</span>
+</button>
+</div>
+<!-- Filtres accessibles WCAG 2.2 AA -->
+<div class="bg-surface-container-lowest p-space-md rounded shadow-xs flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Filtrer :
+        </span>
+<!-- Filtre Statut -->
+<label class="sr-only" for="filter-status">Filtrer par statut</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-status">
+<option selected="">Statut : Tous</option>
+<option>À faire</option>
+<option>En cours de rédaction</option>
+<option>Rendu - En attente de note</option>
+<option>Noté &amp; Corrigé</option>
+</select>
+<!-- Filtre Matière -->
+<label class="sr-only" for="filter-subject">Filtrer par matière</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-subject">
+<option selected="">Matière : Toutes</option>
+<option>Intelligence Artificielle</option>
+<option>Algorithmique Avancée</option>
+<option>Éthique du Numérique</option>
+<option>Systèmes Distribués</option>
+</select>
+<!-- Filtre Échéance -->
+<label class="sr-only" for="filter-deadline">Filtrer par date d'échéance</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-deadline">
+<option selected="">Échéance : Plus proche</option>
+<option>Cette semaine</option>
+<option>Ce mois-ci</option>
+<option>Passées</option>
+</select>
+</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm">
+        Affichage de <span class="font-semibold text-on-surface">4 devoirs</span> prioritaires
+      </div>
+</div>
+</section>
+<!-- Grille principale : Cartes de Devoirs (Conformes WCAG : icône + libellé textuel explicite) -->
+<section aria-label="Liste des devoirs" class="flex flex-col gap-space-md mb-space-xl">
+<!-- Devoir 1 : Prioritaire / Urgent -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-xs relative overflow-hidden flex flex-col xl:flex-row gap-space-lg justify-between">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error"></div>
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- WCAG Badge: Icon + Label -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>Urgent • Échéance dans 2 jours</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+            UE Intelligence Artificielle
+          </span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            Coeff. 2.0
+          </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">
+          TP 3 : Classification d'images par ConvNets (PyTorch)
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          Concevez, entraînez et optimisez un réseau résiduel profond (ResNet) sur le jeu de données CIFAR-100. Comparaison des optimiseurs SGD et AdamW avec quantification post-entraînement.
+        </p>
+<!-- Progress bar & State details -->
+<div class="mt-space-sm max-w-xl">
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant mb-1.5">
+<span class="flex items-center gap-1.5 font-medium text-secondary">
+<span class="material-symbols-outlined text-[18px]">timelapse</span>
+              Statut : En cours de rédaction (60% complété)
+            </span>
+<span class="font-data-metric text-data-metric text-on-surface font-semibold">Échéance : 24 Octobre 23h59</span>
+</div>
+<!-- Accessible Progress bar -->
+<div aria-label="Progression du TP 3" aria-valuemax="100" aria-valuemin="0" aria-valuenow="60" class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden" role="progressbar">
+<div class="h-full bg-secondary rounded-full transition-all duration-300" style="width: 60%"></div>
+</div>
+</div>
+</div>
+<!-- Actions Buttons with strict 44px hit-target for WCAG -->
+<div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[240px]">
+<button class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-xs focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">edit_document</span>
+<span>Reprendre le devoir</span>
+</button>
+<a class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest transition-all font-label-md text-label-md flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" href="#">
+<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+<span>Voir le sujet PDF accessible</span>
+</a>
+</div>
+</article>
+<!-- Devoir 2 : À commencer -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col xl:flex-row gap-space-lg justify-between">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- WCAG Badge: Hourglass Icon + Explicit Text -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+<span>Statut : À commencer</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+            UE Algorithmique Avancée
+          </span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            Coeff. 1.5
+          </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">
+          Devoir Maison : Équilibrage des Arbres Rouge-Noir
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          Preuve formelle des invariants d'insertion et de suppression dans un arbre bicolore. Implémentation certifiée en C++ avec vérification des rotations gauches et droites.
+        </p>
+<div class="flex items-center gap-space-md mt-space-sm text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-outline">event</span>
+<span>Échéance : <strong>Dans 6 jours (28 Octobre 18h00)</strong></span>
+</div>
+<span class="text-outline">•</span>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">attachment</span>
+<span>Archive fournie : skeleton_rbt.zip</span>
+</div>
+</div>
+</div>
+<div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[200px]">
+<button class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-low text-primary hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+<span>Ouvrir l'énoncé</span>
+</button>
+</div>
+</article>
+<!-- Devoir 3 : Brouillon enregistré -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col xl:flex-row gap-space-lg justify-between">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- WCAG Badge: Draft Document Icon + Text -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">draft</span>
+<span>Statut : Brouillon enregistré</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+            UE Éthique du Numérique
+          </span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            Coeff. 1.0
+          </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">
+          Essai critique : Biais algorithmiques et équité dans les LLMs
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          Analyse des disparités socioculturelles induites par le RLHF dans les grands modèles de langage contemporains. Longueur attendue : 3 000 mots avec bibliographie APA.
+        </p>
+<div class="flex items-center gap-space-md mt-space-sm text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-outline">calendar_today</span>
+<span>Échéance : <strong>3 Novembre 2024</strong></span>
+</div>
+<span class="text-outline">•</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Dernière sauvegarde auto : hier 22:41</span>
+</div>
+</div>
+<div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[200px]">
+<button class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+<span>Reprendre la rédaction</span>
+</button>
+</div>
+</article>
+<!-- Devoir 4 : Rendu (En attente de notation) -->
+<article class="bg-surface-container-low p-space-lg rounded shadow-xs flex flex-col xl:flex-row gap-space-lg justify-between opacity-95">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- WCAG Badge: Green Check Icon + Text -->
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Statut : Rendu le 18 Octobre</span>
+</span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            UE Systèmes Distribués
+          </span>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+            Coeff. 2.0
+          </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">
+          Implémentation Raft : Élection de leader et réplication de logs
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">
+          Développement en Go d'un consensus distribué résistant aux partitions réseau partielles. Rendu Git complété avec suite de tests unitaires passante à 100%.
+        </p>
+<div class="flex items-center gap-space-xs mt-space-sm text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+<span>En attente de correction par <strong>Dr. Marc Danjou</strong> (Résultats estimés le 27 Octobre)</span>
+</div>
+</div>
+<div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[200px]">
+<button class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+<span>Voir la copie soumise</span>
+</button>
+</div>
+</article>
+</section>
+<!-- Section Entraînement Thématique Multimodal -->
+<section aria-label="S'entraîner par thématique" class="flex flex-col gap-space-md mb-space-xl">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">S'entraîner par thématique</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Modules interactifs ciblés pour consolider vos acquis théoriques et pratiques.</p>
+</div>
+<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1" href="#">
+<span>Voir tout le catalogue de révision</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<!-- Card QCM interactif -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">quiz</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Auto-évaluation</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">QCM Théorique &amp; Formules</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            30 questions chronométrées sur les descentes de gradients stochastiques, rétropropagation et backpropagation through time.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-on-surface-variant">Durée ~ 15 min</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+            Lancer le quiz
+          </button>
+</div>
+</div>
+<!-- Card Code Sandbox Python / PyTorch -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Pratique guidée</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Code Sandbox PyTorch</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            Bac à sable interactif dans le navigateur avec GPU virtuel alloué. Implémentez un module d'attention multi-têtes en moins de 50 lignes.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-secondary font-semibold">GPU T4 Alloué</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-secondary text-on-secondary hover:opacity-95 font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-secondary" type="button">
+            Ouvrir la session
+          </button>
+</div>
+</div>
+<!-- Card Questions réflexives & Éthique -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-tertiary-container mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Analyse conceptuelle</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Études de Cas &amp; Débats</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            Scénarios décisionnels réels : audit de biais dans le recrutement automatisé et protection des données sensibles sous l'EU AI Act.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-on-surface-variant">4 cas disponibles</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+            Explorer les cas
+          </button>
+</div>
+</div>
+</div>
+<!-- Lecteur Multimédia Accessible (Exercice de Compréhension Orale / Conférence IA) -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs mt-space-md flex flex-col lg:flex-row gap-space-lg items-center">
+<!-- Media Player Mock with Accessible Visualizer -->
+<div class="w-full lg:w-1/2 flex flex-col gap-space-sm">
+<div class="relative bg-inverse-surface rounded p-space-md overflow-hidden aspect-video flex flex-col justify-between text-inverse-on-surface">
+<!-- Top bar with CC and Audio badges -->
+<div class="flex items-center justify-between z-10">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest/20 backdrop-blur-md text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-error">radio_button_checked</span>
+              Conférence NeurIPS • Audio haute fidélité
+            </span>
+<div class="flex items-center gap-1.5">
+<button aria-label="Sous-titres activés" aria-pressed="true" class="px-2 py-0.5 rounded bg-primary text-on-primary font-data-metric text-[11px] font-bold" type="button">
+                CC ON
+              </button>
+<button aria-label="Paramètres de lecture" class="p-1 rounded hover:bg-surface-container-lowest/20" type="button">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+</div>
+<!-- Animated Audio Waveform (multimodal accessible visualizer) -->
+<div aria-hidden="true" class="flex items-end justify-center gap-1 h-20 my-auto py-2">
+<span class="w-1.5 bg-primary-fixed rounded-full h-8 animate-pulse"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-14 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-20 animate-pulse"></span>
+<span class="w-1.5 bg-secondary rounded-full h-12"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-16 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-6"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-10 animate-pulse"></span>
+<span class="w-1.5 bg-secondary rounded-full h-18 animate-pulse"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-14 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-8"></span>
+</div>
+<!-- Bottom Player Controls -->
+<div class="flex flex-col gap-2 z-10">
+<!-- Scrubber bar -->
+<div class="relative w-full h-1.5 bg-surface-container-lowest/30 rounded-full cursor-pointer">
+<div class="h-full bg-secondary-container rounded-full" style="width: 42%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-data-metric text-xs">
+<div class="flex items-center gap-2">
+<button aria-label="Pause" class="w-8 h-8 rounded-full bg-on-primary text-primary flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button aria-label="Reculer de 10 secondes" class="p-1 text-inverse-on-surface hover:text-on-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">replay_10</span>
+</button>
+<button aria-label="Avancer de 10 secondes" class="p-1 text-inverse-on-surface hover:text-on-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">forward_10</span>
+</button>
+<span>04:12 / 09:58</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/20">Vitesse : 1.0x</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Synchronized Accessible Transcription Column -->
+<div class="w-full lg:w-1/2 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Transcription synchronisée (FR &amp; EN)</span>
+<span class="inline-flex items-center gap-1 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">hearing</span>
+            Exercice de compréhension auditive
+          </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+          Prof. Yoshua Bengio : "Représentations auto-supervisées et causalité"
+        </h3>
+<div aria-label="Transcription intégrale" class="bg-surface-container-low p-space-md rounded max-h-44 overflow-y-auto flex flex-col gap-space-xs text-body-md font-body-md" tabindex="0">
+<p class="text-on-surface-variant text-body-sm">
+<span class="font-data-metric text-[11px] text-outline">[03:45]</span> Dans le cadre des représentations latentes, l'optimisation ne doit pas se restreindre à la seule corrélation statistique...
+          </p>
+<p class="bg-surface-container-highest p-2 rounded text-primary font-medium text-body-sm">
+<span class="font-data-metric text-[11px] text-primary">[04:12]</span> <em>(Passage actuel)</em> Nous introduisons ici une variable de distribution contrefactuelle qui permet à l'agent de mesurer la stabilité des invariants.
+          </p>
+<p class="text-on-surface-variant text-body-sm">
+<span class="font-data-metric text-[11px] text-outline">[04:38]</span> Ceci contraint l'espace d'hypothèse et prévient l'effondrement des représentations (representation collapse).
+          </p>
+</div>
+<div class="flex items-center gap-space-sm mt-1">
+<button class="min-h-[44px] px-space-md rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">quiz</span>
+<span>Répondre aux questions associées (3)</span>
+</button>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Télécharger la transcription</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Panneau Latéral Coulissant IA (Slide-over Drawer Accessible) -->
+<aside aria-labelledby="ai-drawer-title" aria-modal="true" class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface-container-lowest shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col" id="ai-panel-drawer" role="dialog">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="ai-drawer-title">Générateur d'Entraînement IA</h2>
+</div>
+<button aria-label="Fermer le panneau IA" class="w-9 h-9 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary" onclick="document.getElementById('ai-panel-drawer').classList.add('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Body -->
+<div class="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
+<!-- Resilience Warning Banner -->
+<div class="bg-surface-container-high p-space-md rounded flex items-start gap-space-sm" role="status">
+<span class="material-symbols-outlined text-primary text-[22px] flex-shrink-0 mt-0.5">verified_user</span>
+<div class="text-body-sm font-body-sm text-on-surface">
+<strong class="font-semibold block mb-0.5">Continuité de service garantie</strong>
+          Le service de correction et d'entraînement manuel reste disponible à 100% en cas d'interruption du service IA.
+        </div>
+</div>
+<!-- Form Inputs -->
+<form class="flex flex-col gap-space-md" onsubmit="event.preventDefault();">
+<!-- Target Subject -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface" for="ai-subject-select">Matière ciblée</label>
+<select class="h-11 px-space-sm bg-surface-container-low text-on-surface text-body-md font-body-md rounded outline-none focus:ring-2 focus:ring-primary" id="ai-subject-select">
+<option selected="">Intelligence Artificielle &amp; Deep Learning</option>
+<option>Algorithmique Avancée &amp; Graphes</option>
+<option>Systèmes Distribués &amp; Consensus</option>
+<option>Éthique du Numérique</option>
+</select>
+</div>
+<!-- Difficulty Level -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-on-surface">Niveau de difficulté</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs">
+<label class="flex items-center gap-2 p-3 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container-high transition-colors">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="difficulty" type="radio" value="intermediaire"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Intermédiaire</span>
+</label>
+<label class="flex items-center gap-2 p-3 bg-surface-container-low rounded cursor-pointer border border-primary/20 bg-primary/5">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary" name="difficulty" type="radio" value="avance"/>
+<span class="font-body-sm text-body-sm text-primary font-semibold">Avancé (Master 1)</span>
+</label>
+</div>
+</div>
+<!-- Number of Questions -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-on-surface">Nombre de questions générées</span>
+<div class="flex items-center gap-space-sm">
+<button class="flex-1 py-2 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high" type="button">3 questions</button>
+<button class="flex-1 py-2 rounded bg-primary text-on-primary font-label-md text-label-md shadow-xs" type="button">5 questions</button>
+<button class="flex-1 py-2 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high" type="button">10 questions</button>
+</div>
+</div>
+</form>
+<!-- AI Suggestion Preview Card -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+            Suggestion IA prête
+          </span>
+<!-- Confidence metric -->
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric text-primary font-bold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+            Score de confiance : 95%
+          </span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface font-bold">Série #402 : Fonctions d'activation &amp; Rétropropagation</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Génération personnalisée alignée avec le plan de cours du TP 3.
+          </p>
+</div>
+<!-- Question List Preview -->
+<ol class="list-decimal pl-5 flex flex-col gap-2 font-body-sm text-body-sm text-on-surface">
+<li>
+<strong>ReLU vs GeLU :</strong> Pourquoi la non-linéarité GeLU est-elle privilégiée dans les Transformers malgré son coût de calcul supérieur ?
+          </li>
+<li>
+<strong>Disparition de gradient :</strong> Démontrez formellement l'impact d'une mauvaise initialisation de He sur une architecture ResNet à 50 couches.
+          </li>
+<li>
+<strong>Calcul de dérivée :</strong> Écrivez l'équation de mise à jour du tenseur de biais pour une couche de normalisation (LayerNorm).
+          </li>
+</ol>
+<!-- Standard Actions: Garder, Modifier, Refuser -->
+<div class="flex flex-col sm:flex-row items-center gap-space-xs mt-space-sm pt-space-xs">
+<button class="w-full sm:flex-1 min-h-[44px] px-3 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" onclick="document.getElementById('ai-panel-drawer').classList.add('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Garder</span>
+</button>
+<button class="w-full sm:flex-1 min-h-[44px] px-3 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-full text-error hover:bg-error-container/40 font-label-md text-label-md transition-all flex items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-error" onclick="document.getElementById('ai-panel-drawer').classList.add('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-space-md bg-surface-container-low text-center text-outline font-data-metric text-[11px]">
+      Modèle certifié Université Paris Cité • RGPD compliant
+    </div>
+</aside>
+</div></main>
+{% endblock %}

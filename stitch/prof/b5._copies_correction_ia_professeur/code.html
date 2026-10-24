@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><title>Hub Éducatif Multimodal - Portail Enseignant</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary":"#ffffff","on-tertiary-container":"#facf74","primary-container":"#004191","primary":"#004191","tertiary-container":"#594100","surface-container-highest":"#dde1ff","on-secondary-fixed":"#0f0069","primary-fixed":"#d8e2ff","inverse-on-surface":"#efefff","on-primary":"#ffffff","on-secondary-container":"#fffbff","secondary-fixed":"#e2dfff","secondary-container":"#655dfb","on-surface":"#06164b","inverse-primary":"#adc6ff","on-tertiary-fixed-variant":"#5c4300","tertiary-fixed-dim":"#e6c277","on-background":"#06164b","on-secondary":"#ffffff","on-surface-variant":"#424754","secondary":"#4b41e1","on-secondary-fixed-variant":"#3323cc","surface-bright":"#fbf8ff","error":"#ba1a1a","outline-variant":"#c3c6d3","on-error-container":"#93000a","primary-fixed-dim":"#aec6ff","on-tertiary-fixed":"#261a00","surface-container-low":"#f3f2ff","surface-dim":"#d2d8ff","surface-container-lowest":"#ffffff","tertiary-fixed":"#ffdf9f","error-container":"#ffdad6","on-error":"#ffffff","on-primary-container":"#8db1ff","outline":"#727785","secondary-fixed-dim":"#c3c0ff","surface":"#fbf8ff","surface-container-high":"#e4e7ff","surface-container":"#ecedff","surface-variant":"#dde1ff","inverse-surface":"#1f2d61","surface-tint":"#085ac0","on-primary-fixed-variant":"#004395","tertiary":"#594100","on-primary-fixed":"#001a42","background":"#fbf8ff"},"borderRadius":{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-md":"1rem","space-lg":"1.5rem","margin-mobile":"1.25rem","gutter-mobile":"1rem","margin":"3rem","gutter":"1.5rem","space-sm":"0.5rem","space-xl":"2.5rem"},"fontFamily":{"display-mobile":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"data-metric":["JetBrains Mono"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-lg":["Inter"]},"fontSize":{"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><a class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-space-md focus:py-space-sm focus:bg-primary focus:text-on-primary focus:rounded-full font-label-md shadow-lg outline-none" href="#main-content">Aller au contenu</a><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-40 flex flex-col shadow-[0_1px_8px_rgba(6,22,75,0.06)] overflow-y-auto"><div class="h-16 px-space-md flex items-center gap-space-sm shrink-0 bg-surface-container-lowest"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[20px]">school</span></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-title-md text-primary leading-tight truncate">Hub Éducatif</span><span class="font-label-sm text-secondary tracking-wider uppercase leading-none">Portail Enseignant</span></div></div><div class="px-space-md py-space-sm"><div class="p-space-sm rounded-DEFAULT bg-surface-container-low flex flex-col gap-1"><span class="font-label-sm text-on-surface-variant uppercase">Établissement actif</span><div class="flex items-center justify-between gap-1"><span class="font-title-md text-body-sm font-semibold text-on-surface truncate">Université Paris Cité</span><span class="material-symbols-outlined text-primary text-[18px]">verified</span></div></div></div><nav class="flex-1 px-space-sm py-space-sm space-y-space-md" data-active-classes="bg-primary-container text-on-primary font-bold rounded-DEFAULT shadow-[0_1px_8px_rgba(6,22,75,0.06)]"><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Tableau de bord</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-tableau-de-bord" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span>Mon Tableau de bord</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Compte</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-profil-enseignant-et-grades" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Mon Profil &amp; Grades</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-universites" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Mes Universités</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-classes-et-groupes" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span>Mes Classes &amp; Groupes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="parametres-du-compte" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Paramètres du compte</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Cours</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-cours" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Mes Cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="supports-de-cours" href="#"><span class="material-symbols-outlined text-[20px]">folder_shared</span><span>Supports de cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="emploi-du-temps-des-cours" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Emploi du temps</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="gestion-des-matieres" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Gestion des matières</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Exercices</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="banque-d-exercices" href="#"><span class="material-symbols-outlined text-[20px]">quiz</span><span>Banque d'exercices</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="devoirs-crees" href="#"><span class="material-symbols-outlined text-[20px]">assignment</span><span>Devoirs créés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="series-et-baremes" href="#"><span class="material-symbols-outlined text-[20px]">checklist</span><span>Séries &amp; Barèmes</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Examens &amp; Notes</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="sessions-d-examen" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span>Sessions d'examen</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="copies-a-corriger" href="#"><span class="material-symbols-outlined text-[20px]">draw</span><span>Copies à corriger</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="releves-de-notes-et-jurys" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Relevés &amp; Jurys</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Échanges</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="annonces" href="#"><span class="material-symbols-outlined text-[20px]">campaign</span><span>Annonces</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="forums-et-questions-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">forum</span><span>Forums &amp; Questions</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="messagerie-academique" href="#"><span class="material-symbols-outlined text-[20px]">mail</span><span>Messagerie</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="moderation" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span>Modération</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Suivi Référent</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="tableau-de-bord-de-mes-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span>Tableau de bord étudiants</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="fiches-etudiants-et-difficultes" href="#"><span class="material-symbols-outlined text-[20px]">person_search</span><span>Fiches &amp; Difficultés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="rendez-vous-de-tutorat" href="#"><span class="material-symbols-outlined text-[20px]">support_agent</span><span>Rendez-vous de tutorat</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="journal-de-progression-des-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span>Journal de progression</span></a></div></div></nav><div class="p-space-sm shrink-0 bg-surface-container-low"><div class="px-space-sm py-2 flex items-center justify-between text-on-surface-variant"><span class="font-data-metric text-on-surface-variant">v2.4 • Prof-IRIF</span><span class="w-2.5 h-2.5 rounded-full bg-secondary" title="Connexion sécurisée"></span></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(6,22,75,0.04)] z-30 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="relative flex items-center"><label class="sr-only" for="university-select">Changer d'université assignée</label><span class="material-symbols-outlined text-primary absolute left-3 pointer-events-none text-[20px]">account_balance</span><select class="appearance-none bg-surface-container-low text-on-surface font-title-md text-body-sm pl-9 pr-9 py-2 rounded-full cursor-pointer hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" id="university-select"><option selected="" value="uparis">Université Paris Cité</option><option value="sorbonne">Sorbonne Université</option><option value="saclay">Université Paris-Saclay</option></select><span class="material-symbols-outlined text-on-surface-variant absolute right-3 pointer-events-none text-[18px]">expand_more</span></div><div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low rounded-full px-space-md py-1.5"><span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span><input class="bg-transparent text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none w-64" placeholder="Rechercher cours, copies, étudiants..." type="search"/><kbd class="font-data-metric text-label-sm bg-surface-container-highest px-1.5 py-0.5 rounded text-on-surface-variant uppercase">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button aria-label="Notifications (3 non lues)" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-error text-on-error font-data-metric text-[10px] flex items-center justify-center font-bold">3</span></button><div class="h-7 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-1"><div class="relative"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest" title="En ligne"></span></div><div class="hidden md:flex flex-col text-left"><div class="flex items-center gap-1.5"><span class="font-label-md text-on-surface leading-tight">Prof. Hélène Vasseur</span><span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm px-1.5 py-0.2 rounded-full uppercase">Labo IRIF</span></div><span class="font-body-sm text-on-surface-variant leading-tight">Enseignant / Chercheur</span></div><span class="material-symbols-outlined text-on-surface-variant text-[20px] cursor-pointer">arrow_drop_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen" id="main-content"><div class="flex flex-col w-full">
+<!-- Top Navigation & Context Bar -->
+<section class="w-full px-space-lg py-space-md bg-surface-container-lowest shadow-sm flex flex-col gap-space-sm">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<!-- Breadcrumb & Title -->
+<div class="flex flex-col min-w-0">
+<nav class="flex items-center gap-space-xs text-on-surface-variant font-label-sm uppercase tracking-wider">
+<span>Portail Enseignant</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span>Examens &amp; Évaluations</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Correction de session</span>
+</nav>
+<div class="flex flex-wrap items-center gap-space-sm mt-1">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight truncate">
+            Session : Partiel Mi-Parcours - INF501 Réseaux de Neurones Profonds
+          </h1>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            En cours de correction (24 / 38 copies validées)
+          </span>
+</div>
+</div>
+<!-- Session Global Actions -->
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary transition-all duration-200 shadow-sm font-label-md" id="toggle-ia-btn">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Correction assistée par l'IA</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-lowest/20 font-data-metric text-label-sm">BETA</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-colors shadow-md font-label-md">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+<span>Publier l'ensemble des notes validées</span>
+</button>
+</div>
+</div>
+<!-- Student Selector & Submission Carousel Ribbon -->
+<div class="mt-space-xs p-space-sm bg-surface-container-low rounded-DEFAULT flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-md">
+<!-- Student Identity Badge -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-1.5 rounded-full shadow-sm">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-title-md text-body-sm">
+            CM
+          </div>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-body-md text-on-surface font-semibold">Camille Martin</span>
+<span class="font-data-metric text-on-surface-variant text-label-sm bg-surface-container px-2 py-0.5 rounded-full">N° 20248912</span>
+</div>
+</div>
+<!-- Student Dropdown Quick Selection -->
+<div class="relative inline-flex items-center">
+<label class="sr-only" for="student-select">Changer d'étudiant</label>
+<select class="appearance-none bg-surface-container-lowest text-on-surface font-label-md text-body-sm pl-space-md pr-8 py-1.5 rounded-full cursor-pointer hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="student-select">
+<option selected="" value="25">Copie 25 / 38 - Camille Martin (En révision)</option>
+<option value="26">Copie 26 / 38 - Hugo Bernard (Non corrigée)</option>
+<option value="27">Copie 27 / 38 - Léa Benali (Non corrigée)</option>
+<option value="24">Copie 24 / 38 - Lucas Fontaine (Validée)</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant absolute right-2.5 pointer-events-none text-[18px]">unfold_more</span>
+</div>
+<!-- Multi-filter Chips -->
+<div class="flex items-center gap-1.5">
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-sm uppercase transition-colors">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Non corrigée (10)</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm uppercase shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">rate_review</span>
+<span>En révision (4)</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-sm uppercase transition-colors">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Validée (24)</span>
+</button>
+</div>
+</div>
+<!-- Quick Pagination Indicators -->
+<div class="flex items-center gap-space-sm">
+<span class="font-data-metric text-label-md text-on-surface-variant">Progression: 63%</span>
+<div class="w-32 h-2.5 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full transition-all duration-300" style="width: 63%;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Dual-Column Canvas + Resilient AI Panel -->
+<div class="w-full px-space-lg py-space-md grid grid-cols-12 gap-space-lg mb-24">
+<!-- LEFT COLUMN: Digitize Exam Script Paper Visualizer (7 Cols) -->
+<section class="col-span-12 xl:col-span-7 flex flex-col gap-space-md">
+<!-- Viewer Controls Toolbar -->
+<div class="bg-surface-container-lowest p-space-sm rounded-DEFAULT shadow-sm flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" id="zoom-in-btn" title="Zoom avant">
+<span class="material-symbols-outlined text-[20px]">zoom_in</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" id="zoom-out-btn" title="Zoom arrière">
+<span class="material-symbols-outlined text-[20px]">zoom_out</span>
+</button>
+<span class="font-data-metric text-label-sm text-on-surface-variant px-2" id="zoom-level">100%</span>
+<div class="h-5 w-px bg-surface-container-high mx-1"></div>
+<button class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" title="Faire pivoter">
+<span class="material-symbols-outlined text-[20px]">rotate_right</span>
+</button>
+<button class="p-2 rounded-full bg-primary-fixed text-on-primary-fixed transition-colors" title="Outil Surlignage">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">ink_highlighter</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" title="Ajouter annotation manuscrite">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm uppercase text-on-surface-variant">Page 1 sur 3</span>
+<div class="flex items-center bg-surface-container rounded-full p-0.5">
+<button class="p-1 rounded-full hover:bg-surface-container-highest text-on-surface-variant" title="Page précédente">
+<span class="material-symbols-outlined text-[18px]">keyboard_arrow_left</span>
+</button>
+<button class="p-1 rounded-full hover:bg-surface-container-highest text-on-surface-variant" title="Page suivante">
+<span class="material-symbols-outlined text-[18px]">keyboard_arrow_right</span>
+</button>
+</div>
+<a class="p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant" href="#" title="Ouvrir en plein écran">
+<span class="material-symbols-outlined text-[20px]">open_in_full</span>
+</a>
+</div>
+</div>
+<!-- Scanned Sheet Surface with Annotations & Layer Overlays -->
+<div class="relative bg-surface-container-low rounded-DEFAULT overflow-hidden shadow-md flex flex-col items-center p-space-md border-0">
+<!-- Active Scan Container -->
+<div class="relative w-full max-w-[680px] bg-white rounded-DEFAULT shadow-lg overflow-hidden transition-transform duration-200" id="scan-container">
+<!-- Student Paper Header Mockup -->
+<div class="bg-surface-container-lowest px-6 pt-6 pb-4 border-b border-surface-container-high flex justify-between items-center text-on-surface-variant">
+<div>
+<span class="font-label-sm uppercase tracking-wider text-secondary font-bold">Épreuve Écrite • INF501</span>
+<p class="font-title-md text-on-surface font-bold">Partiel Novembre 2024</p>
+</div>
+<div class="text-right">
+<span class="font-data-metric text-label-sm">Copie Anonymisée N° A-8912</span>
+<p class="font-label-sm text-outline">Amphi Turing • 14:00 - 17:00</p>
+</div>
+</div>
+<!-- Handwritten Exam Page Image with Data-Alt -->
+<div class="relative w-full h-[620px] overflow-hidden bg-surface-bright">
+<img class="w-full h-full object-cover select-none" data-alt="Photorealistic scanned university exam paper showing authentic student handwriting in dark blue ink, complex computational neural network layer graphs with node diagrams, backward propagation mathematical derivation with partial derivatives, and subtle yellow and red teacher highlighter marks in the margins. Crisp collegiate paper texture with faint college ruled lines and official university header watermark." id="scanned-sheet-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCse0qvrnTin3xlGP_4pLpNjx2xBAGbt11wbOnp94_lXkz0vy_bGI0k4jYanMGad3-icH6imsbA35HuPeja02K1XKUPbbfVY3qcLDu43jdN4unbBhdBr77BkvGrgGcm3nSh0kcnCXPsuDk30rJygVBwgQFI4ZVegbsou-wwYuwF1Yq3QRxh-5PtGYHuWqB54_4fZNxTpAQCLWhtQCWevX6E9U87HSY-scqhxXYzu0l5JlyrqYoMaWf1"/>
+<!-- Interactive Visual Annotation Flags Overlaid on Paper -->
+<div class="absolute top-[28%] left-[45%] group cursor-pointer">
+<span class="relative flex h-6 w-6">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-6 w-6 bg-secondary text-on-secondary items-center justify-center font-data-metric text-[11px] font-bold shadow-md">1</span>
+</span>
+<div class="absolute left-7 top-0 w-64 p-space-sm bg-surface-container-lowest/95 backdrop-blur-md rounded-DEFAULT shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+<span class="font-label-sm text-secondary uppercase font-bold">Remarque Professeur</span>
+<p class="font-body-sm text-on-surface mt-0.5">Application de la règle de dérivation en chaîne (Chain Rule) rigoureuse sur la couche cachée $h_2$.</p>
+</div>
+</div>
+<div class="absolute top-[62%] left-[62%] group cursor-pointer">
+<span class="relative flex h-6 w-6">
+<span class="relative inline-flex rounded-full h-6 w-6 bg-error text-on-error items-center justify-center font-data-metric text-[11px] font-bold shadow-md">2</span>
+</span>
+<div class="absolute right-7 top-0 w-64 p-space-sm bg-surface-container-lowest/95 backdrop-blur-md rounded-DEFAULT shadow-xl opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+<span class="font-label-sm text-error uppercase font-bold">Signalement Erreur</span>
+<p class="font-body-sm text-on-surface mt-0.5">Le vecteur momentum $v_{t}$ est manquant dans l'actualisation des poids $\Delta W^{(3)}$.</p>
+</div>
+</div>
+<!-- Visual Marker: OCR Detected Region -->
+<div class="absolute bottom-6 left-6 right-6 p-2 rounded bg-primary-fixed/20 backdrop-blur-sm pointer-events-none">
+<span class="font-data-metric text-label-sm text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">document_scanner</span>
+                Zone transcription automatique active
+              </span>
+</div>
+</div>
+</div>
+<!-- Real-Time Multimodal OCR Math Transcription Bar -->
+<div class="w-full mt-space-md p-space-md bg-surface-container-lowest rounded-DEFAULT shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[20px]">functions</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Transcription OCR des équations (LaTeX / Symboles)</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-data-metric text-label-sm">
+              Confiance 98.4%
+            </span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded-DEFAULT font-data-metric text-body-sm text-on-surface overflow-x-auto space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant font-bold select-none">[Ligne 14]</span>
+<code class="text-primary font-semibold">$$\frac{\partial \mathcal{L}}{\partial W^{(l)}} = \delta^{(l)} \cdot (a^{(l-1)})^T + \lambda W^{(l)}$$</code>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant font-bold select-none">[Ligne 18]</span>
+<code class="text-on-surface">$$v_t = \beta v_{t-1} + (1 - \beta) g_t \implies \theta_{t+1} = \theta_t - \eta \frac{v_t}{\sqrt{s_t} + \epsilon}$$</code>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: Interactive Evaluation Rubric & Calculated Total (5 Cols) -->
+<section class="col-span-12 xl:col-span-5 flex flex-col gap-space-md">
+<!-- Live Computed Score Summary Card -->
+<div class="bg-gradient-to-br from-primary via-primary-container to-secondary p-space-lg rounded-DEFAULT text-on-primary shadow-xl relative overflow-hidden">
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm uppercase tracking-widest text-on-primary/80">Barème INF501 • Total Provisoire</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-display text-[44px] leading-tight font-extrabold text-on-primary" id="total-score-display">17.0</span>
+<span class="font-headline-sm text-on-primary/70">/ 20</span>
+</div>
+<span class="font-body-sm text-on-primary/80 mt-1">Mention Très Bien • Percentile session : Top 15%</span>
+</div>
+<!-- Radial Progress Ring Inline SVG -->
+<div class="relative w-20 h-20 shrink-0">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-on-primary/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-tertiary-fixed-dim transition-all duration-500 ease-out" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="85, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-data-metric text-label-md text-on-primary font-bold">
+              85%
+            </div>
+</div>
+</div>
+</div>
+<!-- Rubric Criteria Cards Accordion / List -->
+<div class="bg-surface-container-lowest p-space-lg rounded-DEFAULT shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-2">
+<h2 class="font-title-md text-headline-sm text-on-surface font-bold">Grille critériée d'évaluation</h2>
+<span class="font-data-metric text-label-sm text-on-surface-variant">4 critères définis</span>
+</div>
+<!-- Criterion 1 -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex flex-col gap-space-sm hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-label-sm flex items-center justify-center font-bold">C1</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Architecture &amp; Rétropropagation</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-2.5 py-1 rounded-full shadow-sm">
+<input class="w-12 font-data-metric text-body-md font-bold text-primary text-center bg-transparent focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.5"/>
+<span class="font-data-metric text-body-sm text-on-surface-variant font-medium">/ 5 pts</span>
+</div>
+</div>
+<!-- Slider Control -->
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.5"/>
+</div>
+<input class="w-full bg-surface-container-lowest px-3 py-1.5 rounded-md text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Démonstration claire du calcul différentiel sur les couches denses."/>
+</div>
+<!-- Criterion 2 -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex flex-col gap-space-sm hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-label-sm flex items-center justify-center font-bold">C2</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Calcul du Gradient &amp; Optimisation SGD</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-2.5 py-1 rounded-full shadow-sm">
+<input class="w-12 font-data-metric text-body-md font-bold text-primary text-center bg-transparent focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.0"/>
+<span class="font-data-metric text-body-sm text-on-surface-variant font-medium">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.0"/>
+</div>
+<input class="w-full bg-surface-container-lowest px-3 py-1.5 rounded-md text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Légère imprécision sur l'incorporation de l'inertie (momentum) à l'itération finale."/>
+</div>
+<!-- Criterion 3 -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex flex-col gap-space-sm hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-label-sm flex items-center justify-center font-bold">C3</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Régularisation &amp; Prévention Surapprentissage</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-2.5 py-1 rounded-full shadow-sm">
+<input class="w-12 font-data-metric text-body-md font-bold text-primary text-center bg-transparent focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.5"/>
+<span class="font-data-metric text-body-sm text-on-surface-variant font-medium">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.5"/>
+</div>
+<input class="w-full bg-surface-container-lowest px-3 py-1.5 rounded-md text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Excellente comparaison entre Weight Decay (L2) et Dropout stochastique."/>
+</div>
+<!-- Criterion 4 -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex flex-col gap-space-sm hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-label-sm flex items-center justify-center font-bold">C4</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Rigueur scientifique &amp; Rédaction</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-2.5 py-1 rounded-full shadow-sm">
+<input class="w-12 font-data-metric text-body-md font-bold text-primary text-center bg-transparent focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.0"/>
+<span class="font-data-metric text-body-sm text-on-surface-variant font-medium">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.0"/>
+</div>
+<input class="w-full bg-surface-container-lowest px-3 py-1.5 rounded-md text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Graphiques annotés avec soin. Vocabulaire mathématique précis."/>
+</div>
+<!-- Global Synthesis Feedback Textarea -->
+<div class="flex flex-col gap-1.5 mt-2">
+<label class="font-label-md text-on-surface flex items-center justify-between" for="global-feedback">
+<span>Commentaire global adressé à l'étudiant</span>
+<span class="font-data-metric text-label-sm text-on-surface-variant">Visible sur le relevé</span>
+</label>
+<textarea class="w-full bg-surface-container-low p-space-md rounded-DEFAULT font-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary resize-none placeholder:text-outline" id="global-feedback" rows="3">Très bon travail d'ensemble sur ce devoir surveillé. Les concepts théoriques de la rétropropagation sont pleinement assimilés. Veillez à bien maintenir la rigueur dans les développements d'optimisation stochastique lors du partiel final.</textarea>
+</div>
+</div>
+<!-- COLLAPSIBLE AI CORRECTION ASSISTANT PANEL -->
+<div class="bg-surface-container-lowest rounded-DEFAULT shadow-md overflow-hidden flex flex-col" id="ai-assistant-panel">
+<!-- AI Card Header -->
+<div class="bg-surface-container-high px-space-lg py-space-sm flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-title-md text-headline-sm text-on-surface font-bold">Correction Assistée par l'IA</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm uppercase tracking-wider">
+            Beta Académique
+          </span>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Mandatory WCAG Resilience Alert Banner -->
+<div aria-live="polite" class="p-space-sm bg-surface-container rounded-DEFAULT flex items-center gap-space-sm text-on-surface" role="status">
+<span class="material-symbols-outlined text-outline text-[20px] shrink-0">info</span>
+<p class="font-body-sm text-on-surface-variant">
+              L'IA est momentanément indisponible. Vous pouvez continuer manuellement.
+            </p>
+</div>
+<!-- Analysis Parameters -->
+<div class="grid grid-cols-2 gap-space-sm bg-surface-container-low p-space-sm rounded-DEFAULT">
+<div class="flex flex-col">
+<span class="font-label-sm uppercase text-on-surface-variant">Modèle d'alignement</span>
+<span class="font-title-md text-body-sm text-on-surface font-semibold truncate">Grille stricte INF501</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm uppercase text-on-surface-variant">Tolérance de notation</span>
+<span class="font-title-md text-body-sm text-secondary font-semibold">Standard (±0.5 pt)</span>
+</div>
+</div>
+<!-- AI Suggestion Box -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex flex-col gap-space-sm relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+<span class="font-title-md text-body-md font-bold text-on-surface">Recommandation du modèle</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-highest px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-secondary text-[14px]">insights</span>
+<span class="font-data-metric text-label-sm text-on-surface font-bold">Certitude OCR 97%</span>
+</div>
+</div>
+<!-- Key Mistakes Highlighted -->
+<div class="p-space-xs bg-error-container/40 rounded-md text-on-error-container flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-[18px] shrink-0 mt-0.5">report_problem</span>
+<span class="font-body-sm text-on-surface font-medium leading-tight">
+                Anomalie détectée : Omission du terme d'inertie (momentum) à l'itération 3 du gradient stochastique.
+              </span>
+</div>
+<!-- Suggested Score Distribution -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-lowest rounded-DEFAULT">
+<div class="flex flex-col">
+<span class="font-label-sm uppercase text-on-surface-variant">Proposition note globale</span>
+<span class="font-headline-sm text-primary font-bold">16.5 / 20</span>
+</div>
+<div class="font-data-metric text-label-sm text-on-surface-variant text-right">
+                C1: 4.5 | C2: 3.5<br/>C3: 4.5 | C4: 4.0
+              </div>
+</div>
+<!-- Pre-drafted Pedagogical Feedback -->
+<div class="flex flex-col gap-1">
+<span class="font-label-sm uppercase text-on-surface-variant">Feedback synthétique pré-rédigé</span>
+<p class="font-body-sm text-on-surface italic bg-surface-container-lowest p-space-sm rounded-md shadow-sm">
+                "Très bonne maîtrise globale de l'algorithme de rétropropagation. Veillez à inclure la mise à jour complète de la vitesse lors des optimisations accélérées."
+              </p>
+</div>
+<!-- Mandatory Action Trio -->
+<div class="grid grid-cols-3 gap-2 mt-1">
+<button class="flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md transition-colors shadow-sm" id="ai-accept-btn">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Garder</span>
+</button>
+<button class="flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-container hover:text-on-secondary-container font-label-md transition-colors" id="ai-modify-btn">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-surface-container text-on-surface-variant hover:bg-error-container hover:text-on-error-container font-label-md transition-colors" id="ai-reject-btn">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- FIXED STICKY BOTTOM EVALUATION ACTION BAR -->
+<footer class="fixed bottom-0 left-72 right-0 h-20 bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_-2px_12px_rgba(6,22,75,0.08)] z-40 px-space-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>Copie précédente (Lucas F.)</span>
+</button>
+<span class="font-data-metric text-label-sm text-on-surface-variant hidden sm:inline-block">
+        Modifications sauvegardées automatiquement (il y a 32s)
+      </span>
+</div>
+<div class="flex items-center gap-space-md">
+<button class="flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Enregistrer brouillon</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-lg py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-lg font-label-md group" id="validate-next-btn">
+<span>Valider la note et passer au suivant</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</footer>
+</div>
+<script>
+  (function() {
+    // Zoom Micro-interaction on Exam Scan
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const zoomLevelEl = document.getElementById('zoom-level');
+    const scanSheet = document.getElementById('scanned-sheet-img');
+    let currentZoom = 100;
+
+    if (zoomInBtn && zoomOutBtn && zoomLevelEl && scanSheet) {
+      zoomInBtn.addEventListener('click', () => {
+        if (currentZoom < 180) {
+          currentZoom += 20;
+          scanSheet.style.transform = `scale(${currentZoom / 100})`;
+          scanSheet.style.transformOrigin = 'top center';
+          zoomLevelEl.textContent = `${currentZoom}%`;
+        }
+      });
+
+      zoomOutBtn.addEventListener('click', () => {
+        if (currentZoom > 80) {
+          currentZoom -= 20;
+          scanSheet.style.transform = `scale(${currentZoom / 100})`;
+          scanSheet.style.transformOrigin = 'top center';
+          zoomLevelEl.textContent = `${currentZoom}%`;
+        }
+      });
+    }
+
+    // Interactive Dynamic Total Calculation with Sliders & Number inputs
+    const sliders = document.querySelectorAll('.criterion-slider');
+    const inputs = document.querySelectorAll('.criterion-input');
+    const totalDisplay = document.getElementById('total-score-display');
+
+    function calculateTotal() {
+      let sum = 0;
+      inputs.forEach(input => {
+        sum += parseFloat(input.value) || 0;
+      });
+      if (totalDisplay) {
+        totalDisplay.textContent = sum.toFixed(1);
+      }
+    }
+
+    sliders.forEach((slider, index) => {
+      const correspondingInput = inputs[index];
+      slider.addEventListener('input', (e) => {
+        if (correspondingInput) {
+          correspondingInput.value = parseFloat(e.target.value).toFixed(1);
+        }
+        calculateTotal();
+      });
+
+      if (correspondingInput) {
+        correspondingInput.addEventListener('input', (e) => {
+          slider.value = e.target.value;
+          calculateTotal();
+        });
+      }
+    });
+
+    // AI Recommendation 'Garder' Action
+    const aiAcceptBtn = document.getElementById('ai-accept-btn');
+    const globalFeedback = document.getElementById('global-feedback');
+    if (aiAcceptBtn && inputs.length >= 4) {
+      aiAcceptBtn.addEventListener('click', () => {
+        inputs[0].value = 4.5;
+        inputs[1].value = 3.5;
+        inputs[2].value = 4.5;
+        inputs[3].value = 4.0;
+        sliders[0].value = 4.5;
+        sliders[1].value = 3.5;
+        sliders[2].value = 4.5;
+        sliders[3].value = 4.0;
+        calculateTotal();
+
+        if (globalFeedback) {
+          globalFeedback.value = "Très bonne maîtrise globale de l'algorithme de rétropropagation. Veillez à inclure la mise à jour complète de la vitesse lors des optimisations accélérées.";
+        }
+
+        aiAcceptBtn.classList.remove('bg-primary');
+        aiAcceptBtn.classList.add('bg-secondary');
+        aiAcceptBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">done_all</span><span>Appliqué</span>';
+        setTimeout(() => {
+          aiAcceptBtn.classList.add('bg-primary');
+          aiAcceptBtn.classList.remove('bg-secondary');
+          aiAcceptBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>Garder</span>';
+        }, 2000);
+      });
+    }
+
+    // Toggle AI panel scroll
+    const toggleIaBtn = document.getElementById('toggle-ia-btn');
+    const aiPanel = document.getElementById('ai-assistant-panel');
+    if (toggleIaBtn && aiPanel) {
+      toggleIaBtn.addEventListener('click', () => {
+        aiPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  })();
+</script></main></div></body></html>

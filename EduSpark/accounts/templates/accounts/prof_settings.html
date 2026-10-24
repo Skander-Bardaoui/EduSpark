@@ -1,0 +1,89 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Paramètres du compte — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Compte</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Paramètres du compte</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Informations professionnelles, préférences de notification et sécurité de connexion.</p>
+</header>
+<div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+<div class="flex flex-col gap-6">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Profil enseignant</h2>
+<p class="text-xs text-on-surface-variant">Ces informations apparaissent sur vos pages de cours et vos supports.</p>
+</div>
+<form class="grid gap-4 p-5 sm:grid-cols-2" id="profile-form">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Prénom</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="text" value="Hélène"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nom</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="text" value="Vasseur"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">E-mail professionnel</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="email" value="helene.vasseur@u-paris.fr"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Téléphone</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="tel" value="+33 1 44 27 55 10"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Département</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary"><option>Informatique &amp; IA</option><option>Mathématiques appliquées</option><option>Réseaux &amp; Télécoms</option></select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Bureau</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="text" value="B301 · Bâtiment Sophie Germain"/></label>
+<label class="flex flex-col gap-1.5 sm:col-span-2"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Présentation</span><textarea class="min-h-24 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" rows="3">Enseignante-chercheuse en apprentissage automatique. Responsable du parcours M1 Intelligence Artificielle et référente pédagogique L3 Informatique.</textarea></label>
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4 sm:col-span-2">
+<p class="text-xs text-on-surface-variant">Dernière mise à jour : 12 octobre 2026</p>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer</button>
+</div>
+</form>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Préférences de notification</h2>
+<p class="text-xs text-on-surface-variant">Choisissez les événements pour lesquels vous souhaitez être alertée.</p>
+</div>
+<div class="divide-y divide-outline-variant/30">
+<div class="flex items-center justify-between gap-4 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Copies déposées</p><p class="text-xs text-on-surface-variant">Recevoir un e-mail à chaque dépôt de copie.</p></div><button aria-checked="true" class="relative h-6 w-11 shrink-0 rounded-full bg-primary transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-white shadow transition-transform"></span></button></div>
+<div class="flex items-center justify-between gap-4 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Questions de forum</p><p class="text-xs text-on-surface-variant">Être notifiée quand un étudiant vous mentionne.</p></div><button aria-checked="true" class="relative h-6 w-11 shrink-0 rounded-full bg-primary transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-white shadow transition-transform"></span></button></div>
+<div class="flex items-center justify-between gap-4 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Résumé hebdomadaire</p><p class="text-xs text-on-surface-variant">Synthèse des alertes de suivi chaque vendredi.</p></div><button aria-checked="true" class="relative h-6 w-11 shrink-0 rounded-full bg-primary transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-white shadow transition-transform"></span></button></div>
+<div class="flex items-center justify-between gap-4 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Notifications push</p><p class="text-xs text-on-surface-variant">Alertes en temps réel sur le navigateur.</p></div><button aria-checked="false" class="relative h-6 w-11 shrink-0 rounded-full bg-outline-variant transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"></span></button></div>
+<div class="flex items-center justify-between gap-4 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Demandes de tutorat</p><p class="text-xs text-on-surface-variant">Nouvelles demandes de rendez-vous étudiants.</p></div><button aria-checked="true" class="relative h-6 w-11 shrink-0 rounded-full bg-primary transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 translate-x-5 rounded-full bg-white shadow transition-transform"></span></button></div>
+</div>
+<div class="border-t border-outline-variant/40 px-5 py-4 text-right">
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" data-toast="Préférences de notification mises à jour." type="button"><span class="material-symbols-outlined text-[18px]">notifications_active</span>Mettre à jour</button>
+</div>
+</section>
+</div>
+<div class="flex flex-col gap-6">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sécurité</h2>
+</div>
+<form class="flex flex-col gap-3 p-5" id="security-form">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Mot de passe actuel</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="password" value="••••••••"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nouveau mot de passe</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="password" value=""/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Confirmer</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="password" value=""/></label>
+<button class="mt-1 inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" type="submit"><span class="material-symbols-outlined text-[16px]">lock_reset</span>Modifier le mot de passe</button>
+</form>
+<div class="border-t border-outline-variant/40 px-5 py-4">
+<div class="flex items-center justify-between gap-3">
+<div><p class="text-sm font-semibold text-on-surface">Double authentification</p><p class="text-xs text-on-surface-variant">Recommandée pour les comptes enseignants.</p></div>
+<button aria-checked="false" class="relative h-6 w-11 shrink-0 rounded-full bg-outline-variant transition-colors" data-switch role="switch" type="button"><span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"></span></button>
+</div>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sessions actives</h2>
+<ul class="mt-3 space-y-3 text-sm">
+<li class="flex items-start gap-3"><span class="material-symbols-outlined text-[20px] text-primary">laptop_mac</span><div class="min-w-0"><p class="font-semibold text-on-surface">Chrome · Windows</p><p class="text-xs text-on-surface-variant">Paris · Session actuelle</p></div></li>
+<li class="flex items-start gap-3"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">smartphone</span><div class="min-w-0"><p class="font-semibold text-on-surface">Safari · iPhone</p><p class="text-xs text-on-surface-variant">Paris · Il y a 2 heures</p></div></li>
+</ul>
+<button class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-error/30 px-4 py-2 text-xs font-bold text-error transition-colors hover:bg-error-container/40" data-toast="Les autres sessions seront déconnectées." data-toast-type="info" type="button"><span class="material-symbols-outlined text-[16px]">logout</span>Déconnecter les autres appareils</button>
+</section>
+</div>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var profile = document.getElementById('profile-form');
+  if (profile) profile.addEventListener('submit', function (e) { e.preventDefault(); window.portalToast('Profil enseignant enregistré.'); });
+  var security = document.getElementById('security-form');
+  if (security) security.addEventListener('submit', function (e) { e.preventDefault(); window.portalToast('Mot de passe mis à jour.', 'info'); });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Rendez-vous — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Accompagnement</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Rendez-vous</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Réservez un créneau avec votre tuteur référent ou un enseignant.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#appointment-modal" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>Demander un rendez-vous
+</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Rendez-vous à venir" value="2" icon="event_available" hint="Dont 1 cette semaine" %}
+{% include "portal/_stat_card.html" with label="Tutorat cette année" value="8" icon="support_agent" icon_class="bg-surface-container text-secondary" hint="Taux de présence : 100 %" %}
+{% include "portal/_stat_card.html" with label="Prochaine séance" value="Jeu. 24" icon="schedule" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="14h30 · Visioconférence" %}
+{% include "portal/_stat_card.html" with label="Créneaux disponibles" value="6" icon="calendar_month" hint="Cette semaine" %}
+</div>
+<section class="grid gap-4 lg:grid-cols-[1fr_340px]">
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Prochain rendez-vous</p>
+<div class="mt-3 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-sm font-extrabold">HV</span>
+<div><p class="font-headline-sm text-[17px] font-bold">Hélène Vasseur</p><p class="text-xs text-white/70">Tutrice référente · Réseaux de neurones</p></div>
+</div>
+<div class="rounded bg-white/10 px-4 py-2 text-center ring-1 ring-white/15">
+<p class="text-[11px] font-bold uppercase tracking-wider text-white/60">Jeudi 24 octobre</p>
+<p class="font-data-metric text-lg font-bold">14h30 – 15h00</p>
+</div>
+</div>
+<p class="mt-4 text-sm text-white/75">Point d'étape sur le projet IA embarquée et préparation de la soutenance intermédiaire.</p>
+<div class="mt-4 flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-toast="Salle de visioconférence ouverte." type="button"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20" data-toast="Demande de report envoyée à la tutrice." type="button"><span class="material-symbols-outlined text-[16px]">event_repeat</span>Reporter</button>
+</div>
+</div>
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Disponibilités des tuteurs</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Sélectionnez un créneau pour envoyer une demande.</p>
+<div class="mt-4 space-y-3">
+<div class="rounded border border-outline-variant/40 p-3.5">
+<div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed text-[11px] font-extrabold text-primary">HV</span><div class="min-w-0 flex-1"><p class="text-body-sm font-bold text-on-surface">Hélène Vasseur</p><p class="text-[11px] text-on-surface-variant">Tutorat méthodologique</p></div></div>
+<div class="mt-2.5 flex flex-wrap gap-1.5"><button class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary transition-colors hover:bg-primary hover:text-on-primary" data-slot="Hélène Vasseur" data-toast="Créneau du jeudi 24 oct. à 14h30 présélectionné." type="button">Jeu. 14:30</button><button class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-slot="Hélène Vasseur" data-toast="Créneau du vendredi 25 oct. à 10h00 présélectionné." type="button">Ven. 10:00</button></div>
+</div>
+<div class="rounded border border-outline-variant/40 p-3.5">
+<div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-fixed text-[11px] font-extrabold text-on-secondary-fixed">AD</span><div class="min-w-0 flex-1"><p class="text-body-sm font-bold text-on-surface">Amine Diallo</p><p class="text-[11px] text-on-surface-variant">Algorithmique &amp; méthodes</p></div></div>
+<div class="mt-2.5 flex flex-wrap gap-1.5"><button class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-slot="Amine Diallo" data-toast="Créneau du mercredi 30 oct. à 16h00 présélectionné." type="button">Mer. 16:00</button><button class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-slot="Amine Diallo" data-toast="Créneau du jeudi 31 oct. à 09h00 présélectionné." type="button">Jeu. 09:00</button></div>
+</div>
+<div class="rounded border border-outline-variant/40 p-3.5">
+<div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-[11px] font-extrabold text-on-tertiary-fixed">LM</span><div class="min-w-0 flex-1"><p class="text-body-sm font-bold text-on-surface">Lina Moreau</p><p class="text-[11px] text-on-surface-variant">Tutrice étudiante · méthode</p></div></div>
+<div class="mt-2.5 flex flex-wrap gap-1.5"><button class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-slot="Lina Moreau" data-toast="Créneau du mardi 29 oct. à 18h00 présélectionné." type="button">Mar. 18:00</button><button class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-slot="Lina Moreau" data-toast="Créneau du mercredi 30 oct. à 12h30 présélectionné." type="button">Mer. 12:30</button></div>
+</div>
+</div>
+<button class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-modal-open="#appointment-modal" type="button">Voir plus de créneaux</button>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4"><h2 class="font-headline-sm text-headline-sm text-on-surface">Historique des rendez-vous</h2></div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[700px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Interlocuteur</th><th class="px-5 py-3 font-bold">Objet</th><th class="px-5 py-3 font-bold">Modalité</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Jeudi 24 octobre · 14:30</td><td class="px-5 py-3 text-on-surface-variant">Hélène Vasseur</td><td class="px-5 py-3 text-on-surface-variant">Point projet &amp; soutenance</td><td class="px-5 py-3 text-on-surface-variant">Visioconférence</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Mardi 5 novembre · 17:00</td><td class="px-5 py-3 text-on-surface-variant">Amine Diallo</td><td class="px-5 py-3 text-on-surface-variant">Méthodologie de révision</td><td class="px-5 py-3 text-on-surface-variant">Bureau B204</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À venir" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Jeudi 3 octobre · 15:00</td><td class="px-5 py-3 text-on-surface-variant">Lina Moreau</td><td class="px-5 py-3 text-on-surface-variant">Organisation du travail</td><td class="px-5 py-3 text-on-surface-variant">Visioconférence</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Passé" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Vendredi 20 septembre · 11:00</td><td class="px-5 py-3 text-on-surface-variant">Hélène Vasseur</td><td class="px-5 py-3 text-on-surface-variant">Accueil et plan de travail</td><td class="px-5 py-3 text-on-surface-variant">Bureau B301</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Passé" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="appointment-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Demander un rendez-vous</h2>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button" aria-label="Fermer"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form class="space-y-4 p-5" data-appointment-form>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Tuteur</span>
+<select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus>
+<option>Hélène Vasseur</option><option>Amine Diallo</option><option>Lina Moreau</option>
+</select></label>
+<div class="grid gap-4 sm:grid-cols-2">
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Date souhaitée</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" required type="date"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Créneau</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"><option>14:30 – 15:00</option><option>15:00 – 15:30</option><option>16:00 – 16:30</option><option>17:00 – 17:30</option></select></label>
+</div>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Motif</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Décrivez brièvement votre demande..." required rows="3"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer la demande</button></div>
+</form>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var form = document.querySelector('[data-appointment-form]');
+  if (!form) return;
+  document.querySelectorAll('[data-slot]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var modal = document.getElementById('appointment-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('portal-drawer-open');
+        var tutor = modal.querySelector('select');
+        if (tutor) tutor.value = btn.getAttribute('data-slot');
+      }
+    });
+  });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var modal = document.getElementById('appointment-modal');
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.classList.remove('portal-drawer-open'); }
+    form.reset();
+    window.portalToast('Votre demande de rendez-vous a bien été envoyée.', 'success');
+  });
+})();
+</script>
+{% endblock %}

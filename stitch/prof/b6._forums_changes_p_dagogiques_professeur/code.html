@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><title>Hub Éducatif Multimodal - Portail Enseignant</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary":"#ffffff","on-tertiary-container":"#facf74","primary-container":"#004191","primary":"#004191","tertiary-container":"#594100","surface-container-highest":"#dde1ff","on-secondary-fixed":"#0f0069","primary-fixed":"#d8e2ff","inverse-on-surface":"#efefff","on-primary":"#ffffff","on-secondary-container":"#fffbff","secondary-fixed":"#e2dfff","secondary-container":"#655dfb","on-surface":"#06164b","inverse-primary":"#adc6ff","on-tertiary-fixed-variant":"#5c4300","tertiary-fixed-dim":"#e6c277","on-background":"#06164b","on-secondary":"#ffffff","on-surface-variant":"#424754","secondary":"#4b41e1","on-secondary-fixed-variant":"#3323cc","surface-bright":"#fbf8ff","error":"#ba1a1a","outline-variant":"#c3c6d3","on-error-container":"#93000a","primary-fixed-dim":"#aec6ff","on-tertiary-fixed":"#261a00","surface-container-low":"#f3f2ff","surface-dim":"#d2d8ff","surface-container-lowest":"#ffffff","tertiary-fixed":"#ffdf9f","error-container":"#ffdad6","on-error":"#ffffff","on-primary-container":"#8db1ff","outline":"#727785","secondary-fixed-dim":"#c3c0ff","surface":"#fbf8ff","surface-container-high":"#e4e7ff","surface-container":"#ecedff","surface-variant":"#dde1ff","inverse-surface":"#1f2d61","surface-tint":"#085ac0","on-primary-fixed-variant":"#004395","tertiary":"#594100","on-primary-fixed":"#001a42","background":"#fbf8ff"},"borderRadius":{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-md":"1rem","space-lg":"1.5rem","margin-mobile":"1.25rem","gutter-mobile":"1rem","margin":"3rem","gutter":"1.5rem","space-sm":"0.5rem","space-xl":"2.5rem"},"fontFamily":{"display-mobile":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"data-metric":["JetBrains Mono"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-lg":["Inter"]},"fontSize":{"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><a class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-space-md focus:py-space-sm focus:bg-primary focus:text-on-primary focus:rounded-full font-label-md shadow-lg outline-none" href="#main-content">Aller au contenu</a><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-40 flex flex-col shadow-[0_1px_8px_rgba(6,22,75,0.06)] overflow-y-auto"><div class="h-16 px-space-md flex items-center gap-space-sm shrink-0 bg-surface-container-lowest"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[20px]">school</span></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-title-md text-primary leading-tight truncate">Hub Éducatif</span><span class="font-label-sm text-secondary tracking-wider uppercase leading-none">Portail Enseignant</span></div></div><div class="px-space-md py-space-sm"><div class="p-space-sm rounded-DEFAULT bg-surface-container-low flex flex-col gap-1"><span class="font-label-sm text-on-surface-variant uppercase">Établissement actif</span><div class="flex items-center justify-between gap-1"><span class="font-title-md text-body-sm font-semibold text-on-surface truncate">Université Paris Cité</span><span class="material-symbols-outlined text-primary text-[18px]">verified</span></div></div></div><nav class="flex-1 px-space-sm py-space-sm space-y-space-md" data-active-classes="bg-primary-container text-on-primary font-bold rounded-DEFAULT shadow-[0_1px_8px_rgba(6,22,75,0.06)]"><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Tableau de bord</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-tableau-de-bord" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span>Mon Tableau de bord</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Compte</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-profil-enseignant-et-grades" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Mon Profil &amp; Grades</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-universites" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Mes Universités</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-classes-et-groupes" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span>Mes Classes &amp; Groupes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="parametres-du-compte" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Paramètres du compte</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Cours</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-cours" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Mes Cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="supports-de-cours" href="#"><span class="material-symbols-outlined text-[20px]">folder_shared</span><span>Supports de cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="emploi-du-temps-des-cours" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Emploi du temps</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="gestion-des-matieres" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Gestion des matières</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Exercices</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="banque-d-exercices" href="#"><span class="material-symbols-outlined text-[20px]">quiz</span><span>Banque d'exercices</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="devoirs-crees" href="#"><span class="material-symbols-outlined text-[20px]">assignment</span><span>Devoirs créés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="series-et-baremes" href="#"><span class="material-symbols-outlined text-[20px]">checklist</span><span>Séries &amp; Barèmes</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Examens &amp; Notes</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="sessions-d-examen" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span>Sessions d'examen</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="copies-a-corriger" href="#"><span class="material-symbols-outlined text-[20px]">draw</span><span>Copies à corriger</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="releves-de-notes-et-jurys" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Relevés &amp; Jurys</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Échanges</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="annonces" href="#"><span class="material-symbols-outlined text-[20px]">campaign</span><span>Annonces</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="forums-et-questions-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">forum</span><span>Forums &amp; Questions</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="messagerie-academique" href="#"><span class="material-symbols-outlined text-[20px]">mail</span><span>Messagerie</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="moderation" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span>Modération</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Suivi Référent</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="tableau-de-bord-de-mes-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span>Tableau de bord étudiants</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="fiches-etudiants-et-difficultes" href="#"><span class="material-symbols-outlined text-[20px]">person_search</span><span>Fiches &amp; Difficultés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="rendez-vous-de-tutorat" href="#"><span class="material-symbols-outlined text-[20px]">support_agent</span><span>Rendez-vous de tutorat</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="journal-de-progression-des-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span>Journal de progression</span></a></div></div></nav><div class="p-space-sm shrink-0 bg-surface-container-low"><div class="px-space-sm py-2 flex items-center justify-between text-on-surface-variant"><span class="font-data-metric text-on-surface-variant">v2.4 • Prof-IRIF</span><span class="w-2.5 h-2.5 rounded-full bg-secondary" title="Connexion sécurisée"></span></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(6,22,75,0.04)] z-30 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="relative flex items-center"><label class="sr-only" for="university-select">Changer d'université assignée</label><span class="material-symbols-outlined text-primary absolute left-3 pointer-events-none text-[20px]">account_balance</span><select class="appearance-none bg-surface-container-low text-on-surface font-title-md text-body-sm pl-9 pr-9 py-2 rounded-full cursor-pointer hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" id="university-select"><option selected="" value="uparis">Université Paris Cité</option><option value="sorbonne">Sorbonne Université</option><option value="saclay">Université Paris-Saclay</option></select><span class="material-symbols-outlined text-on-surface-variant absolute right-3 pointer-events-none text-[18px]">expand_more</span></div><div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low rounded-full px-space-md py-1.5"><span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span><input class="bg-transparent text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none w-64" placeholder="Rechercher cours, copies, étudiants..." type="search"/><kbd class="font-data-metric text-label-sm bg-surface-container-highest px-1.5 py-0.5 rounded text-on-surface-variant uppercase">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button aria-label="Notifications (3 non lues)" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-error text-on-error font-data-metric text-[10px] flex items-center justify-center font-bold">3</span></button><div class="h-7 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-1"><div class="relative"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest" title="En ligne"></span></div><div class="hidden md:flex flex-col text-left"><div class="flex items-center gap-1.5"><span class="font-label-md text-on-surface leading-tight">Prof. Hélène Vasseur</span><span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm px-1.5 py-0.2 rounded-full uppercase">Labo IRIF</span></div><span class="font-body-sm text-on-surface-variant leading-tight">Enseignant / Chercheur</span></div><span class="material-symbols-outlined text-on-surface-variant text-[20px] cursor-pointer">arrow_drop_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen" id="main-content"><div class="flex flex-col w-full">
+<!-- Subtle decorative ambient background elements constrained within parent -->
+<div class="relative w-full overflow-hidden px-space-md md:px-margin py-space-lg space-y-space-xl">
+<div class="absolute -top-32 right-12 w-96 h-96 rounded-full bg-primary-fixed/30 blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-96 -left-20 w-80 h-80 rounded-full bg-secondary-fixed/40 blur-3xl pointer-events-none -z-10"></div>
+<!-- 1. Fil d'Ariane & Contexte académique -->
+<section class="flex flex-col gap-space-xs">
+<nav aria-label="Fil d'ariane" class="flex items-center gap-space-xs font-label-sm text-on-surface-variant uppercase tracking-wider">
+<span class="hover:text-primary transition-colors cursor-pointer">Portail Enseignant</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary transition-colors cursor-pointer">Échanges</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Forums &amp; Questions Étudiantes</span>
+</nav>
+<!-- 2. Titre principal & Description synthétique -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pt-space-xs">
+<div class="max-w-3xl space-y-1">
+<div class="inline-flex items-center gap-space-xs bg-surface-container-high text-primary px-3 py-1 rounded-full font-label-sm uppercase tracking-wide">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span>Flux de modération centralisé • Semestre 2</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Forums Pédagogiques &amp; Modération des Échanges
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+            Répondez aux sollicitations académiques de vos étudiants, épinglez les annonces officielles pour vos promotions et identifiez les incompréhensions conceptuelles récurrentes.
+          </p>
+</div>
+<!-- 3. Barre d'action supérieure -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<button class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-surface-container-low text-primary hover:bg-surface-container-high transition-all font-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>7 questions non résolues</span>
+<span class="w-2 h-2 rounded-full bg-error ml-0.5"></span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all font-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">video_camera_front</span>
+<span>Permanence virtuelle</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md shadow-md hover:shadow-lg" type="button">
+<span class="material-symbols-outlined text-[18px]">campaign</span>
+<span>+ Nouvelle annonce certifiée</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed">verified</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. Cartes statistiques / KPIs en Bento Grid asymétrique -->
+<section aria-label="Indicateurs de performance des forums">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- KPI 1: Questions en attente -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Questions en attente</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">mark_chat_unread</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-sm">
+<span class="font-display text-headline-lg font-bold text-on-surface leading-none">7</span>
+<span class="inline-flex items-center gap-1 bg-error-container text-on-error-container font-label-sm px-2 py-0.5 rounded-full font-bold">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+              3 &gt; 24h
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+            Priorité haute sur le TP3 (INF501)
+          </p>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-error h-full rounded-full w-[43%]"></div>
+</div>
+</div>
+<!-- KPI 2: Délai moyen de réponse -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Délai moyen de réponse</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">timer</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-sm">
+<span class="font-display text-headline-lg font-bold text-on-surface leading-none">4h 15m</span>
+<span class="inline-flex items-center gap-0.5 text-primary font-data-metric text-data-metric font-semibold">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+              -35%
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+            Comparé à la moyenne de l'UFR Sciences
+          </p>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[78%]"></div>
+</div>
+</div>
+<!-- KPI 3: Annonces actives -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Annonces actives</span>
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-sm">
+<span class="font-display text-headline-lg font-bold text-on-surface leading-none">3</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm px-2 py-0.5 rounded-full">
+              Visibilité 100%
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs truncate">
+            M1 IA &amp; L3 Math-Informatique
+          </p>
+<div class="flex items-center gap-1.5 mt-3">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+</div>
+</div>
+<!-- KPI 4: Taux de satisfaction des réponses -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Taux de satisfaction</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-sm">
+<span class="font-display text-headline-lg font-bold text-primary leading-none">96.2%</span>
+<span class="font-label-sm text-on-surface-variant">/ 142 votes</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-xs">
+            Certifié par évaluation des pairs &amp; promos
+          </p>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[96.2%]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Filtres et sélecteurs de promotion -->
+<section class="space-y-space-sm">
+<!-- Onglets d'UEs -->
+<div class="flex flex-wrap items-center gap-space-xs pb-1">
+<button class="px-space-md py-2 rounded-full bg-primary text-on-primary font-label-md shadow-sm flex items-center gap-1.5 transition-all" type="button">
+<span>Tous mes cours</span>
+<span class="bg-white/20 text-on-primary text-label-sm px-1.5 py-0.2 rounded-full">14</span>
+</button>
+<button class="px-space-md py-2 rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container-high font-label-md flex items-center gap-1.5 transition-all" type="button">
+<span>INF501 • Réseaux de Neurones Profonds</span>
+<span class="bg-primary-fixed text-on-primary-fixed text-label-sm px-1.5 py-0.2 rounded-full">8</span>
+</button>
+<button class="px-space-md py-2 rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container-high font-label-md flex items-center gap-1.5 transition-all" type="button">
+<span>INF502 • Systèmes Distribués</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-label-sm px-1.5 py-0.2 rounded-full">4</span>
+</button>
+<button class="px-space-md py-2 rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container-high font-label-md flex items-center gap-1.5 transition-all" type="button">
+<span>INF503 • Algorithmique Avancée</span>
+<span class="bg-surface-container-highest text-on-surface-variant text-label-sm px-1.5 py-0.2 rounded-full">2</span>
+</button>
+</div>
+<!-- Filtres rapides d'état + Champ de recherche -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex flex-wrap items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-sm uppercase tracking-wide" type="button">
+            Toutes
+          </button>
+<button class="px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-sm uppercase tracking-wide font-bold flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+            Urgent / Bloquant (3)
+          </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high font-label-sm uppercase tracking-wide" type="button">
+            Sans réponse de l'équipe (4)
+          </button>
+<button class="px-3 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm uppercase tracking-wide flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[14px]">how_to_reg</span>
+            Résolues par les pairs à certifier (2)
+          </button>
+</div>
+<div class="relative w-full lg:w-96">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-sm pl-10 pr-10 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" placeholder="Rechercher un concept, une ligne de code ou un étudiant..." type="search"/>
+<kbd class="absolute right-3.5 top-1/2 -translate-y-1/2 font-data-metric text-[10px] bg-surface-container-high px-1.5 py-0.5 rounded text-on-surface-variant">⌘F</kbd>
+</div>
+</div>
+</section>
+<!-- Layout principal : Flux de questions (Col 8) + Volet IA Pédagogique (Col 4) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- 6. Flux de questions des étudiants (8 cols) -->
+<section aria-label="Fils de questions à modérer" class="lg:col-span-8 space-y-space-md">
+<!-- En-tête de section -->
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Questions prioritaires &amp; Discussions</h2>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Page 1 sur 3</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant font-label-sm">
+<span>Trier par :</span>
+<button class="font-bold text-primary flex items-center gap-0.5" type="button">
+              Urgence pédagogique
+              <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+</div>
+</div>
+<!-- Question 1: Urgent / À certifier (PyTorch ConvNets) -->
+<article class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm space-y-space-md group relative">
+<!-- Carte Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary font-title-md font-bold text-body-sm shrink-0">
+                LM
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Lucas Moreau</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm px-2 py-0.5 rounded-full">M1 IA • Promo 24/25</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Posée il y a 2 heures • 4 étudiants ont la même question</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-start sm:self-auto">
+<span class="bg-error-container text-on-error-container font-label-sm px-2.5 py-1 rounded-full uppercase tracking-wider font-bold inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                Bloquant TP3
+              </span>
+<span class="bg-surface-container-high text-primary font-label-sm px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
+                INF501
+              </span>
+</div>
+</div>
+<!-- Question Content -->
+<div class="space-y-space-xs">
+<h3 class="font-headline-sm text-title-md font-bold text-on-surface">
+              Problème de convergence sur AdamW avec lr=1e-4 : divergence des gradients lors de la passe backward
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Bonjour Professeur, dans le cadre de la séance de TP3 (modèle ResNet-18 modifié), mon tenseur de perte explose vers <code>NaN</code> dès l'époque 3. J'ai pourtant normalisé les entrées selon ImageNet. Voici le bloc d'optimisation incriminé :
+            </p>
+</div>
+<!-- Code Snippet multimodale -->
+<div class="bg-surface-container-highest rounded-DEFAULT p-space-md space-y-2">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-data-metric text-data-metric">train_step.py • PyTorch 2.2</span>
+<button class="font-label-sm text-primary flex items-center gap-1 hover:underline" type="button">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+                Copier l'extrait
+              </button>
+</div>
+<pre class="font-data-metric text-body-sm text-on-surface overflow-x-auto leading-relaxed p-2 bg-surface-container-lowest/60 rounded-DEFAULT"><code><span class="text-secondary font-bold">optimizer</span> = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-2)
+<span class="text-secondary font-bold">for</span> epoch <span class="text-secondary font-bold">in</span> range(num_epochs):
+    loss = criterion(outputs, labels)
+    loss.backward()
+    <span class="text-error font-bold"># [POINT DE RUPTURE IDENTIFIÉ] Absence de clip_grad_norm_</span>
+    optimizer.step()
+    optimizer.zero_grad()</code></pre>
+</div>
+<!-- Statut pédagogique -->
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm bg-surface-container-low px-space-md py-2 rounded-DEFAULT">
+<span class="material-symbols-outlined text-primary text-[18px]">pending_actions</span>
+<span>Statut : <strong class="text-on-surface">En attente de validation enseignant</strong>. 1 suggestion d'étudiant déposée.</span>
+</div>
+<!-- Actions de modération -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2">
+<div class="flex flex-wrap items-center gap-space-xs">
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">reply</span>
+<span>Répondre directement</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all font-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+<span>Valider la réponse d'un pair</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-space-md py-2 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all font-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+<span>Insérer dans le cours</span>
+</button>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-on-surface rounded-full hover:bg-surface-container-high transition-colors" title="Plus d'options" type="button">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Question 2: Résolue par un pair (Raft Quorum) -->
+<article class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm space-y-space-md relative">
+<!-- Carte Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-title-md font-bold text-body-sm shrink-0">
+                FB
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Fatima Benali</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm px-2 py-0.5 rounded-full">M1 IA • Consensus Raft</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Posée hier à 18:20 • Discussion active</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-start sm:self-auto">
+<span class="bg-surface-container-high text-secondary font-label-sm px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
+                INF502 • Systèmes Distribués
+              </span>
+</div>
+</div>
+<!-- Question Content -->
+<div class="space-y-space-xs">
+<h3 class="font-headline-sm text-title-md font-bold text-on-surface">
+              Condition de quorum lors d'une partition réseau asymétrique à 5 nœuds
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Si 2 nœuds sont isolés du Leader mais que le Leader voit toujours 3 nœuds (majorité stricte), le terme d'élection est-il incrémenté lors d'une tentative de split-brain côté minorité ?
+            </p>
+</div>
+<!-- Réponse d'un pair en encadré valorisant -->
+<div class="bg-surface-container-low rounded-DEFAULT p-space-md space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">psychology</span>
+<span class="font-title-md text-body-sm font-bold text-on-surface">Réponse proposée par Alexandre Chen (Étudiant Référent)</span>
+</div>
+<span class="bg-surface-container-highest text-secondary font-label-sm px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                Pertinente &amp; Rigoureuse
+              </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed pl-7 italic">
+              "Non, le côté minoritaire (2 nœuds) va tenter de déclencher une élection en incrémentant le Term, mais n'obtiendra jamais les 3 votes nécessaires pour former un nouveau quorum. Lorsque la partition se résorbe, le vrai Leader force les deux nœuds à adopter son log..."
+            </p>
+</div>
+<!-- Actions de validation officielle -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-1">
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-2 px-space-md py-2 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Certifier cette réponse comme officielle</span>
+</button>
+<button class="px-space-md py-2 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all font-label-md" type="button">
+                Ajouter une précision d'enseignant
+              </button>
+</div>
+<span class="font-label-sm text-on-surface-variant">Accorde +5 pts de contribution académique à l'étudiant</span>
+</div>
+</article>
+<!-- Question 3: Générale / Administration (Julien Vasseur) -->
+<article class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm space-y-space-md relative">
+<!-- Carte Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface font-title-md font-bold text-body-sm shrink-0">
+                JV
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Julien Vasseur</span>
+<span class="bg-surface-container text-on-surface-variant font-label-sm px-2 py-0.5 rounded-full">L1 Portail Sciences</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Posée ce matin à 09:12 • Administratif</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-start sm:self-auto">
+<span class="bg-surface-container text-on-surface-variant font-label-sm px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
+                Hors Cadre Pédagogique
+              </span>
+</div>
+</div>
+<!-- Question Content -->
+<div class="space-y-space-xs">
+<h3 class="font-headline-sm text-title-md font-bold text-on-surface">
+              Question sur les dates de rattrapage du semestre 1
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Madame la Professeure, je n'ai pas pu assister à l'examen de mathématiques fondamentales en janvier suite à une convocation médicale. Les jurys m'ont indiqué de voir avec le responsable d'UE pour le calendrier de 2e session. Pouvez-vous me confirmer la date ?
+            </p>
+</div>
+<!-- Actions de routage administratif -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 bg-surface-container-low p-space-sm rounded-DEFAULT">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">forward_to_inbox</span>
+<span>Demande relevant du secrétariat des licences Math-Info.</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">send</span>
+<span>Transférer à l'administration</span>
+</button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-all font-label-md" type="button">
+                Répondre template S1
+              </button>
+</div>
+</div>
+</article>
+</section>
+<!-- 7. Volet IA Latéral Standardisé (BETA MULTIMODALE) (4 cols) -->
+<aside aria-label="Assistant Pédagogique Intelligent" class="lg:col-span-4 space-y-space-md">
+<!-- Boîte principale IA -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-md space-y-space-md relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary-fixed/20 blur-xl pointer-events-none"></div>
+<!-- En-tête IA avec Badge Beta Multimodale -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-bold leading-tight">Assistant Forums IA</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Modèle EduSpark Académique</span>
+</div>
+</div>
+<span class="bg-secondary text-on-secondary font-label-sm px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold">
+              BETA MULTIMODALE
+            </span>
+</div>
+<!-- Sélecteur d'objectif pédagogique -->
+<div class="space-y-1.5">
+<label class="font-label-sm text-on-surface-variant uppercase tracking-wider" for="ai-objective-selector">Objectif de l'analyse</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-low text-on-surface font-label-md px-3.5 py-2.5 rounded-DEFAULT focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="ai-objective-selector">
+<option selected="" value="syn">Synthèse des blocages de promotion (Recommandé)</option>
+<option value="draft">Brouillon de réponse conceptuelle</option>
+<option value="faq">Génération automatique d'entrée FAQ</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Bloc Suggestion IA Détectée -->
+<div class="bg-surface-container rounded-DEFAULT p-space-md space-y-space-sm">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+<h4 class="font-title-md text-body-sm font-bold">Détection d'une incompréhension collective sur le TP3</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+<strong>4 étudiants distincts</strong> ont posé une question similaire sur l'inversion d'indice dans la backpropagation tensorielle (dim=1 vs dim=2).
+            </p>
+<div class="bg-surface-container-lowest p- space-sm rounded-DEFAULT space-y-1">
+<span class="font-label-sm text-primary uppercase font-bold tracking-wider">Action suggérée :</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Publier une note explicative d'une demi-page avec le schéma matriciel dans le fil d'annonces du cours <em>INF501</em>.
+              </p>
+</div>
+<!-- Boutons d'arbitrage normés OBLIGATOIRES -->
+<div class="pt-2 flex flex-col gap-2">
+<button class="w-full inline-flex items-center justify-center gap-2 px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">publish</span>
+<span>Garder &amp; Publier l'annonce</span>
+</button>
+<button class="w-full inline-flex items-center justify-center gap-2 px-space-md py-2 rounded-full bg-surface-container-highest text-on-surface hover:bg-surface-container-high transition-all font-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Modifier le texte</span>
+</button>
+<button class="w-full inline-flex items-center justify-center gap-1 py-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/20 transition-all font-label-sm uppercase tracking-wide" type="button">
+<span>Refuser la suggestion</span>
+</button>
+</div>
+</div>
+<!-- Micro-visualisation des tendances de questions -->
+<div class="space-y-space-xs pt-1">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm">
+<span class="uppercase">Sujets récurrents cette semaine</span>
+<span class="font-data-metric">64 messages</span>
+</div>
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-body-sm">
+<span class="text-on-surface truncate">Gradients &amp; Optimisation (INF501)</span>
+<span class="font-data-metric font-semibold text-primary">52%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-[52%]"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm pt-1">
+<span class="text-on-surface truncate">Partitions Réseau Raft (INF502)</span>
+<span class="font-data-metric font-semibold text-secondary">31%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full w-[31%]"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm pt-1">
+<span class="text-on-surface truncate">Modalités d'examen</span>
+<span class="font-data-metric font-semibold text-on-surface-variant">17%</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-outline h-full rounded-full w-[17%]"></div>
+</div>
+</div>
+</div>
+<!-- Encadré de résilience obligatoire -->
+<div class="bg-surface-container-low rounded-DEFAULT p-space-md space-y-1 flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
+<div class="space-y-0.5">
+<span class="font-label-sm text-on-surface uppercase font-bold tracking-wide">Garantie de continuité de service</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+                La modération et l'envoi de messages manuels restent 100% disponibles sans IA.
+              </p>
+</div>
+</div>
+</div>
+<!-- Carte rapide : Raccourcis de permanence & Modérateurs adjoints -->
+<div class="bg-surface-container-lowest rounded-DEFAULT p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<h4 class="font-title-md text-title-md text-on-surface">Équipe de monitorat</h4>
+<span class="font-label-sm text-primary font-bold cursor-pointer hover:underline">Gérer (3)</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between text-body-sm p-2 rounded-DEFAULT bg-surface-container-low">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-label-sm text-primary">
+                  AC
+                </div>
+<div class="flex flex-col">
+<span class="font-title-md text-body-sm text-on-surface">A. Chen (Doctorant)</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Actif sur INF502</span>
+</div>
+</div>
+<span class="w-2 h-2 rounded-full bg-secondary" title="En ligne"></span>
+</div>
+<div class="flex items-center justify-between text-body-sm p-2 rounded-DEFAULT bg-surface-container-low">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-label-sm text-on-surface">
+                  SL
+                </div>
+<div class="flex flex-col">
+<span class="font-title-md text-body-sm text-on-surface">S. Laurent (ATER)</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Permanence ven. 14h</span>
+</div>
+</div>
+<span class="w-2 h-2 rounded-full bg-outline-variant" title="Absent"></span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div></main></div></body></html>

@@ -1,0 +1,52 @@
+diff --git a/EduSpark/landing/templates/landing/index.html b/EduSpark/landing/templates/landing/index.html
+index 6578aa7..b8f4f0a 100644
+--- a/EduSpark/landing/templates/landing/index.html
++++ b/EduSpark/landing/templates/landing/index.html
+@@ -38,7 +38,7 @@
+       </p>
+ <!-- Liquid Glass Email Action Input + Arrow Button -->
+ <div class="mt-6 w-full max-w-xl">
+-<form method="get" action="{% url 'accounts:signup' %}" class="p-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-2xl shadow-[0_12px_40px_rgba(6,22,75,0.4)] flex items-center justify-between gap-space-xs transition-all focus-within:bg-surface-container-lowest/25">
++<form method="get" action="{% url 'users:signup' %}" class="p-1.5 rounded-full bg-surface-container-lowest/15 backdrop-blur-2xl shadow-[0_12px_40px_rgba(6,22,75,0.4)] flex items-center justify-between gap-space-xs transition-all focus-within:bg-surface-container-lowest/25">
+ <div class="flex items-center pl-space-md gap-space-xs w-full">
+ <span class="material-symbols-outlined text-outline-variant text-[20px]">alternate_email</span>
+ <input aria-label="Adresse email" class="w-full bg-transparent text-surface-container-lowest placeholder:text-outline-variant font-body-md text-body-md focus:outline-none" name="email" placeholder="Entrez votre email académique ou professionnel" type="email"/>
+diff --git a/EduSpark/users/templates/users/partials/page_header.html b/EduSpark/users/templates/users/partials/page_header.html
+index 00b89db..f991dd9 100644
+--- a/EduSpark/users/templates/users/partials/page_header.html
++++ b/EduSpark/users/templates/users/partials/page_header.html
+@@ -1,4 +1,33 @@
+-<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
++ProgrammingError at /accounts/connexion/
++la relation « users_user » n'existe pas
++LINE 1: ...l", "users_user"."phone", "users_user"."bio" FROM "users_use...
++                                                             ^
++Request Method:	POST
++Request URL:	http://127.0.0.1:8000/accounts/connexion/
++Django Version:	5.2.17
++Exception Type:	ProgrammingError
++Exception Value:	
++la relation « users_user » n'existe pas
++LINE 1: ...l", "users_user"."phone", "users_user"."bio" FROM "users_use...
++                                                             ^
++Exception Location:	C:\Users\skonb\Desktop\Nouveau dossier\EduSpark\.venv\Lib\site-packages\psycopg\cursor.py, line 117, in execute
++Raised during:	users.views.auth.login_view
++Python Executable:	C:\Users\skonb\Desktop\Nouveau dossier\EduSpark\.venv\Scripts\python.exe
++Python Version:	3.11.9
++Python Path:	
++['C:\\Users\\skonb\\Desktop\\Nouveau dossier\\EduSpark\\EduSpark',
++ 'C:\\Program '
++ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\python311.zip',
++ 'C:\\Program '
++ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\DLLs',
++ 'C:\\Program '
++ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\\Lib',
++ 'C:\\Program '
++ 'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0',
++ 'C:\\Users\\skonb\\Desktop\\Nouveau dossier\\EduSpark\\.venv',
++ 'C:\\Users\\skonb\\Desktop\\Nouveau '
++ 'dossier\\EduSpark\\.venv\\Lib\\site-packages']
++Server time:	Sat, 24 Oct 2026 17:21:41 +0000<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-md">
+   <div class="min-w-0">
+     {% if eyebrow %}<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric mb-space-xs uppercase"><span class="material-symbols-outlined text-[14px]">{{ icon|default:"apps" }}</span><span>{{ eyebrow }}</span></div>{% endif %}
+     <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background tracking-tight break-words">{{ title }}</h1>

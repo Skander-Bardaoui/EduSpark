@@ -1,0 +1,579 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Examens — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Top Context Header & Actions -->
+<header class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
+<div class="max-w-3xl">
+<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm uppercase tracking-wider mb-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-body-md">school</span>
+<span>Année Universitaire 2024-2025 • Semestre 1</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+        Mes Examens, Copies &amp; Relevés de Notes
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+        Consultez vos épreuves à venir, vos résultats certifiés et le détail des corrections académiques.
+      </p>
+</div>
+<!-- AI Toggle Button -->
+<div class="flex items-center gap-space-md shrink-0">
+<button aria-controls="ai-simulation-panel" aria-expanded="false" class="group relative inline-flex items-center gap-space-sm px-space-lg py-3 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="toggle-ai-panel-btn" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-secondary transition-transform group-hover:rotate-12" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md">Simulateur de Notes &amp; Mention IA</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-[11px] uppercase font-bold tracking-wider">Actif</span>
+</button>
+</div>
+</header>
+<!-- Segmented Tabs / Navigation -->
+<nav aria-label="Sections des examens et résultats" class="flex items-center gap-space-xs p-1.5 rounded bg-surface-container-low max-w-fit mb-space-xl overflow-x-auto shadow-xs" role="tablist">
+<button aria-controls="panel-sessions" aria-selected="true" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary" id="tab-sessions" role="tab">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">event_upcoming</span>
+<span>Sessions d'examen</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric font-semibold">2</span>
+</button>
+<button aria-controls="panel-evaluations" aria-selected="false" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-primary" id="tab-evaluations" role="tab">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>Copies corrigées &amp; Évaluations</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-data-metric text-data-metric">4</span>
+</button>
+<button aria-controls="panel-transcripts" aria-selected="false" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-primary" id="tab-transcripts" role="tab">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">verified</span>
+<span>Relevés officiels &amp; Attestations</span>
+</button>
+</nav>
+<!-- Main Content & Resilient AI Panel Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left / Center Main Stream (Exam Workflow) -->
+<div class="flex flex-col gap-space-xl lg:col-span-8 transition-all duration-300" id="main-content-column">
+<!-- Section 1: Sessions d'examen actives & à venir -->
+<section aria-labelledby="heading-active-sessions" class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span aria-hidden="true" class="flex h-3 w-3 rounded-full bg-secondary animate-pulse"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="heading-active-sessions">
+              Sessions d'examen actives &amp; à venir
+            </h2>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Session Hiver 2024</span>
+</div>
+<div class="grid grid-cols-1 gap-space-md">
+<!-- Card 1: Présentiel avec tiers-temps -->
+<article class="relative flex flex-col p-space-lg rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-all overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary rounded-l"></div>
+<div class="flex flex-col xl:flex-row xl:items-start justify-between gap-space-md">
+<div class="flex flex-col max-w-xl">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-xs">
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-bold uppercase">
+                    INF501 • Systèmes Distribués
+                  </span>
+<span class="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">balance</span>
+                    Coeff. <span class="font-data-metric font-semibold text-on-surface">3.0</span>
+</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors">
+                  Partiel Mi-Parcours : Algorithmes de consensus &amp; RPC
+                </h3>
+</div>
+<!-- Icon + Text Accessible Status -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed self-start font-label-md text-label-md" role="status">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-semibold">Convoqué / Présentiel validé</span>
+</div>
+</div>
+<!-- Details metadata grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md my-space-md p-space-md rounded bg-surface-container-low">
+<div class="flex items-start gap-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5">calendar_clock</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Horaire de début</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Mercredi 30 Octobre — 08h30</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Durée standard : 2h00</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5">location_on</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Emplacement certifié</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Amphi Turing (Présentiel)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Campus Grands Moulins, Aile C, Place 42</span>
+</div>
+</div>
+</div>
+<!-- WCAG Accessibility Notice for Tiers-Temps -->
+<div aria-label="Aménagement pédagogique spécialisé" class="flex items-center gap-space-sm p-3 rounded bg-tertiary-fixed text-on-tertiary-fixed mb-space-md" role="note">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-tertiary shrink-0">accessibility_new</span>
+<p class="font-body-sm text-body-sm text-on-tertiary-fixed-variant leading-snug">
+<strong>Aménagement tiers-temps accordé (+40 min).</strong> Fin effective de votre épreuve reprogrammée à <strong class="font-data-metric text-on-tertiary-fixed">11h10</strong>. Casque antibruit personnel autorisé après inspection.
+              </p>
+</div>
+<!-- Card Actions -->
+<div class="flex flex-wrap items-center justify-between gap-space-md pt-space-xs">
+<button aria-label="Télécharger la convocation officielle au format PDF accessible" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">download</span>
+<span class="font-label-md text-label-md">Télécharger la convocation (PDF/UA)</span>
+</button>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-data-metric text-data-metric">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-secondary">shield</span>
+<span>SHA-256 : 9bf1...c4a1</span>
+</div>
+</div>
+</article>
+<!-- Card 2: Examen en ligne sécurisé -->
+<article class="relative flex flex-col p-space-lg rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-all overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary rounded-l"></div>
+<div class="flex flex-col xl:flex-row xl:items-start justify-between gap-space-md">
+<div class="flex flex-col max-w-xl">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-xs">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold uppercase">
+                    ETH402 • Éthique des Systèmes Autonomes
+                  </span>
+<span class="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-secondary">balance</span>
+                    Coeff. <span class="font-data-metric font-semibold text-on-surface">1.5</span>
+</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface group-hover:text-secondary transition-colors">
+                  Épreuve en ligne : QCM Chronométré IA &amp; Éthique Appliquée
+                </h3>
+</div>
+<!-- Icon + Text Accessible Status -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md" role="status">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-secondary">lock_clock</span>
+<span class="font-semibold">Accès ouvert à 13h50</span>
+</div>
+</div>
+<!-- Details metadata grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md my-space-md p-space-md rounded bg-surface-container-low">
+<div class="flex items-start gap-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-secondary mt-0.5">schedule</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Créneau d'évaluation</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Lundi 4 Novembre — 14h00 à 15h00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Verrouillage automatique à 15h00 pile</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-secondary mt-0.5">devices</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Modalité technique</span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">Navigateur sécurisé (Safe Exam Browser)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Webcam &amp; audio requis pour protocole anti-fraude</span>
+</div>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="flex flex-wrap items-center justify-between gap-space-md pt-space-xs">
+<button class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-secondary text-on-secondary hover:bg-secondary-container transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">settings_ethernet</span>
+<span class="font-label-md text-label-md">Vérifier la configuration technique</span>
+</button>
+<span class="text-on-surface-variant font-body-sm text-body-sm">
+                Dernier test réseau : <strong class="text-on-surface font-data-metric">Conforme (Ping 18ms)</strong>
+</span>
+</div>
+</article>
+</div>
+</section>
+<!-- Section 2: Dépôt de copie manuscrite & numérisation -->
+<section aria-labelledby="heading-digitization" class="flex flex-col gap-space-md p-space-lg rounded bg-surface-container-low">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm uppercase font-bold tracking-wider">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">document_scanner</span>
+<span>Module Interactif de Numérisation</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="heading-digitization">
+              Dépôt de copie manuscrite
+            </h2>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">timer</span>
+<span>Clôture dans <strong class="font-data-metric text-on-surface">02h 14m</strong></span>
+</div>
+</div>
+<div class="p-space-md rounded bg-surface-container-lowest flex flex-col gap-space-md">
+<div class="flex items-center justify-between border-b border-surface-container-high pb-space-sm">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold">INF503 • Algorithmique Avancée</span>
+<p class="font-title-md text-title-md text-on-surface">Examen blanc &amp; Analyse de complexité amortie</p>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">ID: CC-2024-INF503-01</span>
+</div>
+<!-- Drag and Drop Zone -->
+<div aria-label="Zone de téléversement de scan de copie" class="flex flex-col items-center justify-center p-space-lg rounded bg-surface-container text-center transition-all hover:bg-surface-variant/70 focus-within:ring-2 focus-within:ring-primary" role="region" tabindex="0">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-space-sm shadow-xs">
+<span aria-hidden="true" class="material-symbols-outlined text-[28px]">cloud_upload</span>
+</div>
+<p class="font-title-md text-title-md text-on-surface mb-1">
+              Glissez et déposez vos pages scannées ici
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md mb-space-md">
+              Formats acceptés : PDF haute résolution, PNG ou JPEG. Traitement automatique du contraste pour lisibilité optimale.
+            </p>
+<label class="cursor-pointer inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-xs hover:bg-surface-container-high transition-all">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+<span>Importer photos / scans</span>
+<input accept="image/*,.pdf" aria-label="Sélectionner des fichiers de copie" class="sr-only" multiple="" type="file"/>
+</label>
+</div>
+<!-- Interactive Previews of Scanned Pages -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface">
+                Pages numérisées vérifiées (2 pages prêtes)
+              </span>
+<button class="inline-flex items-center gap-1 text-primary hover:text-primary-container font-label-sm text-label-sm uppercase font-bold" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">post_add</span>
+<span>Ajouter une page</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Page 1 Preview -->
+<div class="flex flex-col p-space-md rounded bg-surface-container-low group">
+<div class="relative w-full h-56 rounded overflow-hidden bg-surface-container-lowest flex items-center justify-center shadow-xs">
+<img class="w-full h-full object-cover object-top" data-alt="Photographie nette et contrastée d'une copie manuscrite universitaire d'algorithmique montrant des formules mathématiques, des arbres binaires dessinés à l'encre bleue et des équations de complexité temporelle sur papier quadrillé blanc." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFraL1E-Hbxp9cMpQCPVUMOO-KcxDmBSiU31PEdrHNPW8qB_HTj6FsDCRYHz-1WajoG_kaD4InnCnXBRiGxGCZ1HgX5mXF7s1N2VuiwUrBlvVpSL_pFzX0Ea8LJPWJ4U0C1_7ETkLUDMsSCGibCVGte0Mdi860-TH4zlgq_lreIOvJ4zKxq4tivl7kRhsIdBbGiGj2-DW3ZING7gDyYIjsuQT409YbVzYHulWUvkQ"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-on-background/80 backdrop-blur-sm text-on-primary font-data-metric text-data-metric">
+                    Page 1 / 2
+                  </div>
+<div class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-primary/90 text-on-primary font-label-sm text-label-sm">
+                    Lisibilité 98%
+                  </div>
+</div>
+<!-- Action Tools -->
+<div class="flex items-center justify-between gap-1 mt-space-sm">
+<div class="flex items-center gap-1">
+<button aria-label="Recadrer la page 1" class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" title="Recadrer les marges de la page 1" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">crop</span>
+</button>
+<button aria-label="Pivoter la page 1 de 90 degrés" class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" title="Pivoter de 90 degrés" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">rotate_right</span>
+</button>
+</div>
+<button aria-label="Remplacer la photo de la page 1" class="inline-flex items-center gap-1 px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-sm text-label-sm transition-all" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">swap_horiz</span>
+<span>Remplacer</span>
+</button>
+</div>
+</div>
+<!-- Page 2 Preview -->
+<div class="flex flex-col p-space-md rounded bg-surface-container-low group">
+<div class="relative w-full h-56 rounded overflow-hidden bg-surface-container-lowest flex items-center justify-center shadow-xs">
+<img class="w-full h-full object-cover object-top" data-alt="Document universitaire manuscrit scanné montrant la suite d'une démonstration d'informatique théorique, un tableau de variables et une signature d'étudiant en bas de page dans une lumière douce et homogène." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_uPFVkOTy8m0VIJZ7jTcmzXvr2UCNZp4MpAxwM_EeDM1cR7qjIY8BPUnbp3vh9Y6RREViIS6vvdvA4LIa42Kd8FqLjf-ZVDG5WP02nbpOEe5FkA1-5uzzKBGCpFQiPaf3UCcuQn48TFIacGBd46yLnQaOwN6JqLgyyVC8NmFZNqY-NHd5_PY28zpMWc1qBE_sMlRQI5PT6nsGtbeJNYeVTGWbKDDCaQbAay4PKJw"/>
+<div class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-on-background/80 backdrop-blur-sm text-on-primary font-data-metric text-data-metric">
+                    Page 2 / 2
+                  </div>
+<div class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-primary/90 text-on-primary font-label-sm text-label-sm">
+                    Lisibilité 96%
+                  </div>
+</div>
+<!-- Action Tools -->
+<div class="flex items-center justify-between gap-1 mt-space-sm">
+<div class="flex items-center gap-1">
+<button aria-label="Recadrer la page 2" class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" title="Recadrer les marges de la page 2" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">crop</span>
+</button>
+<button aria-label="Pivoter la page 2 de 90 degrés" class="p-1.5 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" title="Pivoter de 90 degrés" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">rotate_right</span>
+</button>
+</div>
+<button aria-label="Remplacer la photo de la page 2" class="inline-flex items-center gap-1 px-2 py-1 rounded text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-sm text-label-sm transition-all" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">swap_horiz</span>
+<span>Remplacer</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Final Submit Button -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-xs mt-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-tertiary">verified_user</span>
+<span>Génération automatique de reçu d'horodatage eIDAS</span>
+</div>
+<button class="w-full sm:w-auto inline-flex items-center justify-center gap-space-sm px-space-xl py-3 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">send</span>
+<span class="font-label-md text-label-md">Soumettre la copie (Horodatage officiel)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Dernières corrections détaillées (Grille & Barème) -->
+<section aria-labelledby="heading-graded-exams" class="flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="heading-graded-exams">
+              Dernières corrections détaillées
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Visualisez le détail critère par critère validé par le jury académique.
+            </p>
+</div>
+<!-- Download Semestrial Transcript -->
+<button aria-label="Exporter le relevé officiel signé numériquement au format PDF" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant transition-all font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+<span>Exporter le relevé officiel signé numériquement (PDF)</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Graded Item 1: With Expanded Criteria Grid -->
+<article class="flex flex-col p-space-lg rounded bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-md border-b border-surface-container-high">
+<div class="flex items-start gap-space-md">
+<div class="w-14 h-14 rounded bg-primary-fixed flex flex-col items-center justify-center shrink-0">
+<span class="font-data-metric font-bold text-[18px] text-primary leading-none">17.5</span>
+<span class="font-data-metric text-[11px] text-on-primary-fixed-variant">/ 20</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">TP3 : Classification ConvNets &amp; Optimisation</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Module : Vision par Ordinateur (IA-504) • Enseignante : Prof. Hélène Vasseur • Coeff. <span class="font-data-metric font-semibold text-on-surface">2.0</span>
+</p>
+</div>
+</div>
+<!-- Icon + Text Status -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md shrink-0">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-semibold">Publié &amp; Validé</span>
+</div>
+</div>
+<!-- Detailed Rubric / Barème (Accordion Container) -->
+<div class="mt-space-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface flex items-center gap-space-xs">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary">table_chart</span>
+                  Grille d'évaluation critériée &amp; barème
+                </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Rang de promotion : <strong class="text-on-surface font-data-metric">4 / 78</strong></span>
+</div>
+<!-- Accessible Table / Grid for Criteria -->
+<div class="overflow-x-auto rounded bg-surface-container-low">
+<table aria-label="Détail des points par critère pour le TP3" class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-container-high bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-2.5 px-space-md font-semibold" scope="col">Critère évalué</th>
+<th class="py-2.5 px-space-md font-semibold" scope="col">Pondération</th>
+<th class="py-2.5 px-space-md font-semibold text-right" scope="col">Points obtenus</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm">
+<tr>
+<th class="py-3 px-space-md font-normal text-on-surface" scope="row">Architecture ResNet &amp; Skip-connections</th>
+<td class="py-3 px-space-md text-on-surface-variant">5.0 pts max</td>
+<td class="py-3 px-space-md text-right font-data-metric font-semibold text-primary">5.0 / 5.0</td>
+</tr>
+<tr>
+<th class="py-3 px-space-md font-normal text-on-surface" scope="row">Stratégie d'optimisation AdamW &amp; Learning Rate Schedule</th>
+<td class="py-3 px-space-md text-on-surface-variant">5.0 pts max</td>
+<td class="py-3 px-space-md text-right font-data-metric font-semibold text-primary">4.5 / 5.0</td>
+</tr>
+<tr>
+<th class="py-3 px-space-md font-normal text-on-surface" scope="row">Rapport d'expérience, courbes &amp; matrice de confusion</th>
+<td class="py-3 px-space-md text-on-surface-variant">5.0 pts max</td>
+<td class="py-3 px-space-md text-right font-data-metric font-semibold text-primary">4.0 / 5.0</td>
+</tr>
+<tr>
+<th class="py-3 px-space-md font-normal text-on-surface" scope="row">Respect des consignes &amp; reproductibilité du dépôt Git</th>
+<td class="py-3 px-space-md text-on-surface-variant">4.0 pts max</td>
+<td class="py-3 px-space-md text-right font-data-metric font-semibold text-primary">4.0 / 4.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Teacher Note Callout -->
+<div class="flex items-start gap-space-sm p-space-md rounded bg-surface-container">
+<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5 shrink-0">rate_review</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Remarques de l'enseignant</span>
+<blockquote class="font-body-md text-body-md text-on-surface italic mt-0.5">
+                    « Excellent travail de validation croisée et analyse rigoureuse des erreurs résiduelles sur la classe 7. La courbe de convergence témoigne d'une maîtrise nette de l'initialisation He. »
+                  </blockquote>
+<span class="font-label-sm text-label-sm text-primary mt-1 font-semibold">— Prof. Hélène Vasseur, le 24 Octobre 2024</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Graded Item 2: Compact card -->
+<article class="flex flex-col md:flex-row md:items-center justify-between gap-space-md p-space-lg rounded bg-surface-container-lowest shadow-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-14 h-14 rounded bg-secondary-fixed flex flex-col items-center justify-center shrink-0">
+<span class="font-data-metric font-bold text-[18px] text-secondary leading-none">15.0</span>
+<span class="font-data-metric text-[11px] text-on-secondary-fixed-variant">/ 20</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Devoir 2 : Implémentation du Consensus Raft</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Module : Systèmes Distribués (INF-501) • Coeff. <span class="font-data-metric font-semibold text-on-surface">1.0</span> • Élection de leader &amp; tolérance aux pannes réseau
+                </p>
+</div>
+</div>
+<div class="flex items-center gap-space-md self-end md:self-center">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">check</span>
+<span>Publié</span>
+</div>
+<button aria-label="Afficher la grille complète du Devoir 2 Raft" class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+</div>
+<!-- Right Side: Persistent AI Simulator Panel (Standard Pattern) -->
+<aside aria-label="Simulateur et analyse prédictive IA des notes" class="lg:col-span-4 flex flex-col gap-space-md p-space-lg rounded bg-surface-container-lowest shadow-sm sticky top-28" id="ai-simulation-panel">
+<!-- Panel Header -->
+<div class="flex items-start justify-between gap-space-sm pb-space-sm border-b border-surface-container-high">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">
+              Simulateur &amp; Analyse IA
+            </h2>
+<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">
+              Beta Multimodale
+            </span>
+</div>
+</div>
+<button aria-label="Fermer le simulateur IA" class="p-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary" id="close-ai-panel-btn" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- WCAG Error Resilience Notice (Collapsible / Informational) -->
+<div class="flex items-start gap-space-xs p-2.5 rounded bg-surface-container text-on-surface-variant font-body-sm text-xs leading-snug" role="status">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-outline shrink-0 mt-0.5">info</span>
+<span>
+          En cas d'interruption du réseau neuronal, le moteur de calcul arithmétique standard prend le relais sans perte de données.
+        </span>
+</div>
+<!-- Simulator Target Controls -->
+<div class="flex flex-col gap-space-sm">
+<label class="font-label-md text-label-md text-on-surface" for="simulation-target-select">
+          Objectif académique visé
+        </label>
+<div class="relative">
+<select class="w-full appearance-none px-space-md py-2.5 rounded bg-surface-container-low text-on-surface font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary pr-10 cursor-pointer" id="simulation-target-select">
+<option value="tb">Mention Très Bien (Moyenne &gt;= 16.0)</option>
+<option value="b">Mention Bien (Moyenne &gt;= 14.0)</option>
+<option value="ab">Mention Assez Bien (Moyenne &gt;= 12.0)</option>
+<option value="pass">Validation simple du semestre (Moyenne &gt;= 10.0)</option>
+</select>
+<span aria-hidden="true" class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-on-surface-variant text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Simulation Metric Overview (SVG Chart Dial) -->
+<div class="flex flex-col items-center justify-center p-space-md rounded bg-surface-container-low">
+<div class="relative flex items-center justify-center">
+<!-- Circular Progress SVG Meter -->
+<svg aria-hidden="true" class="w-36 h-36 transform -rotate-90" viewbox="0 0 120 120">
+<circle class="stroke-surface-container-high" cx="60" cy="60" fill="none" r="50" stroke-width="10"></circle>
+<circle class="stroke-secondary" cx="60" cy="60" fill="none" r="50" stroke-dasharray="314.159" stroke-dashoffset="59.7" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center text-center">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">16.2</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1">Moyenne actuelle</span>
+</div>
+</div>
+<div class="w-full flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric mt-space-sm pt-space-xs border-t border-surface-container-high">
+<span>ECTS acquis : <strong>24 / 30</strong></span>
+<span>Rang estimé : <strong>Top 5%</strong></span>
+</div>
+</div>
+<!-- Action Button to Trigger Calculations -->
+<button class="w-full inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-secondary text-on-secondary hover:bg-secondary-container transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="recalc-btn" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">calculate</span>
+<span class="font-label-md text-label-md">Calculer les projections</span>
+</button>
+<!-- AI Suggestion Card -->
+<div aria-label="Recommandation de l'intelligence artificielle" class="p-space-md rounded bg-surface-container text-on-surface flex flex-col gap-space-xs" role="region">
+<div class="flex items-center gap-1.5 text-secondary font-label-sm text-label-sm font-bold uppercase">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span>Synthèse prédictive personnalisée</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+          Avec vos notes actuelles (<strong class="font-data-metric text-primary">moyenne 16.2/20</strong>) et vos coefficients restants, une note minimale de <strong class="font-data-metric text-secondary font-bold">12.5/20</strong> au partiel de Systèmes Distribués vous assure la <strong class="text-on-surface">Mention Très Bien (≥ 16.0)</strong>.
+        </p>
+</div>
+<!-- 3 Standard AI Action Buttons -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-xs pt-space-xs">
+<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" title="Sauvegarder dans mes objectifs personnels" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">bookmark</span>
+<span>Garder</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-variant transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" title="Ajuster les hypothèses de notes" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" id="dismiss-ai-suggestion" title="Fermer cette recommandation" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px]">block</span>
+<span>Refuser</span>
+</button>
+</div>
+<!-- Fallback Error Alert Banner (Hidden by default, resilient toggle) -->
+<div class="hidden p-space-sm rounded bg-error-container text-on-error-container text-body-sm flex items-start gap-space-xs" id="ai-error-banner">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">report_problem</span>
+<p class="font-body-sm text-xs leading-snug">
+          L'IA est momentanément indisponible. Le calcul automatique standard reste accessible.
+        </p>
+</div>
+</aside>
+</div>
+</div>
+<script>
+  // Micro-interaction handlers for AI panel toggle and resilience actions
+  (function initExamScreen() {
+    const toggleBtn = document.getElementById('toggle-ai-panel-btn');
+    const closeBtn = document.getElementById('close-ai-panel-btn');
+    const dismissBtn = document.getElementById('dismiss-ai-suggestion');
+    const aiPanel = document.getElementById('ai-simulation-panel');
+    const contentCol = document.getElementById('main-content-column');
+    const recalcBtn = document.getElementById('recalc-btn');
+    const errorBanner = document.getElementById('ai-error-banner');
+
+    function togglePanel() {
+      const isHidden = aiPanel.classList.contains('hidden');
+      if (isHidden) {
+        aiPanel.classList.remove('hidden');
+        contentCol.classList.remove('lg:col-span-12');
+        contentCol.classList.add('lg:col-span-8');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+      } else {
+        aiPanel.classList.add('hidden');
+        contentCol.classList.remove('lg:col-span-8');
+        contentCol.classList.add('lg:col-span-12');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', togglePanel);
+    if (closeBtn) closeBtn.addEventListener('click', togglePanel);
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        const suggestionCard = dismissBtn.closest('aside').querySelector('[role="region"]');
+        if (suggestionCard) {
+          suggestionCard.style.opacity = '0.5';
+          suggestionCard.setAttribute('aria-disabled', 'true');
+        }
+      });
+    }
+
+    if (recalcBtn) {
+      recalcBtn.addEventListener('click', () => {
+        recalcBtn.disabled = true;
+        recalcBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Projections en cours...';
+        setTimeout(() => {
+          recalcBtn.disabled = false;
+          recalcBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">calculate</span> Calculer les projections';
+        }, 600);
+      });
+    }
+  })();
+</script></main>
+{% endblock %}

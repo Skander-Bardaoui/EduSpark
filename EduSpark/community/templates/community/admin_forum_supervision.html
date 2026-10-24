@@ -1,0 +1,284 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Supervision des forums — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Échanges &amp; Modération</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Supervision des forums</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Pilotage des espaces d'échange par département, animation des communautés et coordination des équipes de modération.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Charte des forums téléchargée au format PDF." type="button"><span class="material-symbols-outlined text-[18px]">policy</span>Charte des forums</button>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'community:admin_reports' %}"><span class="material-symbols-outlined text-[18px]">warning</span>Signalements</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#new-forum-modal" type="button"><span class="material-symbols-outlined text-[18px]">add_comment</span>Créer un forum</button>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Forums actifs" value="24" icon="forum" icon_class="bg-primary-fixed text-primary" hint="Répartis sur 4 départements" %}
+{% include "portal/_stat_card.html" with label="Messages (7 jours)" value="1 842" icon="chat" icon_class="bg-surface-container text-secondary" hint="+12 % par rapport à la semaine passée" %}
+{% include "portal/_stat_card.html" with label="Signalements ouverts" value="7" icon="flag" icon_class="bg-error-container text-on-error-container" hint="2 en priorité haute" %}
+{% include "portal/_stat_card.html" with label="Modérateurs actifs" value="12" icon="shield_person" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Enseignants et tuteurs pairs" %}
+</div>
+<div class="grid grid-cols-1 gap-5 xl:grid-cols-12">
+<section class="flex flex-col gap-4 xl:col-span-8" data-filter-scope>
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Forums de la plateforme</h2>
+<p class="text-xs text-on-surface-variant"><span data-filter-count>6</span> forums affichés · activité des 7 derniers jours</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="informatique" type="button">Informatique</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="mathematiques" type="button">Mathématiques</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="donnees" type="button">Données</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="vie" type="button">Vie étudiante</button>
+</div>
+</div>
+<div class="grid gap-4 md:grid-cols-2" data-forum-list>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="informatique">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">terminal</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum INF501 · Algorithmique</h3><p class="text-xs text-on-surface-variant">L3 Informatique · 86 membres</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Entraide sur les TP, les preuves de complexité et les annales d'examen.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">128</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">642</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">3</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span>Dernier message il y a 4 min</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum INF501 ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="informatique">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[20px]">hub</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum INF502 · Systèmes distribués</h3><p class="text-xs text-on-surface-variant">M1 IA · 42 membres</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Questions sur les architectures, le consensus distribué et les projets de semestre.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">64</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">318</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span>Dernier message il y a 22 min</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum INF502 ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="mathematiques">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">functions</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum MAT302 · Analyse numérique</h3><p class="text-xs text-on-surface-variant">L3 Math-Info · 74 membres</p></div></div>
+{% include "portal/_badge.html" with label="Sous surveillance" tone_class="bg-error-container text-on-error-container" %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Méthodes itératives, stabilité numérique et préparation de l'examen final.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">96</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">411</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-error"><span class="material-symbols-outlined text-[16px]">flag</span>2 signalements à traiter</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum MAT302 ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="donnees">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">database</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum DATA · Sciences des données</h3><p class="text-xs text-on-surface-variant">M2 Data · 38 membres</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Veille outils, jeux de données ouverts et retours d'expérience de stage.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">57</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">246</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span>Dernier message il y a 1 h</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum DATA ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="mathematiques">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[20px]">calculate</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum L1 · Méthodes mathématiques</h3><p class="text-xs text-on-surface-variant">L1 Sciences exactes · 156 membres</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Accompagnement de rentrée et entraide entre pairs sur les fondamentaux.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">82</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">174</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">4</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span>Dernier message il y a 3 h</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum L1 ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-forum-item data-tags="vie">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">diversity_3</span></span><div><h3 class="font-title-md text-title-md text-on-surface">Forum Vie de campus</h3><p class="text-xs text-on-surface-variant">Toutes promotions · 420 membres</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">Associations, événements culturels, sport et initiatives étudiantes.</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
+<div><p class="font-data-metric text-base font-bold text-on-surface">214</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">892</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div>
+<div><p class="font-data-metric text-base font-bold text-on-surface">5</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateurs</p></div>
+</div>
+<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="flex items-center gap-1.5 text-[11px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span>Dernier message il y a 6 min</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum Vie de campus ouvert en mode supervision." type="button">Ouvrir</button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-surface-container" data-pin type="button" title="Épingler le forum" aria-label="Épingler le forum"><span class="material-symbols-outlined text-body-md">push_pin</span></button>
+<button class="rounded-full border border-outline-variant/70 px-2 py-1 text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" data-archive type="button" title="Archiver le forum" aria-label="Archiver le forum"><span class="material-symbols-outlined text-body-md">archive</span></button>
+</div>
+</div>
+</article>
+</div>
+<p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun forum ne correspond à cette catégorie.</p>
+</section>
+<aside class="flex flex-col gap-4 xl:col-span-4">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2"><h2 class="font-headline-sm text-headline-sm text-on-surface">Activité hebdomadaire</h2><span class="font-data-metric text-data-metric text-on-surface-variant">1 842 msg</span></div>
+<div class="mt-4 flex h-32 items-end justify-between gap-2">
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:52%"></div><span class="text-center text-[11px] text-on-surface-variant">Lun</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:68%"></div><span class="text-center text-[11px] text-on-surface-variant">Mar</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-primary" style="height:92%"></div><span class="text-center text-[11px] font-bold text-primary">Mer</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:74%"></div><span class="text-center text-[11px] text-on-surface-variant">Jeu</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:61%"></div><span class="text-center text-[11px] text-on-surface-variant">Ven</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:38%"></div><span class="text-center text-[11px] text-on-surface-variant">Sam</span></div>
+<div class="flex h-full flex-1 flex-col justify-end gap-2"><div class="rounded-t-lg bg-surface-container-high" style="height:24%"></div><span class="text-center text-[11px] text-on-surface-variant">Dim</span></div>
+</div>
+<p class="mt-3 border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant">Pic d'activité mercredi entre 18 h et 21 h · 412 messages.</p>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2"><h2 class="font-headline-sm text-headline-sm text-on-surface">Équipe de modération</h2><span class="font-data-metric text-data-metric text-on-surface-variant">12 actifs</span></div>
+<ul class="mt-3 space-y-3">
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-on-primary">HV</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Hélène Vasseur</p><p class="text-[11px] text-on-surface-variant">Modératrice principale · Informatique</p></div>{% include "portal/_badge.html" with label="En ligne" tone_class="bg-primary-fixed text-primary" dot=True %}</li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-bold text-on-secondary">AD</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Amadou Diallo</p><p class="text-[11px] text-on-surface-variant">Modérateur · Informatique &amp; IA</p></div>{% include "portal/_badge.html" with label="En ligne" tone_class="bg-primary-fixed text-primary" dot=True %}</li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-[11px] font-bold text-on-tertiary-fixed">SL</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Sophie Lambert</p><p class="text-[11px] text-on-surface-variant">Modératrice · Mathématiques</p></div>{% include "portal/_badge.html" with label="Absente" tone_class="bg-surface-container text-on-surface-variant" %}</li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-[11px] font-bold text-on-surface-variant">AC</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Alexandre Chen</p><p class="text-[11px] text-on-surface-variant">Tuteur pair · Vie de campus</p></div>{% include "portal/_badge.html" with label="En ligne" tone_class="bg-primary-fixed text-primary" dot=True %}</li>
+</ul>
+<button class="mt-4 w-full rounded-full bg-surface-container px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Annuaire complet de la modération ouvert." type="button">Gérer l'équipe de modération</button>
+</section>
+<section class="rounded border border-outline-variant/40 bg-error-container/30 p-5 shadow-sm">
+<div class="flex items-start gap-2"><span class="material-symbols-outlined text-[20px] text-error">priority_high</span><div><h2 class="font-headline-sm text-headline-sm text-on-error-container">2 signalements prioritaires</h2><p class="mt-1 text-xs leading-relaxed text-on-surface-variant">Le forum MAT302 concentre deux signalements liés à des propos discriminatoires. Une décision est attendue sous 24 h.</p></div></div>
+<a class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-error px-4 py-2.5 font-label-md text-label-md text-on-error transition-colors hover:opacity-90" href="{% url 'community:admin_reports' %}"><span class="material-symbols-outlined text-[18px]">gavel</span>Ouvrir la file de modération</a>
+</section>
+</aside>
+</div>
+</div>
+</main>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="new-forum-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Créer un forum</h2><p class="text-xs text-on-surface-variant">Le forum sera immédiatement visible par les étudiants concernés.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="grid gap-3 p-5" data-forum-form>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Intitulé du forum</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus placeholder="Ex. Forum INFO506 · Apprentissage par renforcement" required type="text"/></label>
+<div class="grid gap-3 sm:grid-cols-2">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Catégorie</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-forum-category><option value="informatique">Informatique</option><option value="mathematiques">Mathématiques</option><option value="donnees">Sciences des données</option><option value="vie">Vie étudiante</option></select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Public</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary"><option>Toute la promotion</option><option>Groupe TD uniquement</option><option>Enseignants seulement</option></select></label>
+</div>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Description</span><textarea class="min-h-20 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" placeholder="Objet du forum et règles de participation…" required></textarea></label>
+<div class="flex flex-wrap justify-end gap-2 pt-1">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">add_comment</span>Créer le forum</button>
+</div>
+</form>
+</div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var list = document.querySelector('[data-forum-list]');
+  var form = document.querySelector('[data-forum-form]');
+  var count = document.querySelector('[data-filter-count]');
+
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.classList.remove('portal-drawer-open');
+  }
+
+  function cardFrom(name, category, description) {
+    var article = document.createElement('article');
+    article.className = 'flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm';
+    article.setAttribute('data-filter-item', '');
+    article.setAttribute('data-forum-item', '');
+    article.setAttribute('data-tags', category);
+    var label = {informatique: 'Informatique', mathematiques: 'Mathématiques', donnees: 'Sciences des données', vie: 'Vie étudiante'}[category] || 'Général';
+    article.innerHTML = '<div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">forum</span></span><div><h3 class="font-title-md text-title-md text-on-surface"></h3><p class="text-xs text-on-surface-variant">Nouveau forum · 0 membre</p></div></div><span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>Actif</span></div><p class="text-sm leading-relaxed text-on-surface-variant"></p><div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center"><div><p class="font-data-metric text-base font-bold text-on-surface">0</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Sujets</p></div><div><p class="font-data-metric text-base font-bold text-on-surface">0</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Messages</p></div><div><p class="font-data-metric text-base font-bold text-on-surface">1</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Modérateur</p></div></div><div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3"><span class="text-[11px] text-on-surface-variant">Catégorie : ' + label + '</span><button class="rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Forum créé, ouverture en mode supervision." type="button">Ouvrir</button></div>';
+    article.querySelector('h3').textContent = name;
+    article.querySelector('p.text-sm').textContent = description;
+    return article;
+  }
+
+  if (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var name = form.querySelector('input[type="text"]').value.trim() || 'Nouveau forum';
+      var category = form.querySelector('[data-forum-category]').value;
+      var description = form.querySelector('textarea').value.trim() || 'Forum nouvellement créé.';
+      if (list) list.prepend(cardFrom(name, category, description));
+      if (count) count.textContent = String(parseInt(count.textContent, 10) + 1);
+      closeModal(form.closest('[data-modal]'));
+      form.reset();
+      window.portalToast('Forum « ' + name + ' » créé avec succès.', 'success');
+    });
+  }
+
+  document.addEventListener('click', function (event) {
+    var pin = event.target.closest('[data-pin]');
+    if (pin) {
+      var pinned = pin.getAttribute('data-pinned') === 'true';
+      pin.setAttribute('data-pinned', String(!pinned));
+      pin.classList.toggle('bg-primary-fixed', !pinned);
+      pin.classList.toggle('text-primary', !pinned);
+      window.portalToast(pinned ? 'Forum désépinglé.' : 'Forum épinglé en haut de la catégorie.', 'info');
+      return;
+    }
+    var archive = event.target.closest('[data-archive]');
+    if (archive) {
+      var item = archive.closest('[data-forum-item]');
+      if (!item) return;
+      var badge = item.querySelector('span.inline-flex');
+      if (badge) {
+        badge.className = 'inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant';
+        badge.textContent = 'Archivé';
+      }
+      item.classList.add('opacity-60');
+      archive.disabled = true;
+      window.portalToast('Forum archivé. Les étudiants ne peuvent plus publier.', 'info');
+    }
+  });
+})();
+</script>
+{% endblock %}

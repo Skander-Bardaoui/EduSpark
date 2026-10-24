@@ -1,0 +1,74 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Relevés & Jurys — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevés &amp; Jurys</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Relevés de notes en attente de signature, composition des jurys et délibérations.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}"><span class="material-symbols-outlined text-[18px]">event_available</span>Sessions</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" onclick="window.print()" type="button"><span class="material-symbols-outlined text-[18px]">print</span>Imprimer</button>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Relevés à signer" value="3" icon="workspace_premium" hint="Délibération le 6 novembre" %}
+{% include "portal/_stat_card.html" with label="Étudiants concernés" value="80" icon="group" icon_class="bg-surface-container text-secondary" hint="3 classes · 11 UE" %}
+{% include "portal/_stat_card.html" with label="Jurys actifs" value="3" icon="gavel" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="1 jury incomplet" %}
+{% include "portal/_stat_card.html" with label="Moyenne générale" value="13,7" suffix=" /20" icon="grade" hint="+0,4 vs semestre précédent" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Relevés de notes par UE</h2>
+<span class="text-xs text-on-surface-variant">Semestre 1 · 2026 – 2027</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[940px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">UE</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Étudiants</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Jury</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF501 · Algorithmique avancée</p><p class="text-xs text-on-surface-variant">Coefficient 6 · 8 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">38</td><td class="px-5 py-3"><span class="font-bold text-on-surface">12,4</span></td><td class="px-5 py-3 text-on-surface-variant">Vasseur · Lambert</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF502 · Systèmes distribués</p><p class="text-xs text-on-surface-variant">Coefficient 5 · 6 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3"><span class="font-bold text-on-surface">13,1</span></td><td class="px-5 py-3 text-on-surface-variant">Vasseur · Traoré</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF503 · Réseaux de neurones</p><p class="text-xs text-on-surface-variant">Coefficient 4 · 5 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3"><span class="font-bold text-on-surface">14,2</span></td><td class="px-5 py-3 text-on-surface-variant">Vasseur · Diallo</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF504 · Bases de données</p><p class="text-xs text-on-surface-variant">Coefficient 3 · 4 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3"><span class="font-bold text-on-surface">14,6</span></td><td class="px-5 py-3 text-on-surface-variant">Traoré · Vasseur</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF505 · Éthique de l'IA</p><p class="text-xs text-on-surface-variant">Coefficient 2 · 3 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3"><span class="font-bold text-on-surface">15,3</span></td><td class="px-5 py-3 text-on-surface-variant">Nguyen · Vasseur</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<div class="grid gap-6 lg:grid-cols-[1fr_380px]">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Délibérations à venir</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'exams:prof_exam_sessions' %}">Voir les sessions</a>
+</div>
+<ul class="divide-y divide-outline-variant/30">
+<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury L3 Informatique · S1</p><p class="text-xs text-on-surface-variant">6 novembre 2026 · 14h00 · Salle du conseil</p></div>{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}</li>
+<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury M1 Intelligence Artificielle · S1</p><p class="text-xs text-on-surface-variant">7 novembre 2026 · 09h00 · Salle du conseil</p></div>{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}</li>
+<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury M2 Data Science · mémoires</p><p class="text-xs text-on-surface-variant">12 novembre 2026 · 09h00 · Amphi Turing</p></div>{% include "portal/_badge.html" with label="À compléter" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</li>
+</ul>
+<div class="border-t border-outline-variant/40 px-5 py-4 text-right">
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Les 3 relevés en attente ont été signés électroniquement." type="button">Signer les relevés en attente</button>
+</div>
+</section>
+<aside class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Composition du jury</h2>
+<span class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">M1 IA</span>
+</div>
+<ul class="mt-4 space-y-3">
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">HV</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Hélène Vasseur</p><p class="text-xs text-on-surface-variant">Présidente du jury</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-xs font-bold text-on-secondary">AD</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Amadou Diallo</p><p class="text-xs text-on-surface-variant">Examinateur · TP</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-xs font-bold text-on-tertiary-fixed">MT</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Mariam Traoré</p><p class="text-xs text-on-surface-variant">Examinatrice · Projet</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-xs font-bold text-on-surface-variant">+</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Membre à désigner</p><p class="text-xs text-on-surface-variant">Soutenance de mémoire M2</p></div><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation envoyée aux membres disponibles." type="button">Inviter</button></li>
+</ul>
+<div class="mt-4 border-t border-outline-variant/40 pt-3">
+<p class="text-xs leading-relaxed text-on-surface-variant">Les délibérations suivent le barème officiel et l'échelle ECTS. Toute modification est journalisée.</p>
+</div>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

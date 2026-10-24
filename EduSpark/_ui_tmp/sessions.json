@@ -1,0 +1,14 @@
+{
+  "etudiant": {
+    "sessionid": "soadd5p8a9zregjo0iw1k05lvddpdgj8",
+    "username": "test.ui@example.com"
+  },
+  "prof": {
+    "sessionid": "5lqtnqjb4arnu9pj5eofl8exnz7fvoid",
+    "username": "prof.test@eduspark.local"
+  },
+  "admin": {
+    "sessionid": "bw4ulnu8i38lwvb2w6jqi6grultiz3ag",
+    "username": "admin@eduspark.local"
+  }
+}

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><title>Hub Éducatif Multimodal - Portail Enseignant</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary":"#ffffff","on-tertiary-container":"#facf74","primary-container":"#004191","primary":"#004191","tertiary-container":"#594100","surface-container-highest":"#dde1ff","on-secondary-fixed":"#0f0069","primary-fixed":"#d8e2ff","inverse-on-surface":"#efefff","on-primary":"#ffffff","on-secondary-container":"#fffbff","secondary-fixed":"#e2dfff","secondary-container":"#655dfb","on-surface":"#06164b","inverse-primary":"#adc6ff","on-tertiary-fixed-variant":"#5c4300","tertiary-fixed-dim":"#e6c277","on-background":"#06164b","on-secondary":"#ffffff","on-surface-variant":"#424754","secondary":"#4b41e1","on-secondary-fixed-variant":"#3323cc","surface-bright":"#fbf8ff","error":"#ba1a1a","outline-variant":"#c3c6d3","on-error-container":"#93000a","primary-fixed-dim":"#aec6ff","on-tertiary-fixed":"#261a00","surface-container-low":"#f3f2ff","surface-dim":"#d2d8ff","surface-container-lowest":"#ffffff","tertiary-fixed":"#ffdf9f","error-container":"#ffdad6","on-error":"#ffffff","on-primary-container":"#8db1ff","outline":"#727785","secondary-fixed-dim":"#c3c0ff","surface":"#fbf8ff","surface-container-high":"#e4e7ff","surface-container":"#ecedff","surface-variant":"#dde1ff","inverse-surface":"#1f2d61","surface-tint":"#085ac0","on-primary-fixed-variant":"#004395","tertiary":"#594100","on-primary-fixed":"#001a42","background":"#fbf8ff"},"borderRadius":{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-md":"1rem","space-lg":"1.5rem","margin-mobile":"1.25rem","gutter-mobile":"1rem","margin":"3rem","gutter":"1.5rem","space-sm":"0.5rem","space-xl":"2.5rem"},"fontFamily":{"display-mobile":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-sm":["Inter"],"data-metric":["JetBrains Mono"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-lg":["Inter"]},"fontSize":{"display-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"display":["56px",{"lineHeight":"64px","letterSpacing":"-0.03em","fontWeight":"800"}],"label-md":["14px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"600"}],"title-md":["16px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.005em","fontWeight":"400"}],"data-metric":["13px",{"lineHeight":"18px","letterSpacing":"-0.02em","fontWeight":"500"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-lg":["40px",{"lineHeight":"48px","letterSpacing":"-0.025em","fontWeight":"700"}],"headline-lg-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><a class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-space-md focus:py-space-sm focus:bg-primary focus:text-on-primary focus:rounded-full font-label-md shadow-lg outline-none" href="#main-content">Aller au contenu</a><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-40 flex flex-col shadow-[0_1px_8px_rgba(6,22,75,0.06)] overflow-y-auto"><div class="h-16 px-space-md flex items-center gap-space-sm shrink-0 bg-surface-container-lowest"><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[20px]">school</span></div><div class="flex flex-col min-w-0"><span class="font-headline-sm text-title-md text-primary leading-tight truncate">Hub Éducatif</span><span class="font-label-sm text-secondary tracking-wider uppercase leading-none">Portail Enseignant</span></div></div><div class="px-space-md py-space-sm"><div class="p-space-sm rounded-DEFAULT bg-surface-container-low flex flex-col gap-1"><span class="font-label-sm text-on-surface-variant uppercase">Établissement actif</span><div class="flex items-center justify-between gap-1"><span class="font-title-md text-body-sm font-semibold text-on-surface truncate">Université Paris Cité</span><span class="material-symbols-outlined text-primary text-[18px]">verified</span></div></div></div><nav class="flex-1 px-space-sm py-space-sm space-y-space-md" data-active-classes="bg-primary-container text-on-primary font-bold rounded-DEFAULT shadow-[0_1px_8px_rgba(6,22,75,0.06)]"><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Tableau de bord</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-tableau-de-bord" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span>Mon Tableau de bord</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Compte</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mon-profil-enseignant-et-grades" href="#"><span class="material-symbols-outlined text-[20px]">badge</span><span>Mon Profil &amp; Grades</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-universites" href="#"><span class="material-symbols-outlined text-[20px]">account_balance</span><span>Mes Universités</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-classes-et-groupes" href="#"><span class="material-symbols-outlined text-[20px]">groups</span><span>Mes Classes &amp; Groupes</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="parametres-du-compte" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Paramètres du compte</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Cours</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="mes-cours" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Mes Cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="supports-de-cours" href="#"><span class="material-symbols-outlined text-[20px]">folder_shared</span><span>Supports de cours</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="emploi-du-temps-des-cours" href="#"><span class="material-symbols-outlined text-[20px]">calendar_month</span><span>Emploi du temps</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="gestion-des-matieres" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Gestion des matières</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Exercices</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="banque-d-exercices" href="#"><span class="material-symbols-outlined text-[20px]">quiz</span><span>Banque d'exercices</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="devoirs-crees" href="#"><span class="material-symbols-outlined text-[20px]">assignment</span><span>Devoirs créés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="series-et-baremes" href="#"><span class="material-symbols-outlined text-[20px]">checklist</span><span>Séries &amp; Barèmes</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Examens &amp; Notes</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="sessions-d-examen" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span>Sessions d'examen</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="copies-a-corriger" href="#"><span class="material-symbols-outlined text-[20px]">draw</span><span>Copies à corriger</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="releves-de-notes-et-jurys" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Relevés &amp; Jurys</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Échanges</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="annonces" href="#"><span class="material-symbols-outlined text-[20px]">campaign</span><span>Annonces</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="forums-et-questions-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">forum</span><span>Forums &amp; Questions</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="messagerie-academique" href="#"><span class="material-symbols-outlined text-[20px]">mail</span><span>Messagerie</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="moderation" href="#"><span class="material-symbols-outlined text-[20px]">gavel</span><span>Modération</span></a></div></div><div class="space-y-1"><span class="px-space-sm font-label-sm uppercase text-on-surface-variant tracking-wider">Suivi Référent</span><div class="space-y-0.5 mt-1"><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="tableau-de-bord-de-mes-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span>Tableau de bord étudiants</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="fiches-etudiants-et-difficultes" href="#"><span class="material-symbols-outlined text-[20px]">person_search</span><span>Fiches &amp; Difficultés</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="rendez-vous-de-tutorat" href="#"><span class="material-symbols-outlined text-[20px]">support_agent</span><span>Rendez-vous de tutorat</span></a><a class="flex items-center gap-space-sm px-space-sm py-2 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors font-label-md" data-path="journal-de-progression-des-etudiants" href="#"><span class="material-symbols-outlined text-[20px]">trending_up</span><span>Journal de progression</span></a></div></div></nav><div class="p-space-sm shrink-0 bg-surface-container-low"><div class="px-space-sm py-2 flex items-center justify-between text-on-surface-variant"><span class="font-data-metric text-on-surface-variant">v2.4 • Prof-IRIF</span><span class="w-2.5 h-2.5 rounded-full bg-secondary" title="Connexion sécurisée"></span></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(6,22,75,0.04)] z-30 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="relative flex items-center"><label class="sr-only" for="university-select">Changer d'université assignée</label><span class="material-symbols-outlined text-primary absolute left-3 pointer-events-none text-[20px]">account_balance</span><select class="appearance-none bg-surface-container-low text-on-surface font-title-md text-body-sm pl-9 pr-9 py-2 rounded-full cursor-pointer hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" id="university-select"><option selected="" value="uparis">Université Paris Cité</option><option value="sorbonne">Sorbonne Université</option><option value="saclay">Université Paris-Saclay</option></select><span class="material-symbols-outlined text-on-surface-variant absolute right-3 pointer-events-none text-[18px]">expand_more</span></div><div class="hidden xl:flex items-center gap-space-xs bg-surface-container-low rounded-full px-space-md py-1.5"><span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span><input class="bg-transparent text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none w-64" placeholder="Rechercher cours, copies, étudiants..." type="search"/><kbd class="font-data-metric text-label-sm bg-surface-container-highest px-1.5 py-0.5 rounded text-on-surface-variant uppercase">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><button aria-label="Notifications (3 non lues)" class="relative p-2 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-error text-on-error font-data-metric text-[10px] flex items-center justify-center font-bold">3</span></button><div class="h-7 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-1"><div class="relative"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest" title="En ligne"></span></div><div class="hidden md:flex flex-col text-left"><div class="flex items-center gap-1.5"><span class="font-label-md text-on-surface leading-tight">Prof. Hélène Vasseur</span><span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm px-1.5 py-0.2 rounded-full uppercase">Labo IRIF</span></div><span class="font-body-sm text-on-surface-variant leading-tight">Enseignant / Chercheur</span></div><span class="material-symbols-outlined text-on-surface-variant text-[20px] cursor-pointer">arrow_drop_down</span></div></div></header><main class="w-full pt-16 bg-surface min-h-screen" id="main-content"><div class="flex flex-col w-full">
+<!-- En-tête de page & Contextualisation -->
+<div class="px-space-margin py-space-lg bg-surface-container-lowest shadow-sm">
+<!-- Breadcrumb -->
+<nav aria-label="Fil d'Ariane" class="flex items-center gap-2 mb-space-sm">
+<ol class="flex items-center gap-1.5 font-label-sm text-on-surface-variant uppercase tracking-wider">
+<li>
+<a class="hover:text-primary transition-colors" href="#">Portail Enseignant</a>
+</li>
+<li class="flex items-center">
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+</li>
+<li>
+<a class="hover:text-primary transition-colors" href="#">Cours</a>
+</li>
+<li class="flex items-center">
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+</li>
+<li aria-current="page" class="text-primary font-bold">Gestion de l'UE &amp; Syllabus</li>
+</ol>
+</nav>
+<!-- Titre de l'UE & Badges & Boutons d'actions -->
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="space-y-space-xs">
+<div class="flex flex-wrap items-center gap-space-sm">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">
+            INF501 • Réseaux de Neurones Profonds
+          </h1>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Enseignement actif
+          </span>
+</div>
+<div class="flex flex-wrap items-center gap-2 pt-1">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">school</span>
+            M1 Informatique &amp; IA
+          </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">date_range</span>
+            Semestre 1
+          </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-tertiary-container">workspace_premium</span>
+            6 ECTS
+          </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">group</span>
+            142 inscrits
+          </span>
+<span class="text-outline-variant font-data-metric text-data-metric hidden sm:inline">|</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Code Apogée: INF-NN-501-P24</span>
+</div>
+</div>
+<!-- Actions principales -->
+<div class="flex items-center gap-3 shrink-0">
+<button class="group flex items-center gap-2 px-space-md py-2.5 rounded-full bg-surface-container-high hover:bg-secondary-fixed text-secondary hover:text-on-secondary-fixed font-label-md transition-all duration-200" id="toggle-ai-btn" type="button">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-12" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Générer un syllabus avec l'IA</span>
+</button>
+<button class="flex items-center gap-2 px-space-md py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md shadow-[0_1px_8px_rgba(6,22,75,0.12)] transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Ajouter un chapitre / support</span>
+</button>
+</div>
+</div>
+<!-- Onglets de sous-navigation -->
+<div class="flex items-center gap-6 mt-space-lg -mb-space-lg overflow-x-auto">
+<button class="flex items-center gap-2 py-3.5 px-1 font-label-md text-primary font-bold relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" type="button">
+<span class="material-symbols-outlined text-[20px]">view_agenda</span>
+<span>Syllabus &amp; Chapitres</span>
+</button>
+<button class="flex items-center gap-2 py-3.5 px-1 font-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+<span>Supports de cours &amp; Médias</span>
+<span class="px-2 py-0.2 rounded-full bg-surface-container text-on-surface font-data-metric text-[11px]">12 fichiers</span>
+</button>
+<button class="flex items-center gap-2 py-3.5 px-1 font-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+<span>Séances &amp; Emploi du temps</span>
+<span class="px-2 py-0.2 rounded-full bg-surface-container text-on-surface-variant font-label-sm">CM / TP</span>
+</button>
+<button class="flex items-center gap-2 py-3.5 px-1 font-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+<span>Étudiants inscrits</span>
+<span class="px-2 py-0.2 rounded-full bg-surface-container text-on-surface font-data-metric text-[11px]">142</span>
+</button>
+</div>
+</div>
+<!-- Corps principal de l'espace de travail -->
+<div class="p-space-margin space-y-space-xl">
+<!-- Grille globale : Contenu d'apprentissage à gauche + Volet Assistant IA à droite -->
+<div class="grid grid-cols-12 gap-space-lg items-start">
+<!-- Colonne principale (Arborescence Syllabus & Téléversements) -->
+<div class="col-span-12 xl:col-span-8 space-y-space-xl">
+<!-- SECTION 1: SYLLABUS & ARBORESCENCE DU COURS -->
+<section aria-labelledby="syllabus-section-heading" class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-space-md">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="syllabus-section-heading">
+                Plan d'études &amp; Arborescence des Modules
+              </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Organisez l'ordonnancement séquentiel, publiez vos paliers pédagogiques et gérez les supports rattachés.
+              </p>
+</div>
+<div class="flex items-center gap-2 self-start sm:self-auto">
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Progression globale :</span>
+<span class="font-data-metric text-data-metric font-bold text-primary">75% Publié</span>
+</div>
+</div>
+<!-- Liste ordonnable des chapitres -->
+<div aria-label="Liste des chapitres du cours" class="space-y-space-sm" role="list">
+<!-- Chapitre 1 -->
+<div class="group bg-surface-container-low hover:bg-surface-container transition-all duration-200 rounded-DEFAULT p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md" role="listitem">
+<div class="flex items-start md:items-center gap-space-md min-w-0">
+<button aria-label="Déplacer le chapitre 1" class="cursor-grab active:cursor-grabbing text-outline hover:text-primary mt-1 md:mt-0 p-1 rounded-DEFAULT hover:bg-surface-container-lowest transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">drag_indicator</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-sm text-title-md shrink-0 shadow-sm">
+                  1
+                </div>
+<div class="space-y-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">
+                      Fondements des Réseaux Denses &amp; Rétropropagation
+                    </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                      Publié
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">timelapse</span>
+                      4h CM • 4h TP
+                    </span>
+<span>•</span>
+<span class="flex items-center gap-1 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px] text-secondary">attachment</span>
+                      3 supports attachés
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-end md:self-auto shrink-0">
+<button aria-label="Éditer le Chapitre 1" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button aria-label="Déplacer le Chapitre 1" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">swap_vert</span>
+</button>
+<button aria-label="Supprimer le Chapitre 1" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Chapitre 2 -->
+<div class="group bg-surface-container-low hover:bg-surface-container transition-all duration-200 rounded-DEFAULT p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md" role="listitem">
+<div class="flex items-start md:items-center gap-space-md min-w-0">
+<button aria-label="Déplacer le chapitre 2" class="cursor-grab active:cursor-grabbing text-outline hover:text-primary mt-1 md:mt-0 p-1 rounded-DEFAULT hover:bg-surface-container-lowest transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">drag_indicator</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-sm text-title-md shrink-0 shadow-sm">
+                  2
+                </div>
+<div class="space-y-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">
+                      Architectures Convolutives (CNN) &amp; Pooling
+                    </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                      Publié
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">timelapse</span>
+                      4h CM • 8h TP
+                    </span>
+<span>•</span>
+<span class="flex items-center gap-1 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px] text-secondary">attachment</span>
+                      4 supports (Slides PDF balisé, Notebook Jupyter)
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-end md:self-auto shrink-0">
+<button aria-label="Éditer le Chapitre 2" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button aria-label="Déplacer le Chapitre 2" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">swap_vert</span>
+</button>
+<button aria-label="Supprimer le Chapitre 2" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Chapitre 3 -->
+<div class="group bg-surface-container-low hover:bg-surface-container transition-all duration-200 rounded-DEFAULT p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md" role="listitem">
+<div class="flex items-start md:items-center gap-space-md min-w-0">
+<button aria-label="Déplacer le chapitre 3" class="cursor-grab active:cursor-grabbing text-outline hover:text-primary mt-1 md:mt-0 p-1 rounded-DEFAULT hover:bg-surface-container-lowest transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">drag_indicator</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline-sm text-title-md shrink-0 shadow-sm">
+                  3
+                </div>
+<div class="space-y-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">
+                      Modèles Résiduels (ResNet) &amp; Régularisation moderne
+                    </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-primary font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                      Publié
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">timelapse</span>
+                      4h CM • 4h TP
+                    </span>
+<span>•</span>
+<span class="flex items-center gap-1 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px] text-secondary">attachment</span>
+                      2 supports attachés
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-end md:self-auto shrink-0">
+<button aria-label="Éditer le Chapitre 3" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button aria-label="Déplacer le Chapitre 3" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">swap_vert</span>
+</button>
+<button aria-label="Supprimer le Chapitre 3" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Chapitre 4 -->
+<div class="group bg-surface-container-high/40 hover:bg-surface-container transition-all duration-200 rounded-DEFAULT p-space-md flex flex-col md:flex-row md:items-center justify-between gap-space-md" role="listitem">
+<div class="flex items-start md:items-center gap-space-md min-w-0">
+<button aria-label="Déplacer le chapitre 4" class="cursor-grab active:cursor-grabbing text-outline hover:text-primary mt-1 md:mt-0 p-1 rounded-DEFAULT hover:bg-surface-container-lowest transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">drag_indicator</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-headline-sm text-title-md shrink-0">
+                  4
+                </div>
+<div class="space-y-1 min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">
+                      Mécanismes d'Attention &amp; Introduction aux Transformers
+                    </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">edit_note</span>
+                      Brouillon (En préparation)
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-outline">timelapse</span>
+                      4h CM estimées
+                    </span>
+<span>•</span>
+<span class="flex items-center gap-1 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px] text-outline">pending</span>
+                      En attente de validation du support
+                    </span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-end md:self-auto shrink-0">
+<button aria-label="Éditer le Chapitre 4" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button aria-label="Déplacer le Chapitre 4" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">swap_vert</span>
+</button>
+<button aria-label="Supprimer le Chapitre 4" class="p-2 rounded-full hover:bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bouton d'ajout rapide au pied de liste -->
+<div class="mt-space-md pt-space-sm flex justify-center">
+<button class="inline-flex items-center gap-2 px-space-md py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-primary font-label-md transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Insérer un nouveau chapitre à la suite</span>
+</button>
+</div>
+</section>
+<!-- SECTION 2: DÉPÔT ET GESTION DES SUPPORTS DE COURS -->
+<section aria-labelledby="upload-section-heading" class="bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm space-y-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="upload-section-heading">
+                Dépôt et Gestion des Supports Pédagogiques
+              </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Téléversez vos supports de cours multimédias. Vérification automatique de conformité WCAG 2.2 et balisage sémantique.
+              </p>
+</div>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm self-start sm:self-auto">
+<span class="material-symbols-outlined text-primary text-[16px]">verified_user</span>
+              Contrôleur d'accessibilité activé
+            </span>
+</div>
+<!-- Zone de Drop & File Picker -->
+<div class="relative bg-surface-container-low hover:bg-surface-container transition-colors rounded-DEFAULT p-space-xl flex flex-col items-center justify-center text-center cursor-pointer group">
+<input aria-label="Téléverser des fichiers de cours" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10" id="file-uploader" multiple="" type="file"/>
+<div class="w-14 h-14 rounded-full bg-surface-container-highest flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-space-sm">
+<span class="material-symbols-outlined text-[28px]">cloud_upload</span>
+</div>
+<p class="font-title-md text-title-md text-on-surface font-semibold mb-1">
+              Glissez vos fichiers pédagogiques ici (PDF, MP4, IPYNB, LaTeX)
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-lg mb-space-md">
+              ou <span class="text-primary font-bold underline underline-offset-2">parcourez votre ordinateur</span> pour importer les ressources de vos étudiants.
+            </p>
+<!-- Notice WCAG -->
+<div class="flex items-center gap-2 px-space-md py-1.5 rounded-full bg-surface-container-highest/80 text-on-surface-variant font-body-sm text-[12px]">
+<span class="material-symbols-outlined text-primary text-[16px]">accessibility_new</span>
+<span><strong>Exigence WCAG :</strong> Formats acceptés : PDF accessible (balisé), MP4 avec fichier VTT de sous-titres, Notebooks. Taille max : 500 Mo.</span>
+</div>
+</div>
+<!-- Liste des fichiers récemment déposés avec tags d'accessibilité -->
+<div class="space-y-space-sm pt-space-xs">
+<h3 class="font-label-md text-label-md text-on-surface uppercase tracking-wider">
+              Derniers supports vérifiés et indexés
+            </h3>
+<div class="space-y-2">
+<!-- Fichier 1 : PDF/UA -->
+<div class="flex items-center justify-between p-space-sm px-space-md bg-surface-container-low rounded-DEFAULT hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<p class="font-title-md text-body-md font-semibold text-on-surface truncate">
+                        INF501_CM01_Retropropagation_Dense.pdf
+                      </p>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-primary font-data-metric text-[11px] font-bold">
+                        PDF/UA certifié
+                      </span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">
+                      Ajouté le 12 Octobre • 4.8 Mo • Rattaché au Chapitre 1
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="hidden md:inline-flex items-center gap-1 text-on-surface-variant font-body-sm text-[12px]">
+<span class="material-symbols-outlined text-primary text-[16px]">check_circle</span>
+                    Lecteur d'écran OK
+                  </span>
+<button aria-label="Options du fichier CM01" class="p-1.5 rounded-full hover:bg-surface-container-lowest text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Fichier 2 : Vidéo sous-titrée VTT -->
+<div class="flex items-center justify-between p-space-sm px-space-md bg-surface-container-low rounded-DEFAULT hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">movie</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<p class="font-title-md text-body-md font-semibold text-on-surface truncate">
+                        Capsule_Intro_Convolution_2D.mp4
+                      </p>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary font-data-metric text-[11px] font-bold">
+                        Sous-titré VTT + Audio FR
+                      </span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">
+                      Ajouté le 15 Octobre • 182 Mo • Rattaché au Chapitre 2
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="hidden md:inline-flex items-center gap-1 text-on-surface-variant font-body-sm text-[12px]">
+<span class="material-symbols-outlined text-secondary text-[16px]">closed_caption</span>
+                    Piste synchronisée
+                  </span>
+<button aria-label="Options de la vidéo Capsule Intro" class="p-1.5 rounded-full hover:bg-surface-container-lowest text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Fichier 3 : Jupyter Notebook -->
+<div class="flex items-center justify-between p-space-sm px-space-md bg-surface-container-low rounded-DEFAULT hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+</div>
+<div class="min-w-0">
+<div class="flex items-center gap-2">
+<p class="font-title-md text-body-md font-semibold text-on-surface truncate">
+                        TP02_PyTorch_CNN_Optimization.ipynb
+                      </p>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-tertiary-container font-data-metric text-[11px] font-bold">
+                        Balises Markdown Valides
+                      </span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">
+                      Ajouté le 18 Octobre • 620 Ko • Rattaché au Chapitre 2
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="hidden md:inline-flex items-center gap-1 text-on-surface-variant font-body-sm text-[12px]">
+<span class="material-symbols-outlined text-tertiary-container text-[16px]">code</span>
+                    Exécutable Colab/Jupyter
+                  </span>
+<button aria-label="Options du Notebook TP02" class="p-1.5 rounded-full hover:bg-surface-container-lowest text-on-surface-variant" type="button">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Colonne latérale : Assistant Pédagogique IA (Standard Component) -->
+<aside aria-labelledby="ai-assistant-heading" class="col-span-12 xl:col-span-4 bg-surface-container-lowest rounded-DEFAULT p-space-lg shadow-sm space-y-space-md">
+<!-- En-tête Volet IA -->
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h2 class="font-title-md text-title-md text-on-surface font-bold leading-tight" id="ai-assistant-heading">
+                Assistant Pédagogique IA
+              </h2>
+<span class="font-label-sm text-secondary font-semibold uppercase tracking-wider">Plan de cours multimodal</span>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-data-metric text-[10px] uppercase">
+            Modèle v4-Edu
+          </span>
+</div>
+<!-- Fallback Banner Standard (Accessible & Informatif) -->
+<div class="hidden p-space-sm px-space-md bg-tertiary-fixed/30 rounded-DEFAULT text-on-surface space-y-1" id="ai-fallback-banner">
+<div class="flex items-center gap-2 text-tertiary font-label-md">
+<span class="material-symbols-outlined text-[18px]">info</span>
+<span>Mode hors-ligne IA</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">
+            L'IA est momentanément indisponible. Vous pouvez composer votre plan manuellement via le bouton principal.
+          </p>
+</div>
+<!-- Formulaire de paramétrage IA -->
+<form class="space-y-space-md" id="ai-syllabus-form" onsubmit="event.preventDefault();">
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface" for="course-title-input">
+              Titre de l'UE
+            </label>
+<input class="w-full px-space-md py-2 bg-surface-container-low rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" id="course-title-input" type="text" value="Réseaux de Neurones Profonds"/>
+</div>
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface" for="audience-level-input">
+              Niveau &amp; Public
+            </label>
+<input class="w-full px-space-md py-2 bg-surface-container-low rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" id="audience-level-input" type="text" value="Master 1 Recherche &amp; Professionnel"/>
+</div>
+<div class="space-y-1.5">
+<label class="block font-label-md text-label-md text-on-surface" for="hours-volume-input">
+              Volume horaire cible
+            </label>
+<input class="w-full px-space-md py-2 bg-surface-container-low rounded-DEFAULT font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" id="hours-volume-input" type="text" value="30h réparties (16h CM / 14h TP)"/>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-2.5 px-space-md rounded-full bg-secondary text-on-secondary hover:bg-secondary-container font-label-md transition-colors shadow-sm" id="btn-generate-ai" type="button">
+<span class="material-symbols-outlined text-[18px]">psychology</span>
+<span>Générer la proposition de plan</span>
+</button>
+</form>
+<!-- Carte Suggestion IA Dynamique -->
+<div class="bg-surface-container p-space-md rounded-DEFAULT space-y-space-md transition-all" id="ai-suggestion-card">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-title-md text-title-md font-bold text-on-surface">Suggestion IA générée</span>
+</div>
+<span class="font-data-metric text-data-metric text-secondary font-bold">Cohérence: 98%</span>
+</div>
+<!-- Détails de la structure proposée -->
+<div class="space-y-space-sm font-body-sm text-body-sm text-on-surface-variant">
+<div class="p-2.5 bg-surface-container-lowest rounded-DEFAULT space-y-1">
+<span class="font-label-sm text-primary uppercase block">Structure en 6 Modules recommandés :</span>
+<ul class="list-disc list-inside space-y-0.5 text-[13px]">
+<li>M1 : Algèbre &amp; Gradient Stochastique (4h)</li>
+<li>M2 : Réseaux Convolutifs Avancés &amp; Séquentiels (6h)</li>
+<li>M3 : Mécanismes d'Auto-Attention &amp; Transformers (6h)</li>
+<li>M4 : Modèles Génératifs (Diffusion, VAE) (4h)</li>
+<li>M5 : Apprentissage par Renforcement Profond (4h)</li>
+<li>M6 : Éthique &amp; Biais Algorithmiques (6h)</li>
+</ul>
+</div>
+<div class="p-2.5 bg-surface-container-lowest rounded-DEFAULT space-y-1">
+<span class="font-label-sm text-secondary uppercase block">Acquis d'apprentissage visés (AAV) :</span>
+<p class="text-[12px] leading-relaxed">
+                Implémenter un transformeur complet en PyTorch, auditer l'empreinte carbone et concevoir une fonction de perte personnalisée conforme à l'éthique IA européenne.
+              </p>
+</div>
+<div class="grid grid-cols-2 gap-2 text-[12px]">
+<div class="p-2 bg-surface-container-lowest rounded-DEFAULT">
+<span class="font-label-sm uppercase text-outline block">Prérequis :</span>
+<span class="font-semibold text-on-surface">Calcul Matriciel, Python L3</span>
+</div>
+<div class="p-2 bg-surface-container-lowest rounded-DEFAULT">
+<span class="font-label-sm uppercase text-outline block">Évaluation :</span>
+<span class="font-semibold text-on-surface">Projet Kaggle + Examen (50/50)</span>
+</div>
+</div>
+</div>
+<!-- Trois boutons d'action obligatoires : Garder / Modifier / Refuser -->
+<div class="pt-space-xs space-y-2">
+<div class="grid grid-cols-2 gap-2">
+<button class="flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md transition-colors shadow-sm" id="btn-keep-ai" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Garder</span>
+</button>
+<button class="flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-full bg-surface-container-lowest hover:bg-surface-container-highest text-on-surface font-label-md transition-colors" id="btn-edit-ai" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Modifier</span>
+</button>
+</div>
+<button class="w-full flex items-center justify-center gap-1.5 py-2 px-space-sm rounded-full bg-transparent hover:bg-error-container text-error font-label-md transition-colors" id="btn-reject-ai" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Refuser la proposition</span>
+</button>
+</div>
+</div>
+<!-- Section indicateur de performance multimodal -->
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[24px]">model_training</span>
+</div>
+<div class="space-y-0.5">
+<span class="font-label-md text-on-surface block leading-tight">Indexation vectorielle</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant block">Les 12 supports rattachés sont indexés pour l'assistance aux questions étudiantes.</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<script>
+  // Micro-interactions ergonomiques
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggleAiBtn = document.getElementById('toggle-ai-btn');
+    const aiSuggestionCard = document.getElementById('ai-suggestion-card');
+    const btnGenerateAi = document.getElementById('btn-generate-ai');
+    const btnKeepAi = document.getElementById('btn-keep-ai');
+    const btnRejectAi = document.getElementById('btn-reject-ai');
+    const btnEditAi = document.getElementById('btn-edit-ai');
+
+    if (toggleAiBtn) {
+      toggleAiBtn.addEventListener('click', () => {
+        aiSuggestionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        aiSuggestionCard.classList.add('ring-2', 'ring-secondary');
+        setTimeout(() => {
+          aiSuggestionCard.classList.remove('ring-2', 'ring-secondary');
+        }, 1500);
+      });
+    }
+
+    if (btnGenerateAi) {
+      btnGenerateAi.addEventListener('click', () => {
+        const originalText = btnGenerateAi.innerHTML;
+        btnGenerateAi.innerHTML = '<span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span><span>Calcul du syllabus optimal...</span>';
+        btnGenerateAi.disabled = true;
+        setTimeout(() => {
+          btnGenerateAi.innerHTML = originalText;
+          btnGenerateAi.disabled = false;
+        }, 1000);
+      });
+    }
+
+    if (btnKeepAi) {
+      btnKeepAi.addEventListener('click', () => {
+        btnKeepAi.innerHTML = '<span class="material-symbols-outlined text-[18px]">done_all</span><span>Appliqué !</span>';
+        btnKeepAi.classList.remove('bg-primary');
+        btnKeepAi.classList.add('bg-secondary');
+        setTimeout(() => {
+          btnKeepAi.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span><span>Garder</span>';
+          btnKeepAi.classList.remove('bg-secondary');
+          btnKeepAi.classList.add('bg-primary');
+        }, 2000);
+      });
+    }
+
+    if (btnRejectAi) {
+      btnRejectAi.addEventListener('click', () => {
+        aiSuggestionCard.style.opacity = '0.5';
+        setTimeout(() => {
+          aiSuggestionCard.style.opacity = '1';
+        }, 600);
+      });
+    }
+
+    if (btnEditAi) {
+      btnEditAi.addEventListener('click', () => {
+        document.getElementById('course-title-input').focus();
+      });
+    }
+  });
+</script></main></div></body></html>

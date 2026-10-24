@@ -1,0 +1,94 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Relevés de notes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Résultats académiques</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Relevés de notes</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Relevé officiel du Master 1 Informatique &amp; IA · Année universitaire 2024 – 2025.</p>
+</div>
+<div class="flex flex-wrap items-center gap-2 print:hidden">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Relevé PDF généré et téléchargé." type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>Télécharger
+</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>Imprimer
+</button>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Moyenne générale" value="15.4" suffix="/20" icon="emoji_events" hint="Semestre 1 validé" %}
+{% include "portal/_stat_card.html" with label="Crédits validés" value="54" suffix="/60" icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="6 crédits en cours au S2" %}
+{% include "portal/_stat_card.html" with label="Rang de promotion" value="4" suffix="e / 32" icon="leaderboard" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Top 15 % de la promotion" %}
+{% include "portal/_stat_card.html" with label="Mention projetée" value="Bien" icon="military_tech" hint="Objectif : Très bien" %}
+</div>
+<section class="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-tabs>
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes par unité d'enseignement</h2>
+<div class="inline-flex rounded-full bg-surface-container p-1" role="tablist" aria-label="Semestres">
+<button aria-selected="true" class="tab-btn is-active rounded-full px-4 py-1.5 text-xs font-bold text-on-surface-variant" data-tab="s1" role="tab" type="button">Semestre 1</button>
+<button aria-selected="false" class="tab-btn rounded-full px-4 py-1.5 text-xs font-bold text-on-surface-variant" data-tab="s2" role="tab" type="button">Semestre 2</button>
+</div>
+</div>
+<div data-tab-panel="s1">
+<div class="overflow-x-auto">
+<table class="w-full min-w-[640px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Code</th><th class="px-5 py-3 font-bold">Unité d'enseignement</th><th class="px-5 py-3 font-bold">ECTS</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF501</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Réseaux de neurones profonds</p><p class="text-xs text-on-surface-variant">Pr. H. Vasseur</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">16.5</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF502</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Algorithmique avancée</p><p class="text-xs text-on-surface-variant">A. Diallo</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">15.0</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF503</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Bases de données réparties</p><p class="text-xs text-on-surface-variant">M. Traoré</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">14.0</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">MAT501</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Probabilités &amp; statistiques</p><p class="text-xs text-on-surface-variant">S. Lambert</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">13.5</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">ANG501</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Anglais scientifique</p><p class="text-xs text-on-surface-variant">J. Parker</p></td><td class="px-5 py-3 text-on-surface-variant">3</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">17.0</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">PRO501</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Projet tutoré</p><p class="text-xs text-on-surface-variant">H. Vasseur</p></td><td class="px-5 py-3 text-on-surface-variant">9</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">16.0</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+</tbody>
+</table>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 bg-surface-container/40 px-5 py-3 text-xs text-on-surface-variant"><span>36 crédits ECTS · Semestre 1</span><span class="font-data-metric font-bold text-on-surface">Moyenne S1 : 15.3 / 20</span></div>
+</div>
+<div class="hidden" data-tab-panel="s2">
+<div class="overflow-x-auto">
+<table class="w-full min-w-[640px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Code</th><th class="px-5 py-3 font-bold">Unité d'enseignement</th><th class="px-5 py-3 font-bold">ECTS</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF601</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Apprentissage par renforcement</p><p class="text-xs text-on-surface-variant">H. Vasseur</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">15.8</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="En cours" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF602</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Vision par ordinateur</p><p class="text-xs text-on-surface-variant">C. Nguyen</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">14.5</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="En cours" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">INF603</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">IA embarquée &amp; edge computing</p><p class="text-xs text-on-surface-variant">Projet · Groupe 4</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">—</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="À venir" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">ETH601</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">Éthique &amp; régulation de l'IA</p><p class="text-xs text-on-surface-variant">C. Nguyen</p></td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">17.5</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+</tbody>
+</table>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 bg-surface-container/40 px-5 py-3 text-xs text-on-surface-variant"><span>18 crédits validés · 6 en cours</span><span class="font-data-metric font-bold text-on-surface">Moyenne S2 provisoire : 15.8 / 20</span></div>
+</div>
+</div>
+<aside class="flex flex-col gap-4">
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Synthèse annuelle</p>
+<p class="font-data-metric text-[20px] font-bold mt-2">15.4<span class="text-lg font-normal text-white/60">/20</span></p>
+<p class="mt-1 text-sm text-white/70">Mention Bien · 54 crédits validés</p>
+<div class="mt-4 space-y-2 border-t border-white/15 pt-3 text-xs text-white/75">
+<div class="flex justify-between"><span>Progression du diplôme</span><span class="font-bold text-white">90 %</span></div>
+<div class="flex justify-between"><span>Objectif personnel</span><span class="font-bold text-white">16 / 20</span></div>
+<div class="flex justify-between"><span>Prochaine échéance</span><span class="font-bold text-white">Partiel · 30 oct.</span></div>
+</div>
+<button class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-label-md text-label-md font-bold text-primary transition-transform hover:scale-[1.01]" data-toast="Attestation de réussite téléchargée." type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>Attestation de réussite
+</button>
+</div>
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Règles de validation</h2>
+<ul class="mt-3 space-y-2.5 text-xs leading-relaxed text-on-surface-variant">
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Chaque UE est validée à partir de 10/20.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Compensation possible entre les UE d'un même semestre.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>La moyenne annuelle doit atteindre 10/20 pour le passage.</li>
+</ul>
+<button class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" data-toast="Règlement des études ouvert dans un nouvel onglet." type="button">Consulter le règlement<span class="material-symbols-outlined text-[16px]">open_in_new</span></button>
+</div>
+</aside>
+</section>
+</div>
+</main>
+{% endblock %}

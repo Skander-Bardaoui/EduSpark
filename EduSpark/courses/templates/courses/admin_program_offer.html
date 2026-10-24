@@ -1,0 +1,526 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Offre de formation — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Fil d'ariane & Contexte Opérationnel -->
+<!-- En-tête de page & Commandes Globales -->
+<header class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-6">
+<div class="max-w-3xl">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed mb-3">
+<span class="material-symbols-outlined text-[16px]">account_tree</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Structure Académique &amp; Référentiels</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface mb-2">Offre de Formation &amp; Départements Académiques</h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Gouvernance des UFRs, pilotage des maquettes pédagogiques, validation des accréditations HCÉRES et contrôle des ECTS par filière pour l'Université Paris Cité.
+      </p>
+</div>
+<!-- Actions Rapides -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors font-label-md text-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Audit de conformité</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-low text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span>Exporter maquettes (CSV/Apogée)</span>
+</button>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-label-md shadow-md hover:shadow-lg" type="button">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Créer une filière / Mention</span>
+</button>
+</div>
+</header>
+<!-- Section KPIs & Métriques de Conformité -->
+<section aria-label="Indicateurs clés de l'offre académique" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+<!-- Card 1: Composantes -->
+<article class="relative p-5 rounded bg-surface-container-lowest shadow-[0_2px_12px_rgba(6,22,75,0.04)] flex flex-col justify-between overflow-hidden">
+<div class="absolute -right-4 -bottom-4 w-28 h-28 rounded-full bg-surface-container-low/50 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Composantes &amp; UFRs</span>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[20px]">corporate_fare</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">9</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">UFRs actives</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant/90">Sciences, Santé, SHS, IUT Paris Pajol...</p>
+</div>
+<div class="mt-4 pt-3 border-t-0 flex items-center gap-1.5 text-on-surface-variant font-data-metric text-data-metric">
+<span class="inline-block w-2 h-2 rounded-full bg-primary"></span>
+<span>Tous campus parisiens rattachés</span>
+</div>
+</article>
+<!-- Card 2: Diplômes Accrédités -->
+<article class="relative p-5 rounded bg-surface-container-lowest shadow-[0_2px_12px_rgba(6,22,75,0.04)] flex flex-col justify-between overflow-hidden">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Diplômes Accrédités</span>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">142</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-semibold">HCÉRES 2024-2029</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant/90">Licences, Masters Pro/Recherche, Doctorats</p>
+</div>
+<div class="mt-4 flex items-center justify-between font-data-metric text-data-metric text-on-surface-variant">
+<span>Filières d'ingénierie : 18</span>
+<span class="text-secondary font-semibold">100% audités</span>
+</div>
+</article>
+<!-- Card 3: ECTS Validés -->
+<article class="relative p-5 rounded bg-surface-container-lowest shadow-[0_2px_12px_rgba(6,22,75,0.04)] flex flex-col justify-between overflow-hidden">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">ECTS Validés &amp; Équilibrés</span>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">balance</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-3 mb-1">
+<span class="font-data-metric text-[20px] font-bold text-primary leading-none">100%</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-bold">Standard Bologne</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant/90">30 ECTS / semestre réglementaires sur l'offre</p>
+</div>
+<div class="mt-4 flex items-center gap-2">
+<div class="w-full bg-surface-container-low h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full w-full"></div>
+</div>
+<span class="font-data-metric text-data-metric text-primary font-bold">30/30</span>
+</div>
+</article>
+<!-- Card 4: Syllabus Validés -->
+<article class="relative p-5 rounded bg-surface-container-lowest shadow-[0_2px_12px_rgba(6,22,75,0.04)] flex flex-col justify-between overflow-hidden">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Syllabus Validés</span>
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2 mb-1">
+<span class="font-data-metric text-[20px] font-bold text-tertiary leading-none">94.2%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">conformité</span>
+</div>
+<p class="font-body-sm text-body-sm text-error font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">pending_actions</span>
+          8 maquettes en attente de visa conseil
+        </p>
+</div>
+<div class="mt-4 flex items-center justify-between font-data-metric text-data-metric text-on-surface-variant">
+<span>Objectif rentrée : 100%</span>
+<span class="text-tertiary font-bold">Échéance J-12</span>
+</div>
+</article>
+</section>
+<!-- Layout Asymétrique Principal : 2 colonnes (Contenu Majeur + Volet IA Réglementaire) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-12 items-start">
+<!-- COLONNE GAUCHE (8 col) : Composantes & Grille des maquettes -->
+<div class="lg:col-span-8 flex flex-col gap-5 min-w-0">
+<!-- Bloc Composantes & UFRs -->
+<section aria-labelledby="section-ufrs-title" class="rounded bg-surface-container-lowest p-5 shadow-[0_2px_16px_rgba(6,22,75,0.03)]">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-ufrs-title">Composantes &amp; UFRs d'enseignement</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Supervision des unités déconcentrées et de la gouvernance de formation.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Filtrer par pôle :</span>
+<select aria-label="Filtrer par pôle universitaire" class="px-3 py-1.5 rounded-full bg-surface-container-low text-on-surface font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary border-0">
+<option>Tous les pôles (Sciences &amp; Santé)</option>
+<option>Pôle Sciences Fondamentales</option>
+<option>Pôle Santé &amp; Médecine</option>
+<option>Pôle Sociétés &amp; Humanités</option>
+</select>
+</div>
+</div>
+<!-- Cartes descriptives UFRs -->
+<div class="space-y-4">
+<!-- UFR 1: Informatique -->
+<article class="p-5 rounded bg-surface-container-low/70 hover:bg-surface-container-low transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+<div class="flex items-start gap-3.5">
+<div class="w-11 h-11 rounded bg-primary flex items-center justify-center text-on-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-title-md text-title-md text-on-surface">UFR d'Informatique</h3>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface">Grands Moulins</span>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-semibold">HCÉRES 2029</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                    Responsable : <span class="text-on-surface font-medium">Pr. Alain R.</span> • 1 240 étudiants • 68 enseignants-chercheurs
+                  </p>
+</div>
+</div>
+<!-- Statut & Jauge -->
+<div class="flex md:flex-col items-end justify-between md:justify-center shrink-0">
+<span class="font-data-metric text-data-metric text-primary font-bold">98% complétion syllabus</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span> Entièrement conforme
+                </span>
+</div>
+</div>
+<!-- Formations associées tags -->
+<div class="flex flex-wrap items-center gap-1.5 my-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant mr-1">Offres :</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Licence Informatique (L1-L3)</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Master Informatique &amp; IA (M1-M2)</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Master Systèmes Distribués</span>
+</div>
+<!-- Actions de pilotage -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t-0 mt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-primary hover:bg-primary-fixed font-label-md text-label-md transition-colors" type="button">
+                  Éditer les maquettes
+                </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-xs" type="button">
+                  Gérer les coefficients
+                </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-xs" type="button">
+                  Voir les UEs
+                </button>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Code UFR : UFR-INF-75</span>
+</div>
+</article>
+<!-- UFR 2: Mathématiques -->
+<article class="p-5 rounded bg-surface-container-low/70 hover:bg-surface-container-low transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+<div class="flex items-start gap-3.5">
+<div class="w-11 h-11 rounded bg-secondary flex items-center justify-center text-on-secondary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">calculate</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-title-md text-title-md text-on-surface">UFR de Mathématiques</h3>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface">Bâtiment Sophie Germain</span>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-semibold">HCÉRES 2028</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                    Responsable : <span class="text-on-surface font-medium">Dr. É. Moreau</span> • 980 étudiants • 54 enseignants-chercheurs
+                  </p>
+</div>
+</div>
+<div class="flex md:flex-col items-end justify-between md:justify-center shrink-0">
+<span class="font-data-metric text-data-metric text-on-surface font-bold">91% complétion syllabus</span>
+<span class="font-label-sm text-label-sm text-tertiary font-medium flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span> 1 UE en révision de barème
+                </span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-1.5 my-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant mr-1">Offres :</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Licence Math-Info</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Master Mathématiques Fondamentales</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Master Modélisation Stochastique</span>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t-0 mt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-primary hover:bg-primary-fixed font-label-md text-label-md transition-colors" type="button">
+                  Éditer les maquettes
+                </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-xs" type="button">
+                  Gérer les coefficients
+                </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-xs" type="button">
+                  Voir les UEs
+                </button>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Code UFR : UFR-MAT-75</span>
+</div>
+</article>
+<!-- UFR 3: Physique -->
+<article class="p-5 rounded bg-surface-container-low/70 hover:bg-surface-container-low transition-all">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+<div class="flex items-start gap-3.5">
+<div class="w-11 h-11 rounded bg-tertiary flex items-center justify-center text-on-tertiary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">science</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="font-title-md text-title-md text-on-surface">UFR de Physique Fondamentale</h3>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface">Campus Halle aux Farines</span>
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-semibold">HCÉRES 2027</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                    Responsable : <span class="text-on-surface font-medium">Pr. M. Vasseur</span> • 850 étudiants • 42 enseignants
+                  </p>
+</div>
+</div>
+<div class="flex md:flex-col items-end justify-between md:justify-center shrink-0">
+<span class="font-data-metric text-data-metric text-error font-bold">88% complétion syllabus</span>
+<span class="font-label-sm text-label-sm text-error font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span> Alerte : 2 syllabus en retard (S2)
+                </span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-1.5 my-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant mr-1">Offres :</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Licence Sciences Physiques</span>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface shadow-xs">Master Nanomatériaux &amp; Matière Condensée</span>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t-0 mt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-primary hover:bg-primary-fixed font-label-md text-label-md transition-colors" type="button">
+                  Relancer les retardataires
+                </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors shadow-xs" type="button">
+                  Éditer les maquettes
+                </button>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Code UFR : UFR-PHY-75</span>
+</div>
+</article>
+</div>
+</section>
+<!-- Grille des maquettes de diplôme en révision -->
+<section aria-labelledby="section-maquettes-title" class="rounded bg-surface-container-lowest p-5 shadow-[0_2px_16px_rgba(6,22,75,0.03)]">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-maquettes-title">Maquettes de diplôme en révision &amp; accréditation</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Contrôle des volumes horaires CM/TD/TP et état des visas pédagogiques.</p>
+</div>
+<div class="flex items-center gap-2 self-start sm:self-auto">
+<span class="font-label-sm text-label-sm px-3 py-1 rounded-full bg-surface-container text-primary font-bold">Session Conseil 2024-C</span>
+</div>
+</div>
+<!-- Table Responsive -->
+<div class="overflow-x-auto -mx-6 px-6">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant">
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider rounded-l">Code Diplôme</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider">Intitulé de Formation</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider">UFR Rattachement</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider">Responsable Pédagogique</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-center">Vol. CM / TD / TP</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider">Statut Visa</th>
+<th class="py-3 px-4 font-label-sm text-label-sm uppercase tracking-wider text-right rounded-r">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- Ligne 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-4 font-data-metric text-data-metric text-primary font-bold">LIC-INFO-2024</td>
+<td class="py-2.5 px-4">
+<div class="font-title-md text-title-md text-on-surface">Licence Informatique Générale</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mention Sciences Formelles</span>
+</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">UFR Informatique</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">Dr. Céline Barthez</td>
+<td class="py-2.5 px-4 text-center">
+<span class="font-data-metric text-data-metric bg-surface-container px-2 py-0.5 rounded text-on-surface">
+                    180h / 140h / 110h
+                  </span>
+</td>
+<td class="py-2.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Visa Délivré
+                  </span>
+</td>
+<td class="py-2.5 px-4 text-right">
+<button class="p-1 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Consulter la fiche" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-4 font-data-metric text-data-metric text-secondary font-bold">MST-IA-401</td>
+<td class="py-2.5 px-4">
+<div class="font-title-md text-title-md text-on-surface">Master 2 Intelligence Artificielle &amp; Data</div>
+<span class="font-body-sm text-body-sm text-tertiary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">error</span> Écart d'heures TP détecté
+                  </span>
+</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">UFR Informatique</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">Pr. Marc Delaunay</td>
+<td class="py-2.5 px-4 text-center">
+<span class="font-data-metric text-data-metric bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded font-bold">
+                    120h / 80h / 42h*
+                  </span>
+</td>
+<td class="py-2.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Arbitrage IA
+                  </span>
+</td>
+<td class="py-2.5 px-4 text-right">
+<button class="p-1 rounded-full text-secondary hover:bg-secondary-fixed transition-colors" title="Voir l'analyse" type="button">
+<span class="material-symbols-outlined text-[20px]">troubleshoot</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-4 font-data-metric text-data-metric text-on-surface-variant font-bold">MST-STOCH-302</td>
+<td class="py-2.5 px-4">
+<div class="font-title-md text-title-md text-on-surface">Master Modélisation Aléatoire &amp; Finance</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mention Mathématiques Appliquées</span>
+</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">UFR Mathématiques</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">Dr. É. Moreau</td>
+<td class="py-2.5 px-4 text-center">
+<span class="font-data-metric text-data-metric bg-surface-container px-2 py-0.5 rounded text-on-surface">
+                    140h / 120h / 60h
+                  </span>
+</td>
+<td class="py-2.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Visa en cours
+                  </span>
+</td>
+<td class="py-2.5 px-4 text-right">
+<button class="p-1 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Consulter la fiche" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-2.5 px-4 font-data-metric text-data-metric text-on-surface-variant font-bold">LIC-PHY-102</td>
+<td class="py-2.5 px-4">
+<div class="font-title-md text-title-md text-on-surface">Licence 2 Physique Fondamentale</div>
+<span class="font-body-sm text-body-sm text-error font-medium">Retard validation syllabus S4</span>
+</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">UFR Physique</td>
+<td class="py-2.5 px-4 font-body-sm text-body-sm text-on-surface">Pr. M. Vasseur</td>
+<td class="py-2.5 px-4 text-center">
+<span class="font-data-metric text-data-metric bg-surface-container px-2 py-0.5 rounded text-on-surface">
+                    160h / 110h / 90h
+                  </span>
+</td>
+<td class="py-2.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span> En attente dépôt
+                  </span>
+</td>
+<td class="py-2.5 px-4 text-right">
+<button class="p-1 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Consulter la fiche" type="button">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- COLONNE DROITE (4 col) : Volet IA Latéral Standardisé (BETA MULTIMODALE) -->
+<aside aria-label="Assistance IA et conformité institutionnelle" class="lg:col-span-4 flex flex-col gap-5">
+<!-- Volet IA Dédié -->
+<div class="relative p-5 rounded bg-surface-container-low shadow-[0_4px_24px_rgba(6,22,75,0.06)] overflow-hidden">
+<!-- Accent Décoratif d'arrière-plan -->
+<div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-secondary-fixed/40 blur-2xl pointer-events-none"></div>
+<!-- En-tête Volet IA -->
+<div class="flex items-start justify-between gap-3 mb-4 relative z-10">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="font-title-md text-title-md text-on-surface">Assistant IA Maquettes &amp; Conformité</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed uppercase tracking-wider font-bold">Bêta Multimodale</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[20px]">info</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-5 relative z-10">
+<strong class="text-on-surface">Objectif :</strong> Contrôle des volumes horaires et des prérequis ECTS selon le cadre national des formations.
+        </p>
+<!-- Notification de Suggestion IA -->
+<div class="p-4 rounded bg-surface-container-lowest shadow-sm mb-5 relative z-10 space-y-3">
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+<span class="font-label-md text-label-md font-bold">Écart détecté : Master 2 IA</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+            Le volume de TP encadré est inférieur de <strong>6 heures</strong> aux recommandations de la commission d'accréditation HCÉRES pour la mention Informatique Avancée.
+          </p>
+<div class="p-3 rounded bg-surface-container font-body-sm text-body-sm text-on-surface">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">lightbulb</span>
+<p>
+<strong class="text-primary font-semibold">Recommandation :</strong> Réajuster 6h de CM en 6h de TP encadré sur l'UE <strong>INF501</strong> pour rétablir la conformité sans altérer le quota total de 30 ECTS.
+              </p>
+</div>
+</div>
+<!-- Métadonnées techniques multimodales -->
+<div class="pt-2 flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric">
+<span>Réf: HCERES-F-2024</span>
+<span>Confiance: 99.4%</span>
+</div>
+</div>
+<!-- Boutons d'Arbitrage Normés Obligatoires -->
+<div class="space-y-2 mb-6 relative z-10">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold block mb-1">Arbitrage de la DSI</span>
+<button class="w-full py-2.5 px-4 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center justify-center gap-2 transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Appliquer le rééquilibrage</span>
+</button>
+<button class="w-full py-2.5 px-4 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest font-label-md text-label-md flex items-center justify-center gap-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Ajuster manuellement</span>
+</button>
+<button class="w-full py-2.5 px-4 rounded-full bg-transparent hover:bg-surface-container text-outline hover:text-error font-label-md text-label-md flex items-center justify-center gap-2 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+<span>Refuser</span>
+</button>
+</div>
+<!-- Encadré de Résilience Institutionnelle Obligatoire -->
+<div class="p-4 rounded bg-surface-container-high text-on-surface relative z-10">
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0">shield_lock</span>
+<div>
+<h4 class="font-title-md text-title-md leading-tight mb-1 text-primary">Garantie de continuité de service</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                La saisie et la modification manuelle des maquettes pédagogiques restent <strong>100% opérationnelles sans IA</strong>, garantissant l'indépendance de la scolarité centrale.
+              </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Module d'Information Réglementaire -->
+<div class="p-5 rounded bg-surface-container-lowest shadow-[0_2px_12px_rgba(6,22,75,0.03)] space-y-4">
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+<span>Calendrier des Visas de Formation</span>
+</h3>
+<ul class="space-y-3 font-body-sm text-body-sm">
+<li class="flex items-start gap-3">
+<span class="font-data-metric text-data-metric px-2 py-0.5 rounded bg-surface-container text-on-surface shrink-0 mt-0.5">14 OCT</span>
+<div>
+<p class="font-medium text-on-surface">Conseil Académique Plénier</p>
+<p class="text-on-surface-variant">Arbitrage final des dérogations horaires 2024-2025.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="font-data-metric text-data-metric px-2 py-0.5 rounded bg-surface-container text-on-surface shrink-0 mt-0.5">02 NOV</span>
+<div>
+<p class="font-medium text-on-surface">Export National Apogée / SI-Scol</p>
+<p class="text-on-surface-variant">Génération des structures d'enseignement officielles.</p>
+</div>
+</li>
+</ul>
+<div class="pt-2">
+<a class="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary hover:text-primary-container font-semibold" href="#">
+<span>Télécharger le guide d'audit HCÉRES</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</aside>
+</div>
+</div></main>
+{% endblock %}

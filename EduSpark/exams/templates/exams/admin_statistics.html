@@ -1,0 +1,96 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Statistiques &amp; Taux de réussite — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Statistiques &amp; Taux de réussite</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Indicateurs de réussite par département, par UE et par promotion pour l'année 2026 – 2027.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Rapport statistique complet téléchargé." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'exams:admin_exam_sessions' %}"><span class="material-symbols-outlined text-[18px]">event_available</span>Sessions d'examen</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Taux de réussite global" value="86,4" suffix=" %" icon="insights" hint="+2,1 pts vs 2025 – 2026" %}
+{% include "portal/_stat_card.html" with label="Étudiants admis" value="1 198" icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Sur 1 387 inscrits" %}
+{% include "portal/_stat_card.html" with label="Moyenne générale" value="13,2" suffix=" /20" icon="grade" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Toutes promotions" %}
+{% include "portal/_stat_card.html" with label="Taux d'abandon" value="4,8" suffix=" %" icon="trending_down" hint="En baisse de 0,7 pt" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-tabs>
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Réussite par département</h2><p class="text-xs text-on-surface-variant">Part des étudiants ayant validé au moins 80 % des crédits.</p></div>
+<div class="flex flex-wrap gap-2">
+<button aria-selected="true" class="tab-btn is-active rounded-full border border-outline-variant/60 px-4 py-1.5 text-xs font-bold text-on-surface-variant transition-colors" data-tab="s1" type="button">Semestre 1</button>
+<button aria-selected="false" class="tab-btn rounded-full border border-outline-variant/60 px-4 py-1.5 text-xs font-bold text-on-surface-variant transition-colors" data-tab="s2" type="button">Semestre 2</button>
+</div>
+</div>
+<div class="p-5" data-tab-panel="s1">
+<div class="space-y-4">
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Informatique &amp; IA</span><span class="font-bold text-on-surface">91,2 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:91.2%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">306 admis sur 336 · moyenne 13,8</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Sciences des données</span><span class="font-bold text-on-surface">88,6 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-secondary" style="width:88.6%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">218 admis sur 246 · moyenne 13,5</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Mathématiques appliquées</span><span class="font-bold text-on-surface">84,3 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:84.3%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">342 admis sur 406 · moyenne 12,7</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Réseaux &amp; Télécoms</span><span class="font-bold text-on-surface">80,1 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-outline" style="width:80.1%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">332 admis sur 399 · moyenne 12,1</p></div>
+</div>
+<div class="mt-5 grid gap-3 sm:grid-cols-3">
+<div class="rounded bg-surface-container p-3.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Meilleure progression</p><p class="mt-1 text-sm font-semibold text-on-surface">Informatique &amp; IA · +4,2 pts</p></div>
+<div class="rounded bg-surface-container p-3.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">UE la plus réussie</p><p class="mt-1 text-sm font-semibold text-on-surface">INF503 · 94 % de réussite</p></div>
+<div class="rounded bg-surface-container p-3.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">UE sous surveillance</p><p class="mt-1 text-sm font-semibold text-on-surface">MAT302 · 71 % de réussite</p></div>
+</div>
+</div>
+<div class="hidden p-5" data-tab-panel="s2">
+<div class="space-y-4">
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Informatique &amp; IA</span><span class="font-bold text-on-surface">89,7 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:89.7%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">Projection sur les résultats partiels</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Sciences des données</span><span class="font-bold text-on-surface">90,4 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-secondary" style="width:90.4%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">Projection sur les résultats partiels</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Mathématiques appliquées</span><span class="font-bold text-on-surface">82,9 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:82.9%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">Projection sur les résultats partiels</p></div>
+<div><div class="flex items-center justify-between text-sm"><span class="font-semibold text-on-surface">Réseaux &amp; Télécoms</span><span class="font-bold text-on-surface">78,5 %</span></div><div class="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-outline" style="width:78.5%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">Projection sur les résultats partiels</p></div>
+</div>
+</div>
+</section>
+<section class="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_380px]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Taux de réussite par UE</h2>
+<span class="text-xs text-on-surface-variant">Semestre 1 · 2026 – 2027</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">UE</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Inscrits</th><th class="px-5 py-3 font-bold">Admis</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 text-right font-bold">Réussite</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INF501 · Algorithmique avancée</td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">74</td><td class="px-5 py-3 text-on-surface-variant">66</td><td class="px-5 py-3 text-on-surface-variant">12,4</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="89 %" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INF502 · Systèmes distribués</td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3 text-on-surface-variant">22</td><td class="px-5 py-3 text-on-surface-variant">13,1</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="92 %" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INF503 · Réseaux de neurones</td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3 text-on-surface-variant">23</td><td class="px-5 py-3 text-on-surface-variant">14,2</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="94 %" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INF504 · Bases de données</td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3 text-on-surface-variant">17</td><td class="px-5 py-3 text-on-surface-variant">14,6</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="94 %" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">MAT302 · Analyse numérique</td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">62</td><td class="px-5 py-3 text-on-surface-variant">44</td><td class="px-5 py-3 text-on-surface-variant">10,8</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="71 %" tone_class="bg-error-container text-on-error-container" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INF505 · Éthique de l'IA</td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3 text-on-surface-variant">15,3</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="100 %" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<aside class="flex flex-col gap-4">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes pédagogiques</h2>
+<ul class="mt-3 space-y-3 text-sm">
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-error">warning</span><div><p class="font-semibold text-on-surface">MAT302 sous la cible</p><p class="text-xs text-on-surface-variant">Taux de réussite inférieur de 9 pts à la moyenne départementale.</p></div></li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">schedule</span><div><p class="font-semibold text-on-surface">12 notes manquantes</p><p class="text-xs text-on-surface-variant">Deux UE M2 sans relevé finalisé.</p></div></li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">info</span><div><p class="font-semibold text-on-surface">Session de rattrapage</p><p class="text-xs text-on-surface-variant">Les inscriptions ouvrent le 4 novembre.</p></div></li>
+</ul>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Réussite par promotion</h2>
+<ul class="mt-3 space-y-2 text-sm text-on-surface-variant">
+<li class="flex items-center justify-between"><span>Licence 1</span><span class="font-bold text-on-surface">82,4 %</span></li>
+<li class="flex items-center justify-between"><span>Licence 2</span><span class="font-bold text-on-surface">85,1 %</span></li>
+<li class="flex items-center justify-between"><span>Licence 3</span><span class="font-bold text-on-surface">87,6 %</span></li>
+<li class="flex items-center justify-between"><span>Master 1</span><span class="font-bold text-on-surface">90,2 %</span></li>
+<li class="flex items-center justify-between"><span>Master 2</span><span class="font-bold text-on-surface">93,8 %</span></li>
+</ul>
+</section>
+</aside>
+</section>
+</div>
+</main>
+{% endblock %}

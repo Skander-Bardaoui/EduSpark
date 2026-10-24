@@ -1,0 +1,103 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Tous les cours — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours &amp; Catalogue</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Tous les cours</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Catalogue global des unités d'enseignement par département, semestre et responsable.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Catalogue des cours exporté au format CSV." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Formulaire de création de cours ouvert." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Nouveau cours</button>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Cours au catalogue" value="86" icon="menu_book" hint="4 départements" %}
+{% include "portal/_stat_card.html" with label="Cours actifs ce semestre" value="64" icon="play_circle" icon_class="bg-surface-container text-secondary" hint="74 % du catalogue" %}
+{% include "portal/_stat_card.html" with label="Crédits ECTS proposés" value="480" icon="workspace_premium" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Toutes mentions" %}
+{% include "portal/_stat_card.html" with label="Cours sans support" value="7" icon="folder_off" hint="À compléter par les équipes" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Catalogue des unités d'enseignement</h2>
+<p class="text-xs text-on-surface-variant"><span data-filter-count>7</span> cours affichés</p>
+</div>
+<div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+<label class="relative block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary sm:w-56" id="course-search" placeholder="Rechercher un cours…" type="search"/></label>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="informatique" type="button">Informatique</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="maths" type="button">Mathématiques</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="data" type="button">Data</button>
+</div>
+<label class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Semestre
+<select class="rounded-full border border-outline-variant/60 bg-surface px-3 py-1.5 text-xs font-normal normal-case tracking-normal text-on-surface outline-none focus:border-primary" id="course-semester"><option value="all">Tous</option><option value="s1">Semestre 1</option><option value="s3">Semestre 3</option><option value="s5">Semestre 5</option></select>
+</label>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[1040px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Cours</th><th class="px-5 py-3 font-bold">Département</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Semestre</th><th class="px-5 py-3 font-bold">ECTS</th><th class="px-5 py-3 font-bold">Responsable</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="algorithmique avancee inf501" data-semester="s5" data-filter-item data-tags="informatique"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF501 · Algorithmique avancée</p><p class="text-xs text-on-surface-variant">Graphes, complexité, approximation</p></td><td class="px-5 py-3 text-on-surface-variant">Informatique &amp; IA</td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">S5</td><td class="px-5 py-3 text-on-surface-variant">8</td><td class="px-5 py-3 text-on-surface-variant">H. Vasseur</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="systemes distribues inf502" data-semester="s1" data-filter-item data-tags="informatique"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF502 · Systèmes distribués</p><p class="text-xs text-on-surface-variant">Consensus, tolérance aux pannes</p></td><td class="px-5 py-3 text-on-surface-variant">Informatique &amp; IA</td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1</td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 text-on-surface-variant">H. Vasseur</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="reseaux neurones inf503" data-semester="s1" data-filter-item data-tags="informatique data"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF503 · Réseaux de neurones profonds</p><p class="text-xs text-on-surface-variant">CNN, RNN, optimisation</p></td><td class="px-5 py-3 text-on-surface-variant">Informatique &amp; IA</td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1</td><td class="px-5 py-3 text-on-surface-variant">5</td><td class="px-5 py-3 text-on-surface-variant">H. Vasseur</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="bases de donnees inf504" data-semester="s3" data-filter-item data-tags="data"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF504 · Bases de données avancées</p><p class="text-xs text-on-surface-variant">SQL avancé, transactions, distribution</p></td><td class="px-5 py-3 text-on-surface-variant">Sciences des données</td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S3</td><td class="px-5 py-3 text-on-surface-variant">4</td><td class="px-5 py-3 text-on-surface-variant">M. Traoré</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="ethique ia inf505" data-semester="s3" data-filter-item data-tags="data"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF505 · Éthique de l'IA</p><p class="text-xs text-on-surface-variant">Biais, transparence, régulation</p></td><td class="px-5 py-3 text-on-surface-variant">Sciences des données</td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S3</td><td class="px-5 py-3 text-on-surface-variant">3</td><td class="px-5 py-3 text-on-surface-variant">C. Nguyen</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="probabilites mat301" data-semester="s5" data-filter-item data-tags="maths"><td class="px-5 py-3"><p class="font-semibold text-on-surface">MAT301 · Probabilités</p><p class="text-xs text-on-surface-variant">Chaînes de Markov, estimation</p></td><td class="px-5 py-3 text-on-surface-variant">Mathématiques appliquées</td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">S5</td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 text-on-surface-variant">S. Lambert</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-course-row data-course-search="analyse numerique mat302" data-semester="s3" data-filter-item data-tags="maths"><td class="px-5 py-3"><p class="font-semibold text-on-surface">MAT302 · Analyse numérique</p><p class="text-xs text-on-surface-variant">Méthodes itératives, interpolation</p></td><td class="px-5 py-3 text-on-surface-variant">Mathématiques appliquées</td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">S3</td><td class="px-5 py-3 text-on-surface-variant">5</td><td class="px-5 py-3 text-on-surface-variant">S. Lambert</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Archivé" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
+</tbody>
+</table>
+</div>
+<p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun cours ne correspond à ces filtres.</p>
+</section>
+<section class="grid gap-4 lg:grid-cols-3">
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><h2 class="font-headline-sm text-headline-sm text-on-surface">Répartition par département</h2><ul class="mt-3 space-y-2 text-sm text-on-surface-variant"><li class="flex items-center justify-between"><span>Informatique &amp; IA</span><span class="font-bold text-on-surface">32</span></li><li class="flex items-center justify-between"><span>Sciences des données</span><span class="font-bold text-on-surface">22</span></li><li class="flex items-center justify-between"><span>Mathématiques appliquées</span><span class="font-bold text-on-surface">18</span></li><li class="flex items-center justify-between"><span>Réseaux &amp; Télécoms</span><span class="font-bold text-on-surface">14</span></li></ul></article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><h2 class="font-headline-sm text-headline-sm text-on-surface">Actions de catalogue</h2><div class="mt-3 flex flex-col gap-2"><a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'courses:admin_program_offer' %}">Départements &amp; filières<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a><a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'courses:admin_timetable' %}">Emploi du temps global<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a><a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'exercises:admin_categories' %}">Catégories &amp; niveaux<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a></div></article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><h2 class="font-headline-sm text-headline-sm text-on-surface">Contrôle qualité</h2><p class="mt-2 text-sm leading-relaxed text-on-surface-variant">7 cours n'ont pas encore de support publié. Les équipes pédagogiques ont été notifiées le 20 octobre.</p><button class="mt-3 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Relance envoyée aux responsables de cours." type="button">Relancer les responsables</button></article>
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var rows = Array.prototype.slice.call(document.querySelectorAll('[data-course-row]'));
+  var chips = Array.prototype.slice.call(document.querySelectorAll('[data-filter-value]'));
+  var search = document.getElementById('course-search');
+  var semester = document.getElementById('course-semester');
+  var count = document.querySelector('[data-filter-count]');
+  var empty = document.querySelector('[data-filter-empty]');
+  var department = 'all';
+
+  function apply() {
+    var q = (search && search.value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    var sem = semester ? semester.value : 'all';
+    var shown = 0;
+    rows.forEach(function (row) {
+      var tags = (row.getAttribute('data-tags') || '').split(/\s+/);
+      var haystack = (row.getAttribute('data-course-search') || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      var match = (department === 'all' || tags.indexOf(department) !== -1) && (sem === 'all' || row.getAttribute('data-semester') === sem) && haystack.indexOf(q) !== -1;
+      row.classList.toggle('hidden', !match);
+      if (match) shown += 1;
+    });
+    if (count) count.textContent = shown;
+    if (empty) empty.classList.toggle('hidden', shown !== 0);
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      department = chip.getAttribute('data-filter-value');
+      chips.forEach(function (c) { c.classList.toggle('is-active', c === chip); c.setAttribute('aria-pressed', String(c === chip)); });
+      apply();
+    });
+  });
+  if (search) search.addEventListener('input', apply);
+  if (semester) semester.addEventListener('change', apply);
+})();
+</script>
+{% endblock %}

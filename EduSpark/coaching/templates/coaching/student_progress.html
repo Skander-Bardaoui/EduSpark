@@ -1,0 +1,613 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Objectifs &amp; Plans — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Dynamic Top Bar & Hero Section -->
+<header class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg mb-space-xl">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex items-center gap-space-xs text-secondary font-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">monitoring</span>
+<span>Tableau de Bord Pédagogique • Semestre 1</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+        Mon Suivi &amp; Planification Académique
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Définissez vos objectifs d'apprentissage semestriels, planifiez vos sessions de révision et mesurez vos progrès en temps réel.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="group flex items-center gap-space-sm px-space-lg py-space-sm bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary hover:text-on-secondary rounded-full font-label-md text-label-md transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="toggle-ia-panel" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary group-hover:text-on-secondary transition-colors" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Générer mon plan d'étude avec l'IA</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Rapport Synthèse</span>
+</button>
+</div>
+</header>
+<!-- Metrics Grid -->
+<section aria-label="Indicateurs clés de progression" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Metric 1: Objectifs -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Objectifs atteints</span>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">8</span>
+<span class="font-title-md text-title-md text-outline">/ 12</span>
+<span class="ml-auto font-data-metric text-data-metric text-primary bg-primary-fixed px-2 py-0.5 rounded-full font-semibold">67%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: 67%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary">trending_up</span>
+<span>+2 complétés depuis 15 jours</span>
+</p>
+</div>
+<!-- Metric 2: Heures de révision -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Révision Semaine</span>
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">hourglass_top</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">14h</span>
+<span class="font-title-md text-title-md text-outline">/ 20h</span>
+<span class="ml-auto font-data-metric text-data-metric text-secondary font-bold">70%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full transition-all duration-500" style="width: 70%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary">schedule</span>
+<span>6h restantes d'ici dimanche</span>
+</p>
+</div>
+<!-- Metric 3: Tâches d'études -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Tâches terminées</span>
+<div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">23</span>
+<span class="font-title-md text-title-md text-outline">/ 28</span>
+<span class="ml-auto font-data-metric text-data-metric text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-semibold">82%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-surface-tint h-2 rounded-full transition-all duration-500" style="width: 82%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-tertiary">assignment_late</span>
+<span>5 tâches urgentes actives</span>
+</p>
+</div>
+<!-- Metric 4: Prochain jalon critique -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Jalon critique</span>
+<div class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+</div>
+</div>
+<div class="flex flex-col mb-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">Partiel Systèmes Distribués</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">INF502 • Amphi Poincaré</span>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-data-metric text-data-metric rounded-full font-bold">Dans 6 jours</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">24 Nov - 09:00</span>
+</div>
+</div>
+</section>
+<!-- Main Canvas: Two Columns Layout (Wide Main Content + Normalized Right AI Panel) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-xl items-start">
+<!-- Left / Center Main Core Flow (8 Cols) -->
+<div class="xl:col-span-8 flex flex-col gap-space-xl">
+<!-- Section: Mes Objectifs Académiques -->
+<section aria-labelledby="section-objectifs-title" class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between flex-wrap gap-space-sm">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-objectifs-title">
+              Mes Objectifs Académiques
+            </h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full">Semestre 1</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md rounded-full shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Ajouter un objectif</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Objectif 1: En cours -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                  Filière IA &amp; Deep Learning
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-surface-container text-primary font-label-sm text-label-sm rounded-full font-semibold">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">sync</span>
+<span>En cours</span>
+</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">INF501</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+                Maîtriser les architectures ResNet et Transformer
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Implémentation en PyTorch, analyse des couches d'auto-attention et optimisation sur TPU.
+              </p>
+<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>4/5 compétences acquises</span>
+</span>
+<span class="flex items-center gap-1 font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-outline">event</span>
+<span>Échéance: 08 Janvier</span>
+</span>
+</div>
+</div>
+<div class="md:w-48 flex flex-col items-end gap-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">85%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">avancement</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full" style="width: 85%;"></div>
+</div>
+<button class="mt-space-xs font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
+<span>Détails &amp; Jalons</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</article>
+<!-- Objectif 2: En retard / Vigilance -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                  Méthodologie &amp; Recherche
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-error-container text-on-error-container font-label-sm text-label-sm rounded-full font-bold">
+<span class="material-symbols-outlined text-sm text-error">warning</span>
+<span>En retard</span>
+</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">HUM501</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+                Rédiger l'état de l'art du projet Master 1
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Synthèse critique de 15 articles IEEE/ACM sur les modèles multimodaux de diffusion latente.
+              </p>
+<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 font-label-sm text-error">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Échéance critique: 15 Décembre</span>
+</span>
+<span class="flex items-center gap-1 font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-outline">description</span>
+<span>8 pages rédigées / 12 requises</span>
+</span>
+</div>
+</div>
+<div class="md:w-48 flex flex-col items-end gap-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm font-bold text-error">70%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">avancement</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
+<div class="bg-error h-2.5 rounded-full" style="width: 70%;"></div>
+</div>
+<button class="mt-space-xs font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
+<span>Reprogrammer</span>
+<span class="material-symbols-outlined text-sm">schedule_send</span>
+</button>
+</div>
+</article>
+<!-- Objectif 3: Objectif Atteint -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
+                  Génie Logiciel
+                </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-surface-variant text-primary font-label-sm text-label-sm rounded-full font-bold">
+<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Objectif atteint</span>
+</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">INF502</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface line-through text-outline">
+                Valider le TP Consensus Raft sans pénalité de retard
+              </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Code distribué validé avec tests unitaires de partition réseau à 100% de couverture.
+              </p>
+<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1 font-label-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">workspace_premium</span>
+<span>Validé le 18 Octobre (Note: 19.5/20)</span>
+</span>
+</div>
+</div>
+<div class="md:w-48 flex flex-col items-end gap-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">100%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">complété</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full" style="width: 100%;"></div>
+</div>
+<span class="font-label-sm text-label-sm text-outline mt-space-xs">Archivé au relevé</span>
+</div>
+</article>
+</div>
+</section>
+<!-- Section: Mon Plan d'étude & Planning hebdomadaire -->
+<section aria-labelledby="section-planning-title" class="flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-planning-title">
+              Mon Plan d'étude &amp; Planning hebdomadaire
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Semaine 47 • 18 au 24 Novembre
+            </p>
+</div>
+<!-- Accessible View Switcher (WCAG Compliant) -->
+<div aria-label="Format d'affichage du planning" class="inline-flex p-1 bg-surface-container rounded-full self-start" role="radiogroup">
+<button aria-checked="false" class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-1.5" id="view-mode-calendar" role="radio" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_view_week</span>
+<span>Vue Calendrier</span>
+</button>
+<button aria-checked="true" class="px-space-md py-1.5 rounded-full font-label-md text-label-md bg-surface-container-lowest text-primary shadow-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-1.5" id="view-mode-list" role="radio" type="button">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+<span>Vue Liste accessible</span>
+</button>
+</div>
+</div>
+<!-- Planning Schedule Cards with Course Indicators -->
+<div class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md font-bold text-on-surface">Sessions de travail programmées</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3 sessions restantes cette semaine</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Session 1: INF501 -->
+<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-data-metric text-data-metric font-semibold">INF501</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span>Programmé</span>
+</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">Vision par Ordinateur</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">TP Noté &amp; Inférence CNN</p>
+</div>
+<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Aujourd'hui • 16:30 - 18:30 (2h)</span>
+</span>
+</div>
+</div>
+<!-- Session 2: INF502 -->
+<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-data-metric text-data-metric font-semibold">INF502</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant font-semibold">
+<span class="material-symbols-outlined text-sm">event_repeat</span>
+<span>Reporté</span>
+</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">Systèmes Répartis</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Révision Raft &amp; Paxos</p>
+</div>
+<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Demain • 14:00 - 17:00 (3h)</span>
+</span>
+</div>
+</div>
+<!-- Session 3: HUM501 -->
+<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded-full font-data-metric text-data-metric font-semibold">HUM501</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="material-symbols-outlined text-sm">check</span>
+<span>Complété</span>
+</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">Méthodologie</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Revue de Littérature</p>
+</div>
+<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Hier • 10:00 - 12:00 (2h)</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Associated Tasks with WCAG Compliant Hitboxes (>=44px) -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<span class="font-title-md text-title-md font-bold text-on-surface">Tâches prioritaires associées</span>
+<div class="flex flex-col gap-space-xs">
+<!-- Task 1 -->
+<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<span class="font-body-md text-body-md text-on-surface font-medium">Relire cours 4 ConvNets &amp; Residual Connections</span>
+<span class="font-data-metric text-data-metric text-outline">INF501 • Estimé 45 min</span>
+</div>
+</label>
+<!-- Task 2 -->
+<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
+<input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<span class="font-body-md text-body-md text-on-surface font-medium">Résoudre 5 exercices de la banque sur le consensus distribué</span>
+<span class="font-data-metric text-data-metric text-outline">INF502 • Estimé 1h30</span>
+</div>
+</label>
+<!-- Task 3 -->
+<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
+<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<span class="font-body-md text-body-md text-on-surface line-through text-outline">Rédiger synthèse bibliographique (Articles Vaswani et Devlin)</span>
+<span class="font-data-metric text-data-metric text-outline">HUM501 • Complété le 19 Nov</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Journal de Réflexion & Progression -->
+<section aria-labelledby="section-journal-title" class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-journal-title">
+              Journal de Réflexion &amp; Progression
+            </h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full">Partage tuteur</span>
+</div>
+<button class="font-label-md text-label-md text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]">rate_review</span>
+<span>Nouvelle réflexion</span>
+</button>
+</div>
+<div class="space-y-space-md">
+<!-- Journal Entry 1 -->
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-bold">
+                  CM
+                </div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Auto-évaluation Semaine 46 • Maîtrise des Graphes de Calcul</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Posté le 15 Novembre 2024 à 18:20</span>
+</div>
+</div>
+<!-- Rating Stars -->
+<div aria-label="Auto-évaluation : 4 étoiles sur 5" class="flex items-center gap-1 text-tertiary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[20px] text-surface-container-high">star</span>
+<span class="ml-1 font-data-metric text-data-metric text-on-surface font-bold">4/5</span>
+</div>
+</div>
+<!-- Student Reflection -->
+<blockquote class="p-space-md bg-surface-container-low rounded font-body-md text-body-md text-on-surface-variant italic">
+              « J'ai éprouvé de réelles facilités lors de la mise en pratique du backpropagation manuel sur PyTorch, mais les mécanismes de cache mémoire pour le consensus distribué Raft demandent encore du travail de synthèse avant le partiel. »
+            </blockquote>
+<!-- Tutor Feedback (Dr. Hélène Vasseur) -->
+<div class="flex items-start gap-space-md p-space-md bg-surface-container rounded">
+<img class="w-11 h-11 rounded-full object-cover shrink-0" data-alt="Portrait photographique professionnel de Dr. Hélène Vasseur, professeure d'informatique à l'Université Paris Cité, souriante en environnement académique lumineux, tonalité bleue institutionnelle sobre et chaleureuse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAeTJr2yfHTZQQ3zjAKjp_a_kMtbZeNQgBeFuxTtmtb4OpA1vikGRrCRBpCDrjXckvVoRmhovttxoN94IAvYGf9Hg6nZ6p1T3m7ccxafRlkJyx9Pk-9BeONp2dKkfhFMqOF5VJntg3-vVMiL3GLMmD_qIa9NmI7QjGL4srENwWcfzHCL5PS9oeUpzcBnvCfvs-HGS-Rse94s6ZO7G4Dt9qQMTrvUJp7JJsUwK64Xlqui2uMn4UPYmP"/>
+<div class="flex flex-col gap-space-xs flex-1">
+<div class="flex items-center justify-between flex-wrap gap-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">Dr. Hélène Vasseur</span>
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-label-sm text-[11px] font-bold uppercase">Professeure Référente</span>
+</div>
+<span class="font-data-metric text-data-metric text-outline text-xs">16 Nov. 09:45</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+                  Excellente rigueur sur la démarche algorithmique Camille. Pour Raft, focalisez-vous sur le journal d'états et les règles d'élection en cas de partition réseau asymétrique. N'hésitez pas à solliciter la permanence jeudi matin.
+                </p>
+</div>
+</div>
+</article>
+</div>
+</section>
+</div>
+<!-- Right Column: Reusable Normalized AI Study Plan Assistant Panel (4 Cols) -->
+<aside aria-label="Assistant Plan d'Étude IA" class="xl:col-span-4 flex flex-col gap-space-lg" id="ia-study-panel">
+<!-- Normalized AI Container Card -->
+<div class="bg-surface-container-lowest rounded p-space-lg shadow-md flex flex-col gap-space-md sticky top-28">
+<!-- Header Panel with BETA Multimodale Badge -->
+<div class="flex items-center justify-between border-b pb-space-sm" style="border-color: #dde1ff;">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[24px] text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-headline-sm text-title-md font-bold text-on-surface">Assistant Plan d'Étude IA</span>
+</div>
+<span class="px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider rounded-full">
+            BETA MULTIMODALE
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Optimisez votre charge mentale en générant une proposition de planning adaptative basée sur vos jalons d'examens et vos objectifs actifs.
+        </p>
+<!-- Framing Form -->
+<form class="flex flex-col gap-space-md" onsubmit="event.preventDefault();">
+<!-- Selection des objectifs cibles -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="ai-target-objectives">
+              Objectifs prioritaires à intégrer
+            </label>
+<select class="w-full px-space-md py-2.5 bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded outline-none focus:ring-2 focus:ring-secondary transition-all" id="ai-target-objectives">
+<option selected="" value="both">Tous les objectifs critiques (ResNet + Partiel INF502)</option>
+<option value="resnet">Focus IA : Architectures ResNet &amp; Transformer</option>
+<option value="raft">Urgence : Partiel Systèmes Distribués (J-6)</option>
+<option value="etat-art">Méthodologie : État de l'art Master 1</option>
+</select>
+</div>
+<!-- Disponibilité Hebdomadaire -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="ai-hours-slider">
+                Disponibilité de révision
+              </label>
+<span class="font-data-metric text-data-metric text-secondary font-bold" id="hours-display">15 heures</span>
+</div>
+<input class="w-full accent-secondary cursor-pointer" id="ai-hours-slider" max="30" min="5" oninput="document.getElementById('hours-display').innerText = this.value + ' heures';" step="1" type="range" value="15"/>
+<div class="flex justify-between font-label-sm text-[11px] text-outline">
+<span>5h (Légère)</span>
+<span>15h (Équilibrée)</span>
+<span>30h (Intensive)</span>
+</div>
+</div>
+<!-- Priorisation -->
+<fieldset class="flex flex-col gap-2">
+<legend class="font-label-md text-label-md text-on-surface font-semibold mb-1">Stratégie de priorisation</legend>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs">
+<label class="flex items-center gap-2 p-2 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="text-secondary focus:ring-secondary" name="ai-priority" type="radio" value="deadlines"/>
+<span class="font-label-sm text-label-sm text-on-surface">Échéances imminentes</span>
+</label>
+<label class="flex items-center gap-2 p-2 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container transition-colors">
+<input class="text-secondary focus:ring-secondary" name="ai-priority" type="radio" value="balance"/>
+<span class="font-label-sm text-label-sm text-on-surface">Équilibre de travail</span>
+</label>
+</div>
+</fieldset>
+<!-- Bouton Générer la planification -->
+<button class="w-full flex items-center justify-center gap-space-sm px-space-md py-3 bg-secondary text-on-secondary rounded-full font-label-md text-label-md hover:bg-secondary-container transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_mode</span>
+<span>Générer la planification</span>
+</button>
+</form>
+<!-- Suggested AI Plan Card with Viability Tag -->
+<div class="p-space-md bg-surface-container-low rounded flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-sm text-label-sm font-bold uppercase">
+<span class="material-symbols-outlined text-sm">psychology_alt</span>
+<span>Suggestion IA</span>
+</span>
+<div class="flex items-center gap-1 font-data-metric text-data-metric text-primary bg-surface-container-lowest px-2 py-0.5 rounded-full font-semibold shadow-xs">
+<span class="material-symbols-outlined text-sm text-primary">analytics</span>
+<span>Score de viabilité : 96%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Planification optimisée selon vos pics d'énergie cognitifs enregistrés et la date d'examen du 24 Novembre :
+          </p>
+<!-- 3 Blocs de travail proposés -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between p-2 bg-surface-container-lowest rounded text-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-semibold text-on-surface">Bloc 1 : Théorie Consensus Raft</span>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Ven 22 • 2h30</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-lowest rounded text-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-semibold text-on-surface">Bloc 2 : Annales d'examens corrigées</span>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Sam 23 • 3h00</span>
+</div>
+<div class="flex items-center justify-between p-2 bg-surface-container-lowest rounded text-body-sm">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-semibold text-on-surface">Bloc 3 : Rétro-ingénierie ResNet</span>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Dim 24 • 2h00</span>
+</div>
+</div>
+<!-- 3 Boutons d'actions obligatoires -->
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-xs pt-space-xs">
+<button class="px-2 py-2 bg-primary text-on-primary hover:bg-primary-container rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-primary" title="Sauvegarder et injecter au planning" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Garder</span>
+</button>
+<button class="px-2 py-2 bg-surface-container-high text-on-surface hover:bg-surface-variant rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-primary" title="Modifier le cadrage" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="px-2 py-2 bg-surface-container-lowest text-error hover:bg-error-container rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-error" title="Rejeter la suggestion" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+<!-- Bandeau de résilience WCAG obligatoire -->
+<div aria-live="polite" class="flex items-start gap-space-sm p-space-sm bg-surface-container rounded text-on-surface-variant" role="status">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-xs leading-tight">
+            L'IA est momentanément indisponible. Vous pouvez continuer manuellement sans interruption.
+          </p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<script>
+  // Simple micro-interactions: view mode toggles & hours slider feedback
+  const btnCalendar = document.getElementById('view-mode-calendar');
+  const btnList = document.getElementById('view-mode-list');
+
+  if (btnCalendar && btnList) {
+    btnCalendar.addEventListener('click', () => {
+      btnCalendar.setAttribute('aria-checked', 'true');
+      btnCalendar.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs', 'font-semibold');
+      btnCalendar.classList.remove('text-on-surface-variant');
+
+      btnList.setAttribute('aria-checked', 'false');
+      btnList.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs', 'font-semibold');
+      btnList.classList.add('text-on-surface-variant');
+    });
+
+    btnList.addEventListener('click', () => {
+      btnList.setAttribute('aria-checked', 'true');
+      btnList.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs', 'font-semibold');
+      btnList.classList.remove('text-on-surface-variant');
+
+      btnCalendar.setAttribute('aria-checked', 'false');
+      btnCalendar.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs', 'font-semibold');
+      btnCalendar.classList.add('text-on-surface-variant');
+    });
+  }
+
+  // Smooth scroll or focus to IA panel when clicking hero button
+  const toggleIaBtn = document.getElementById('toggle-ia-panel');
+  const iaPanel = document.getElementById('ia-study-panel');
+  if (toggleIaBtn && iaPanel) {
+    toggleIaBtn.addEventListener('click', () => {
+      iaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const select = iaPanel.querySelector('select');
+      if (select) select.focus();
+    });
+  }
+</script></main>
+{% endblock %}

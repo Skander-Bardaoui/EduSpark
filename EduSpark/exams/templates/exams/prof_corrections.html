@@ -1,0 +1,518 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Copies &amp; Correction IA — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full bg-surface min-h-[calc(100vh-4rem)] pb-24" id="main-content"><div class="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
+<!-- Top Navigation & Context Bar -->
+<div class="flex flex-col gap-4">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<!-- Breadcrumb & Title -->
+<div class="flex min-w-0 flex-col">
+<nav class="flex flex-wrap items-center gap-1.5 text-on-surface-variant text-[11px] font-semibold uppercase tracking-wider">
+<span>Portail Enseignant</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span>Examens &amp; Évaluations</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-bold">Correction de session</span>
+</nav>
+<div class="flex flex-wrap items-center gap-3 mt-1.5">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+            Session : Partiel Mi-Parcours - INF501 Réseaux de Neurones Profonds
+          </h1>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold uppercase whitespace-nowrap">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            En cours de correction (24 / 38)
+          </span>
+</div>
+</div>
+<!-- Session Global Actions -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-secondary-container px-3.5 text-[13px] font-semibold text-on-secondary-container transition-colors hover:bg-secondary shadow-sm" id="toggle-ia-btn">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Correction assistée par l'IA</span>
+<span class="rounded-full bg-surface-container-lowest/20 px-1.5 py-0.5 font-data-metric text-[10px]">BETA</span>
+</button>
+<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary transition-colors hover:bg-primary/90 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>Publier l'ensemble des notes validées</span>
+</button>
+</div>
+</div>
+<!-- Student Selector & Submission Carousel Ribbon -->
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded bg-surface-container-low p-3">
+<div class="flex flex-wrap items-center gap-3">
+<!-- Student Identity Badge -->
+<div class="flex items-center gap-2 rounded-full bg-surface-container-lowest py-1.5 pl-1.5 pr-4 shadow-sm">
+<div class="flex h-7 w-7 items-center justify-center rounded-full bg-primary-fixed text-[12px] font-bold text-primary">
+            CM
+          </div>
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-on-surface">Camille Martin</span>
+<span class="rounded-full bg-surface-container px-2 py-0.5 font-data-metric text-[11px] text-on-surface-variant">N° 20248912</span>
+</div>
+</div>
+<!-- Student Dropdown Quick Selection -->
+<div class="relative inline-flex items-center">
+<label class="sr-only" for="student-select">Changer d'étudiant</label>
+<select class="min-w-0 max-w-full appearance-none rounded-full bg-surface-container-lowest py-1.5 pl-4 pr-8 text-[13px] text-on-surface shadow-sm cursor-pointer hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" id="student-select">
+<option selected="" value="25">Copie 25 / 38 - Camille Martin (En révision)</option>
+<option value="26">Copie 26 / 38 - Hugo Bernard (Non corrigée)</option>
+<option value="27">Copie 27 / 38 - Léa Benali (Non corrigée)</option>
+<option value="24">Copie 24 / 38 - Lucas Fontaine (Validée)</option>
+</select>
+<span class="material-symbols-outlined text-on-surface-variant absolute right-2.5 pointer-events-none text-[16px]">unfold_more</span>
+</div>
+<!-- Multi-filter Chips -->
+<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+<button class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container px-3 text-[11px] font-bold uppercase text-on-surface-variant transition-colors hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Non corrigée (10)</span>
+</button>
+<button class="inline-flex h-7 items-center gap-1 rounded-full bg-tertiary-fixed px-3 text-[11px] font-bold uppercase text-on-tertiary-fixed shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">rate_review</span>
+<span>En révision (4)</span>
+</button>
+<button class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container px-3 text-[11px] font-bold uppercase text-on-surface-variant transition-colors hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Validée (24)</span>
+</button>
+</div>
+</div>
+<!-- Quick Pagination Indicators -->
+<div class="flex items-center gap-2">
+<span class="font-data-metric text-[12px] text-on-surface-variant">Progression: 63%</span>
+<div class="h-2 w-28 overflow-hidden rounded-full bg-surface-container-highest">
+<div class="h-full rounded-full bg-secondary transition-all duration-300" style="width: 63%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive Dual-Column Canvas + Resilient AI Panel -->
+<div class="mt-5 grid grid-cols-12 items-start gap-5">
+<!-- LEFT COLUMN: Digitize Exam Script Paper Visualizer (7 Cols) -->
+<section class="col-span-12 flex flex-col gap-4 xl:col-span-7">
+<!-- Viewer Controls Toolbar -->
+<div class="flex flex-wrap items-center justify-between gap-2 rounded bg-surface-container-lowest p-3 shadow-sm">
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" id="zoom-in-btn" title="Zoom avant">
+<span class="material-symbols-outlined text-[18px]">zoom_in</span>
+</button>
+<button class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" id="zoom-out-btn" title="Zoom arrière">
+<span class="material-symbols-outlined text-[18px]">zoom_out</span>
+</button>
+<span class="px-1.5 font-data-metric text-[11px] text-on-surface-variant" id="zoom-level">100%</span>
+<div class="mx-1 h-4 w-px bg-surface-container-high"></div>
+<button class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" title="Faire pivoter">
+<span class="material-symbols-outlined text-[18px]">rotate_right</span>
+</button>
+<button class="p-1.5 rounded-full bg-primary-fixed text-on-primary-fixed transition-colors" title="Outil Surlignage">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">ink_highlighter</span>
+</button>
+<button class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant transition-colors" title="Ajouter annotation manuscrite">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Page 1 sur 3</span>
+<div class="flex items-center rounded-full bg-surface-container p-0.5">
+<button class="p-1 rounded-full hover:bg-surface-container-highest text-on-surface-variant" title="Page précédente">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_left</span>
+</button>
+<button class="p-1 rounded-full hover:bg-surface-container-highest text-on-surface-variant" title="Page suivante">
+<span class="material-symbols-outlined text-[16px]">keyboard_arrow_right</span>
+</button>
+</div>
+<a class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" href="#" title="Ouvrir en plein écran">
+<span class="material-symbols-outlined text-[18px]">open_in_full</span>
+</a>
+</div>
+</div>
+<!-- Scanned Sheet Surface with Annotations & Layer Overlays -->
+<div class="relative flex flex-col items-center rounded bg-surface-container-low p-3 shadow-md overflow-hidden border-0">
+<!-- Active Scan Container -->
+<div class="relative w-full max-w-[680px] bg-white rounded shadow-lg overflow-hidden transition-transform duration-200" id="scan-container">
+<!-- Student Paper Header Mockup -->
+<div class="flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest px-5 pt-4 pb-3 text-on-surface-variant">
+<div>
+<span class="text-[11px] font-bold uppercase tracking-wider text-secondary">Épreuve Écrite • INF501</span>
+<p class="text-[14px] font-bold text-on-surface">Partiel Novembre 2024</p>
+</div>
+<div class="text-right">
+<span class="font-data-metric text-[11px]">Copie Anonymisée N° A-8912</span>
+<p class="text-[11px] text-outline">Amphi Turing • 14:00 - 17:00</p>
+</div>
+</div>
+<!-- Handwritten Exam Page Image with Data-Alt -->
+<div class="relative w-full overflow-hidden bg-surface-bright">
+<img class="w-full h-auto max-h-[720px] object-contain select-none" data-alt="Photorealistic scanned university exam paper showing authentic student handwriting in dark blue ink, complex computational neural network layer graphs with node diagrams, backward propagation mathematical derivation with partial derivatives, and subtle yellow and red teacher highlighter marks in the margins. Crisp collegiate paper texture with faint college ruled lines and official university header watermark." id="scanned-sheet-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCse0qvrnTin3xlGP_4pLpNjx2xBAGbt11wbOnp94_lXkz0vy_bGI0k4jYanMGad3-icH6imsbA35HuPeja02K1XKUPbbfVY3qcLDu43jdN4unbBhdBr77BkvGrgGcm3nSh0kcnCXPsuDk30rJygVBwgQFI4ZVegbsou-wwYuwF1Yq3QRxh-5PtGYHuWqB54_4fZNxTpAQCLWhtQCWevX6E9U87HSY-scqhxXYzu0l5JlyrqYoMaWf1"/>
+<!-- Interactive Visual Annotation Flags Overlaid on Paper -->
+<div class="absolute top-[28%] left-[45%] -m-1.5 flex h-9 w-9 items-center justify-center group cursor-pointer outline-none" role="button" tabindex="0" aria-label="Annotation 1 : application de la règle de dérivation en chaîne sur la couche cachée h2">
+<span class="relative flex h-6 w-6">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-6 w-6 bg-secondary text-on-secondary items-center justify-center font-data-metric text-[11px] font-bold shadow-md">1</span>
+</span>
+<div class="absolute left-7 top-0 w-56 p-2.5 bg-surface-container-lowest/95 backdrop-blur-md rounded shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus:opacity-100 transition-opacity z-20 pointer-events-none">
+<span class="text-[11px] font-bold uppercase text-secondary">Remarque Professeur</span>
+<p class="text-[12px] text-on-surface mt-0.5">Application de la règle de dérivation en chaîne (Chain Rule) rigoureuse sur la couche cachée $h_2$.</p>
+</div>
+</div>
+<div class="absolute top-[62%] left-[62%] -m-1.5 flex h-9 w-9 items-center justify-center group cursor-pointer outline-none" role="button" tabindex="0" aria-label="Annotation 2 : le vecteur momentum est manquant dans l'actualisation des poids">
+<span class="relative flex h-6 w-6">
+<span class="relative inline-flex rounded-full h-6 w-6 bg-error text-on-error items-center justify-center font-data-metric text-[11px] font-bold shadow-md">2</span>
+</span>
+<div class="absolute right-7 top-0 w-56 p-2.5 bg-surface-container-lowest/95 backdrop-blur-md rounded shadow-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 group-focus:opacity-100 transition-opacity z-20 pointer-events-none">
+<span class="text-[11px] font-bold uppercase text-error">Signalement Erreur</span>
+<p class="text-[12px] text-on-surface mt-0.5">Le vecteur momentum $v_{t}$ est manquant dans l'actualisation des poids $\Delta W^{(3)}$.</p>
+</div>
+</div>
+<!-- Visual Marker: OCR Detected Region -->
+<div class="absolute bottom-4 left-4 right-4 rounded bg-primary-fixed/20 p-2 backdrop-blur-sm pointer-events-none">
+<span class="flex items-center gap-1 font-data-metric text-[11px] font-bold text-primary">
+<span class="material-symbols-outlined text-[16px]">document_scanner</span>
+                Zone transcription automatique active
+              </span>
+</div>
+</div>
+</div>
+<!-- Real-Time Multimodal OCR Math Transcription Bar -->
+<div class="w-full rounded bg-surface-container-lowest p-3 shadow-sm">
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary">functions</span>
+<span class="text-[14px] font-bold text-on-surface">Transcription OCR des équations (LaTeX / Symboles)</span>
+</div>
+<span class="rounded-full bg-secondary-fixed px-2 py-0.5 font-data-metric text-[11px] text-on-secondary-fixed">
+              Confiance 98.4%
+            </span>
+</div>
+<div class="space-y-1.5 overflow-x-auto rounded bg-surface-container-low p-3 font-data-metric text-[12px] text-on-surface">
+<div class="flex items-center gap-2">
+<span class="font-bold text-on-surface-variant select-none">[Ligne 14]</span>
+<code class="font-semibold text-primary">$$\frac{\partial \mathcal{L}}{\partial W^{(l)}} = \delta^{(l)} \cdot (a^{(l-1)})^T + \lambda W^{(l)}$$</code>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-bold text-on-surface-variant select-none">[Ligne 18]</span>
+<code class="text-on-surface">$$v_t = \beta v_{t-1} + (1 - \beta) g_t \implies \theta_{t+1} = \theta_t - \eta \frac{v_t}{\sqrt{s_t} + \epsilon}$$</code>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT COLUMN: Interactive Evaluation Rubric & Calculated Total (5 Cols) -->
+<section class="col-span-12 flex flex-col gap-4 xl:col-span-5">
+<!-- Live Computed Score Summary Card -->
+<div class="relative overflow-hidden rounded bg-gradient-to-br from-primary via-primary-container to-secondary p-4 text-on-primary shadow-md">
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[11px] font-bold uppercase tracking-widest text-on-primary/80">Barème INF501 • Total Provisoire</span>
+<div class="mt-1 flex items-baseline gap-2">
+<span class="font-data-metric text-[26px] font-bold leading-none text-on-primary" id="total-score-display">17.0</span>
+<span class="text-[15px] text-on-primary/70">/ 20</span>
+</div>
+<span class="mt-1 text-[12px] text-on-primary/80">Mention Très Bien • Percentile session : Top 15%</span>
+</div>
+<!-- Radial Progress Ring Inline SVG -->
+<div class="relative h-16 w-16 shrink-0">
+<svg class="h-full w-full -rotate-90" viewBox="0 0 36 36">
+<path class="text-on-primary/20" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-tertiary-fixed-dim transition-all duration-500 ease-out" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="85, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center font-data-metric text-[12px] font-bold text-on-primary">
+              85%
+            </div>
+</div>
+</div>
+</div>
+<!-- Rubric Criteria Cards Accordion / List -->
+<div class="flex flex-col gap-3 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between pb-1">
+<h2 class="text-[15px] font-bold text-on-surface">Grille critériée d'évaluation</h2>
+<span class="font-data-metric text-[11px] text-on-surface-variant">4 critères définis</span>
+</div>
+<!-- Criterion 1 -->
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-fixed font-data-metric text-[11px] font-bold text-on-primary-fixed">C1</span>
+<span class="text-[13px] font-bold text-on-surface">Architecture &amp; Rétropropagation</span>
+</div>
+<div class="flex items-center gap-1.5 rounded-full bg-surface-container-lowest px-2.5 py-1 shadow-sm">
+<input class="w-11 bg-transparent text-center font-data-metric text-[13px] font-bold text-primary focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.5"/>
+<span class="font-data-metric text-[11px] font-medium text-on-surface-variant">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.5"/>
+</div>
+<input class="w-full rounded-md bg-surface-container-lowest px-3 py-1.5 text-[12px] text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Démonstration claire du calcul différentiel sur les couches denses."/>
+</div>
+<!-- Criterion 2 -->
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-fixed font-data-metric text-[11px] font-bold text-on-primary-fixed">C2</span>
+<span class="text-[13px] font-bold text-on-surface">Calcul du Gradient &amp; Optimisation SGD</span>
+</div>
+<div class="flex items-center gap-1.5 rounded-full bg-surface-container-lowest px-2.5 py-1 shadow-sm">
+<input class="w-11 bg-transparent text-center font-data-metric text-[13px] font-bold text-primary focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.0"/>
+<span class="font-data-metric text-[11px] font-medium text-on-surface-variant">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.0"/>
+</div>
+<input class="w-full rounded-md bg-surface-container-lowest px-3 py-1.5 text-[12px] text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Légère imprécision sur l'incorporation de l'inertie (momentum) à l'itération finale."/>
+</div>
+<!-- Criterion 3 -->
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-fixed font-data-metric text-[11px] font-bold text-on-primary-fixed">C3</span>
+<span class="text-[13px] font-bold text-on-surface">Régularisation &amp; Prévention Surapprentissage</span>
+</div>
+<div class="flex items-center gap-1.5 rounded-full bg-surface-container-lowest px-2.5 py-1 shadow-sm">
+<input class="w-11 bg-transparent text-center font-data-metric text-[13px] font-bold text-primary focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.5"/>
+<span class="font-data-metric text-[11px] font-medium text-on-surface-variant">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.5"/>
+</div>
+<input class="w-full rounded-md bg-surface-container-lowest px-3 py-1.5 text-[12px] text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Excellente comparaison entre Weight Decay (L2) et Dropout stochastique."/>
+</div>
+<!-- Criterion 4 -->
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="flex h-6 w-6 items-center justify-center rounded-full bg-primary-fixed font-data-metric text-[11px] font-bold text-on-primary-fixed">C4</span>
+<span class="text-[13px] font-bold text-on-surface">Rigueur scientifique &amp; Rédaction</span>
+</div>
+<div class="flex items-center gap-1.5 rounded-full bg-surface-container-lowest px-2.5 py-1 shadow-sm">
+<input class="w-11 bg-transparent text-center font-data-metric text-[13px] font-bold text-primary focus:outline-none criterion-input" data-weight="5" max="5" min="0" step="0.5" type="number" value="4.0"/>
+<span class="font-data-metric text-[11px] font-medium text-on-surface-variant">/ 5 pts</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-full accent-primary cursor-pointer criterion-slider" max="5" min="0" step="0.5" type="range" value="4.0"/>
+</div>
+<input class="w-full rounded-md bg-surface-container-lowest px-3 py-1.5 text-[12px] text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary" placeholder="Appréciation pour ce critère..." type="text" value="Graphiques annotés avec soin. Vocabulaire mathématique précis."/>
+</div>
+<!-- Global Synthesis Feedback Textarea -->
+<div class="mt-1 flex flex-col gap-1.5">
+<label class="flex items-center justify-between text-[13px] text-on-surface" for="global-feedback">
+<span>Commentaire global adressé à l'étudiant</span>
+<span class="font-data-metric text-[11px] text-on-surface-variant">Visible sur le relevé</span>
+</label>
+<textarea class="w-full resize-none rounded bg-surface-container-low p-3 text-[13px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-outline" id="global-feedback" rows="3">Très bon travail d'ensemble sur ce devoir surveillé. Les concepts théoriques de la rétropropagation sont pleinement assimilés. Veillez à bien maintenir la rigueur dans les développements d'optimisation stochastique lors du partiel final.</textarea>
+</div>
+</div>
+<!-- COLLAPSIBLE AI CORRECTION ASSISTANT PANEL -->
+<div class="flex flex-col overflow-hidden rounded bg-surface-container-lowest shadow-sm" id="ai-assistant-panel">
+<!-- AI Card Header -->
+<div class="flex items-center justify-between bg-surface-container-high px-4 py-3">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="text-[14px] font-bold text-on-surface">Correction Assistée par l'IA</span>
+</div>
+<span class="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-on-secondary">
+            Beta Académique
+          </span>
+</div>
+<div class="flex flex-col gap-3 p-4">
+<!-- Mandatory WCAG Resilience Alert Banner -->
+<div aria-live="polite" class="flex items-center gap-2 rounded bg-surface-container p-3 text-on-surface" role="status">
+<span class="material-symbols-outlined text-[18px] text-outline shrink-0">info</span>
+<p class="text-[12px] text-on-surface-variant">
+              L'IA est momentanément indisponible. Vous pouvez continuer manuellement.
+            </p>
+</div>
+<!-- Analysis Parameters -->
+<div class="grid grid-cols-1 gap-2 rounded bg-surface-container-low p-3 sm:grid-cols-2">
+<div class="flex flex-col">
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Modèle d'alignement</span>
+<span class="text-[13px] font-semibold text-on-surface">Grille stricte INF501</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Tolérance de notation</span>
+<span class="text-[13px] font-semibold text-secondary">Standard (±0.5 pt)</span>
+</div>
+</div>
+<!-- AI Suggestion Box -->
+<div class="relative flex flex-col gap-2.5 rounded bg-surface-container-low p-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span class="text-[13px] font-bold text-on-surface">Recommandation du modèle</span>
+</div>
+<div class="flex items-center gap-1 rounded-full bg-surface-container-highest px-2 py-0.5">
+<span class="material-symbols-outlined text-[16px] text-secondary">insights</span>
+<span class="font-data-metric text-[11px] font-bold text-on-surface">Certitude OCR 97%</span>
+</div>
+</div>
+<!-- Key Mistakes Highlighted -->
+<div class="flex items-start gap-2 rounded-md bg-error-container/40 p-2.5 text-on-error-container">
+<span class="material-symbols-outlined text-[16px] text-error shrink-0 mt-0.5">report_problem</span>
+<span class="text-[12px] font-medium leading-tight text-on-surface">
+                Anomalie détectée : Omission du terme d'inertie (momentum) à l'itération 3 du gradient stochastique.
+              </span>
+</div>
+<!-- Suggested Score Distribution -->
+<div class="flex items-center justify-between rounded bg-surface-container-lowest p-2.5">
+<div class="flex flex-col">
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Proposition note globale</span>
+<span class="text-[15px] font-bold text-primary">16.5 / 20</span>
+</div>
+<div class="font-data-metric text-[11px] text-right text-on-surface-variant">
+                C1: 4.5 | C2: 3.5<br/>C3: 4.5 | C4: 4.0
+              </div>
+</div>
+<!-- Pre-drafted Pedagogical Feedback -->
+<div class="flex flex-col gap-1">
+<span class="text-[11px] font-bold uppercase text-on-surface-variant">Feedback synthétique pré-rédigé</span>
+<p class="rounded-md bg-surface-container-lowest p-2.5 text-[12px] italic text-on-surface shadow-sm">
+                "Très bonne maîtrise globale de l'algorithme de rétropropagation. Veillez à inclure la mise à jour complète de la vitesse lors des optimisations accélérées."
+              </p>
+</div>
+<!-- Mandatory Action Trio -->
+<div class="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-3">
+<button class="inline-flex h-9 items-center justify-center gap-1 rounded-full bg-primary px-3 text-[13px] font-semibold text-on-primary transition-colors hover:bg-primary/90 shadow-sm" id="ai-accept-btn">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Garder</span>
+</button>
+<button class="inline-flex h-9 items-center justify-center gap-1 rounded-full bg-secondary-fixed px-3 text-[13px] font-semibold text-on-secondary-fixed transition-colors hover:bg-secondary-container hover:text-on-secondary-container" id="ai-modify-btn">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="inline-flex h-9 items-center justify-center gap-1 rounded-full bg-surface-container px-3 text-[13px] font-semibold text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container" id="ai-reject-btn">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- FIXED STICKY BOTTOM EVALUATION ACTION BAR -->
+<footer class="fixed bottom-0 left-0 right-0 z-40 flex flex-wrap items-center justify-between gap-2 bg-surface-container-lowest/95 px-4 py-3 shadow-[0_-2px_12px_rgba(6,22,75,0.08)] backdrop-blur-xl sm:px-6 lg:left-72">
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-low px-3.5 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-container">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span>Copie précédente (Lucas F.)</span>
+</button>
+<span class="hidden font-data-metric text-[11px] text-on-surface-variant sm:inline-block">
+        Modifications sauvegardées automatiquement (il y a 32s)
+      </span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container px-3.5 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[16px]">save</span>
+<span>Enregistrer brouillon</span>
+</button>
+<button class="group inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-on-primary transition-colors hover:bg-primary/90 shadow-md" id="validate-next-btn">
+<span>Valider la note et passer au suivant</span>
+<span class="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</div>
+</footer>
+<script>
+  (function() {
+    // Zoom Micro-interaction on Exam Scan
+    const zoomInBtn = document.getElementById('zoom-in-btn');
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const zoomLevelEl = document.getElementById('zoom-level');
+    const scanSheet = document.getElementById('scanned-sheet-img');
+    let currentZoom = 100;
+
+    if (zoomInBtn && zoomOutBtn && zoomLevelEl && scanSheet) {
+      zoomInBtn.addEventListener('click', () => {
+        if (currentZoom < 180) {
+          currentZoom += 20;
+          scanSheet.style.transform = `scale(${currentZoom / 100})`;
+          scanSheet.style.transformOrigin = 'top center';
+          zoomLevelEl.textContent = `${currentZoom}%`;
+        }
+      });
+
+      zoomOutBtn.addEventListener('click', () => {
+        if (currentZoom > 80) {
+          currentZoom -= 20;
+          scanSheet.style.transform = `scale(${currentZoom / 100})`;
+          scanSheet.style.transformOrigin = 'top center';
+          zoomLevelEl.textContent = `${currentZoom}%`;
+        }
+      });
+    }
+
+    // Interactive Dynamic Total Calculation with Sliders & Number inputs
+    const sliders = document.querySelectorAll('.criterion-slider');
+    const inputs = document.querySelectorAll('.criterion-input');
+    const totalDisplay = document.getElementById('total-score-display');
+
+    function calculateTotal() {
+      let sum = 0;
+      inputs.forEach(input => {
+        sum += parseFloat(input.value) || 0;
+      });
+      if (totalDisplay) {
+        totalDisplay.textContent = sum.toFixed(1);
+      }
+    }
+
+    sliders.forEach((slider, index) => {
+      const correspondingInput = inputs[index];
+      slider.addEventListener('input', (e) => {
+        if (correspondingInput) {
+          correspondingInput.value = parseFloat(e.target.value).toFixed(1);
+        }
+        calculateTotal();
+      });
+
+      if (correspondingInput) {
+        correspondingInput.addEventListener('input', (e) => {
+          slider.value = e.target.value;
+          calculateTotal();
+        });
+      }
+    });
+
+    // AI Recommendation 'Garder' Action
+    const aiAcceptBtn = document.getElementById('ai-accept-btn');
+    const globalFeedback = document.getElementById('global-feedback');
+    if (aiAcceptBtn && inputs.length >= 4) {
+      aiAcceptBtn.addEventListener('click', () => {
+        inputs[0].value = 4.5;
+        inputs[1].value = 3.5;
+        inputs[2].value = 4.5;
+        inputs[3].value = 4.0;
+        sliders[0].value = 4.5;
+        sliders[1].value = 3.5;
+        sliders[2].value = 4.5;
+        sliders[3].value = 4.0;
+        calculateTotal();
+
+        if (globalFeedback) {
+          globalFeedback.value = "Très bonne maîtrise globale de l'algorithme de rétropropagation. Veillez à inclure la mise à jour complète de la vitesse lors des optimisations accélérées.";
+        }
+
+        aiAcceptBtn.classList.remove('bg-primary');
+        aiAcceptBtn.classList.add('bg-secondary');
+        aiAcceptBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">done_all</span><span>Appliqué</span>';
+        setTimeout(() => {
+          aiAcceptBtn.classList.add('bg-primary');
+          aiAcceptBtn.classList.remove('bg-secondary');
+          aiAcceptBtn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>Garder</span>';
+        }, 2000);
+      });
+    }
+
+    // Toggle AI panel scroll
+    const toggleIaBtn = document.getElementById('toggle-ia-btn');
+    const aiPanel = document.getElementById('ai-assistant-panel');
+    if (toggleIaBtn && aiPanel) {
+      toggleIaBtn.addEventListener('click', () => {
+        aiPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  })();
+</script></main>
+{% endblock %}

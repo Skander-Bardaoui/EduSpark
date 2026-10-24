@@ -1,0 +1,13 @@
+{% if messages %}
+<div aria-live="polite" class="fixed right-5 top-20 z-[70] flex w-80 max-w-[calc(100vw-2.5rem)] flex-col gap-2 print:hidden">
+{% for message in messages %}
+<div class="pointer-events-auto flex items-start gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-2xl transition-all duration-200" data-flash="" role="status">
+<span class="material-symbols-outlined text-[20px] {% if message.tags == 'error' %}text-error{% elif message.tags == 'warning' %}text-tertiary{% elif message.tags == 'success' %}text-primary{% else %}text-secondary{% endif %}">{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}</span>
+<p class="flex-1 text-body-sm leading-snug text-on-surface">{{ message }}</p>
+<button aria-label="Fermer" class="text-outline transition-colors hover:text-on-surface" data-flash-close="" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+{% endfor %}
+</div>
+{% endif %}

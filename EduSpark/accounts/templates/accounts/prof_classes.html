@@ -1,0 +1,108 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Mes Classes & Groupes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Enseignement</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Classes &amp; Groupes</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Promotions suivies cette année, effectifs, groupes de TP et projets encadrés.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Fiche de suivi de classe exportée." type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>Exporter le suivi
+</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Classes suivies" value="3" icon="groups" hint="M1 IA · L3 Info · M2 Data" %}
+{% include "portal/_stat_card.html" with label="Étudiants encadrés" value="80" icon="group" icon_class="bg-surface-container text-secondary" hint="+6 depuis la rentrée" %}
+{% include "portal/_stat_card.html" with label="Groupes de TP" value="9" icon="workspaces" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="3 groupes par classe" %}
+{% include "portal/_stat_card.html" with label="Projets en cours" value="7" icon="rocket_launch" hint="2 revues programmées" %}
+</div>
+<section data-filter-scope>
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Classes actives</h2>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Toutes</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="info" type="button">Informatique</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="ia" type="button">IA &amp; Data</button>
+<span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant"><span data-filter-count>3</span> classes</span>
+</div>
+</div>
+<div class="grid gap-4 lg:grid-cols-3">
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-tags="ia info">
+<div class="flex items-start justify-between gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[22px]">psychology</span></span>
+{% include "portal/_badge.html" with label="M1 · Semestre 1" tone_class="bg-primary-fixed text-primary" %}
+</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">M1 Intelligence Artificielle</h3>
+<p class="text-xs text-on-surface-variant">24 étudiants · 3 groupes de TP · Référente de promotion</p>
+<div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">13,8</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">91 %</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">4</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Alertes</p></div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'coaching:prof_followup' %}"><span class="material-symbols-outlined text-[16px]">monitoring</span>Suivi des étudiants</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary" href="{% url 'courses:prof_timetable' %}"><span class="material-symbols-outlined text-[16px]">calendar_month</span>Planning</a>
+</div>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-tags="info">
+<div class="flex items-start justify-between gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded bg-secondary text-on-secondary"><span class="material-symbols-outlined text-[22px]">terminal</span></span>
+{% include "portal/_badge.html" with label="L3 · Semestre 5" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">L3 Informatique</h3>
+<p class="text-xs text-on-surface-variant">38 étudiants · 4 groupes de TP · 2 projets encadrés</p>
+<div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">12,4</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">87 %</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">7</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Alertes</p></div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'coaching:prof_followup' %}"><span class="material-symbols-outlined text-[16px]">monitoring</span>Suivi des étudiants</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary" href="{% url 'exams:prof_grade_sheets' %}"><span class="material-symbols-outlined text-[16px]">fact_check</span>Relevés</a>
+</div>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-tags="ia">
+<div class="flex items-start justify-between gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[22px]">insights</span></span>
+{% include "portal/_badge.html" with label="M2 · Semestre 3" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">M2 Data Science</h3>
+<p class="text-xs text-on-surface-variant">18 étudiants · 2 groupes de TP · Jury de mémoire</p>
+<div class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">14,6</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">94 %</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">2</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Alertes</p></div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'coaching:prof_student_journal' %}"><span class="material-symbols-outlined text-[16px]">trending_up</span>Journaux</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary" href="{% url 'coaching:prof_tutoring' %}"><span class="material-symbols-outlined text-[16px]">support_agent</span>Tutorat</a>
+</div>
+</article>
+</div>
+<p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucune classe ne correspond à ce filtre.</p>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Groupes &amp; projets</h2>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_assignments' %}"><span class="material-symbols-outlined text-[16px]">assignment</span>Devoirs des groupes</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[860px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Groupe</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Effectif</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">Projet encadré</th><th class="px-5 py-3 font-bold">Avancement</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">TP1 · IA</td><td class="px-5 py-3 text-on-surface-variant">M1 Intelligence Artificielle</td><td class="px-5 py-3 text-on-surface-variant">8</td><td class="px-5 py-3 text-on-surface-variant">B204</td><td class="px-5 py-3 text-on-surface-variant">Détection d'anomalies</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:72%"></div></div><span class="text-xs font-semibold text-on-surface-variant">72 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À jour" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">TP2 · IA</td><td class="px-5 py-3 text-on-surface-variant">M1 Intelligence Artificielle</td><td class="px-5 py-3 text-on-surface-variant">8</td><td class="px-5 py-3 text-on-surface-variant">B205</td><td class="px-5 py-3 text-on-surface-variant">Reconnaissance d'images</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:58%"></div></div><span class="text-xs font-semibold text-on-surface-variant">58 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À jour" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">TP3 · IA</td><td class="px-5 py-3 text-on-surface-variant">M1 Intelligence Artificielle</td><td class="px-5 py-3 text-on-surface-variant">8</td><td class="px-5 py-3 text-on-surface-variant">B206</td><td class="px-5 py-3 text-on-surface-variant">IA frugale</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:34%"></div></div><span class="text-xs font-semibold text-on-surface-variant">34 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="En retard" tone_class="bg-error-container text-on-error-container" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">TP1 · L3</td><td class="px-5 py-3 text-on-surface-variant">L3 Informatique</td><td class="px-5 py-3 text-on-surface-variant">10</td><td class="px-5 py-3 text-on-surface-variant">C112</td><td class="px-5 py-3 text-on-surface-variant">Compilateur mini-langage</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:81%"></div></div><span class="text-xs font-semibold text-on-surface-variant">81 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À jour" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">TP2 · L3</td><td class="px-5 py-3 text-on-surface-variant">L3 Informatique</td><td class="px-5 py-3 text-on-surface-variant">9</td><td class="px-5 py-3 text-on-surface-variant">C113</td><td class="px-5 py-3 text-on-surface-variant">Application web temps réel</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:64%"></div></div><span class="text-xs font-semibold text-on-surface-variant">64 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À jour" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Mémoire · M2</td><td class="px-5 py-3 text-on-surface-variant">M2 Data Science</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3 text-on-surface-variant">B301</td><td class="px-5 py-3 text-on-surface-variant">Soutenances de mémoire</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:46%"></div></div><span class="text-xs font-semibold text-on-surface-variant">46 %</span></div></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="En cours" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

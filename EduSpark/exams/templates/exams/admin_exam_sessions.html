@@ -1,0 +1,596 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Sessions d'examen — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Top Context Header & Actions -->
+<header class="relative mb-6 pb-6 bg-surface-container-low/60 rounded-2xl p-5 shadow-sm overflow-hidden">
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-secondary-fixed/40 blur-3xl pointer-events-none"></div>
+<div class="absolute right-64 bottom-0 w-48 h-48 rounded-full bg-primary-fixed/30 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5">
+<div class="max-w-3xl">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+          Sessions d'Examen &amp; Jurys de Délibération
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl leading-relaxed">
+          Organisation logistique des épreuves surveillées, supervision des jurys d'admission, validation des procès-verbaux (PV) et publication des relevés officiels eIDAS.
+        </p>
+</div>
+<!-- Quick Session Controls -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-md text-label-md transition-colors shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">history</span>
+<span>Historique Sessions</span>
+</button>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-md transition-all hover:scale-[1.02]" type="button">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+<span>Nouvelle Session</span>
+</button>
+</div>
+</div>
+</header>
+<!-- 1. Cartes de synthèse / KPIs -->
+<section aria-labelledby="kpi-heading" class="mb-10">
+<h2 class="sr-only" id="kpi-heading">Indicateurs clés de performance des examens</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- KPI 1 -->
+<article class="relative p-5 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="flex items-start justify-between mb-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Sessions Ouvertes</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Semestre 1 &amp; Rentrée décalée</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">event_seat</span>
+</div>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold leading-tight text-on-surface">18</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-bold">Actives</span>
+</div>
+<!-- Micro sparkline bar visual -->
+<div class="w-full h-1.5 rounded-full bg-surface-container-high mt-4 overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 72%;"></div>
+</div>
+</article>
+<!-- KPI 2 -->
+<article class="relative p-5 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="flex items-start justify-between mb-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Copies en Attente de Visa</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Signature numérique jury</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">draw</span>
+</div>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold leading-tight text-secondary">342</span>
+<span class="font-data-metric text-data-metric text-on-surface-variant font-medium">/ 2 450 total</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-high mt-4 overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 48%;"></div>
+</div>
+</article>
+<!-- KPI 3 -->
+<article class="relative p-5 rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="flex items-start justify-between mb-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Taux de Délibération</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">4 jurys sur 6 terminés</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+</div>
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold leading-tight text-on-surface">78.5<span class="text-2xl text-primary font-bold">%</span></span>
+<span class="font-label-sm text-label-sm text-primary font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +12%
+          </span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-high mt-4 overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 78.5%;"></div>
+</div>
+</article>
+<!-- KPI 4 (Alertes Anomalies) -->
+<article class="relative p-5 rounded-2xl bg-error-container/40 shadow-sm flex flex-col justify-between overflow-hidden">
+<div class="flex items-start justify-between mb-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-error-container font-bold">Alertes Anomalies Notes</span>
+<span class="font-body-sm text-body-sm text-on-error-container/80 mt-0.5">Écart type hors-seuil &amp; oublis</span>
+</div>
+<div class="w-10 h-10 rounded-xl bg-error text-on-error flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between">
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold leading-tight text-error">4</span>
+<span class="font-body-sm text-body-sm text-on-error-container font-medium">signalements</span>
+</div>
+<!-- Accessible WCAG Warning Badge -->
+<span aria-live="polite" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold shadow-sm" role="status">
+<span class="material-symbols-outlined text-sm">priority_high</span>
+<span>Action requise</span>
+</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-error-container mt-4 overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 65%;"></div>
+</div>
+</article>
+</div>
+</section>
+<!-- Main Grid: 2 Columns (Content Left 8 cols / Assistant IA Right 4 cols) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start mb-12">
+<!-- LEFT COLUMN: Jurys + Emission Modules (8 cols) -->
+<div class="xl:col-span-8 flex flex-col gap-10">
+<!-- 2. Tableau de bord des jurys et délibérations -->
+<section aria-labelledby="jurys-heading" class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="jurys-heading">
+                Jurys Programmés &amp; Délibérations
+              </h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Supervision en temps réel des délibérations officielles et contrôle des procès-verbaux universitaires.
+            </p>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
+              Tous (6)
+            </button>
+<button class="px-3.5 py-1.5 rounded-full bg-surface text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">
+              Urgences (1)
+            </button>
+</div>
+</div>
+<!-- List / Table Alternative via semantic modern cards -->
+<div class="space-y-4">
+<!-- Jury Card 1 -->
+<article class="p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">psychology</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<h3 class="font-title-md text-title-md text-on-surface">Jury M1 Informatique &amp; IA</h3>
+<span class="font-data-metric text-data-metric px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">UE-INFO-801</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping"></span>
+                      En cours de délibération
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-4 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+                      Président : <strong>Pr. Alain R.</strong>
+</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+                      142 étudiants
+                    </span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                      18 Novembre 2024
+                    </span>
+</div>
+</div>
+</div>
+<!-- Action buttons per spec -->
+<div class="flex flex-wrap items-center gap-2 pt-2 lg:pt-0">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-highest hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" title="Consulter la grille de délibération" type="button">
+<span class="material-symbols-outlined text-[16px]">table_chart</span>
+<span>Consulter la grille</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-high/60 text-outline cursor-not-allowed font-label-sm text-label-sm" disabled="" title="PV en attente de clôture" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>PV non signé</span>
+</button>
+</div>
+</div>
+<!-- Contextual note inside card -->
+<div class="mt-3 pt-3 flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric">
+<span class="flex items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-body-md">broadcast_on_personal</span> Salle de délibération hybride B-304 connectée
+              </span>
+<span>138 / 142 notes renseignées</span>
+</div>
+</article>
+<!-- Jury Card 2 -->
+<article class="p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">calculate</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<h3 class="font-title-md text-title-md text-on-surface">Jury L3 Mathématiques-Informatique</h3>
+<span class="font-data-metric text-data-metric px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">LIC-MATH-302</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-sm">check_circle</span>
+                      PV Validé &amp; Signé
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-4 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+                      Présidente : <strong>Dr. E. Moreau</strong>
+</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+                      210 étudiants
+                    </span>
+<span class="flex items-center gap-1 text-emerald-800 font-semibold">
+<span class="material-symbols-outlined text-[16px]">history_edu</span>
+                      Signé le 16 Nov (Cachet eIDAS)
+                    </span>
+</div>
+</div>
+</div>
+<!-- Action buttons per spec -->
+<div class="flex flex-wrap items-center gap-2 pt-2 lg:pt-0">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-highest hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Consulter la grille</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-high hover:bg-primary-fixed text-primary font-label-sm text-label-sm transition-colors" title="Télécharger le PV officiel signé au format PDF/UA accessible" type="button">
+<span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+<span>Télécharger le PV signé (PDF/UA)</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">mark_email_read</span>
+<span>Générer les relevés officiels</span>
+</button>
+</div>
+</div>
+<div class="mt-3 pt-3 flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric">
+<span class="text-on-surface-variant">Archivage CINES certifié - Réf : UPC-2024-PV-8894</span>
+<span class="text-emerald-700 font-bold">100% Délibéré</span>
+</div>
+</article>
+<!-- Jury Card 3 -->
+<article class="p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-on-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">neurology</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2 mb-1">
+<h3 class="font-title-md text-title-md text-on-surface">Jury M2 Neurosciences Computationnelles</h3>
+<span class="font-data-metric text-data-metric px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">MST-NEURO-504</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                      En attente des copies du rattrapage
+                    </span>
+</div>
+<div class="flex flex-wrap items-center gap-4 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+                      Président : <strong>Pr. Marc V.</strong>
+</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+                      48 étudiants
+                    </span>
+<span class="flex items-center gap-1 text-error font-semibold">
+<span class="material-symbols-outlined text-[16px]">pending_actions</span>
+                      23 copies manquantes
+                    </span>
+</div>
+</div>
+</div>
+<!-- Action buttons per spec -->
+<div class="flex flex-wrap items-center gap-2 pt-2 lg:pt-0">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-highest hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">view_timeline</span>
+<span>Relancer correcteurs</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Consulter la grille</span>
+</button>
+</div>
+</div>
+<div class="mt-3 pt-3 flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric">
+<span class="text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">timer</span> Échéance clôture réglementaire : J-2 (20 Nov 23h59)
+              </span>
+<span>25 / 48 épreuves versées</span>
+</div>
+</article>
+</div>
+</section>
+<!-- 3. Module d'émission des relevés de notes sécurisés -->
+<section aria-labelledby="releves-heading" class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="releves-heading">
+                Émission Sécurisée des Relevés &amp; Attestations
+              </h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Génération par lot avec scellement eIDAS, empreintes SHA-256 et synchronisation interfacée avec le SI-Scol / Apogée.
+            </p>
+</div>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-sm transition-colors shrink-0" type="button">
+<span class="material-symbols-outlined text-[20px]">batch_prediction</span>
+<span>Lancer la génération par lot</span>
+</button>
+</div>
+<!-- Security & Proof Feature Box -->
+<div class="p-5 rounded-xl bg-surface-container-low mb-6">
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+<div class="flex min-w-0 flex-wrap items-center gap-5">
+<!-- Inline QR Visual -->
+<div class="p-3 bg-white rounded-xl shadow-sm shrink-0 flex flex-col items-center justify-center">
+<svg aria-label="QR Code de scellement cryptographique" fill="none" height="68" viewbox="0 0 68 68" width="68" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#004191" height="24" rx="4" width="24" x="4" y="4"></rect>
+<rect fill="white" height="16" rx="2" width="16" x="8" y="8"></rect>
+<rect fill="#004191" height="8" width="8" x="12" y="12"></rect>
+<rect fill="#004191" height="24" rx="4" width="24" x="40" y="4"></rect>
+<rect fill="white" height="16" rx="2" width="16" x="44" y="8"></rect>
+<rect fill="#004191" height="8" width="8" x="48" y="12"></rect>
+<rect fill="#004191" height="24" rx="4" width="24" x="4" y="40"></rect>
+<rect fill="white" height="16" rx="2" width="16" x="8" y="44"></rect>
+<rect fill="#004191" height="8" width="8" x="12" y="48"></rect>
+<circle cx="34" cy="34" fill="#4b41e1" r="5"></circle>
+<rect fill="#004191" height="8" width="8" x="36" y="44"></rect>
+<rect fill="#004191" height="6" width="6" x="48" y="40"></rect>
+<rect fill="#004191" height="10" width="10" x="44" y="52"></rect>
+<rect fill="#004191" height="12" width="6" x="58" y="34"></rect>
+</svg>
+<span class="font-data-metric text-[11px] text-on-surface-variant mt-1 font-bold">VERIF:eIDAS</span>
+</div>
+<div class="min-w-0 flex-1 space-y-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface">Scellement Numérique &amp; Signature eIDAS</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-bold">Niveau Élevé Qualifié</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xl">
+                  Chaque document émis intègre l'horodatage qualifié RFC 3161 et un certificat d'authenticité universitaire vérifiable sans connexion tierce.
+                </p>
+<div class="flex min-w-0 flex-wrap items-center gap-2 pt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Dernière empreinte lot racine :</span>
+<code class="min-w-0 break-all rounded bg-surface-container-high px-2.5 py-1 font-data-metric text-data-metric font-bold text-primary">
+                    SHA-256: 4f98a2d187b5c8e0329ac...d83a1b02ef
+                  </code>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2 shrink-0 w-full lg:w-auto">
+<button class="w-full text-center px-4 py-2 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
+                Tester le lecteur de vérification
+              </button>
+</div>
+</div>
+</div>
+<!-- Journal d'audit et de traçabilité SI-Scol / Apogée -->
+<h3 class="font-title-md text-title-md text-on-surface mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">receipt_long</span>
+<span>Journal d'audit &amp; Traçabilité d'envoi aux étudiants (Apogée / SI-Scol)</span>
+</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead>
+<tr class="text-on-surface-variant/80 font-label-sm text-label-sm uppercase tracking-wider bg-surface-container-low/50">
+<th class="py-3 px-4 rounded-l-lg" scope="col">Horodatage</th>
+<th class="py-3 px-4" scope="col">Promotion / Cohorte</th>
+<th class="py-3 px-4" scope="col">Volumétrie</th>
+<th class="py-3 px-4" scope="col">Statut Apogée</th>
+<th class="py-3 px-4" scope="col">Empreinte &amp; Visa</th>
+<th class="py-3 px-4 rounded-r-lg text-right" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody class="space-y-1">
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface">18/11/24 14:32:04</td>
+<td class="py-3 px-4 font-medium text-on-surface">L3 Math-Info (S1)</td>
+<td class="py-3 px-4">210 relevés</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Transmis (200 OK)
+                  </span>
+</td>
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface-variant">eIDAS #UPC-99823</td>
+<td class="py-3 px-4 text-right">
+<button class="text-primary hover:text-primary-container font-label-sm text-label-sm font-semibold inline-flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span> Reçu
+                  </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface">18/11/24 11:15:22</td>
+<td class="py-3 px-4 font-medium text-on-surface">M2 Bio-Informatique (Sem 3)</td>
+<td class="py-3 px-4">64 relevés</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-600"></span> Transmis (200 OK)
+                  </span>
+</td>
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface-variant">eIDAS #UPC-99818</td>
+<td class="py-3 px-4 text-right">
+<button class="text-primary hover:text-primary-container font-label-sm text-label-sm font-semibold inline-flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">download</span> Reçu
+                  </button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface">17/11/24 18:40:11</td>
+<td class="py-3 px-4 font-medium text-on-surface">DU Intelligence Artificielle Santé</td>
+<td class="py-3 px-4">32 diplômes</td>
+<td class="py-3 px-4">
+<span class="inline-flex items-center gap-1 text-amber-700 font-semibold">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span> File d'attente DSI
+                  </span>
+</td>
+<td class="py-3 px-4 font-data-metric text-data-metric text-on-surface-variant">eIDAS #UPC-99804</td>
+<td class="py-3 px-4 text-right">
+<button class="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold inline-flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">refresh</span> Relancer
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section: Visualisation campus / Centre d'examen multimodal (Decorative & photo rich) -->
+<section class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm">
+<h3 class="font-title-md text-title-md text-on-surface mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">meeting_room</span>
+<span>Centres d'Examen Surveillés &amp; Salles Multimodales (Site Grands Moulins)</span>
+</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="relative rounded-xl overflow-hidden group">
+<div class="w-full h-44 bg-cover bg-center transition-transform duration-300 group-hover:scale-105" data-alt="A modern, brightly lit university examination amphitheater at University Paris Cité with students using secure digital tablets, clean architectural lines in cool blues and white tones, soft daylight streaming through large high windows, realistic academic atmosphere" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBp4TIMjIjZFvUmUcPY6XmbjXUObd5_aDGKYF71y6OO722OnYVj6Qm7JmhRx8zuIepESOzf7rp8sSk5W0iMo3_KiFol0KOkML_Vx6_03ncreBnZKP2xsZVrucF-Dgp-0SWx3_kYURQEb0EcQLB5ct8yUg5iu7na3XHEp8lHsrtg-4SZ2zys-C8QD8wDwTUItp34HczS2o3-N-WGD3EdQX2_u4EuxT1_Ozr-vBfVVGE')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex flex-col justify-end p-4 text-inverse-on-surface">
+<span class="font-title-md text-title-md font-bold">Amphi Buffon - 350 Postes Dématérialisés</span>
+<span class="font-body-sm text-body-sm opacity-90">Sessions de rattrapage en cours • Climatisation &amp; Brouillage RF actifs</span>
+</div>
+</div>
+<div class="relative rounded-xl overflow-hidden group">
+<div class="w-full h-44 bg-cover bg-center transition-transform duration-300 group-hover:scale-105" data-alt="University academic jury meeting room with professors deliberating around a clean oak conference table reviewing digital transcripts on tablets, soft natural ambient lighting, deep blue color scheme accents, intellectual focus, high resolution" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDAtadK4_s1z0_sLwXQFDYmQkpqw5GuQqZjcbACtMdPnAWlwjrP7wBu1yFeXQ4PwSvPvObM8AON-xwohEY6a261xaw3pYLOjsIpJYTztqL9O8MsWtooo_os_W7bI7FkDAhKgl5pygHs0Pwht-nuUHjjruP1JUp93PmsKH2r9Avx0oyrvMOmAnws0M5_nAC0HzyMgizP7yzy1Yu0_SDIG1d9ls1gtXWob8-jFmQWGKE')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex flex-col justify-end p-4 text-inverse-on-surface">
+<span class="font-title-md text-title-md font-bold">Salon des Thèses &amp; Délibérations</span>
+<span class="font-body-sm text-body-sm opacity-90">Salle Hybride C-201 • Écrans de contrôle et microphones chiffrés</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- RIGHT COLUMN: 4. Panneau latéral normalisé 'Assistant IA Contrôle des Jurys' (4 cols) -->
+<aside aria-labelledby="ia-assistant-title" class="xl:col-span-4 flex flex-col gap-5 sticky top-20">
+<!-- AI Assistant Card -->
+<section class="rounded-2xl bg-surface-container-lowest p-5 shadow-md relative overflow-hidden">
+<!-- Subtle AI background glow -->
+<div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-secondary-fixed/50 blur-2xl pointer-events-none"></div>
+<!-- Header -->
+<div class="flex items-start justify-between gap-3 mb-5 pb-4 border-b border-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[22px]">smart_toy</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="ia-assistant-title">
+                Assistant IA Conformité &amp; Jurys
+              </h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Surveillance algorithmique des biais</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-extrabold uppercase tracking-wide">
+            BETA MULTIMODALE
+          </span>
+</div>
+<!-- Section 1: Contrôle de cohérence académique -->
+<div class="mb-5">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">balance</span>
+<h3 class="font-title-md text-title-md text-on-surface">
+              Contrôle de cohérence académique
+            </h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Détection automatisée des écarts de notation significatifs entre évaluateurs sur les épreuves de contrôle continu vs examen terminal standardisé.
+          </p>
+<!-- Metric Chart Mini Widget -->
+<div class="mt-3 p-3.5 rounded-xl bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant font-medium">Corrélation CC / Terminal</span>
+<span class="font-data-metric text-data-metric text-primary font-bold">r = 0.84 (Optimal)</span>
+</div>
+<!-- Custom mini bar comparison -->
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center justify-between text-[11px] text-on-surface-variant font-data-metric">
+<span>Groupe A (Pr. Lambert)</span>
+<span>Moy : 12.8 / 20</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 64%;"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] text-on-surface-variant font-data-metric pt-1">
+<span>Groupe B (Pr. Danvers)</span>
+<span>Moy : 10.4 / 20</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 52%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2: Suggestion IA & Détection Anomalie -->
+<div class="p-4 rounded-xl bg-amber-50/70 mb-6">
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+</div>
+<div class="space-y-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-amber-900 font-bold">
+                Suggestion IA • Harmonisation Barème
+              </span>
+<p class="font-body-sm text-body-sm text-on-surface leading-snug font-medium">
+                Détection d'un biais de distribution sur l'UE <strong>INF503 (Algorithmique avancée)</strong> avec un écart critique de <strong>2.4 pts</strong> sur le jury n°2.
+              </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant pt-1 text-xs">
+                Recommandation : Application d'un facteur compensatoire de correction normalisé (+1.15 pt) avant scellement définitif du PV.
+              </p>
+</div>
+</div>
+<!-- Boutons d'action normés -->
+<div class="mt-4 pt-3 flex flex-wrap items-center gap-2">
+<button class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm shadow-sm transition-all" onclick="alert('Harmonisation acceptée : Re-calcul de la distribution en cours.')" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Garder l'harmonisation</span>
+</button>
+<button class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
+<span>Modifier les seuils</span>
+</button>
+<button class="inline-flex items-center justify-center px-3 py-2 rounded-full bg-transparent hover:bg-error-container text-error font-label-sm text-label-sm transition-colors" onclick="alert('Suggestion rejetée. Le barème original est maintenu.')" type="button">
+<span>Refuser</span>
+</button>
+</div>
+</div>
+<!-- Section 3: Diagnostic en direct -->
+<div class="space-y-2 mb-6">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Fiabilité du corpus analysé</span>
+<span class="font-data-metric text-data-metric text-emerald-700 font-bold">99.2% de confiance</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-emerald-600 rounded-full" style="width: 99.2%;"></div>
+</div>
+</div>
+<!-- Bandeau de résilience WCAG obligatoire -->
+<div class="p-3.5 rounded-xl bg-surface-container-high/70 text-on-surface-variant flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-xs leading-normal">
+<strong class="text-on-surface">Garantie de continuité de service :</strong> La validation juridique et le calcul des moyennes restent entièrement opérationnels sans intelligence artificielle.
+          </p>
+</div>
+</section>
+<!-- Second Widget: Dispositif d'urgence & Assistance Réglementaire -->
+<div class="rounded-2xl bg-surface-container-lowest p-5 shadow-sm">
+<h4 class="font-title-md text-title-md text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">support_agent</span>
+<span>Permanence Juridique Délibérations</span>
+</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4">
+          En cas de litige étudiant ou de quorum non atteint lors du tour de table :
+        </p>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low font-data-metric text-data-metric">
+<span class="text-on-surface">Ligne directe DSI / Scolarité :</span>
+<span class="text-primary font-bold">Poste 44 20</span>
+</div>
+</div>
+</aside>
+</div>
+</div></main>
+{% endblock %}

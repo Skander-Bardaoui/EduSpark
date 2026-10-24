@@ -1,0 +1,112 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mon Emploi du temps — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Organisation</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mon Emploi du temps</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Cours magistraux, travaux pratiques et temps projet de la semaine. <span class="font-semibold text-on-surface" data-week-label>Semaine 8 · 21 – 25 octobre 2024</span></p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-week-step="-1" type="button"><span class="material-symbols-outlined text-[18px]">chevron_left</span>Semaine précédente</button>
+<button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-week-step="1" type="button">Semaine suivante<span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Emploi du temps exporté au format iCal." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+</div>
+</header>
+<section class="grid gap-4 lg:grid-cols-[1fr_320px]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Prochaine séance · Aujourd'hui</p>
+<h2 class="font-headline-sm text-headline-sm mt-1 text-on-surface">Réseaux de neurones profonds</h2>
+<p class="mt-1 text-sm text-on-surface-variant">CM · 14h00 – 15h30 · Amphi Turing · Pr. Hélène Vasseur</p>
+</div>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1 text-[11px] font-bold text-primary"><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>Dans 1 h 20</span>
+</div>
+<div class="mt-4 flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Support du cours téléchargé." type="button"><span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>Support du cours</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Rappel ajouté à votre agenda." type="button"><span class="material-symbols-outlined text-[16px]">notifications</span>Me rappeler</button>
+</div>
+</div>
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-surface-variant">Légende</p>
+<ul class="mt-3 space-y-2 text-sm text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-primary"></span>Cours magistral (CM)</li>
+<li class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-secondary"></span>Travaux pratiques (TP)</li>
+<li class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-tertiary-fixed-dim"></span>Temps projet</li>
+<li class="flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-outline-variant"></span>Créneau libre</li>
+</ul>
+<p class="mt-4 border-t border-outline-variant/40 pt-3 text-xs leading-relaxed text-on-surface-variant">Les salles sont affichées sur chaque carte. Toute modification est notifiée par e-mail.</p>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Semaine en un coup d'œil</h2>
+<div class="flex flex-wrap gap-2" data-filter-chips>
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tout</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="cours" type="button">CM</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="tp" type="button">TP</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="projet" type="button">Projet</button>
+</div>
+</div>
+<div class="overflow-x-auto p-4">
+<div class="grid min-w-[900px] grid-cols-[88px_repeat(5,minmax(0,1fr))] gap-2">
+<div></div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Lundi 21</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Mardi 22</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Mercredi 23</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Jeudi 24</div>
+<div class="px-2 pb-1 text-center text-xs font-bold text-on-surface">Vendredi 25</div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">08:30<br/><span class="font-normal text-outline">10:00</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-filter-item data-tags="cours"><p class="text-xs font-bold leading-tight text-on-surface">Réseaux de neurones</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · Amphi Turing</p><p class="mt-0.5 text-[11px] text-on-surface-variant">H. Vasseur</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-filter-item data-tags="cours"><p class="text-xs font-bold leading-tight text-on-surface">Bases de données</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · Amphi Turing</p><p class="mt-0.5 text-[11px] text-on-surface-variant">M. Traoré</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-filter-item data-tags="cours"><p class="text-xs font-bold leading-tight text-on-surface">Probabilités</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · Salle A101</p><p class="mt-0.5 text-[11px] text-on-surface-variant">S. Lambert</p></div></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">10:15<br/><span class="font-normal text-outline">11:45</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-filter-item data-tags="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Algorithmique</p><p class="mt-1 text-[11px] text-on-surface-variant">TP2 · Salle B204</p><p class="mt-0.5 text-[11px] text-on-surface-variant">A. Diallo</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-filter-item data-tags="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Bases de données</p><p class="mt-1 text-[11px] text-on-surface-variant">TP2 · Salle C112</p><p class="mt-0.5 text-[11px] text-on-surface-variant">M. Traoré</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">13:30<br/><span class="font-normal text-outline">15:00</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-secondary bg-secondary-fixed/60 p-2.5" data-filter-item data-tags="tp"><p class="text-xs font-bold leading-tight text-on-surface">TP Algorithmique</p><p class="mt-1 text-[11px] text-on-surface-variant">TP2 · Salle B204</p><p class="mt-0.5 text-[11px] text-on-surface-variant">A. Diallo</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-tertiary-fixed-dim bg-tertiary-fixed/40 p-2.5" data-filter-item data-tags="projet"><p class="text-xs font-bold leading-tight text-on-surface">Temps projet</p><p class="mt-1 text-[11px] text-on-surface-variant">Groupe 4 · Salle projet</p><p class="mt-0.5 text-[11px] text-on-surface-variant">Autonomie</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-tertiary-fixed-dim bg-tertiary-fixed/40 p-2.5" data-filter-item data-tags="projet"><p class="text-xs font-bold leading-tight text-on-surface">Revue de projet</p><p class="mt-1 text-[11px] text-on-surface-variant">Groupe 4 · B301</p><p class="mt-0.5 text-[11px] text-on-surface-variant">H. Vasseur</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-tertiary-fixed-dim bg-tertiary-fixed/40 p-2.5 ring-2 ring-primary/30" data-filter-item data-tags="projet"><p class="text-xs font-bold leading-tight text-on-surface">Soutenance intermédiaire</p><p class="mt-1 text-[11px] text-on-surface-variant">Groupe 4 · Amphi Turing</p><p class="mt-0.5 text-[11px] font-semibold text-primary">Jalon noté</p></div></div>
+<div class="pt-2 text-right text-[11px] font-bold text-on-surface-variant">15:15<br/><span class="font-normal text-outline">16:45</span></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-filter-item data-tags="cours"><p class="text-xs font-bold leading-tight text-on-surface">Anglais scientifique</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · Salle D12</p><p class="mt-0.5 text-[11px] text-on-surface-variant">J. Parker</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"><div class="h-full rounded border-l-4 border-primary bg-primary-fixed/50 p-2.5" data-filter-item data-tags="cours"><p class="text-xs font-bold leading-tight text-on-surface">Éthique de l'IA</p><p class="mt-1 text-[11px] text-on-surface-variant">CM · Salle A203</p><p class="mt-0.5 text-[11px] text-on-surface-variant">C. Nguyen</p></div></div>
+<div class="min-h-[104px] rounded bg-surface-container/50 p-2"></div>
+</div>
+<p class="hidden px-5 py-8 text-center text-sm text-on-surface-variant" data-filter-empty>Aucune séance ne correspond à ce filtre.</p>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var labels = [
+    'Semaine 7 · 14 – 18 octobre 2024',
+    'Semaine 8 · 21 – 25 octobre 2024',
+    'Semaine 9 · 28 octobre – 1 novembre 2024'
+  ];
+  var index = 1;
+  var label = document.querySelector('[data-week-label]');
+  document.querySelectorAll('[data-week-step]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      index = Math.min(labels.length - 1, Math.max(0, index + parseInt(btn.getAttribute('data-week-step'), 10)));
+      if (label) label.textContent = labels[index];
+      window.portalToast('Planning mis à jour : ' + labels[index] + '.', 'info');
+    });
+  });
+})();
+</script>
+{% endblock %}

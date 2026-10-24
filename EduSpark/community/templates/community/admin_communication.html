@@ -1,0 +1,657 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Communication &amp; Modération — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Fil d'Ariane & Contexte Opérationnel -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-data-metric text-data-metric uppercase tracking-wider text-[11px]">Nœud DSI : Central Paris Cité (SSL/RGPD Conforme)</span>
+</div>
+</div>
+<!-- Header Stratégique & Actions -->
+<header class="flex flex-col xl:flex-row xl:items-end justify-between gap-5 mb-6">
+<div class="max-w-3xl space-y-2">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+          Espace Réglementaire &amp; Vivier Numérique
+        </div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+          Communication Institutionnelle &amp; Modération
+        </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Diffusion d'alertes campus prioritaires, gestion des campagnes d'information universitaire et supervision éthique des espaces d'échange étudiants et enseignants.
+        </p>
+</div>
+<div class="flex flex-wrap items-center gap-2.5">
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+          Charte d'usage &amp; Règles
+        </button>
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+          Journal RGPD
+        </button>
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-md hover:bg-primary-container transition-all" data-modal-open="#broadcastModal" id="openBroadcastModal" type="button">
+<span class="material-symbols-outlined text-[18px]">add_alert</span>
+          + Diffuser une annonce campus
+        </button>
+</div>
+</header>
+<!-- Grille KPIs Tonal -->
+<section aria-label="Indicateurs de performance" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
+<!-- Stat 1 -->
+<div class="relative p-5 rounded bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Annonces Actives</span>
+<div class="h-9 w-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">4</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">1 alerte météo/travaux</span>
+</div>
+<p class="mt-2 font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-tertiary">location_on</span>
+          Ciblage Campus Rive Gauche actif
+        </p>
+</div>
+<div class="mt-4 w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-secondary" style="width: 75%"></div>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="relative p-5 rounded bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Taux d'ouverture global</span>
+<div class="h-9 w-9 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[20px]">mark_email_read</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">84.6%</span>
+<span class="font-data-metric text-data-metric text-primary flex items-center">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> +3.2%
+          </span>
+</div>
+<p class="mt-2 font-body-sm text-body-sm text-on-surface-variant">
+          Sur <span class="font-data-metric text-data-metric font-semibold text-on-surface">16 060</span> usagers synchronisés
+        </p>
+</div>
+<div class="mt-4 flex items-center gap-1">
+<svg class="w-full h-6" preserveAspectRatio="none" viewBox="0 0 100 24">
+<path class="text-primary" d="M0,18 Q20,12 40,15 T80,8 T100,4" fill="none" stroke="currentColor" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="relative p-5 rounded bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Signalements en attente</span>
+<div class="h-9 w-9 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+<span class="material-symbols-outlined text-[20px]">priority_high</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-error leading-none">2</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">Non résolus</span>
+</div>
+<p class="mt-2 font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+          Temps moyen : <span class="font-data-metric text-data-metric text-on-surface font-semibold">18 min</span>
+</p>
+</div>
+<div class="mt-4 w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full bg-error" style="width: 25%"></div>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="relative p-5 rounded bg-surface-container-lowest shadow-sm overflow-hidden flex flex-col justify-between">
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Sérénité Communautaire</span>
+<div class="h-9 w-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[20px]">sentiment_very_satisfied</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">99.8%</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-bold">Standard A+</span>
+</div>
+<p class="mt-2 font-body-sm text-body-sm text-on-surface-variant">
+          Conformité stricte à la charte universitaire
+        </p>
+</div>
+<div class="mt-4 flex items-center justify-between font-label-sm text-[11px] text-on-surface-variant">
+<span>0.2% Déviations bloquées</span>
+<span class="font-data-metric text-data-metric font-semibold text-secondary">0 litiges judiciaires</span>
+</div>
+</div>
+</section>
+<!-- Disposition Principale Asymétrique 12 Colonnes -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start mb-6">
+<!-- Colonne Principale : Annonces & File Modération (8 Cols) -->
+<div class="xl:col-span-8 space-y-6 min-w-0">
+<!-- Section 1 : Annonces Officielles -->
+<section class="space-y-4">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Annonces Officielles en Diffusion</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high font-data-metric text-data-metric text-on-surface-variant">3 actives</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+              Filtrer par Campus
+            </button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high">
+              Historique
+            </button>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Annonce 1 : Prioritaire Ambre -->
+<article class="p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-tertiary-fixed-dim"></div>
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">warning</span>
+                    Alerte Prioritaire DSI
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Réf. #ANC-2024-884</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Diffusé il y a 2h</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+                  Travaux de maintenance réseau DSI dans la Halle aux Farines ce samedi
+                </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Interruption programmée des routeurs Wi-Fi Eduroam et des bornes interactives de 07h00 à 14h00 pour déploiement des fibres redondantes.
+                </p>
+<div class="flex flex-wrap items-center gap-4 pt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">groups</span>
+                    Étudiants &amp; Personnels Campus Rive Gauche
+                  </span>
+<span class="flex items-center gap-1.5 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">send</span>
+                    4 200 destinataires
+                  </span>
+<span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-low text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">mark_chat_unread</span>
+                    Bandeau portail + Push courriel
+                  </span>
+</div>
+</div>
+<div class="flex lg:flex-col items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Taux de lecture :</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded-full">91%</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" title="Modifier l'annonce" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" title="Prolonger la diffusion" type="button">
+<span class="material-symbols-outlined text-[16px]">update</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-error hover:bg-error-container transition-colors" title="Archiver l'annonce" type="button">
+<span class="material-symbols-outlined text-[16px]">archive</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Annonce 2 : Information Académique Bleue -->
+<article class="p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary"></div>
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">school</span>
+                    Information Académique
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Réf. #ANC-2024-879</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+                  Ouverture des inscriptions pédagogiques au tutorat d'accueil pour le semestre 2
+                </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Les candidats étudiants souhaitant postuler comme tuteurs pairs rémunérés peuvent déposer leur dossier jusqu'au 15 novembre à 18h00.
+                </p>
+<div class="flex flex-wrap items-center gap-4 pt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">public</span>
+                    Tous les étudiants Licence &amp; Master
+                  </span>
+<span class="flex items-center gap-1.5 font-data-metric text-data-metric">
+<span class="material-symbols-outlined text-[16px]">group</span>
+                    14 820 destinataires
+                  </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+                    Échéance : <span class="font-data-metric text-data-metric font-semibold text-on-surface">15 Nov 2024</span>
+</span>
+</div>
+</div>
+<div class="flex lg:flex-col items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0">
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
+                  Programmée
+                </span>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-error hover:bg-error-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+<!-- Annonce 3 : Vie de Campus -->
+<article class="p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-secondary"></div>
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+<div class="space-y-2 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">celebration</span>
+                    Vie de Campus
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Réf. #ANC-2024-862</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+                  Conférence Inaugurale IA &amp; Société - Amphi Buffon en accès libre
+                </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Rencontre transversale Droit-Sciences avec le comité d'éthique de la recherche et retransmission en direct sur le portail vidéo.
+                </p>
+<div class="flex flex-wrap items-center gap-4 pt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">room</span>
+                    Amphithéâtre Buffon (Grands Moulins)
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface">Jeudi 14 Novembre • 18:00</span>
+</div>
+</div>
+<div class="flex lg:flex-col items-center lg:items-end justify-between gap-3 shrink-0 pt-2 lg:pt-0">
+<span class="px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
+                  Diffusée
+                </span>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Section 2 : File de Modération & Signalements Forums -->
+<section class="space-y-4">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">File de Modération Communautaire</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Surveillance algorithmique &amp; signalements d'enseignants sous convention d'intégrité académique.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+              2 dossiers ouverts
+            </span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-2.5 px-4">ID &amp; Horodatage</th>
+<th class="py-2.5 px-4">Objet &amp; Espace Signalé</th>
+<th class="py-2.5 px-4">Émetteur du signalement</th>
+<th class="py-2.5 px-4">Statut / Risque</th>
+<th class="py-2.5 px-4 text-right">Actions Souveraines</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Ligne 1 : Signalement #1042 (Actif en analyse) -->
+<tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors group">
+<td class="py-3 px-4 align-top">
+<div class="font-data-metric text-data-metric font-semibold text-primary">#1042</div>
+<div class="font-data-metric text-[11px] text-on-surface-variant mt-0.5">Aujourd'hui 09:41</div>
+</td>
+<td class="py-4 px-5 align-top max-w-sm">
+<div class="font-title-md text-sm text-on-surface font-semibold">
+                      Partage de corrigé d'examen non autorisé
+                    </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                      Fichier PDF "Correction_Partiel_2023_NonValide.pdf" téléversé avec demande de tips en cryptomonnaie.
+                    </div>
+<div class="inline-flex items-center gap-1 px-2 py-0.5 mt-2 rounded bg-surface-container-high font-data-metric text-[11px] text-on-surface">
+<span class="material-symbols-outlined text-body-sm">forum</span>
+                      Forum INF501 - Algorithmique Avancée
+                    </div>
+</td>
+<td class="py-3 px-4 align-top">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-primary-fixed flex items-center justify-center font-label-sm text-[11px] text-on-primary-fixed font-bold">
+                        HV
+                      </div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Dr. H. Vasseur</div>
+<div class="font-body-sm text-xs text-on-surface-variant">Maître de conf.</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                      En cours d'analyse
+                    </span>
+<div class="font-data-metric text-[11px] text-error font-medium mt-1">Risque intégrité : 96%</div>
+</td>
+<td class="py-4 px-5 align-top text-right space-y-1">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-xs hover:bg-primary-container transition-colors shadow-sm" title="Masquer le message immédiatement" type="button">
+                        Masquer le message
+                      </button>
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors" title="Notifier l'auteur" type="button">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Classer sans suite" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Ligne 2 : Signalement #1041 (Automatique résolu) -->
+<tr class="bg-surface-container-low/50 hover:bg-surface-container transition-colors opacity-90">
+<td class="py-3 px-4 align-top">
+<div class="font-data-metric text-data-metric font-medium text-on-surface-variant">#1041</div>
+<div class="font-data-metric text-[11px] text-on-surface-variant mt-0.5">Hier 22:15</div>
+</td>
+<td class="py-4 px-5 align-top max-w-sm">
+<div class="font-title-md text-sm text-on-surface font-semibold">
+                      Spam publicitaire de cours particuliers externes
+                    </div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                      Lien vers plateforme commerciale non affiliée avec messages automatisés récurrents.
+                    </div>
+<div class="inline-flex items-center gap-1 px-2 py-0.5 mt-2 rounded bg-surface-container font-data-metric text-[11px] text-on-surface-variant">
+<span class="material-symbols-outlined text-body-sm">forum</span>
+                      Canal Général Étudiant
+                    </div>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="font-body-sm text-body-sm text-on-surface-variant italic">Modérateur Bot IA</span>
+</td>
+<td class="py-3 px-4 align-top">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm">check</span>
+                      Supprimé automatiquement
+                    </span>
+<div class="font-data-metric text-[11px] text-on-surface-variant mt-1">Traçabilité CNIL OK</div>
+</td>
+<td class="py-4 px-5 align-top text-right">
+<button class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-xs hover:bg-surface-container transition-colors" type="button">
+                      Consulter les logs
+                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Éléments Visuels Enrichis : Couverture Campus & Éthique -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+<!-- Carte Synthèse des Espaces de Vie -->
+<div class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div class="space-y-2">
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider font-semibold">Territoire Universitaire</span>
+<h3 class="font-title-md text-title-md text-on-surface">Zones d'Affichage Multimodal</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Visualisation des 4 campus interconnectés : Grands Moulins, Saint-Germain, Odéon et Boulogne.
+            </p>
+</div>
+<div class="w-full h-44 rounded bg-cover bg-center mt-4 relative overflow-hidden shadow-inner" data-location="Universite Paris Cite, Grands Moulins, Paris" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC37bSK0fcbsHiptpSjOzKXChJjXkuCbqOowC0tvdCJcpeH0OydY2Eq-1ujYRDjcfdniQHXQjtJNb5kduESsvIwFAZFzAF0Y_OFlos7Lrw7mlgfHNVSZVFuBsPcNMLrFjF4m76gwcMkBMkKKmg-duX6_tbw8Cgcgyiee_j-6UZa2HNHuORh8DapNJ_dg0k-8-NdQU0G7ym8MJrYEO2AkD1pVFeosNDh8UxgCj8A4ww')">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-primary">
+<span class="font-label-sm text-label-sm backdrop-blur-md bg-surface/20 px-2 py-1 rounded-full">Secteur Rive Gauche : Nominal</span>
+<span class="font-data-metric text-data-metric text-xs">48.829° N, 2.382° E</span>
+</div>
+</div>
+</div>
+<!-- Mosaïque des Engagements Éthiques -->
+<div class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">Protection &amp; RGPD</span>
+<span class="material-symbols-outlined text-secondary text-[20px]">shield_with_heart</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface mt-2">Gouvernance des Données d'Échange</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+              Les discussions académiques restent confidentielles. Aucun modèle public d'IA n'est entraîné avec les conversations de nos étudiants.
+            </p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+<div class="p-3 rounded bg-surface-container-low">
+<div class="font-label-sm text-[11px] text-on-surface-variant uppercase">Conservation Logs</div>
+<div class="font-data-metric text-data-metric font-bold text-on-surface mt-1">90 jours max</div>
+</div>
+<div class="p-3 rounded bg-surface-container-low">
+<div class="font-label-sm text-[11px] text-on-surface-variant uppercase">Délégué DPO</div>
+<div class="font-data-metric text-data-metric font-bold text-on-surface mt-1">Validé T3 2024</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md hover:bg-secondary-fixed-dim transition-colors">
+            Télécharger le rapport de conformité DSI
+          </button>
+</div>
+</section>
+</div>
+<!-- Volet IA Latéral Standardisé (BETA MULTIMODALE) - 4 Colonnes -->
+<aside aria-label="Volet Assistant IA de Modération" class="xl:col-span-4 sticky top-24 space-y-6">
+<!-- Panneau Principal IA Beta -->
+<div class="p-5 rounded bg-surface-container-lowest shadow-md relative overflow-hidden">
+<!-- Décoration d'angle multimodal -->
+<div class="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-secondary/15 blur-xl pointer-events-none"></div>
+<!-- En-tête Assistant IA -->
+<div class="flex items-start justify-between gap-3 pb-5 border-b-0">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-headline-sm text-[18px] font-bold text-on-surface">Assistant IA Modération</span>
+</div>
+<p class="font-label-sm text-[11px] text-secondary font-semibold uppercase tracking-wider">
+              Beta Multimodale • Modèle Souverain Paris Cité
+            </p>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-data-metric text-[11px]">
+            v2.4-edu
+          </span>
+</div>
+<!-- Objectif Système -->
+<div class="py-4">
+<div class="flex items-center gap-2 text-on-surface font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+            Objectif Opérationnel
+          </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Filtrage automatique et détection sémantique des contenus non conformes à la charte universitaire et au code de l'éducation.
+          </p>
+</div>
+<!-- Card Suggestion IA Active (Liée au Signalement #1042) -->
+<div class="p-4 rounded bg-surface-container-low space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+              Analyse de tonalité &amp; conformité
+            </span>
+<span class="font-data-metric text-data-metric text-on-surface font-semibold bg-surface-container-lowest px-2 py-0.5 rounded-full">
+              Dossier #1042
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+            Le signalement <span class="font-data-metric text-data-metric font-semibold text-primary">#1042</span> correspond avec <strong class="text-error font-semibold">96% de probabilité</strong> à une infraction aux droits d'auteur du sujet d'examen.
+          </p>
+<div class="p-3 rounded-md bg-surface-container-lowest text-on-surface-variant font-body-sm text-body-sm italic">
+            "Recommandation IA : Masquage automatique temporaire et proposition d'un message bienveillant rappelant le règlement des examens."
+          </div>
+<!-- Boutons d'Arbitrage Normés OBLIGATOIRES -->
+<div class="space-y-2 pt-2">
+<button class="w-full py-2.5 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+              Appliquer la modération suggérée
+            </button>
+<button class="w-full py-2.5 px-4 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+              Modifier l'avertissement
+            </button>
+<button class="w-full py-2 px-4 rounded-full bg-transparent text-error font-label-md text-label-md hover:bg-error-container/40 transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+              Rejeter le signalement
+            </button>
+</div>
+</div>
+<!-- Encadré de Résilience OBLIGATOIRE -->
+<div class="mt-6 p-4 rounded bg-surface-container text-on-surface-variant space-y-2">
+<div class="flex items-center gap-2 text-on-surface font-label-sm text-label-sm uppercase tracking-wider font-bold">
+<span class="material-symbols-outlined text-[18px] text-primary">gavel</span>
+            Garantie de continuité de service
+          </div>
+<p class="font-body-sm text-xs leading-normal text-on-surface-variant">
+            La modération humaine et le contrôle manuel de Marcelle Dupont restent souverains et disponibles sans assistance IA à tout moment en cas de panne algorithmique.
+          </p>
+</div>
+</div>
+<!-- Module Média Multimodal Complémentaire : Écoute / Transcriptions -->
+<div class="p-5 rounded bg-surface-variant text-on-surface-variant shadow-sm space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">mic</span>
+<span class="font-title-md text-title-md text-on-surface">Vérification Vocale</span>
+</div>
+<span class="font-data-metric text-data-metric text-[11px] bg-surface-container-lowest px-2 py-0.5 rounded-full text-secondary">Podcast Campus</span>
+</div>
+<p class="font-body-sm text-body-sm">
+          Analyse automatique des canaux vocaux étudiants (Discord universitaire / Espaces collaboratifs audio).
+        </p>
+<!-- Waveform SVG visualizer -->
+<div class="p-3 bg-surface-container-lowest rounded-md flex items-center gap-2">
+<button class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</button>
+<div class="flex-1 flex items-center gap-1 h-6">
+<div class="w-1 bg-secondary rounded-full h-2"></div>
+<div class="w-1 bg-secondary rounded-full h-4"></div>
+<div class="w-1 bg-secondary rounded-full h-6"></div>
+<div class="w-1 bg-secondary rounded-full h-3"></div>
+<div class="w-1 bg-secondary rounded-full h-5"></div>
+<div class="w-1 bg-secondary rounded-full h-2"></div>
+<div class="w-1 bg-secondary-fixed rounded-full h-4"></div>
+<div class="w-1 bg-secondary-fixed rounded-full h-3"></div>
+<div class="w-1 bg-secondary-fixed rounded-full h-5"></div>
+<div class="w-1 bg-secondary-fixed rounded-full h-2"></div>
+</div>
+<span class="font-data-metric text-data-metric text-[11px] text-on-surface shrink-0">00:42 / 03:10</span>
+</div>
+</div>
+</aside>
+</div>
+<!-- Modal Caché : Création d'une Nouvelle Annonce Multimodale -->
+<div class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm hidden items-center justify-center p-4" data-modal id="broadcastModal">
+<div class="bg-surface-container-lowest rounded max-w-2xl w-full p-5 shadow-xl space-y-6 relative">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Diffusion Multimodale</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">+ Diffuser une annonce campus</h2>
+</div>
+<button class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors" data-modal-close id="closeBroadcastModal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="space-y-5" onsubmit="event.preventDefault(); window.portalToast('Annonce diffusée sur les canaux sélectionnés.'); window.portalCloseModal(this.closest('[data-modal]'));">
+<!-- Niveau d'urgence -->
+<div>
+<label class="font-label-md text-label-md text-on-surface block mb-2">Niveau de priorité &amp; type d'alerte</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<label class="flex items-center gap-2 p-3 rounded bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="accent-primary" name="priority" type="radio" value="normal"/>
+<span class="font-label-md text-label-md text-on-surface">Standard</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<input class="accent-tertiary" name="priority" type="radio" value="urgent"/>
+<span class="font-label-md text-label-md text-tertiary">Urgent (Bandeau)</span>
+</label>
+<label class="flex items-center gap-2 p-3 rounded bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<input class="accent-error" name="priority" type="radio" value="critical"/>
+<span class="font-label-md text-label-md text-error">Crise / Météo</span>
+</label>
+</div>
+</div>
+<!-- Titre -->
+<div>
+<label class="font-label-md text-label-md text-on-surface block mb-1.5" for="ann-title">Titre de l'annonce</label>
+<input class="w-full px-4 py-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary" id="ann-title" placeholder="Ex: Travaux d'infrastructure amphi Buffon..." type="text"/>
+</div>
+<!-- Contenu -->
+<div>
+<label class="font-label-md text-label-md text-on-surface block mb-1.5" for="ann-content">Corps du message</label>
+<textarea class="w-full px-4 py-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary" id="ann-content" placeholder="Précisez les consignes, les dates d'impact et les canaux de repli..." rows="4"></textarea>
+</div>
+<!-- Ciblage -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="font-label-md text-label-md text-on-surface block mb-1.5" for="target-campus">Campus ciblé</label>
+<select class="w-full px-4 py-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary" id="target-campus">
+<option>Tous les campus (Paris Cité Global)</option>
+<option>Campus Grands Moulins / Rive Gauche</option>
+<option>Campus Saint-Germain-des-Prés</option>
+<option>Campus Odéon</option>
+<option>Campus Boulogne</option>
+</select>
+</div>
+<div>
+<label class="font-label-md text-label-md text-on-surface block mb-1.5" for="target-audience">Population cible</label>
+<select class="w-full px-4 py-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary" id="target-audience">
+<option>Tous (Étudiants, Enseignants, BIATSS)</option>
+<option>Étudiants uniquement</option>
+<option>Corps Enseignant &amp; Chercheurs</option>
+<option>Personnels Administratifs</option>
+</select>
+</div>
+</div>
+<!-- Options Multimodales -->
+<div class="flex flex-wrap items-center gap-x-6 gap-y-3 pt-2 font-label-md text-label-md text-on-surface">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded accent-primary" type="checkbox"/>
+<span>Notification push mobile</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="rounded accent-primary" type="checkbox"/>
+<span>Envoi courriel institutionnel</span>
+</label>
+</div>
+<!-- Actions Modal -->
+<div class="flex flex-wrap items-center justify-end gap-3 pt-4 border-t-0" data-modal-actions>
+<button class="px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors" data-modal-close id="cancelModalBtn" type="button">
+            Annuler
+          </button>
+<button class="px-6 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-md hover:bg-primary-container transition-colors" type="submit">
+            Publier immédiatement
+          </button>
+</div>
+</form>
+</div>
+</div>
+</div></main>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Invitations &amp; Rôles — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Utilisateurs &amp; Organisation</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Invitations &amp; Rôles</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Invitez les nouveaux membres et contrôlez les permissions accordées à chaque rôle.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Invitations en attente exportées." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Campagne de rappel envoyée aux invitations en attente." type="button"><span class="material-symbols-outlined text-[18px]">notifications_active</span>Relancer les invitations</button>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Invitations en attente</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">mark_email_read</span></span></div><p class="font-data-metric text-[20px] font-bold mt-2 leading-none text-on-surface" data-invite-count>12</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">4 expirent sous 48 h</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Invitations acceptées</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">task_alt</span></span></div><p class="font-data-metric text-[20px] font-bold mt-2 leading-none text-on-surface">27</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">98 % de taux d'acceptation</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Rôles configurés</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-container text-secondary"><span class="material-symbols-outlined text-[20px]">admin_panel_settings</span></span></div><p class="font-data-metric text-[20px] font-bold mt-2 leading-none text-on-surface">4</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">Admin · Prof · Étudiant · Invité</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Permissions actives</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">key</span></span></div><p class="font-data-metric text-[20px] font-bold mt-2 leading-none text-on-surface">18</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">Réparties sur 4 rôles</p></article>
+</div>
+<div class="grid grid-cols-1 gap-5 xl:grid-cols-[400px_minmax(0,1fr)]">
+<section class="h-fit rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Inviter un membre</h2>
+<p class="text-xs text-on-surface-variant">Un lien sécurisé valable 7 jours sera envoyé.</p>
+</div>
+<form class="space-y-3 p-5" id="invite-form">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Adresse e-mail</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" id="invite-email" placeholder="prenom.nom@u-paris.fr" required type="email"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Rôle</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" id="invite-role"><option>Enseignant</option><option>Administration</option><option>Étudiant</option><option>Invité externe</option></select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Département</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary"><option>Informatique &amp; IA</option><option>Mathématiques appliquées</option><option>Réseaux &amp; Télécoms</option><option>Sciences des données</option></select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Message personnalisé</span><textarea class="min-h-24 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" placeholder="Ajoutez un message pour le destinataire…" rows="3"></textarea></label>
+<div class="border-t border-outline-variant/40 pt-4">
+<button class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">send</span>Envoyer l'invitation</button>
+</div>
+</form>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Invitations récentes</h2><p class="text-xs text-on-surface-variant">Les invitations expirent automatiquement après 7 jours.</p></div>
+<span class="rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant" data-invite-badge>12 en attente</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Destinataire</th><th class="px-5 py-3 font-bold">Rôle</th><th class="px-5 py-3 font-bold">Envoyée le</th><th class="px-5 py-3 font-bold">Expire le</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm" id="invite-rows">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">karim.haddad@u-paris.fr</p><p class="text-xs text-on-surface-variant">Réseaux &amp; Télécoms</p></td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Enseignant" tone_class="bg-primary-fixed text-primary" %}</td><td class="px-5 py-3 text-on-surface-variant">21 octobre 2026</td><td class="px-5 py-3 text-on-surface-variant">28 octobre 2026</td><td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap"><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation renvoyée à karim.haddad@u-paris.fr." type="button">Relancer</button><button class="text-xs font-bold text-error hover:underline" data-toast="Invitation révoquée." data-toast-type="info" type="button">Révoquer</button></div></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">nadia.kerkour@u-paris.fr</p><p class="text-xs text-on-surface-variant">Sciences des données</p></td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Enseignant" tone_class="bg-primary-fixed text-primary" %}</td><td class="px-5 py-3 text-on-surface-variant">20 octobre 2026</td><td class="px-5 py-3 text-on-surface-variant">27 octobre 2026</td><td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap"><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation renvoyée à nadia.kerkour@u-paris.fr." type="button">Relancer</button><button class="text-xs font-bold text-error hover:underline" data-toast="Invitation révoquée." data-toast-type="info" type="button">Révoquer</button></div></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">thomas.lefevre@etu.u-paris.fr</p><p class="text-xs text-on-surface-variant">Licence 3 Informatique</p></td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Étudiant" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td><td class="px-5 py-3 text-on-surface-variant">19 octobre 2026</td><td class="px-5 py-3 text-on-surface-variant">26 octobre 2026</td><td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap"><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation renvoyée à thomas.lefevre@etu.u-paris.fr." type="button">Relancer</button><button class="text-xs font-bold text-error hover:underline" data-toast="Invitation révoquée." data-toast-type="info" type="button">Révoquer</button></div></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">ines.bertrand@u-paris.fr</p><p class="text-xs text-on-surface-variant">Administration · Scolarité</p></td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Administration" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td><td class="px-5 py-3 text-on-surface-variant">17 octobre 2026</td><td class="px-5 py-3 text-on-surface-variant">24 octobre 2026</td><td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap"><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation renvoyée à ines.bertrand@u-paris.fr." type="button">Relancer</button><button class="text-xs font-bold text-error hover:underline" data-toast="Invitation révoquée." data-toast-type="info" type="button">Révoquer</button></div></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Matrice des rôles &amp; permissions</h2>
+<p class="text-xs text-on-surface-variant">Droits appliqués par défaut à chaque rôle de la plateforme.</p>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[820px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Permission</th><th class="px-5 py-3 text-center font-bold">Administration</th><th class="px-5 py-3 text-center font-bold">Enseignant</th><th class="px-5 py-3 text-center font-bold">Étudiant</th><th class="px-5 py-3 text-center font-bold">Invité</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Gérer les utilisateurs</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Créer des cours et exercices</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Saisir et signer des notes</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Consulter les relevés</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Participer aux forums</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Exporter les données de la plateforme</td><td class="px-5 py-3 text-center text-primary"><span class="material-symbols-outlined text-[20px]">check_circle</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td><td class="px-5 py-3 text-center text-outline"><span class="material-symbols-outlined text-[20px]">remove</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var form = document.getElementById('invite-form');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('invite-email');
+    var role = document.getElementById('invite-role');
+    var rows = document.getElementById('invite-rows');
+    if (!email || !rows) return;
+
+    var tr = document.createElement('tr');
+    tr.className = 'hover:bg-surface-container/40';
+    var tdMail = document.createElement('td');
+    tdMail.className = 'px-5 py-3';
+    var pEmail = document.createElement('p');
+    pEmail.className = 'font-semibold text-on-surface';
+    pEmail.textContent = email.value;
+    var pSub = document.createElement('p');
+    pSub.className = 'text-xs text-on-surface-variant';
+    pSub.textContent = 'Invitation à l\'instant';
+    tdMail.appendChild(pEmail); tdMail.appendChild(pSub);
+    var tdRole = document.createElement('td');
+    tdRole.className = 'px-5 py-3';
+    var badge = document.createElement('span');
+    badge.className = 'inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary';
+    badge.textContent = role ? role.value : 'Invité';
+    tdRole.appendChild(badge);
+    var tdSent = document.createElement('td');
+    tdSent.className = 'px-5 py-3 text-on-surface-variant';
+    tdSent.textContent = 'À l\'instant';
+    var tdExp = document.createElement('td');
+    tdExp.className = 'px-5 py-3 text-on-surface-variant';
+    tdExp.textContent = 'Dans 7 jours';
+    var tdActions = document.createElement('td');
+    tdActions.className = 'px-5 py-3 text-right';
+    tdActions.innerHTML = '<div class="flex justify-end gap-2 whitespace-nowrap"><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation renvoyée." type="button">Relancer</button><button class="text-xs font-bold text-error hover:underline" data-toast="Invitation révoquée." data-toast-type="info" type="button">Révoquer</button></div>';
+    tr.appendChild(tdMail); tr.appendChild(tdRole); tr.appendChild(tdSent); tr.appendChild(tdExp); tr.appendChild(tdActions);
+    rows.insertBefore(tr, rows.firstChild);
+
+    var counter = document.querySelector('[data-invite-count]');
+    if (counter) counter.textContent = String(parseInt(counter.textContent, 10) + 1);
+    var badgeCount = document.querySelector('[data-invite-badge]');
+    if (badgeCount) badgeCount.textContent = (parseInt(badgeCount.textContent, 10) + 1) + ' en attente';
+    form.reset();
+    window.portalToast('Invitation envoyée à ' + email.value + '.');
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,658 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Persévérance &amp; Tuteurs — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+<!-- EN-TÊTE DE SUPERVISION INSTITUTIONNELLE -->
+<div class="flex flex-col gap-5">
+<!-- Fil d'Ariane & Statut -->
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+        CAMPUS CENTRAL PARIS CITÉ • DISPOSITIF RÉUSSITE LICENCE/MASTER
+      </div>
+</div>
+<!-- Titre et Barre d'Actions Stratégiques -->
+<div class="flex flex-col xl:flex-row xl:items-end justify-between gap-5 pb-2">
+<div class="flex flex-col gap-2 max-w-3xl">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+          Persévérance Académique &amp; Gouvernance du Tutorat
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          Supervision institutionnelle des cohortes à risque, pilotage de l'attribution massive des enseignants référents et mesure d'impact des dispositifs de soutien pour l'ensemble des composantes de l'Université Paris Cité.
+        </p>
+</div>
+<!-- Actions Rapides -->
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-md text-label-md transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">auto_fix_high</span>
+<span>Attribution automatique équilibrée (IA)</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Exporter le bilan ministériel MESR</span>
+</button>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary font-label-md text-label-md shadow-md hover:shadow-lg hover:opacity-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+<span>Paramétrer les ratios d'encadrement</span>
+</button>
+</div>
+</div>
+</div>
+<!-- INDICATEURS CLÉS DE L'ÉTABLISSEMENT (4 KPIS HIERARCHISÉS) -->
+<section aria-label="Indicateurs de persévérance et encadrement" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- KPI 1 -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+<div class="flex items-center justify-between gap-3">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Taux de rétention L1 → L2</span>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">82.4%</span>
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric font-semibold text-secondary-container bg-secondary-fixed/50 px-2 py-0.5 rounded-full">
+            +4.1% vs N-1
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant/90 mt-1">
+          Dynamique mesurée post-déploiement du Hub Multimodal et des rappels de méthodologie.
+        </p>
+</div>
+<!-- Barre de progression institutionnelle -->
+<div class="mt-4 w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 82.4%"></div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between gap-3">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Étudiants avec référent actif</span>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">assignment_ind</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">90.5%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">(13 410 / 14 820)</span>
+</div>
+<div class="flex items-center gap-2 mt-1">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-data-metric text-data-metric font-semibold">
+            1 410 en attente
+          </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">d'affectation officielle</span>
+</div>
+</div>
+<div class="mt-4 w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-secondary" style="width: 90.5%"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between gap-3">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Fragilités méthodologiques</span>
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined text-[22px]">notification_important</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex items-baseline gap-3">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">214</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold uppercase px-2 py-0.5 rounded-full bg-tertiary-fixed">
+            Alertes précoces
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant/90 mt-1">
+          100% prises en charge par les équipes pédagogiques ou cellules d'écoute de composante.
+        </p>
+</div>
+<div class="mt-4 flex items-center gap-1.5 text-primary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>0 rupture de contact critique</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between gap-3">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Enseignants &amp; Tuteurs pairs</span>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">diversity_3</span>
+</div>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">825</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">mobilisés</span>
+</div>
+<div class="flex flex-col gap-0.5 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center justify-between">
+<span>Enseignants-chercheurs :</span>
+<strong class="font-data-metric text-on-surface">640</strong>
+</span>
+<span class="flex items-center justify-between">
+<span>Tuteurs pairs rémunérés :</span>
+<strong class="font-data-metric text-on-surface">185</strong>
+</span>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-2">
+<span class="w-full h-1.5 rounded-full bg-primary/20 overflow-hidden flex">
+<span class="h-full bg-primary" style="width: 77.5%"></span>
+<span class="h-full bg-secondary-container" style="width: 22.5%"></span>
+</span>
+</div>
+</div>
+</section>
+<!-- CARTES & GRAPHIQUE DE RÉPARTITION DU TUTORAT PAR UFR -->
+<section class="flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Répartition du Tutorat &amp; Charge par UFR</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Suivi de l'équilibre des ratios d'encadrement cibles (recommandation centrale : max 1:20 en Licence, 1:25 en Master).
+        </p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Année universitaire 2024-2025</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-data-metric text-data-metric text-primary font-semibold">Semestre 2</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+<!-- UFR Informatique -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface">UFR Informatique</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold uppercase">
+              Conforme
+            </span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+              1 240 étud.
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+              68 réf.
+            </span>
+</div>
+</div>
+<div class="mt-5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ratio moyen</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface bg-surface-container-low px-2 py-0.5 rounded-md">1 : 18</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Assignation</span>
+<span class="font-bold text-primary font-data-metric">98%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 98%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- UFR Mathématiques -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface">UFR Mathématiques</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold uppercase">
+              Conforme
+            </span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+              980 étud.
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+              54 réf.
+            </span>
+</div>
+</div>
+<div class="mt-5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ratio moyen</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface bg-surface-container-low px-2 py-0.5 rounded-md">1 : 18</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Assignation</span>
+<span class="font-bold text-primary font-data-metric">95%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 95%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- UFR Sciences Fondamentales (Surchauffe) -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow ring-1 ring-tertiary-fixed-dim/60">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface">Sciences Fondamentales</span>
+<span class="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-bold uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">warning</span>
+              Surchauffe
+            </span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+              1 450 étud.
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+              52 réf.
+            </span>
+</div>
+</div>
+<div class="mt-5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ratio moyen</span>
+<span class="font-data-metric text-data-metric font-bold text-error bg-error-container/30 px-2 py-0.5 rounded-md">1 : 28</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Assignation</span>
+<span class="font-bold text-tertiary font-data-metric">78%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-tertiary-container" style="width: 78%"></div>
+</div>
+</div>
+<p class="font-body-sm text-xs leading-tight text-on-tertiary-fixed-variant bg-tertiary-fixed/30 p-2 rounded mt-1">
+<strong>Recommandation :</strong> Ouverture immédiate de 12 contrats tuteurs pairs M1/M2.
+          </p>
+</div>
+</div>
+<!-- UFR Droit & Sciences Éco -->
+<div class="flex flex-col justify-between p-5 rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between gap-2">
+<span class="font-title-md text-title-md text-on-surface">Droit &amp; Sciences Éco</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold uppercase">
+              Sous tension
+            </span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span>
+              2 800 étud.
+            </span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">person</span>
+              110 réf.
+            </span>
+</div>
+</div>
+<div class="mt-5 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ratio moyen</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface bg-surface-container-low px-2 py-0.5 rounded-md">1 : 25</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Assignation</span>
+<span class="font-bold text-primary font-data-metric">89%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-primary" style="width: 89%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- GRILLE PRINCIPALE : TABLEAU DES COHORTES (GAUCHE) & VOLET IA (DROITE) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+<!-- COLONNE GAUCHE (8 COLONNES) : GESTION DES COHORTES & ATTRIBUTION MASSIVE -->
+<div class="xl:col-span-8 flex flex-col gap-5">
+<div class="p-5 md:p-8 rounded-3xl bg-surface-container-lowest shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[24px]">group_work</span>
+              Outil d'Attribution Massive des Référents
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Pilotage par cohorte, régulation des effectifs et affectation nominative certifiée.
+            </p>
+</div>
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>Filtres avancés</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">group_add</span>
+<span>Nouvelle cohorte</span>
+</button>
+</div>
+</div>
+<!-- Filtres Combinés Multi-critères -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-2xl bg-surface-container-low">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">UFR / Composante</label>
+<select class="w-full h-10 px-3 rounded-2xl bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
+<option value="all">Toutes les composantes</option>
+<option value="info">UFR Informatique</option>
+<option value="math">UFR Mathématiques</option>
+<option value="phys">UFR Sciences Fondamentales</option>
+<option value="droit">UFR Droit &amp; Eco</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cycle / Année</label>
+<select class="w-full h-10 px-3 rounded-2xl bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
+<option value="all">Tous cycles (L &amp; M)</option>
+<option value="l1">Licence 1 (Prioritaire)</option>
+<option value="l2">Licence 2</option>
+<option value="l3">Licence 3</option>
+<option value="m1">Master 1</option>
+<option value="m2">Master 2</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Niveau d'alerte</label>
+<select class="w-full h-10 px-3 rounded-2xl bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
+<option value="all">Tous niveaux d'alerte</option>
+<option value="high">Alerte critique &amp; décrochage</option>
+<option value="mid">Fragilité méthodologique</option>
+<option value="ok">Rythme conforme</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Statut d'attribution</label>
+<select class="w-full h-10 px-3 rounded-2xl bg-surface-container-lowest text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm">
+<option value="all">Tous statuts</option>
+<option value="pending">En attente d'affectation</option>
+<option value="partial">Partiellement attribué</option>
+<option value="done">100% Attribué</option>
+</select>
+</div>
+</div>
+<!-- Table Interactive & Accessible des Cohortes -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-4 rounded-l-xl">Cohorte &amp; Promotion</th>
+<th class="py-3 px-4">Effectif Total</th>
+<th class="py-3 px-4">Référents Mobilisés</th>
+<th class="py-3 px-4">Statut &amp; Couverture</th>
+<th class="py-3 px-4 text-right rounded-r-xl">Actions Rapides</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Ligne 1 : M1 IA -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">M1 Intelligence Artificielle</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">UFR Informatique • Promo 2024-2025</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="font-data-metric text-data-metric font-bold text-on-surface">142</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">inscrits</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-on-surface">
+<strong>Pr. H. Vasseur</strong> (28), <strong>Dr. C. Barthez</strong> (25), <strong>Pr. M. Delaunay</strong> (30)
+                    </span>
+<span class="font-data-metric text-xs text-on-surface-variant">+3 tuteurs pairs recherche</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+                    100% Attribué
+                  </span>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Consulter la liste nominative" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors" title="Modifier la répartition" type="button">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</td>
+</tr>
+<!-- Ligne 2 : L1 Portail Info-Maths -->
+<tr class="hover:bg-surface-container-low/50 transition-colors bg-surface-container-low/20">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">L1 Portail Info &amp; Mathématiques</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Campus Grands Moulins • Cohorte Socle</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="font-data-metric text-data-metric font-bold text-on-surface">420</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">étudiants</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-on-surface">18 enseignants-chercheurs</span>
+<span class="font-data-metric text-error text-xs font-semibold">60 étudiants en file d'attente</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold w-fit">
+<span class="material-symbols-outlined text-[16px] text-tertiary-container">pending</span>
+                      360 / 420 (85.7%)
+                    </span>
+<div class="w-24 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary" style="width: 85.7%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md text-xs shadow-sm transition-all whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                    Affecter aux 4 tuteurs vacataires
+                  </button>
+</td>
+</tr>
+<!-- Ligne 3 : L2 Physique-Chimie -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface">L2 Physique-Chimie</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">UFR Sciences Fondamentales • Tronc commun</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<span class="font-data-metric text-data-metric font-bold text-on-surface">210</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">étudiants</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="font-body-sm text-body-sm text-on-surface">11 enseignants assignés</span>
+<span class="font-body-sm text-xs text-tertiary font-medium">15 primo-entrants internationaux non assignés</span>
+</div>
+</td>
+<td class="py-4 px-4">
+<div class="flex flex-col gap-1">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-sm text-label-sm font-semibold w-fit">
+<span class="material-symbols-outlined text-[16px]">hourglass_top</span>
+                      195 / 210 (92.8%)
+                    </span>
+<div class="w-24 h-1.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 92.8%"></div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 text-right">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim font-label-md text-label-md text-xs transition-all whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[16px]">translate</span>
+                    Prioriser l'attribution bilingue
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 font-body-sm text-body-sm text-on-surface-variant">
+<span>Affichage de 3 cohortes prioritaires sur 34 répertoriées</span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm disabled:opacity-50" disabled="" type="button">Précédent</button>
+<span class="font-data-metric text-data-metric px-2 text-primary font-bold">1 / 12</span>
+<button class="px-3 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm" type="button">Suivant</button>
+</div>
+</div>
+</div>
+<!-- JOURNAL D'AUDIT, TRAÇABILITÉ & CONFORMITÉ RGPD / CNIL -->
+<div class="p-5 md:p-8 rounded-3xl bg-surface-container-lowest shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">policy</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">Registre de Conformité CNIL &amp; Déontologie de l'IA Éducative</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Conformité RGPD - Université Paris Cité / DSI Centrale</p>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface font-data-metric text-data-metric">
+            DPO Réf : UPC-2024-DPO-092
+          </span>
+</div>
+<div class="p-4 rounded-2xl bg-surface-container-low flex flex-col gap-2 font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified_user</span>
+<span>
+<strong>Traçabilité des alertes de vulnérabilité :</strong> Les données pédagogiques et temporelles utilisées pour déceler les ruptures d'engagement sont strictement pseudonymisées au niveau de l'arbitrage central. Aucun profilage comportemental ou psychologique n'est effectué.
+            </span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">timer</span>
+<span>
+<strong>Conservation &amp; purge automatisée :</strong> La durée de conservation des logs de signalement de fragilité méthodologique est limitée à l'année universitaire en cours (durée maximale : 300 jours), avec suppression définitive et archivage légal annuel le 31 août.
+            </span>
+</div>
+</div>
+</div>
+</div>
+<!-- COLONNE DROITE (4 COLONNES) : VOLET IA GOUVERNANCE & ÉQUILIBRAGE DES CHARGES -->
+<div class="xl:col-span-4 flex flex-col gap-5">
+<div class="p-5 md:p-8 rounded-3xl bg-surface-container-lowest shadow-md flex flex-col gap-5 relative overflow-hidden ring-2 ring-primary/10">
+<!-- Badge Décoratif & Titre -->
+<div class="flex items-start justify-between gap-3">
+<div class="flex flex-col gap-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider w-fit">
+<span class="material-symbols-outlined text-sm">psychology</span>
+              BÊTA MULTIMODALE
+            </div>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Assistant Persévérance IA</h3>
+</div>
+<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">balance</span>
+</div>
+</div>
+<!-- Objectif du Modèle -->
+<div class="p-4 rounded-2xl bg-surface-container-low flex flex-col gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Objectif du modèle</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium leading-relaxed">
+            Optimisation sous contraintes de la charge tutorale des enseignants et maximisation de l'adéquation disciplinaire selon le référentiel UPC.
+          </p>
+</div>
+<!-- Suggestion #612 Spécifique -->
+<div class="p-5 rounded-2xl bg-surface-container flex flex-col gap-4 relative">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">lightbulb</span>
+              Suggestion d'optimisation #612
+            </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-primary font-data-metric text-data-metric font-bold">
+              Pertinence : 96.4%
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+            Détection d'un déséquilibre de <strong>60 étudiants non attribués</strong> en L1 Portail Sciences face à <strong>3 enseignants sous-chargés</strong> en service d'enseignement (section CNU 27/26).
+          </p>
+<div class="p-3.5 rounded-xl bg-surface-container-lowest flex flex-col gap-2 font-body-sm text-body-sm text-on-surface">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Proposition formulée :</span>
+<ul class="flex flex-col gap-1.5 list-none">
+<li class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Répartition équilibrée de 20 étudiants chacun.</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Affectation de 2 tuteurs pairs M2 pour les TD de soutien.</span>
+</li>
+</ul>
+</div>
+<!-- Actions d'Arbitrage Obligatoires -->
+<div class="flex flex-col gap-2.5 pt-2">
+<button class="w-full py-3 px-4 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">thumb_up</span>
+              Valider l'attribution proposée
+            </button>
+<button class="w-full py-2.5 px-4 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-label-md shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+              Ajuster manuellement les quotas
+            </button>
+<button class="w-full py-2 text-center text-on-surface-variant hover:text-error font-body-sm text-body-sm transition-colors" type="button">
+              Refuser la proposition
+            </button>
+</div>
+</div>
+<!-- Sécurisation & Continuité de Service -->
+<div class="p-4 rounded-2xl bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-primary text-[20px]">lock</span>
+<span class="font-title-md text-title-md">Souveraineté décisionnelle</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            La scolarité centrale et le secrétariat général conservent la validation manuelle de toutes les affectations. L'outil reste pleinement opérationnel hors connexion IA avec un routage de secours par cohorte.
+          </p>
+</div>
+</div>
+<!-- ENSEIGNANTS RÉFÉRENTS DISPONIBLES (MODULE RAPIDE) -->
+<div class="p-5 rounded-3xl bg-surface-container-lowest shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h4 class="font-title-md text-title-md text-on-surface">Capacité d'Accueil Référents</h4>
+<span class="font-data-metric text-data-metric text-primary font-bold">142 places libres</span>
+</div>
+<div class="flex flex-col gap-3 font-body-sm text-body-sm">
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Dr. Alain Menet</span>
+<span class="text-on-surface-variant">Informatique Fondamentale</span>
+</div>
+<span class="font-data-metric text-data-metric text-secondary font-bold">Capacité : +15</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Pr. Sylvie Garnier</span>
+<span class="text-on-surface-variant">Statistiques Appliquées</span>
+</div>
+<span class="font-data-metric text-data-metric text-secondary font-bold">Capacité : +12</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Dr. Yanis Khelifi</span>
+<span class="text-on-surface-variant">Chimie Organique</span>
+</div>
+<span class="font-data-metric text-data-metric text-secondary font-bold">Capacité : +8</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main>
+{% endblock %}

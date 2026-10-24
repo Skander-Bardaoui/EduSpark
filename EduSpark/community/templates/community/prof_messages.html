@@ -1,0 +1,167 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Messagerie — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Échanges</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Messagerie</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Échangez avec vos étudiants, vos collègues et le service de scolarité.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#new-message-modal" type="button"><span class="material-symbols-outlined text-[18px]">edit_square</span>Nouveau message</button>
+</header>
+<section class="grid overflow-hidden rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm lg:grid-cols-[320px_minmax(0,1fr)]">
+<div class="border-b border-outline-variant/40 lg:border-b-0 lg:border-r">
+<div class="border-b border-outline-variant/40 p-4">
+<label class="relative block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary" data-thread-search placeholder="Rechercher une conversation..." type="search"/></label>
+</div>
+<div class="max-h-[520px] overflow-y-auto" id="prof-thread-list">
+<button class="flex w-full items-start gap-3 border-b border-outline-variant/30 bg-primary-fixed/30 px-4 py-3.5 text-left transition-colors hover:bg-surface-container/60" data-thread="p1" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">CM</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">Camille Martin</span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant">10:42</span></span><span class="mt-0.5 block text-xs text-on-surface-variant">Merci pour les précisions sur le TP 3.</span><span class="mt-1 flex items-center gap-2">{% include "portal/_badge.html" with label="Étudiante" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}<span class="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-on-primary">2</span></span></span>
+</button>
+<button class="flex w-full items-start gap-3 border-b border-outline-variant/30 px-4 py-3.5 text-left transition-colors hover:bg-surface-container/60" data-thread="p2" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-extrabold text-on-secondary">AM</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">Amadou Diallo</span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant">Hier</span></span><span class="mt-0.5 block text-xs text-on-surface-variant">Les notes du jury sont prêtes.</span><span class="mt-1">{% include "portal/_badge.html" with label="Collègue" tone_class="bg-surface-container text-on-surface-variant" %}</span></span>
+</button>
+<button class="flex w-full items-start gap-3 border-b border-outline-variant/30 px-4 py-3.5 text-left transition-colors hover:bg-surface-container/60" data-thread="p3" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-[11px] font-extrabold text-on-tertiary-fixed">SC</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">Service de scolarité</span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant">Lun.</span></span><span class="mt-0.5 block text-xs text-on-surface-variant">Convocations envoyées aux étudiants.</span><span class="mt-1">{% include "portal/_badge.html" with label="Service" tone_class="bg-primary-fixed text-primary" %}</span></span>
+</button>
+<button class="flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-container/60" data-thread="p4" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-[11px] font-extrabold text-on-surface-variant">M2</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">Groupe M2 Data</span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant">18 oct.</span></span><span class="mt-0.5 block text-xs text-on-surface-variant">Question sur les soutenances de mémoire.</span><span class="mt-1">{% include "portal/_badge.html" with label="Groupe" tone_class="bg-surface-container text-on-surface-variant" %}</span></span>
+</button>
+</div>
+</div>
+<div class="flex min-h-[520px] flex-col">
+<div class="hidden flex-1 flex-col" data-thread-panel="p1">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-3.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">CM</span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface">Camille Martin</p><p class="text-xs text-on-surface-variant">Étudiante · M1 Intelligence Artificielle</p></div>
+<span class="ml-auto flex items-center gap-1.5 text-[11px] font-semibold text-primary"><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>En ligne</span>
+</div>
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages>
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm"><p class="text-sm leading-relaxed text-on-surface">Bonjour Madame, je n'arrive pas à reproduire les résultats du TP 3 avec la graine aléatoire imposée. Dois-je utiliser la version 2 du jeu de données ?</p><p class="mt-1 text-right text-[11px] text-outline">10:18</p></div>
+<div class="ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm"><p class="text-sm leading-relaxed">Bonjour Camille, oui : la version 2 corrige les doublons. Pensez à réinitialiser le cache avant de relancer l'entraînement.</p><p class="mt-1 text-right text-[11px] text-white/60">10:31</p></div>
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm"><p class="text-sm leading-relaxed text-on-surface">Merci pour les précisions sur le TP 3 !</p><p class="mt-1 text-right text-[11px] text-outline">10:42</p></div>
+</div>
+</div>
+<div class="hidden flex-1 flex-col" data-thread-panel="p2">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-3.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-[11px] font-extrabold text-on-secondary">AD</span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface">Amadou Diallo</p><p class="text-xs text-on-surface-variant">Collègue · Informatique &amp; IA</p></div>
+</div>
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages>
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm"><p class="text-sm leading-relaxed text-on-surface">Bonjour Hélène, les notes du jury INF503 sont prêtes. Peux-tu vérifier les deux dossiers en attente avant la délibération ?</p><p class="mt-1 text-right text-[11px] text-outline">Hier · 16:05</p></div>
+<div class="ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm"><p class="text-sm leading-relaxed">Je m'en occupe demain matin. Les relevés sont-ils déjà signés côté scolarité ?</p><p class="mt-1 text-right text-[11px] text-white/60">Hier · 16:20</p></div>
+</div>
+</div>
+<div class="hidden flex-1 flex-col" data-thread-panel="p3">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-3.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary-fixed text-[11px] font-extrabold text-on-tertiary-fixed">SC</span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface">Service de scolarité</p><p class="text-xs text-on-surface-variant">Université Paris Cité</p></div>
+</div>
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages>
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm"><p class="text-sm leading-relaxed text-on-surface">Bonjour Madame Vasseur, les convocations pour les examens de la semaine 45 ont été envoyées aux étudiants. Les listes de présence sont disponibles.</p><p class="mt-1 text-right text-[11px] text-outline">Lundi · 09:15</p></div>
+<div class="ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm"><p class="text-sm leading-relaxed">Merci. J'ai ajouté le membre manquant du jury M2, la composition est désormais complète.</p><p class="mt-1 text-right text-[11px] text-white/60">Lundi · 09:32</p></div>
+</div>
+</div>
+<div class="hidden flex-1 flex-col" data-thread-panel="p4">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-3.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-high text-[11px] font-extrabold text-on-surface-variant">M2</span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface">Groupe M2 Data</p><p class="text-xs text-on-surface-variant">18 étudiants · Data Science</p></div>
+</div>
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages>
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm"><p class="text-xs font-bold text-secondary">Léa Fontaine</p><p class="mt-1 text-sm leading-relaxed text-on-surface">Bonjour Madame, pour les soutenances de mémoire, le support doit-il être déposé 48 h avant l'oral ?</p><p class="mt-1 text-right text-[11px] text-outline">18 oct. · 14:12</p></div>
+<div class="ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm"><p class="text-sm leading-relaxed">Oui, 48 h avant sur l'espace cours, en PDF. Le jury reçoit automatiquement la version déposée.</p><p class="mt-1 text-right text-[11px] text-white/60">18 oct. · 14:28</p></div>
+</div>
+</div>
+<form class="border-t border-outline-variant/40 bg-surface-container-lowest p-3" data-message-form>
+<div class="flex items-end gap-2">
+<label class="sr-only" for="prof-message-input">Votre message</label>
+<textarea class="max-h-32 min-h-[96px] flex-1 resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary" data-message-input id="prof-message-input" placeholder="Écrire un message..." rows="3"></textarea>
+<button aria-label="Envoyer" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[20px]">send</span></button>
+</div>
+<p class="mt-1.5 text-[11px] text-on-surface-variant">Réponse enregistrée dans votre espace enseignant.</p>
+</form>
+</div>
+</section>
+</div>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center p-4" data-modal id="new-message-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default bg-[#06164b]/50 backdrop-blur-sm" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Nouveau message</h2>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form class="space-y-4 p-5" id="new-message-form">
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Destinataire</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary"><option>Camille Martin</option><option>Amadou Diallo</option><option>Service de scolarité</option><option>Groupe M2 Data</option></select></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Objet</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary" placeholder="Objet du message" required type="text"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Message</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary" placeholder="Votre message..." required rows="4"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer</button></div>
+</form>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-thread]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('[data-thread-panel]'));
+  function openThread(key) {
+    buttons.forEach(function (btn) {
+      var on = btn.getAttribute('data-thread') === key;
+      btn.classList.toggle('bg-primary-fixed/30', on);
+    });
+    panels.forEach(function (panel) {
+      var on = panel.getAttribute('data-thread-panel') === key;
+      panel.classList.toggle('hidden', !on);
+      panel.classList.toggle('flex', on);
+    });
+  }
+  buttons.forEach(function (btn) { btn.addEventListener('click', function () { openThread(btn.getAttribute('data-thread')); }); });
+  openThread('p1');
+
+  var search = document.querySelector('[data-thread-search]');
+  if (search) search.addEventListener('input', function () {
+    var q = (search.value || '').toLowerCase();
+    buttons.forEach(function (btn) { btn.classList.toggle('hidden', btn.textContent.toLowerCase().indexOf(q) === -1); });
+  });
+
+  var form = document.querySelector('[data-message-form]');
+  if (form) form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = form.querySelector('[data-message-input]');
+    var text = (input.value || '').trim();
+    if (!text) return;
+    var panel = document.querySelector('[data-thread-panel].flex');
+    var messages = panel ? panel.querySelector('[data-thread-messages]') : null;
+    if (!messages) return;
+    var bubble = document.createElement('div');
+    bubble.className = 'ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm';
+    var p = document.createElement('p');
+    p.className = 'text-sm leading-relaxed';
+    p.textContent = text;
+    var time = document.createElement('p');
+    time.className = 'mt-1 text-right text-[11px] text-white/60';
+    time.textContent = 'À l\'instant';
+    bubble.appendChild(p); bubble.appendChild(time);
+    messages.appendChild(bubble);
+    messages.scrollTop = messages.scrollHeight;
+    input.value = '';
+  });
+
+  var newForm = document.getElementById('new-message-form');
+  if (newForm) newForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var modal = document.getElementById('new-message-modal');
+    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.classList.remove('portal-drawer-open'); }
+    newForm.reset();
+    window.portalToast('Message envoyé.');
+  });
+})();
+</script>
+{% endblock %}

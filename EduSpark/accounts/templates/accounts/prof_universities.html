@@ -1,0 +1,82 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Mes Universités — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Réseau académique</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Universités</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Établissements de rattachement, conventions et contacts institutionnels.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Votre demande de partenariat a été transmise." type="button">
+<span class="material-symbols-outlined text-[18px]">handshake</span>Demander un partenariat
+</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Universités rattachées" value="2" icon="account_balance" hint="Paris Cité · Sorbonne Paris Nord" %}
+{% include "portal/_stat_card.html" with label="Conventions actives" value="4" icon="description" icon_class="bg-surface-container text-secondary" hint="2 Erasmus+ · 2 bilatérales" %}
+{% include "portal/_stat_card.html" with label="Partenaires industriels" value="12" icon="corporate_fare" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="IA, data et cybersécurité" %}
+{% include "portal/_stat_card.html" with label="Mobilités en cours" value="3" icon="flight_takeoff" hint="1 sortante · 2 entrantes" %}
+</div>
+<section class="grid gap-4 lg:grid-cols-2">
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="flex h-12 w-12 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[24px]">account_balance</span></span>
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Université Paris Cité</h2><p class="text-xs text-on-surface-variant">Établissement principal · Faculté des Sciences</p></div>
+</div>
+{% include "portal/_badge.html" with label="Principal" tone_class="bg-primary-fixed text-primary" %}
+</div>
+<div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Département</p><p class="mt-1 text-sm font-semibold text-on-surface">Informatique &amp; IA</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Étudiants suivis</p><p class="mt-1 text-sm font-semibold text-on-surface">86 étudiants</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Contact RH</p><p class="mt-1 text-sm font-semibold text-on-surface">Mme Claire Dubois</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Bureau</p><p class="mt-1 text-sm font-semibold text-on-surface">B301 · Sophie Germain</p></div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2 border-t border-outline-variant/40 pt-4">
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Annuaire des contacts de Paris Cité ouvert." type="button"><span class="material-symbols-outlined text-[16px]">contacts</span>Annuaire</button>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3.5 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Convention Paris Cité téléchargée." type="button"><span class="material-symbols-outlined text-[16px]">download</span>Convention</button>
+</div>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="flex h-12 w-12 items-center justify-center rounded bg-secondary text-on-secondary"><span class="material-symbols-outlined text-[24px]">school</span></span>
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Sorbonne Paris Nord</h2><p class="text-xs text-on-surface-variant">Établissement partenaire · IUT Villetaneuse</p></div>
+</div>
+{% include "portal/_badge.html" with label="Partenaire" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+</div>
+<div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Département</p><p class="mt-1 text-sm font-semibold text-on-surface">Réseaux &amp; Télécoms</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Étudiants concernés</p><p class="mt-1 text-sm font-semibold text-on-surface">24 étudiants</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Contact</p><p class="mt-1 text-sm font-semibold text-on-surface">Pr. Karim Haddad</p></div>
+<div class="rounded bg-surface-container p-3"><p class="font-bold uppercase tracking-wider text-on-surface-variant">Convention</p><p class="mt-1 text-sm font-semibold text-on-surface">Erasmus+ · 2024 – 2027</p></div>
+</div>
+<div class="mt-4 flex flex-wrap gap-2 border-t border-outline-variant/40 pt-4">
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Message au Pr. Haddad ouvert." type="button"><span class="material-symbols-outlined text-[16px]">mail</span>Contacter</button>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3.5 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Avenant de convention téléchargé." type="button"><span class="material-symbols-outlined text-[16px]">download</span>Avenant</button>
+</div>
+</article>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Partenaires &amp; conventions</h2>
+<button class="text-xs font-bold text-primary hover:underline" data-toast="Liste complète des partenaires exportée." type="button">Exporter la liste</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Institution</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Domaine</th><th class="px-5 py-3 font-bold">Contact</th><th class="px-5 py-3 font-bold">Échéance</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Université Paris Cité</td><td class="px-5 py-3 text-on-surface-variant">Rattachement</td><td class="px-5 py-3 text-on-surface-variant">Informatique, IA</td><td class="px-5 py-3 text-on-surface-variant">C. Dubois</td><td class="px-5 py-3 text-on-surface-variant">31 août 2026</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Sorbonne Paris Nord</td><td class="px-5 py-3 text-on-surface-variant">Erasmus+</td><td class="px-5 py-3 text-on-surface-variant">Réseaux, télécoms</td><td class="px-5 py-3 text-on-surface-variant">K. Haddad</td><td class="px-5 py-3 text-on-surface-variant">30 juin 2027</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Université de Montréal</td><td class="px-5 py-3 text-on-surface-variant">Bilatérale</td><td class="px-5 py-3 text-on-surface-variant">Apprentissage machine</td><td class="px-5 py-3 text-on-surface-variant">L. Fortin</td><td class="px-5 py-3 text-on-surface-variant">31 décembre 2025</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À renouveler" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">INRIA Paris</td><td class="px-5 py-3 text-on-surface-variant">Recherche</td><td class="px-5 py-3 text-on-surface-variant">IA frugale</td><td class="px-5 py-3 text-on-surface-variant">M. Lemoine</td><td class="px-5 py-3 text-on-surface-variant">31 août 2025</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Capgemini Research</td><td class="px-5 py-3 text-on-surface-variant">Industriel</td><td class="px-5 py-3 text-on-surface-variant">IA générative</td><td class="px-5 py-3 text-on-surface-variant">A. Roche</td><td class="px-5 py-3 text-on-surface-variant">31 janvier 2026</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}
