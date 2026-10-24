@@ -1,0 +1,86 @@
+{% extends "users/base_app.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<div>
+  <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric mb-space-xs uppercase"><span class="material-symbols-outlined text-[14px]">space_dashboard</span><span>{{ current_role_label|default:"Espace personnel" }}</span></div>
+  <h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background tracking-tight">Bonjour <span class="text-tertiary font-serif italic">{{ user.first_name|default:user.email }}</span></h1>
+  <p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">{% if current_university %}Vous travaillez dans <strong class="text-on-surface">{{ current_university.name }}</strong>.{% else %}Aucune université active pour le moment.{% endif %}</p>
+</div>
+
+{% if pending_memberships %}
+<section class="p-space-md rounded-xl bg-tertiary-fixed/50 flex items-start gap-space-sm">
+  <span class="material-symbols-outlined text-tertiary">hourglass_top</span>
+  <div class="font-body-md text-body-md text-on-tertiary-fixed">
+    <p class="font-title-md text-title-md">Inscription en attente de validation</p>
+    <ul class="mt-1">{% for m in pending_memberships %}<li>{{ m.university }} — {{ m.get_role_display }}</li>{% endfor %}</ul>
+    <p class="font-body-sm text-body-sm mt-1">L'administration de votre université doit valider votre demande. Vous recevrez l'accès dès validation.</p>
+  </div>
+</section>
+{% endif %}
+
+{% if platform %}
+<section class="flex flex-col gap-space-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-background">Plateforme</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+    {% url 'users:university_list' as u_url %}{% include "users/partials/stat.html" with icon="account_balance" value=platform.universities label="Universités" url=u_url %}
+    {% include "users/partials/stat.html" with icon="check_circle" value=platform.active_universities label="Universités actives" url=u_url tone="bg-secondary-fixed text-on-secondary-fixed" %}
+    {% url 'users:account_list' as a_url %}{% include "users/partials/stat.html" with icon="manage_accounts" value=platform.accounts label="Comptes" url=a_url tone="bg-tertiary-fixed text-on-tertiary-fixed" %}
+    {% include "users/partials/stat.html" with icon="forward_to_inbox" value=platform.pending_invitations label="Invitations en attente" tone="bg-surface-container-high text-primary" %}
+  </div>
+  {% if not current_university %}
+  <div class="p-space-md rounded-xl bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+    <p class="font-body-md text-body-md text-on-surface-variant">Placez-vous dans une université pour gérer ses professeurs, étudiants, classes et invitations.</p>
+    <a href="{% url 'users:university_switch' %}" class="inline-flex items-center justify-center gap-space-xs px-space-md py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold"><span class="material-symbols-outlined text-[18px]">login</span>Choisir une université</a>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if stats %}
+<section class="flex flex-col gap-space-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-background">{{ current_university.name }}</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+    {% url 'users:professor_list' as p_url %}{% include "users/partials/stat.html" with icon="school" value=stats.professors label="Professeurs" url=p_url %}
+    {% if is_professor_or_admin %}{% url 'users:student_list' as s_url %}{% include "users/partials/stat.html" with icon="badge" value=stats.students label="Étudiants" url=s_url tone="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+    {% url 'users:class_list' as c_url %}{% include "users/partials/stat.html" with icon="groups" value=stats.classes label="Classes" url=c_url tone="bg-tertiary-fixed text-on-tertiary-fixed" %}
+    {% if is_university_admin %}{% url 'users:invitation_list' as i_url %}{% include "users/partials/stat.html" with icon="forward_to_inbox" value=stats.invitations label="Invitations en attente" url=i_url tone="bg-surface-container-high text-primary" %}{% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if to_validate %}
+<section class="flex flex-col gap-space-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-background">Inscriptions à valider <span class="font-data-metric text-data-metric text-on-surface-variant">({{ stats.pending }})</span></h2>
+  <ul class="flex flex-col divide-y divide-surface-container rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)]">
+    {% for m in to_validate %}
+    <li class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm p-space-md">
+      <div class="min-w-0"><p class="font-title-md text-title-md text-on-surface truncate">{{ m.user.display_name }}</p><p class="font-body-sm text-body-sm text-on-surface-variant truncate">{{ m.user.email }} · {{ m.get_role_display }} · {{ m.created_at|date:"d/m/Y" }}</p></div>
+      <form method="post" action="{% url 'users:membership_decide' m.pk %}" class="flex gap-space-sm shrink-0">{% csrf_token %}
+        <button name="decision" value="approve" class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">check</span>Valider</button>
+        <button name="decision" value="reject" class="inline-flex items-center gap-space-xs px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-error-container text-on-surface-variant hover:text-error font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">close</span>Refuser</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if my_classes %}
+<section class="flex flex-col gap-space-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-background">Mes classes</h2>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-space-md">{% for c in my_classes %}<a href="{% url 'users:class_detail' c.pk %}" class="p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] hover:shadow-[0_12px_32px_rgba(6,22,75,0.12)]"><p class="font-title-md text-title-md">{{ c.name }}</p><p class="font-body-sm text-body-sm text-on-surface-variant">{{ c.level }} · {{ c.program }} · {{ c.academic_year }}</p></a>{% endfor %}</div>
+</section>
+{% endif %}
+
+{% if my_groups %}
+<section class="flex flex-col gap-space-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-background">Mes groupes</h2>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-space-md">{% for g in my_groups %}<a href="{% url 'users:class_detail' g.school_class.pk %}" class="p-space-md rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] hover:shadow-[0_12px_32px_rgba(6,22,75,0.12)]"><p class="font-title-md text-title-md">{{ g.name }}</p><p class="font-body-sm text-body-sm text-on-surface-variant">{{ g.school_class }}</p></a>{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="p-space-md rounded-xl bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+  <div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span><p class="font-body-md text-body-md text-on-surface-variant">Complétez votre présentation : l'assistant IA peut vous proposer une bio à partir de votre profil.</p></div>
+  <a href="{% url 'users:profile' %}" class="inline-flex items-center justify-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md font-bold shadow-sm">Mon profil<span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+</section>
+{% endblock %}

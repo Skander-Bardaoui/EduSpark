@@ -1,0 +1,31 @@
+{% extends "users/base_app.html" %}
+{% block title %}Invitation — {{ invitation.email }}{% endblock %}
+{% block content %}
+{% include "users/partials/page_header.html" with title=invitation.email subtitle=invitation.get_role_display eyebrow="Invitation" icon="forward_to_inbox" %}
+<div class="flex flex-wrap gap-space-sm -mt-space-sm">
+  {% if invitation.status == "pending" %}
+  <form method="post" action="{% url 'users:invitation_action' invitation.pk 'renvoyer' %}">{% csrf_token %}<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold"><span class="material-symbols-outlined text-[18px]">send</span>Renvoyer (+7 jours)</button></form>
+  <a href="{% url 'users:invitation_update' invitation.pk %}" class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</a>
+  <form method="post" action="{% url 'users:invitation_action' invitation.pk 'revoquer' %}">{% csrf_token %}<button class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">block</span>Révoquer</button></form>
+  {% endif %}
+  <a href="{% url 'users:invitation_delete' invitation.pk %}" class="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg text-on-surface-variant hover:bg-error-container hover:text-error font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</a>
+</div>
+<section class="max-w-3xl p-space-lg rounded-xl bg-surface-container-lowest shadow-[0_8px_30px_rgba(6,22,75,0.06)] flex flex-col gap-space-md">
+  {% with inv=invitation %}
+  <dl class="grid grid-cols-[auto_1fr] gap-x-space-md gap-y-space-sm font-body-sm text-body-sm">
+    <dt class="text-on-surface-variant">Statut</dt><dd>{% include "users/invitations/_status.html" %}</dd>
+    <dt class="text-on-surface-variant">Rôle</dt><dd>{{ inv.get_role_display }}</dd>
+    <dt class="text-on-surface-variant">Invité par</dt><dd>{{ inv.invited_by.display_name|default:"—" }}</dd>
+    <dt class="text-on-surface-variant">Créée le</dt><dd>{{ inv.created_at|date:"d/m/Y H:i" }}</dd>
+    <dt class="text-on-surface-variant">Expire le</dt><dd>{{ inv.expires_at|date:"d/m/Y H:i" }}</dd>
+    {% if inv.accepted_at %}<dt class="text-on-surface-variant">Acceptée le</dt><dd>{{ inv.accepted_at|date:"d/m/Y H:i" }} par {{ inv.accepted_by.display_name|default:"—" }}</dd>{% endif %}
+  </dl>
+  {% if inv.message %}<blockquote class="p-space-md rounded-lg bg-surface-container-low font-body-md text-body-md whitespace-pre-line">{{ inv.message }}</blockquote>{% endif %}
+  {% if inv.is_usable %}
+  <div class="flex flex-col gap-1"><label for="invite-link" class="font-label-md text-label-md">Lien d'invitation (à partager si l'e-mail n'arrive pas)</label>
+    <div class="flex gap-space-sm"><input id="invite-link" readonly value="{{ link }}" class="flex-1 min-w-0 px-4 py-2.5 bg-surface-container-low rounded-lg font-data-metric text-data-metric outline-none"/><button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('invite-link').value);this.textContent='Copié';" class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md">Copier</button></div>
+  </div>
+  {% endif %}
+  {% endwith %}
+</section>
+{% endblock %}

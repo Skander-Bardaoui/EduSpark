@@ -1,0 +1,80 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr"><head>{% include "users/partials/head.html" %}<title>{% block title %}Espace{% endblock %} — EduSpark</title></head>
+<body class="min-h-screen bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed">
+<a href="#contenu-principal" class="sr-only skip-link">Aller au contenu principal</a>
+{% with url_name=request.resolver_match.url_name|default:"" %}
+<header class="fixed top-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+  <div class="h-16 w-full px-margin-mobile md:px-gutter flex items-center justify-between gap-space-md">
+    <div class="flex items-center gap-space-sm min-w-0">
+      <button type="button" id="nav-toggle" class="lg:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low" aria-label="Ouvrir le menu" aria-controls="app-nav" aria-expanded="false">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <a class="flex items-center gap-space-sm shrink-0" href="{% url 'landing:index' %}">
+        <img src="{% static 'landing/img/logo.png' %}" alt="EduSpark logo" width="256" height="256" class="w-9 h-9 rounded-lg object-cover shadow-[0_4px_16px_-2px_rgba(0,88,190,0.35)]"/>
+        <div class="hidden sm:flex flex-col"><img src="{% static 'landing/img/eduspark.png' %}" alt="EduSpark" width="512" height="79" class="h-5 w-auto object-contain object-left"/><span class="font-label-sm text-label-sm text-tertiary -mt-0.5 font-semibold uppercase tracking-wider">Spark your Potential</span></div>
+      </a>
+    </div>
+    <div class="flex items-center gap-space-sm min-w-0">
+      {% if current_university %}
+        {% if can_switch_university %}
+        <a href="{% url 'users:university_switch' %}" class="inline-flex items-center gap-space-xs max-w-[14rem] px-space-md py-space-xs rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors" title="Changer d'université">
+          <span class="material-symbols-outlined text-primary text-[18px]">account_balance</span><span class="truncate">{{ current_university.name }}</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">unfold_more</span>
+        </a>
+        {% else %}
+        <span class="inline-flex items-center gap-space-xs max-w-[14rem] px-space-md py-space-xs rounded-full bg-surface-container text-on-surface font-label-md text-label-md"><span class="material-symbols-outlined text-primary text-[18px]">account_balance</span><span class="truncate">{{ current_university.name }}</span></span>
+        {% endif %}
+      {% elif is_platform_admin %}
+        <a href="{% url 'users:university_switch' %}" class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">add_location_alt</span><span class="hidden sm:inline">Choisir une université</span></a>
+      {% endif %}
+      <div class="hidden md:flex flex-col items-end leading-tight">
+        <span class="font-label-md text-label-md text-on-surface truncate max-w-[12rem]">{{ user.display_name }}</span>
+        {% if current_role_label %}<span class="font-data-metric text-data-metric text-primary uppercase">{{ current_role_label }}</span>{% endif %}
+      </div>
+      <a class="inline-flex items-center justify-center gap-space-xs px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-[0_4px_14px_rgba(0,88,190,0.35)] hover:bg-primary-container transition-colors" href="{% url 'users:logout' %}"><span class="material-symbols-outlined text-[18px]">logout</span><span class="hidden sm:inline">Déconnexion</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="flex-1 w-full pt-16 flex">
+  <nav id="app-nav" aria-label="Navigation principale" class="hidden lg:flex fixed lg:sticky top-16 left-0 z-40 h-[calc(100vh-4rem)] w-72 lg:w-64 shrink-0 flex-col gap-space-xs overflow-y-auto bg-surface-container-low p-space-md border-r border-outline-variant/30">
+    {% include "users/partials/nav_link.html" with url_target="users:dashboard" icon="space_dashboard" label="Tableau de bord" match="dashboard" %}
+    {% include "users/partials/nav_link.html" with url_target="users:profile" icon="person" label="Mon profil" match="profile" %}
+
+    {% if current_university %}
+    <p class="mt-space-md px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Mon université</p>
+    {% include "users/partials/nav_link.html" with url_target="users:professor_list" icon="school" label="Professeurs" match="professor" %}
+    {% if is_professor_or_admin %}{% include "users/partials/nav_link.html" with url_target="users:student_list" icon="badge" label="Étudiants" match="student" %}{% endif %}
+    {% include "users/partials/nav_link.html" with url_target="users:class_list" icon="groups" label="Classes & groupes" match="class" match2="group" %}
+    {% if is_university_admin %}{% include "users/partials/nav_link.html" with url_target="users:invitation_list" icon="forward_to_inbox" label="Invitations" match="invitation" %}{% endif %}
+    <a href="{% url 'users:university_detail' current_university.pk %}" class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">info</span>Fiche université</a>
+    {% endif %}
+
+    {% if is_platform_admin %}
+    <p class="mt-space-md px-space-sm font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Plateforme</p>
+    {% include "users/partials/nav_link.html" with url_target="users:university_list" icon="account_balance" label="Universités" match="university_list" match2="university_create" %}
+    {% include "users/partials/nav_link.html" with url_target="users:account_list" icon="manage_accounts" label="Comptes" match="account" %}
+    <a href="{% url 'admin:index' %}" class="flex items-center gap-space-sm px-space-sm py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>Back-office Django</a>
+    {% endif %}
+  </nav>
+
+  <main id="contenu-principal" class="flex-1 min-w-0 px-margin-mobile md:px-margin py-space-lg md:py-space-xl">
+    <div class="max-w-6xl mx-auto flex flex-col gap-space-lg">
+      {% if messages %}<div class="flex flex-col gap-2" role="status">{% for message in messages %}<div class="p-3 rounded-lg font-label-md text-label-md flex items-start gap-space-sm {% if message.tags == 'success' %}bg-surface-container-high text-primary{% elif message.tags == 'error' %}bg-error-container text-on-error-container{% else %}bg-tertiary-fixed/60 text-on-tertiary-fixed{% endif %}"><span class="material-symbols-outlined text-[20px]">{% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' %}error{% else %}info{% endif %}</span><span>{{ message }}</span></div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endwith %}
+<footer class="w-full bg-surface-container-low py-space-md"><div class="w-full px-margin-mobile md:px-margin flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm"><span>© 2025 EduSpark — Hub Éducatif &amp; Créatif Multimodal.</span><span class="font-data-metric text-data-metric">{% if current_university %}{{ current_university.code|default:current_university.name }}{% else %}EduSpark{% endif %}</span></div></footer>
+<script>
+(function () {
+  var btn = document.getElementById('nav-toggle'), nav = document.getElementById('app-nav');
+  if (btn && nav) btn.addEventListener('click', function () {
+    var open = nav.classList.toggle('hidden') === false;
+    nav.classList.toggle('flex', open);
+    btn.setAttribute('aria-expanded', open);
+  });
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body></html>
