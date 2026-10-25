@@ -1,0 +1,33 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Bilan de langue — {{ student_name }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent · Tests de langue</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Bilan de {{ student_name }}</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Rapport d’expression orale généré le {{ created_label }}.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'coaching:prof_followup' %}"><span class="material-symbols-outlined text-[18px]">monitoring</span>Tableau de bord suivi</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ list_url }}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Tous les tests</a>
+</div>
+</header>
+<section class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+<div class="flex items-center gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-[12px] font-extrabold text-on-primary">{{ initials }}</span>
+<div>
+<p class="font-title-md text-title-md text-on-surface">{{ student_name }}</p>
+<p class="text-xs text-on-surface-variant">N° {{ student_number }} · {{ class_name }}</p>
+</div>
+</div>
+<div class="flex flex-wrap gap-4 text-xs text-on-surface-variant">
+<span><span class="font-bold text-on-surface">{{ exam_name }}</span> · {{ language_label }}</span>
+<span>Passé le <span class="font-bold text-on-surface">{{ started_label }}</span></span>
+</div>
+</section>
+{% include "coaching/_language_test_result.html" with candidate_label="Étudiant" %}
+</div>
+</main>
+{% endblock %}

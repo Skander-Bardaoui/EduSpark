@@ -11,128 +11,52 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:prof_followup' %}"><span class="material-symbols-outlined text-[18px]">monitoring</span>Tableau de bord étudiants</a>
-<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Les fiches de suivi ont été exportées au format PDF." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter les fiches</button>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ export_url }}"><span class="material-symbols-outlined text-[18px]">download</span>Exporter les fiches</a>
 <button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#new-fiche-modal" type="button"><span class="material-symbols-outlined text-[18px]">note_add</span>Nouvelle fiche</button>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Fiches actives</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">person_search</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface" data-fiches-active>12</p><p class="mt-2 text-xs text-on-surface-variant">Suivis ouverts sur le semestre</p></article>
-<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Vigilance haute</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[20px]">warning</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-error">3</p><p class="mt-2 text-xs text-on-surface-variant">Intervention recommandée sous 48 h</p></article>
-<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Accompagnements en cours</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[20px]">handshake</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">7</p><p class="mt-2 text-xs text-on-surface-variant">Plans d'action validés avec l'étudiant</p></article>
-<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Clôturées (30 j)</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">task_alt</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">5</p><p class="mt-2 text-xs text-on-surface-variant">Objectifs atteints · sortie de suivi</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Fiches actives</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">person_search</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface" data-fiches-active>{{ active_count }}</p><p class="mt-2 text-xs text-on-surface-variant">Suivis ouverts sur le semestre</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Vigilance haute</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[20px]">warning</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-error">{{ high_count }}</p><p class="mt-2 text-xs text-on-surface-variant">Intervention recommandée sous 48 h</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Accompagnements en cours</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[20px]">handshake</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ in_progress_count }}</p><p class="mt-2 text-xs text-on-surface-variant">Plans d'action validés avec l'étudiant</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Clôturées (30 j)</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">task_alt</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ closed_recent }}</p><p class="mt-2 text-xs text-on-surface-variant">Objectifs atteints · sortie de suivi</p></article>
 </div>
 <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
 <section class="flex flex-col gap-4 xl:col-span-8" data-fiche-scope>
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 <div>
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Fiches de difficulté</h2>
-<p class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface" data-fiche-count>6</span> fiches affichées · promotion 2026 – 2027</p>
+<p class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface" data-fiche-count>{{ sheet_rows|length }}</span> fiches affichées · promotion 2026 – 2027</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-fiche-chip="all" type="button">Toutes</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="methodologie" type="button">Méthodologie</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="assiduite" type="button">Assiduité</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="charge" type="button">Charge de travail</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="methodology" type="button">Méthodologie</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="attendance" type="button">Assiduité</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="workload" type="button">Charge de travail</button>
 <button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-fiche-chip="orientation" type="button">Orientation</button>
 </div>
 </div>
 <div class="grid gap-4 md:grid-cols-2">
-<article class="flex flex-col gap-3 rounded border border-error/30 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="methodologie assiduite">
+{% for row in sheet_rows %}
+<article class="flex flex-col gap-3 rounded border {{ row.severity.border }} bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="{{ row.category_tags }}">
 <div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-error-container text-sm font-extrabold text-on-error-container">LM</span><div><h3 class="font-title-md text-title-md text-on-surface">Lucas Moreau</h3><p class="text-xs text-on-surface-variant">INE 0834190281M · M1 Informatique &amp; IA</p></div></div>
-{% include "portal/_badge.html" with label="Vigilance haute" tone_class="bg-error-container text-on-error-container" %}
+<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ row.severity.badge }} text-sm font-extrabold">{{ row.initials }}</span><div><h3 class="font-title-md text-title-md text-on-surface">{{ row.student_name }}</h3><p class="text-xs text-on-surface-variant">INE {{ row.student_number }} · {{ row.student_program }}</p></div></div>
+{% include "portal/_badge.html" with label=row.severity.label tone_class=row.severity.badge %}
 </div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Blocage méthodologique sur la rétropropagation et devoir maison #3 non rendu. Deux absences consécutives en laboratoire.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-error-container/20 p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-error">10,2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-error">72 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-error">1/3</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
+<p class="text-sm leading-relaxed text-on-surface-variant">{{ row.sheet.observation }}</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded {{ row.severity.box }} p-3 text-center">
+<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.average_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
+<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.attendance_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
+<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.assignments_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
 </div>
 <div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Dernier échange : il y a 22 jours</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Lucas Moreau" data-fiche-info="M1 Informatique &amp; IA · INE 0834190281M" data-fiche-issue="Blocage méthodologique sur la rétropropagation, devoir maison #3 non rendu et deux absences en laboratoire GPU." data-fiche-plan="Séance de déblocage de 30 min sur le calcul différentiel matriciel, binôme tuteur avec Alexandre Chen et point hebdomadaire le jeudi." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Lucas Moreau." type="button">Plan d'action</button></div>
+<span class="text-[11px] text-on-surface-variant">{{ row.sheet.get_status_display }} · {{ row.category_label }} · {{ row.last_contact_label }}</span>
+<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-modal-open="#fiche-detail-modal" data-note-url="{{ row.note_url }}" data-fiche-name="{{ row.student_name }}" data-fiche-info="{{ row.student_program }} · INE {{ row.student_number }}" data-fiche-issue="{{ row.sheet.observation }}" data-fiche-plan="{{ row.sheet.action_plan|default:'Aucun plan d’action consigné.' }}" type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-fiche-plan-open data-modal-open="#fiche-plan-modal" data-plan-url="{{ row.plan_url }}" data-plan-name="{{ row.student_name }}" data-plan-value="{{ row.sheet.action_plan }}" type="button">Plan d'action</button></div>
 </div>
 </article>
-<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="assiduite charge">
-<div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-sm font-extrabold text-on-tertiary-fixed">JV</span><div><h3 class="font-title-md text-title-md text-on-surface">Julien Vasseur</h3><p class="text-xs text-on-surface-variant">INE 0612984102P · L3 Mathématiques-Informatique</p></div></div>
-{% include "portal/_badge.html" with label="Vigilance modérée" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
-</div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Régularité des révisions en baisse : 6 h hebdomadaires déclarées contre 15 h recommandées en L3. Charge professionnelle en parallèle.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-on-surface">11,5</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-tertiary">84 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-on-surface">2/3</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
-</div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Relance envoyée le 14 novembre</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Julien Vasseur" data-fiche-info="L3 Mathématiques-Informatique · INE 0612984102P" data-fiche-issue="Baisse de la régularité de travail et charge professionnelle concurrente des études." data-fiche-plan="Entretien méthodologique, aménagement du planning de révision et orientation vers le service d'accompagnement." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Julien Vasseur." type="button">Plan d'action</button></div>
-</div>
-</article>
-<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="methodologie orientation">
-<div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary-fixed text-sm font-extrabold text-on-secondary-fixed">SB</span><div><h3 class="font-title-md text-title-md text-on-surface">Sarah Benali</h3><p class="text-xs text-on-surface-variant">INE 203984712S · M1 Neurosciences computationnelles</p></div></div>
-{% include "portal/_badge.html" with label="Vigilance haute" tone_class="bg-error-container text-on-error-container" %}
-</div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Difficultés à articuler projet de recherche et exigences du mémoire. Inquiétude exprimée lors de l'entretien de mi-semestre.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-error-container/20 p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-error">9,8</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-on-surface">91 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-error">1/2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Livrables</p></div>
-</div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Entretien à planifier cette semaine</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Sarah Benali" data-fiche-info="M1 Neurosciences computationnelles · INE 203984712S" data-fiche-issue="Difficulté à articuler le projet de recherche et les exigences rédactionnelles du mémoire." data-fiche-plan="Atelier de méthodologie de la recherche, relecture du plan de mémoire et rencontre avec le directeur de recherche." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Sarah Benali." type="button">Plan d'action</button></div>
-</div>
-</article>
-<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="charge">
-<div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-sm font-extrabold text-primary">AC</span><div><h3 class="font-title-md text-title-md text-on-surface">Amine Cherif</h3><p class="text-xs text-on-surface-variant">INE 172938402K · M2 Sciences des données</p></div></div>
-{% include "portal/_badge.html" with label="Vigilance modérée" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
-</div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Surcharge entre le projet de fin d'études et la recherche de stage. Risque de décrochage sur l'UE INF504.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-on-surface">12,1</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-tertiary">87 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-on-surface">2/3</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
-</div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Dernier échange : il y a 5 jours</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Amine Cherif" data-fiche-info="M2 Sciences des données · INE 172938402K" data-fiche-issue="Surcharge de travail entre projet de fin d'études et recherche de stage." data-fiche-plan="Priorisation des livrables, échelonnement du projet et point de suivi avec le responsable de M2." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Amine Cherif." type="button">Plan d'action</button></div>
-</div>
-</article>
-<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="orientation">
-<div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-sm font-extrabold text-on-tertiary-fixed">FM</span><div><h3 class="font-title-md text-title-md text-on-surface">Fatima Mansouri</h3><p class="text-xs text-on-surface-variant">INE 112938467F · L2 Informatique</p></div></div>
-{% include "portal/_badge.html" with label="Suivi régulier" tone_class="bg-surface-container text-on-surface-variant" %}
-</div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Doute sur l'orientation vers la filière données. Résultats corrects mais motivation en baisse sur les UE théoriques.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-surface-container-low p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-on-surface">12,8</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-on-surface">94 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-on-surface">3/3</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
-</div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Entretien d'orientation réalisé</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Fatima Mansouri" data-fiche-info="L2 Informatique · INE 112938467F" data-fiche-issue="Questionnement sur l'orientation vers la filière données et baisse de motivation sur les UE théoriques." data-fiche-plan="Entretien d'orientation approfondi, immersion dans un projet données et rencontre avec des étudiants de M1." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Fatima Mansouri." type="button">Plan d'action</button></div>
-</div>
-</article>
-<article class="flex flex-col gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="methodologie assiduite">
-<div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-error-container text-sm font-extrabold text-on-error-container">ID</span><div><h3 class="font-title-md text-title-md text-on-surface">Inès Diallo</h3><p class="text-xs text-on-surface-variant">INE 091283740I · L1 Sciences exactes</p></div></div>
-{% include "portal/_badge.html" with label="Vigilance haute" tone_class="bg-error-container text-on-error-container" %}
-</div>
-<p class="text-sm leading-relaxed text-on-surface-variant">Absences répétées en TD de mathématiques et difficultés d'adaptation à la charge de travail du premier semestre.</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded bg-error-container/20 p-3 text-center">
-<div><p class="font-data-metric text-base font-bold text-error">8,4</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold text-error">64 %</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold text-error">0/2</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
-</div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">Fiche créée il y a 3 jours</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-fiche-name="Inès Diallo" data-fiche-info="L1 Sciences exactes · INE 091283740I" data-fiche-issue="Absences répétées en TD de mathématiques et difficultés d'adaptation à la charge de travail." data-fiche-plan="Contact avec la scolarité, plan de rattrapage des TD manqués et rendez-vous avec le référent L1." type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Plan d'accompagnement proposé à Inès Diallo." type="button">Plan d'action</button></div>
-</div>
-</article>
+{% empty %}
+<article class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest p-5 text-center text-sm text-on-surface-variant md:col-span-2">Aucune fiche de difficulté pour le moment.</article>
+{% endfor %}
 </div>
 <p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-fiche-empty>Aucune fiche ne correspond à ce type de difficulté.</p>
 </section>
@@ -140,10 +64,11 @@
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Répartition des difficultés</h2>
 <div class="mt-3 space-y-3 text-sm">
-<div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Méthodologie</span><span class="font-bold text-on-surface">38 %</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:38%"></div></div></div>
-<div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Assiduité</span><span class="font-bold text-on-surface">27 %</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-error" style="width:27%"></div></div></div>
-<div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Charge de travail</span><span class="font-bold text-on-surface">21 %</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:21%"></div></div></div>
-<div><div class="flex items-center justify-between"><span class="text-on-surface-variant">Orientation</span><span class="font-bold text-on-surface">14 %</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-secondary" style="width:14%"></div></div></div>
+{% for item in distribution %}
+<div><div class="flex items-center justify-between"><span class="text-on-surface-variant">{{ item.label }}</span><span class="font-bold text-on-surface">{{ item.percent }} %</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full {{ item.bar }}" style="width: {{ item.percent }}%"></div></div></div>
+{% empty %}
+<p class="text-xs text-on-surface-variant">Aucune donnée disponible.</p>
+{% endfor %}
 </div>
 </section>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
@@ -158,9 +83,11 @@
 <section class="rounded border border-outline-variant/40 bg-secondary-fixed/30 p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Prochains rendez-vous</h2>
 <ul class="mt-3 space-y-2.5 text-sm">
-<li class="flex items-center justify-between"><span class="text-on-surface-variant">Lucas Moreau</span><span class="font-data-metric text-xs font-bold text-secondary">Jeu. 14 h 00</span></li>
-<li class="flex items-center justify-between"><span class="text-on-surface-variant">Sarah Benali</span><span class="font-data-metric text-xs font-bold text-secondary">Jeu. 15 h 30</span></li>
-<li class="flex items-center justify-between"><span class="text-on-surface-variant">Inès Diallo</span><span class="font-data-metric text-xs font-bold text-secondary">Ven. 10 h 00</span></li>
+{% for item in next_appointments %}
+<li class="flex items-center justify-between"><span class="text-on-surface-variant">{{ item.name }}</span><span class="font-data-metric text-xs font-bold text-secondary">{{ item.when }}</span></li>
+{% empty %}
+<li class="text-xs text-on-surface-variant">Aucun rendez-vous confirmé à venir.</li>
+{% endfor %}
 </ul>
 <a class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full bg-surface-container-lowest px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-white" href="{% url 'coaching:prof_tutoring' %}">Gérer les rendez-vous<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
 </section>
@@ -175,12 +102,27 @@
 <div><h2 class="font-headline-sm text-headline-sm text-on-surface" data-fiche-modal-name>Fiche de suivi</h2><p class="text-xs text-on-surface-variant" data-fiche-modal-info></p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<div class="space-y-4 p-5">
+<form class="space-y-4 p-5" data-fiche-note-form data-validate-form method="post" action="{% if sheet_rows %}{{ sheet_rows.0.note_url }}{% endif %}" novalidate>
+{% csrf_token %}
 <div class="rounded bg-surface-container-low p-4"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Constat pédagogique</p><p class="mt-1 text-sm leading-relaxed text-on-surface" data-fiche-modal-issue></p></div>
 <div class="rounded bg-primary-fixed/40 p-4"><p class="text-[11px] font-bold uppercase tracking-wide text-primary">Plan d'accompagnement proposé</p><p class="mt-1 text-sm leading-relaxed text-on-surface" data-fiche-modal-plan></p></div>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Note de suivi</span><textarea class="min-h-16 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" placeholder="Ajouter une observation après l'entretien…"></textarea></label>
-<div class="flex justify-end gap-2"><button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Fermer</button><button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" data-fiche-save type="button"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer le suivi</button></div>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Note de suivi</span><textarea class="min-h-16 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Saisissez une note de suivi." maxlength="2000" minlength="5" name="note" placeholder="Ajouter une observation après l'entretien…" required></textarea></label>
+<div class="flex justify-end gap-2"><button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Fermer</button><button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer le suivi</button></div>
+</form>
 </div>
+</div>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="fiche-plan-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Plan d'action</h2><p class="text-xs text-on-surface-variant" data-plan-modal-name></p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="space-y-4 p-5" data-fiche-plan-form data-validate-form method="post" action="{% if sheet_rows %}{{ sheet_rows.0.plan_url }}{% endif %}" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Plan d'accompagnement</span><textarea class="min-h-24 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Rédigez le plan d'action." maxlength="2000" minlength="5" name="action_plan" placeholder="Objectifs mesurables, ressources et étapes…" required rows="5"></textarea></label>
+<div class="flex justify-end gap-2"><button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button><button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer le plan</button></div>
+</form>
 </div>
 </div>
 <div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="new-fiche-modal">
@@ -190,10 +132,11 @@
 <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvelle fiche de difficulté</h2><p class="text-xs text-on-surface-variant">La fiche sera visible par l'équipe de suivi référent.</p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<form class="grid gap-3 p-5" data-new-fiche-form>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Étudiant</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus><option>Lucas Moreau · M1 Informatique &amp; IA</option><option>Sarah Benali · M1 Neurosciences</option><option>Julien Vasseur · L3 Mathématiques-Informatique</option><option>Amine Cherif · M2 Sciences des données</option><option>Inès Diallo · L1 Sciences exactes</option></select></label>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Type de difficulté</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary"><option>Méthodologie</option><option>Assiduité</option><option>Charge de travail</option><option>Orientation</option></select></label>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Constat</span><textarea class="min-h-20 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" placeholder="Décrire les faits observés et les premiers indicateurs…" required></textarea></label>
+<form class="grid gap-3 p-5" data-validate-form method="post" action="{% url 'coaching:prof_sheet_create' %}" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Étudiant</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Sélectionnez un étudiant." name="student" required>{% for option in assignment_options %}<option value="{{ option.student.pk }}">{{ option.label }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Type de difficulté</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Choisissez un type de difficulté." name="category" required>{% for value, label in category_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Constat</span><textarea class="min-h-20 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Décrivez le constat observé." data-words-min="2" maxlength="2000" minlength="10" name="observation" placeholder="Décrire les faits observés et les premiers indicateurs…" required></textarea></label>
 <div class="flex flex-wrap justify-end gap-2 pt-1">
 <button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
 <button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">note_add</span>Créer la fiche</button>
@@ -203,6 +146,7 @@
 </div>
 {% endblock %}
 {% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
 <script>
 (function () {
   var items = Array.prototype.slice.call(document.querySelectorAll('[data-fiche-item]'));
@@ -236,6 +180,7 @@
   });
 
   var detailModal = document.getElementById('fiche-detail-modal');
+  var noteForm = document.querySelector('[data-fiche-note-form]');
   document.querySelectorAll('[data-fiche-open]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (!detailModal) return;
@@ -247,39 +192,22 @@
       if (info) info.textContent = btn.getAttribute('data-fiche-info') || '';
       if (issue) issue.textContent = btn.getAttribute('data-fiche-issue') || '';
       if (plan) plan.textContent = btn.getAttribute('data-fiche-plan') || '';
-      detailModal.classList.remove('hidden');
-      detailModal.classList.add('flex');
-      document.body.classList.add('portal-drawer-open');
+      if (noteForm && btn.getAttribute('data-note-url')) noteForm.setAttribute('action', btn.getAttribute('data-note-url'));
     });
   });
 
-  var save = document.querySelector('[data-fiche-save]');
-  if (save) {
-    save.addEventListener('click', function () {
-      if (!detailModal) return;
-      detailModal.classList.add('hidden');
-      detailModal.classList.remove('flex');
-      document.body.classList.remove('portal-drawer-open');
-      window.portalToast('Suivi enregistré et partagé avec l\'équipe référente.', 'success');
+  var planModal = document.getElementById('fiche-plan-modal');
+  var planForm = document.querySelector('[data-fiche-plan-form]');
+  document.querySelectorAll('[data-fiche-plan-open]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!planModal || !planForm) return;
+      var name = planModal.querySelector('[data-plan-modal-name]');
+      var field = planForm.querySelector('textarea[name="action_plan"]');
+      if (name) name.textContent = btn.getAttribute('data-plan-name') || 'Fiche de suivi';
+      if (field) field.value = btn.getAttribute('data-plan-value') || '';
+      planForm.setAttribute('action', btn.getAttribute('data-plan-url') || '');
     });
-  }
-
-  var newForm = document.querySelector('[data-new-fiche-form]');
-  if (newForm) {
-    newForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      var active = document.querySelector('[data-fiches-active]');
-      if (active) active.textContent = String(parseInt(active.textContent, 10) + 1);
-      var modal = newForm.closest('[data-modal]');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.classList.remove('portal-drawer-open');
-      }
-      newForm.reset();
-      window.portalToast('Fiche de difficulté créée. L\'étudiant sera notifié de l\'ouverture du suivi.', 'success');
-    });
-  }
+  });
 
   apply();
 })();

@@ -11,10 +11,10 @@
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="À faire aujourd'hui" value="3" icon="today" hint="Dont 1 prioritaire" %}
-{% include "portal/_stat_card.html" with label="Cette semaine" value="6" icon="date_range" icon_class="bg-surface-container text-secondary" hint="2 échéances notées" %}
-{% include "portal/_stat_card.html" with label="Tâches terminées" value="12" icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Depuis le début du semestre" %}
-{% include "portal/_stat_card.html" with label="Progression" value="62" suffix="%" icon="trending_up" hint="Objectif hebdomadaire : 75 %" %}
+{% include "portal/_stat_card.html" with label="À faire aujourd'hui" value=counts.today icon="today" hint=today_hint %}
+{% include "portal/_stat_card.html" with label="Cette semaine" value=counts.week icon="date_range" icon_class="bg-surface-container text-secondary" hint=deadlines_hint %}
+{% include "portal/_stat_card.html" with label="Tâches terminées" value=counts.done icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Depuis le début du semestre" %}
+{% include "portal/_stat_card.html" with label="Progression" value=counts.progress suffix="%" icon="trending_up" hint="Objectif hebdomadaire : 75 %" %}
 </div>
 <section class="grid gap-4 lg:grid-cols-[1fr_320px]">
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
@@ -28,81 +28,49 @@
 <button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-task-filter="done" type="button">Terminées</button>
 </div>
 </div>
-<div class="mt-3 flex flex-col gap-2 sm:flex-row" data-task-form>
-<input class="min-w-0 flex-1 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20" data-task-input placeholder="Ajouter une tâche..." type="text"/>
-<select class="rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface outline-none focus:border-primary" data-task-horizon>
+<form action="{% url 'coaching:student_task_add' %}" class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start" data-validate-form method="post" novalidate>
+{% csrf_token %}
+<div class="min-w-0 flex-1" data-field-wrap>
+<input aria-label="Intitulé de la tâche" class="w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20" data-require-alnum data-required-message="Saisissez un intitulé de tâche." maxlength="200" minlength="3" name="title" placeholder="Ajouter une tâche..." required type="text"/>
+</div>
+<select aria-label="Horizon de la tâche" class="rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface outline-none focus:border-primary" name="horizon" required>
 <option value="today">Aujourd'hui</option>
 <option value="week">Cette semaine</option>
 </select>
-<button class="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-task-add type="button"><span class="material-symbols-outlined text-[18px]">add</span>Ajouter</button>
-</div>
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">add</span>Ajouter</button>
+</form>
 </div>
 <div class="divide-y divide-outline-variant/30" data-task-list>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="today">
-<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>
+{% for item in task_items %}
+<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="{{ item.tags }}">
+<form action="{% url 'coaching:student_task_toggle' item.task.pk %}" class="mt-0.5 shrink-0" method="post">
+{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.path }}"/>
+<button aria-label="{% if item.task.is_done %}Marquer comme non terminée{% else %}Marquer comme terminée{% endif %}" aria-pressed="{% if item.task.is_done %}true{% else %}false{% endif %}" class="{% if item.task.is_done %}flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary transition-colors{% else %}flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary{% endif %}" type="submit"><span class="material-symbols-outlined text-[22px]">{% if item.task.is_done %}check_circle{% else %}radio_button_unchecked{% endif %}</span></button>
+</form>
 <div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface" data-task-title>Relire le chapitre 4 — Rétropropagation</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Réseaux de neurones · Avant le TP de demain</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Aujourd'hui" tone_class="bg-primary-fixed text-primary" %}{% include "portal/_badge.html" with label="Prioritaire" tone_class="bg-error-container text-on-error-container" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="today">
-<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface" data-task-title>Finaliser la partie 2 du rapport projet</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Projet IA embarquée · Groupe 4</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Aujourd'hui" tone_class="bg-primary-fixed text-primary" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="today done">
-<button aria-label="Marquer comme non terminée" aria-pressed="true" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary transition-colors" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">check_circle</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface line-through text-on-surface-variant" data-task-title>Imprimer la convocation du partiel</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Scolarité · Terminée à 09:12</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Terminée" tone_class="bg-surface-container text-on-surface-variant" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="week">
-<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface" data-task-title>Préparer les questions pour la séance live</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Systèmes distribués · Avant lundi 28 octobre</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Cette semaine" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="week">
-<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface" data-task-title>Relire le CV avant le forum des stages</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Service carrières · Avant le 3 novembre</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Cette semaine" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="week">
-<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface" data-task-title>Réviser les chaînes de Markov</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Probabilités · Partiel du 6 novembre</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Cette semaine" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
-</div>
-</div>
-<div class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30" data-task-item data-tags="done">
-<button aria-label="Marquer comme non terminée" aria-pressed="true" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-primary transition-colors" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">check_circle</span></button>
-<div class="min-w-0 flex-1">
-<p class="text-sm font-bold text-on-surface line-through text-on-surface-variant" data-task-title>Envoyer le compte rendu du TP1</p>
-<p class="mt-0.5 text-xs text-on-surface-variant">Algorithmique · Terminée le 18 octobre</p>
-<div class="mt-2 flex flex-wrap items-center gap-2">{% include "portal/_badge.html" with label="Terminée" tone_class="bg-surface-container text-on-surface-variant" %}</div>
+<p class="{% if item.task.is_done %}text-sm font-bold text-on-surface line-through text-on-surface-variant{% else %}text-sm font-bold text-on-surface{% endif %}" data-task-title>{{ item.task.title }}</p>
+<p class="mt-0.5 text-xs text-on-surface-variant">{{ item.detail }}</p>
+<div class="mt-2 flex flex-wrap items-center gap-2">
+{% if item.task.is_done %}
+{% include "portal/_badge.html" with label="Terminée" tone_class="bg-surface-container text-on-surface-variant" %}
+{% else %}
+{% include "portal/_badge.html" with label=item.horizon_label tone_class=item.horizon_class %}
+{% if item.task.priority == "high" %}{% include "portal/_badge.html" with label="Prioritaire" tone_class="bg-error-container text-on-error-container" %}{% endif %}
+{% endif %}
 </div>
 </div>
 </div>
-<p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-task-empty>Aucune tâche pour ce filtre.</p>
+{% endfor %}
+</div>
+<p class="{% if task_items %}hidden{% endif %} px-5 py-10 text-center text-sm text-on-surface-variant" data-task-empty>Aucune tâche pour ce filtre.</p>
 </div>
 <aside class="flex flex-col gap-4">
 <div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
 <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Progression de la semaine</p>
-<p class="font-data-metric text-[20px] font-bold mt-2"><span data-task-progress>29</span><span class="text-lg font-normal text-white/60">%</span></p>
-<div class="mt-3 h-2 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full bg-white transition-all duration-300" data-task-bar style="width:29%"></div></div>
-<p class="mt-2 text-xs text-white/70"><span data-task-done>2</span> tâches terminées sur <span data-task-total>7</span></p>
+<p class="font-data-metric text-[20px] font-bold mt-2"><span data-task-progress>{{ counts.progress }}</span><span class="text-lg font-normal text-white/60">%</span></p>
+<div class="mt-3 h-2 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full bg-white transition-all duration-300" data-task-bar style="width:{{ counts.progress }}%"></div></div>
+<p class="mt-2 text-xs text-white/70"><span data-task-done>{{ counts.done }}</span> tâches terminées sur <span data-task-total>{{ counts.total }}</span></p>
 </div>
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Conseils de productivité</h2>
@@ -119,12 +87,10 @@
 </main>
 {% endblock %}
 {% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
 <script>
 (function () {
   var list = document.querySelector('[data-task-list]');
-  var input = document.querySelector('[data-task-input]');
-  var horizon = document.querySelector('[data-task-horizon]');
-  var addBtn = document.querySelector('[data-task-add]');
   var empty = document.querySelector('[data-task-empty]');
   var doneLabel = document.querySelector('[data-task-done]');
   var totalLabel = document.querySelector('[data-task-total]');
@@ -160,34 +126,6 @@
     if (empty) empty.classList.toggle('hidden', shown !== 0);
   }
 
-  function toggle(item) {
-    var tags = item.getAttribute('data-tags').split(/\s+/).filter(Boolean);
-    var done = tags.indexOf('done') !== -1;
-    var btn = item.querySelector('[data-task-toggle]');
-    var icon = btn.querySelector('.material-symbols-outlined');
-    var title = item.querySelector('[data-task-title]');
-    if (done) {
-      item.setAttribute('data-tags', tags.filter(function (t) { return t !== 'done'; }).join(' '));
-    } else {
-      item.setAttribute('data-tags', tags.concat('done').join(' '));
-    }
-    btn.setAttribute('aria-pressed', String(!done));
-    if (icon) icon.textContent = done ? 'radio_button_unchecked' : 'check_circle';
-    btn.classList.toggle('text-primary', !done);
-    btn.classList.toggle('text-outline', done);
-    if (title) {
-      title.classList.toggle('line-through', !done);
-      title.classList.toggle('text-on-surface-variant', !done);
-    }
-    update(); applyFilter();
-  }
-
-  list.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-task-toggle]');
-    if (!btn) return;
-    toggle(btn.closest('[data-task-item]'));
-  });
-
   chips.forEach(function (chip) {
     chip.addEventListener('click', function () {
       filter = chip.getAttribute('data-task-filter');
@@ -200,28 +138,8 @@
     });
   });
 
-  function addTask() {
-    var text = (input.value || '').trim();
-    if (!text) { input.focus(); return; }
-    var tag = horizon.value === 'week' ? 'week' : 'today';
-    var item = document.createElement('div');
-    item.className = 'flex items-start gap-3 px-5 py-4 transition-colors hover:bg-surface-container/30';
-    item.setAttribute('data-task-item', '');
-    item.setAttribute('data-tags', tag);
-    item.innerHTML = '<button aria-label="Marquer comme terminée" aria-pressed="false" class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:text-primary" data-task-toggle type="button"><span class="material-symbols-outlined text-[22px]">radio_button_unchecked</span></button>' +
-      '<div class="min-w-0 flex-1"><p class="text-sm font-bold text-on-surface" data-task-title></p>' +
-      '<p class="mt-0.5 text-xs text-on-surface-variant">Ajoutée à l\'instant · ' + (tag === 'week' ? 'Cette semaine' : "Aujourd'hui") + '</p>' +
-      '<div class="mt-2 flex flex-wrap items-center gap-2"><span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ' + (tag === 'week' ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-primary-fixed text-primary') + '">' + (tag === 'week' ? 'Cette semaine' : "Aujourd'hui") + '</span></div></div>';
-    item.querySelector('[data-task-title]').textContent = text;
-    list.insertBefore(item, list.firstChild);
-    input.value = '';
-    update(); applyFilter();
-    window.portalToast('Tâche ajoutée à votre liste.', 'success');
-  }
-
-  if (addBtn) addBtn.addEventListener('click', addTask);
-  if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); addTask(); } });
   update();
+  applyFilter();
 })();
 </script>
 {% endblock %}

@@ -14,10 +14,10 @@
 </button>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Niveau de confiance" value="78" suffix="%" icon="psychology" hint="+6 pts depuis septembre" %}
-{% include "portal/_stat_card.html" with label="Progression globale" value="68" suffix="%" icon="trending_up" icon_class="bg-surface-container text-secondary" hint="Objectif : 75 % en décembre" %}
-{% include "portal/_stat_card.html" with label="Entrées rédigées" value="14" icon="auto_stories" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Dernière : hier" %}
-{% include "portal/_stat_card.html" with label="Série d'écriture" value="6" suffix=" jours" icon="local_fire_department" hint="Meilleure série : 9 jours" %}
+{% include "portal/_stat_card.html" with label="Niveau de confiance" value=today_percent suffix="%" icon="psychology" hint=confidence_hint %}
+{% include "portal/_stat_card.html" with label="Progression globale" value=goal_stats.average_progress suffix="%" icon="trending_up" icon_class="bg-surface-container text-secondary" hint="Objectif : 75 % en décembre" %}
+{% include "portal/_stat_card.html" with label="Entrées rédigées" value=entry_count icon="auto_stories" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=last_entry_label %}
+{% include "portal/_stat_card.html" with label="Série d'écriture" value=streak suffix=streak_suffix icon="local_fire_department" hint=best_streak_hint %}
 </div>
 <section class="grid gap-4 lg:grid-cols-[1fr_360px]">
 <div class="flex flex-col gap-4">
@@ -27,65 +27,60 @@
 {% include "portal/_badge.html" with label="8 dernières semaines" tone_class="bg-surface-container text-on-surface-variant" %}
 </div>
 <div class="mt-5 flex h-40 items-end gap-2">
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:52%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S1</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:58%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S2</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:61%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S3</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:57%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S4</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:66%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S5</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary-fixed" style="height:71%"></div></div><span class="text-[11px] font-semibold text-on-surface-variant">S6</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary" style="height:74%"></div></div><span class="text-[11px] font-bold text-primary">S7</span></div>
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t bg-primary" style="height:78%"></div></div><span class="text-[11px] font-bold text-primary">S8</span></div>
+{% for week in weeks %}
+<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t {% if week.current %}bg-primary{% else %}bg-primary-fixed{% endif %}" style="height:{{ week.height }}%"></div></div><span class="text-[11px] {% if week.current %}font-bold text-primary{% else %}font-semibold text-on-surface-variant{% endif %}">{{ week.label }}</span></div>
+{% endfor %}
 </div>
-<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant"><span>Début du semestre</span><span class="font-semibold text-on-surface">Aujourd'hui : 78 / 100</span></div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant"><span>Début du semestre</span><span class="font-semibold text-on-surface">Aujourd'hui : {{ today_percent }} / 100</span></div>
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
-<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4"><h2 class="font-headline-sm text-headline-sm text-on-surface">Mes entrées</h2><span class="text-xs font-semibold text-on-surface-variant"><span data-journal-count>4</span> entrées récentes</span></div>
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4"><h2 class="font-headline-sm text-headline-sm text-on-surface">Mes entrées</h2><span class="text-xs font-semibold text-on-surface-variant">{{ entry_count }} entrée{{ entry_count|pluralize }}</span></div>
 <div class="relative space-y-0 px-5 py-2" data-journal-timeline>
+{% for item in entry_views %}
 <div class="relative flex gap-4 py-4">
-<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[18px]">lightbulb</span></span><span class="mt-1 w-px flex-1 bg-outline-variant/50"></span></div>
-<div class="min-w-0 flex-1 pb-2">
-<div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface">Une méthode qui fonctionne enfin</h3>{% include "portal/_badge.html" with label="Confiance +8" tone_class="bg-primary-fixed text-primary" %}</div>
-<p class="mt-1 text-xs font-semibold text-on-surface-variant">Hier · 19:40</p>
-<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">J'ai testé la technique des cartes mentales pour la rétropropagation. Reformuler le calcul avec mes propres mots m'a permis de résoudre les exercices 3 et 4 sans aide. Je vais appliquer cette méthode aux chaînes de Markov.</p>
+<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full {{ item.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ item.meta.icon }}</span></span>{% if not forloop.last %}<span class="mt-1 w-px flex-1 bg-outline-variant/50"></span>{% endif %}</div>
+<div class="min-w-0 flex-1 {% if not forloop.last %}pb-2{% endif %}">
+<div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface">{{ item.entry.title }}</h3>{% include "portal/_badge.html" with label=item.meta.label tone_class=item.meta.badge %}</div>
+<p class="mt-1 text-xs font-semibold text-on-surface-variant">{{ item.when_label }}</p>
+<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">{{ item.entry.reflection|linebreaksbr }}</p>
+{% if item.entry.feedback %}
+<div class="mt-3 rounded border border-outline-variant/40 bg-surface-container-low px-3 py-2.5">
+<p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary"><span class="material-symbols-outlined text-[15px]">forum</span>Retour de {{ item.feedback_name }}{% if item.feedback_when %} · {{ item.feedback_when }}{% endif %}</p>
+<p class="mt-1 text-xs leading-relaxed text-on-surface-variant">{{ item.entry.feedback|linebreaksbr }}</p>
+</div>
+{% endif %}
 </div>
 </div>
-<div class="relative flex gap-4 py-4">
-<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[18px]">flag</span></span><span class="mt-1 w-px flex-1 bg-outline-variant/50"></span></div>
-<div class="min-w-0 flex-1 pb-2">
-<div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface">Point d'étape avec ma tutrice</h3>{% include "portal/_badge.html" with label="Objectif atteint" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</div>
-<p class="mt-1 text-xs font-semibold text-on-surface-variant">22 octobre · 15:10</p>
-<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">La séance de tutorat a clarifié le découpage du projet. J'ai maintenant une vision claire des trois livrables et du calendrier. Prochaine étape : finaliser la démonstration avant vendredi.</p>
-</div>
-</div>
-<div class="relative flex gap-4 py-4">
-<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[18px]">water_drop</span></span><span class="mt-1 w-px flex-1 bg-outline-variant/50"></span></div>
-<div class="min-w-0 flex-1 pb-2">
-<div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface">Difficulté à maintenir le rythme</h3>{% include "portal/_badge.html" with label="Point d'attention" tone_class="bg-error-container text-on-error-container" %}</div>
-<p class="mt-1 text-xs font-semibold text-on-surface-variant">18 octobre · 21:05</p>
-<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">Semaine chargée : deux TP et un rendu. J'ai accumulé du retard sur les probabilités. Plan d'action : bloquer deux créneaux de 45 minutes mardi et jeudi, et demander les notes à Sarah.</p>
-</div>
-</div>
-<div class="relative flex gap-4 py-4">
-<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[18px]">verified</span></span><span class="mt-1 w-px flex-1 bg-outline-variant/50"></span></div>
-<div class="min-w-0 flex-1">
-<div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface">Première soutenance blanche réussie</h3>{% include "portal/_badge.html" with label="Fierté" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
-<p class="mt-1 text-xs font-semibold text-on-surface-variant">11 octobre · 17:30</p>
-<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">L'équipe a présenté le prototype devant le groupe. Les retours sont positifs, notamment sur la démonstration embarquée. J'ai gagné en aisance à l'oral, il reste à travailler la gestion du temps.</p>
-</div>
-</div>
+{% empty %}
+<p class="px-2 py-10 text-center text-sm text-on-surface-variant">Aucune entrée pour le moment. Écrivez votre première réflexion.</p>
+{% endfor %}
 </div>
 </section>
 </div>
 <aside class="flex flex-col gap-4">
 <div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
 <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Mon cap</p>
-<p class="mt-2 font-headline-sm text-headline-sm text-white">Valider le semestre avec mention</p>
-<p class="mt-1 text-sm text-white/70">Moyenne cible : 16/20 · 60 crédits ECTS</p>
+<p class="mt-2 font-headline-sm text-headline-sm text-white">{% if goal_stats.goals %}{{ goal_stats.goals.0.title }}{% else %}Valider le semestre avec mention{% endif %}</p>
+<p class="mt-1 text-sm text-white/70">Progression des objectifs : {{ goal_stats.percent }} %</p>
 <div class="mt-4 space-y-2 border-t border-white/15 pt-3 text-xs text-white/75">
-<div class="flex justify-between"><span>Confiance actuelle</span><span class="font-bold text-white">78 %</span></div>
-<div class="flex justify-between"><span>Prochaine révision</span><span class="font-bold text-white">Mercredi 18:00</span></div>
-<div class="flex justify-between"><span>Prochaine séance</span><span class="font-bold text-white">Jeudi 14:30</span></div>
+<div class="flex justify-between gap-3"><span class="shrink-0">Confiance actuelle</span><span class="text-right font-bold text-white">{{ today_percent }} %</span></div>
+<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine révision</span><span class="text-right font-bold text-white">{{ next_study_label }}</span></div>
+<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine séance</span><span class="text-right font-bold text-white">{{ next_session_label }}</span></div>
 </div>
+{% if entry_views and entry_views.0.entry.feedback %}
+<div class="mt-4 border-t border-white/15 pt-3">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Dernier retour tuteur</p>
+<p class="mt-1 text-xs leading-relaxed text-white/80">{{ entry_views.0.entry.feedback|truncatechars:150 }}</p>
+</div>
+{% endif %}
+{% if tutor_notification %}
+<div class="mt-4 border-t border-white/15 pt-3">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Notification ENT{% if tutor_notification.tutor_name %} · {{ tutor_notification.tutor_name }}{% endif %}</p>
+<p class="mt-1 text-xs font-semibold text-white">{{ tutor_notification.notification.title }}</p>
+<p class="mt-1 text-xs leading-relaxed text-white/80">{{ tutor_notification.notification.message|truncatechars:160 }}</p>
+<p class="mt-1 text-[10px] text-white/50">{{ tutor_notification.when_label }}</p>
+</div>
+{% endif %}
 </div>
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Questions pour avancer</h2>
@@ -104,12 +99,13 @@
 <div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
 <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvelle entrée</h2>
-<button class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button" aria-label="Fermer"><span class="material-symbols-outlined text-[20px]">close</span></button>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
 </div>
-<form class="space-y-4 p-5" data-journal-form>
-<label class="block"><span class="text-xs font-bold text-on-surface-variant">Titre</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus placeholder="Ex. Une nouvelle méthode de révision" required type="text"/></label>
-<label class="block"><span class="text-xs font-bold text-on-surface-variant">Ressenti</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"><option>Confiance</option><option>Neutre</option><option>Point d'attention</option></select></label>
-<label class="block"><span class="text-xs font-bold text-on-surface-variant">Réflexion</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" placeholder="Qu'avez-vous appris aujourd'hui ?" required rows="4"></textarea></label>
+<form action="{% url 'coaching:student_journal_add' %}" class="space-y-4 p-5" data-validate-form method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Titre</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-require-alnum data-required-message="Saisissez un titre." maxlength="200" minlength="3" name="title" placeholder="Ex. Une nouvelle méthode de révision" required type="text"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Ressenti</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Choisissez un ressenti." name="sentiment" required>{% for value, label in sentiment_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Réflexion</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Rédigez votre réflexion." data-words-min="3" maxlength="5000" minlength="20" name="reflection" placeholder="Qu'avez-vous appris aujourd'hui ?" required rows="4"></textarea></label>
 <div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Enregistrer</button></div>
 </form>
 </div>
@@ -117,31 +113,5 @@
 </main>
 {% endblock %}
 {% block page_scripts %}
-<script>
-(function () {
-  var form = document.querySelector('[data-journal-form]');
-  if (!form) return;
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var title = form.querySelector('input').value.trim();
-    var text = form.querySelector('textarea').value.trim();
-    if (!title || !text) return;
-    var timeline = document.querySelector('[data-journal-timeline]');
-    var entry = document.createElement('div');
-    entry.className = 'relative flex gap-4 py-4';
-    entry.innerHTML = '<div class="flex flex-col items-center"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[18px]">edit_note</span></span><span class="mt-1 w-px flex-1 bg-outline-variant/50"></span></div>' +
-      '<div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h3 class="font-title-md text-title-md text-on-surface"></h3><span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">Nouveau</span></div>' +
-      '<p class="mt-1 text-xs font-semibold text-on-surface-variant">À l\'instant</p><p class="mt-2 text-sm leading-relaxed text-on-surface-variant"></p></div>';
-    entry.querySelector('h3').textContent = title;
-    entry.querySelector('p.mt-2').textContent = text;
-    timeline.insertBefore(entry, timeline.firstChild);
-    var count = document.querySelector('[data-journal-count]');
-    if (count) count.textContent = String(parseInt(count.textContent, 10) + 1);
-    var modal = document.getElementById('journal-modal');
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.classList.remove('portal-drawer-open'); }
-    form.reset();
-    window.portalToast('Entrée ajoutée à votre journal.', 'success');
-  });
-})();
-</script>
+{% include "coaching/_form_validation.html" %}
 {% endblock %}

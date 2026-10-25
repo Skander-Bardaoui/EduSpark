@@ -1,0 +1,287 @@
+<script>
+(function () {
+  'use strict';
+
+  var REQUIRED = 'Ce champ est obligatoire.';
+  var REQUIRED_CHOICE = 'Choisissez une valeur dans la liste.';
+  var INVALID_DATE = 'Saisissez une date valide (format AAAA-MM-JJ).';
+  var INVALID_NUMBER = 'Saisissez un nombre valide.';
+  var INTEGER = 'Saisissez un nombre entier.';
+  var CLOCK_FORMAT = 'Saisissez une heure valide au format HH:MM (24 h).';
+  var CLOCK_HALF = 'Choisissez un créneau sur une demi-heure (:00 ou :30).';
+  var CLOCK_RANGE = 'Choisissez une heure comprise entre 07:00 et 20:30.';
+  var ALNUM = 'Indiquez au moins une lettre ou un chiffre.';
+  var ERROR_CLASS = 'text-[11px] font-semibold text-error';
+
+  var errorCount = 0;
+
+  function isSkippable(field) {
+    if (!field) return true;
+    if (field.disabled) return true;
+    if (field.tagName === 'BUTTON' || field.tagName === 'FIELDSET') return true;
+    return ['hidden', 'submit', 'button', 'reset', 'image', 'file'].indexOf(field.type) !== -1;
+  }
+
+  function intValue(value, fallback) {
+    var parsed = parseInt(value, 10);
+    return isNaN(parsed) ? fallback : parsed;
+  }
+
+  function frenchDate(iso) {
+    var parts = (iso || '').split('-');
+    if (parts.length !== 3) return iso;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function hasLetterOrDigit(value) {
+    try {
+      return /[\p{L}\p{N}]/u.test(value);
+    } catch (error) {
+      return /[0-9A-Za-z]/.test(value);
+    }
+  }
+
+  function fieldError(field) {
+    var type = (field.type || '').toLowerCase();
+    var raw = field.value || '';
+    var value = raw.replace(/^\s+|\s+$/g, '');
+    var required = field.hasAttribute('required');
+    var requiredMessage = field.getAttribute('data-required-message') || REQUIRED;
+
+    if ((type === 'date' || type === 'number') && field.validity && field.validity.badInput) {
+      return type === 'date' ? INVALID_DATE : INVALID_NUMBER;
+    }
+
+    if (type === 'checkbox' || type === 'radio') {
+      if (required && !field.checked) return requiredMessage;
+      return '';
+    }
+
+    if (required && (value === '' || (field.tagName === 'SELECT' && raw === ''))) {
+      return field.getAttribute('data-required-message') || (field.tagName === 'SELECT' ? REQUIRED_CHOICE : REQUIRED);
+    }
+
+    if (value === '') return '';
+
+    var minLength = intValue(field.getAttribute('minlength'), 0);
+    if (minLength && value.length < minLength) {
+      return 'Saisissez au moins ' + minLength + ' caractères.';
+    }
+
+    var maxLength = intValue(field.getAttribute('maxlength'), 0);
+    if (maxLength && value.length > maxLength) {
+      return 'Saisissez au plus ' + maxLength + ' caractères.';
+    }
+
+    if (field.hasAttribute('data-require-alnum') && !hasLetterOrDigit(value)) {
+      return ALNUM;
+    }
+
+    var wordsMin = intValue(field.getAttribute('data-words-min'), 0);
+    if (wordsMin) {
+      var words = value.split(/\s+/).filter(function (word) { return word !== ''; });
+      if (words.length < wordsMin) {
+        return 'Saisissez au moins ' + wordsMin + ' mot' + (wordsMin > 1 ? 's' : '') + '.';
+      }
+    }
+
+    if (field.hasAttribute('data-clock')) {
+      if (!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) return CLOCK_FORMAT;
+      var pieces = value.split(':');
+      var minutes = intValue(pieces[0], 0) * 60 + intValue(pieces[1], 0);
+      if (intValue(pieces[1], 0) % 30 !== 0) return CLOCK_HALF;
+      if (minutes < 420 || minutes > 1230) return CLOCK_RANGE;
+    }
+
+    if (type === 'date') {
+      var minDate = field.getAttribute('min');
+      var maxDate = field.getAttribute('max');
+      if (minDate && value < minDate) {
+        return 'Choisissez une date à partir du ' + frenchDate(minDate) + '.';
+      }
+      if (maxDate && value > maxDate) {
+        return 'Choisissez une date jusqu\u2019au ' + frenchDate(maxDate) + '.';
+      }
+    }
+
+    if (type === 'number') {
+      var number = Number(raw);
+      if (!isFinite(number)) return INVALID_NUMBER;
+      var step = field.getAttribute('step');
+      if (step && step !== 'any' && isFinite(Number(step)) && Number(step) > 0) {
+        var ratio = number / Number(step);
+        if (Math.abs(ratio - Math.round(ratio)) > 1e-9) return INTEGER;
+      }
+      var minimum = field.getAttribute('min');
+      if (minimum !== null && minimum !== '' && number < Number(minimum)) {
+        return 'Saisissez une valeur supérieure ou égale à ' + minimum + '.';
+      }
+      var maximum = field.getAttribute('max');
+      if (maximum !== null && maximum !== '' && number > Number(maximum)) {
+        return 'Saisissez une valeur inférieure ou égale à ' + maximum + '.';
+      }
+    }
+
+    return '';
+  }
+
+  function futureError(form) {
+    if (!form.hasAttribute('data-future-datetime')) return null;
+    var dateField = form.querySelector('[name="date"]');
+    var timeField = form.querySelector('[name="time"]');
+    if (!dateField || !timeField) return null;
+    var day = (dateField.value || '').trim();
+    var clock = (timeField.value || '').trim();
+    if (!day || !clock) return null;
+    var start = new Date(day + 'T' + clock + ':00');
+    if (isNaN(start.getTime())) {
+      return { field: timeField, message: 'Choisissez une date et un créneau valides.' };
+    }
+    var lead = intValue(form.getAttribute('data-lead-minutes'), 15);
+    if (start.getTime() <= Date.now() + lead * 60000) {
+      return {
+        field: timeField,
+        message: 'Choisissez un créneau au moins ' + lead + ' minutes après l\u2019heure actuelle.',
+      };
+    }
+    return null;
+  }
+
+  function errorHost(field) {
+    return field.closest('[data-field-wrap]') || field.closest('label') || field.parentNode;
+  }
+
+  function errorNode(field) {
+    var id = field.getAttribute('data-error-id');
+    return id ? document.getElementById(id) : null;
+  }
+
+  function showError(field, message) {
+    if (!field) return;
+    var node = errorNode(field);
+    if (!node) {
+      var host = errorHost(field);
+      if (!host) return;
+      errorCount += 1;
+      var id = 'coaching-field-error-' + errorCount;
+      node = document.createElement('span');
+      node.id = id;
+      node.setAttribute('data-field-error', '');
+      node.setAttribute('role', 'alert');
+      node.className = ERROR_CLASS + (host.classList.contains('flex-col') ? '' : ' mt-1 block');
+      host.appendChild(node);
+      field.setAttribute('data-error-id', id);
+      var described = field.getAttribute('aria-describedby');
+      field.setAttribute('aria-describedby', described ? described + ' ' + id : id);
+    }
+    node.textContent = message;
+    field.setAttribute('aria-invalid', 'true');
+  }
+
+  function clearError(field) {
+    if (!field) return;
+    var id = field.getAttribute('data-error-id');
+    if (id) {
+      var node = document.getElementById(id);
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      var described = (field.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
+        .filter(function (part) { return part && part !== id; });
+      if (described.length) field.setAttribute('aria-describedby', described.join(' '));
+      else field.removeAttribute('aria-describedby');
+    }
+    field.removeAttribute('aria-invalid');
+  }
+
+  function validateField(field) {
+    if (isSkippable(field)) return '';
+    var message = fieldError(field);
+    if (message) showError(field, message);
+    else clearError(field);
+    return message;
+  }
+
+  function validateFuture(form, reveal) {
+    var issue = futureError(form);
+    var timeField = form.querySelector('[name="time"]');
+    if (!timeField) return '';
+    if (issue) {
+      if (reveal || errorNode(timeField)) showError(issue.field || timeField, issue.message);
+      return issue.message;
+    }
+    if (errorNode(timeField) && !fieldError(timeField)) clearError(timeField);
+    return '';
+  }
+
+  function onSubmit(event) {
+    var form = event.currentTarget;
+    var invalid = null;
+    Array.prototype.forEach.call(form.elements, function (field) {
+      if (isSkippable(field)) return;
+      if (validateField(field) && !invalid) invalid = field;
+    });
+    var issue = futureError(form);
+    if (issue) {
+      showError(issue.field || form.querySelector('[name="time"]'), issue.message);
+      if (!invalid) invalid = issue.field;
+    }
+    if (invalid) {
+      event.preventDefault();
+      invalid.focus();
+    }
+  }
+
+  function refresh(form, field, reveal) {
+    if (isSkippable(field)) return;
+    if (errorNode(field) || reveal) validateField(field);
+    if (form.hasAttribute('data-future-datetime') && (field.name === 'date' || field.name === 'time')) {
+      validateFuture(form, reveal);
+    }
+  }
+
+  function clearFormErrors(form) {
+    Array.prototype.forEach.call(form.querySelectorAll('[data-field-error]'), function (node) {
+      if (node.parentNode) node.parentNode.removeChild(node);
+    });
+    Array.prototype.forEach.call(form.querySelectorAll('[data-error-id]'), function (field) {
+      field.removeAttribute('data-error-id');
+      field.removeAttribute('aria-invalid');
+      var described = (field.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
+        .filter(function (part) { return part && part.indexOf('coaching-field-error-') !== 0; });
+      if (described.length) field.setAttribute('aria-describedby', described.join(' '));
+      else field.removeAttribute('aria-describedby');
+    });
+  }
+
+  var forms = Array.prototype.slice.call(document.querySelectorAll('form[data-validate-form]'));
+  forms.forEach(function (form) {
+    form.setAttribute('novalidate', 'novalidate');
+    form.addEventListener('submit', onSubmit);
+    form.addEventListener('focusout', function (event) {
+      var field = event.target;
+      if (!field || field.form !== form) return;
+      refresh(form, field, true);
+    });
+    ['input', 'change'].forEach(function (name) {
+      form.addEventListener(name, function (event) {
+        var field = event.target;
+        if (!field || field.form !== form) return;
+        refresh(form, field, false);
+      });
+    });
+  });
+
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || !target.closest) return;
+    var trigger = target.closest('[data-modal-open]');
+    if (!trigger) return;
+    var selector = trigger.getAttribute('data-modal-open');
+    if (!selector) return;
+    var modal = document.querySelector(selector);
+    if (!modal) return;
+    Array.prototype.forEach.call(modal.querySelectorAll('form[data-validate-form]'), clearFormErrors);
+  });
+})();
+</script>

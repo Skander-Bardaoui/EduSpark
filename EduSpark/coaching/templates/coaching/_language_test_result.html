@@ -1,0 +1,93 @@
+{% if feedback %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+<div class="flex items-center gap-4">
+<span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary-fixed font-data-metric text-2xl font-bold text-primary">{{ overall_level }}</span>
+<div>
+<p class="font-label-sm text-label-sm font-bold uppercase tracking-[0.12em] text-on-surface-variant">Niveau global</p>
+<p class="mt-1 font-headline-sm text-headline-sm text-on-surface">{{ exam_name }} · {{ level_label }}</p>
+<div class="mt-2 flex flex-wrap items-center gap-2">
+{% include "portal/_badge.html" with label=verdict_label tone_class=verdict_style dot=True %}
+<span class="text-xs text-on-surface-variant">Score moyen {{ average_label }} /9</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3 text-xs sm:text-right">
+<div><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Langue</p><p class="mt-0.5 font-semibold text-on-surface">{{ language_label }}</p></div>
+<div><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Exercice</p><p class="mt-0.5 font-semibold text-on-surface">{{ exercise_label }}</p></div>
+<div><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Passé le</p><p class="mt-0.5 font-semibold text-on-surface">{{ started_label }}</p></div>
+<div><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Statut</p><p class="mt-0.5 font-semibold text-on-surface">{{ status_label }}</p></div>
+</div>
+</div>
+</section>
+<section>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% for item in scores %}
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-2">
+<p class="font-label-md text-label-md text-on-surface-variant">{{ item.label }}</p>
+<span class="material-symbols-outlined text-[20px] text-primary">{% if item.key == "fluency" %}waves{% elif item.key == "vocabulary" %}menu_book{% elif item.key == "grammar" %}rule{% else %}flag{% endif %}</span>
+</div>
+<p class="mt-2 font-data-metric text-kpi font-bold leading-none text-on-surface">{{ item.score }}<span class="text-base font-normal text-outline">/9</span></p>
+<div class="mt-3 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:{% widthratio item.score 9 100 %}%"></div></div>
+</div>
+{% endfor %}
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4"><h2 class="font-headline-sm text-headline-sm text-on-surface">Notes détaillées</h2></div>
+<div class="grid gap-5 p-5 sm:grid-cols-2">
+{% for item in scores %}
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">{{ item.label }}</h3>
+<ul class="mt-2 space-y-2 text-sm leading-relaxed text-on-surface-variant">
+{% for note in item.notes %}
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span><span>{{ note }}</span></li>
+{% empty %}
+<li class="text-xs text-on-surface-variant">Aucune observation.</li>
+{% endfor %}
+</ul>
+</div>
+{% endfor %}
+</div>
+</section>
+{% if pronunciation_flags %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Points de prononciation</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Mots à travailler d’après la transcription.</p>
+<div class="mt-3 flex flex-wrap gap-2">
+{% for flag in pronunciation_flags %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-bold text-on-tertiary-fixed"><span class="material-symbols-outlined text-[15px]">record_voice_over</span>{{ flag.word }}</span>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Recommandations</h2>
+<ul class="mt-3 space-y-2 text-sm leading-relaxed text-on-surface-variant">
+{% for item in recommendations %}
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">arrow_forward</span><span>{{ item }}</span></li>
+{% empty %}
+<li class="text-xs text-on-surface-variant">Continuez à vous entraîner régulièrement.</li>
+{% endfor %}
+</ul>
+</section>
+{% if transcript %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4"><h2 class="font-headline-sm text-headline-sm text-on-surface">Transcription</h2><span class="text-xs font-semibold text-on-surface-variant">{{ transcript|length }} échange{{ transcript|length|pluralize }}</span></div>
+<ol class="divide-y divide-outline-variant/30">
+{% for turn in transcript %}
+<li class="px-5 py-3.5">
+<p class="text-[11px] font-bold uppercase tracking-[0.12em] {% if turn.speaker == 'assistant' or turn.speaker == 'examiner' %}text-secondary{% else %}text-primary{% endif %}">{% if turn.speaker == 'assistant' or turn.speaker == 'examiner' %}Examinateur{% else %}{{ candidate_label|default:"Vous" }}{% endif %}</p>
+<p class="mt-1 text-sm leading-relaxed text-on-surface">{{ turn.text }}</p>
+</li>
+{% endfor %}
+</ol>
+</section>
+{% endif %}
+{% else %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-8 text-center shadow-sm">
+<p class="font-title-md text-title-md text-on-surface">Aucun bilan disponible</p>
+<p class="mt-1 text-sm text-on-surface-variant">Cette session n’a pas encore été évaluée.</p>
+</section>
+{% endif %}
