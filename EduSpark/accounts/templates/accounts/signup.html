@@ -113,7 +113,7 @@
 </button>
 
 </div>
-<input type="hidden" name="role" id="roleInput" value="{{ form.role.value|default:'etudiant' }}">
+<input type="hidden" name="role" id="roleInput" form="signup-form" value="{{ form.role.value|default:'etudiant' }}">
 </div>
 <!-- Boutons d'Authentification Rapide (OAuth) -->
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs pt-1">
@@ -146,7 +146,7 @@
           </span>
 </div>
 <!-- Formulaire Standard -->
-<form method="post" action="{% url 'accounts:signup' %}" class="space-y-3">
+<form method="post" action="{% url 'accounts:signup' %}" class="space-y-3" id="signup-form">
 {% csrf_token %}
 {% if messages %}<div class="flex flex-col gap-2">{% for message in messages %}<div class="p-3 rounded-lg font-label-md text-label-md {% if message.tags == 'success' %}bg-surface-container-high text-primary{% elif message.tags == 'error' %}bg-error-container text-error{% else %}bg-surface-container-high text-on-surface{% endif %}">{{ message }}</div>{% endfor %}</div>{% endif %}
 {% if form.non_field_errors %}<div class="p-3 rounded-lg bg-error-container font-label-md text-label-md text-error">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
@@ -169,6 +169,20 @@
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">mail</span>
 {{ form.email }}{% if form.email.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.email.errors %}{{ e }} {% endfor %}</p>{% endif %}
 </div>
+</div>
+<!-- Université de rattachement -->
+<div class="space-y-1">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="university">
+              Université
+            </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">account_balance</span>
+{{ form.university }}{% if form.university.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.university.errors %}{{ e }} {% endfor %}</p>{% endif %}
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant flex items-start gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">info</span>
+              Étudiant avec le domaine officiel de l'université : accès immédiat. Autres inscriptions : validation par l'administration.
+            </p>
 </div>
 <!-- Mot de passe & Indicateur de Complexité -->
 <div class="space-y-1.5">

@@ -1,462 +1,133 @@
 {% extends "portal/base_prof.html" %}
 {% block title %}Mon Profil Enseignant &amp; Grades — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="w-full bg-surface min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
-<!-- En-tête & identité -->
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
 <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 <div class="max-w-3xl">
-<div class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">
-<span class="h-2 w-2 rounded-full bg-secondary"></span>
-          Espace d'Administration Académique Certifié
-        </div>
-<h1 class="mt-2 font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Profil Académique &amp; Préférences d'Enseignement</h1>
-<p class="mt-0.5 font-body-sm text-on-surface-variant">
-          Gérez vos affiliations universitaires, vos grades, vos créneaux de tutorat et vos préférences d'assistance pédagogique IA.
-        </p>
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Espace enseignant</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Profil Académique &amp; Préférences d'Enseignement</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">Gérez vos affiliations universitaires, votre profil métier et vos informations de connexion.</p>
 </div>
 <div class="flex shrink-0 flex-wrap items-center gap-2">
-<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-lowest px-3.5 text-[13px] font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container" type="button">
-<span class="material-symbols-outlined text-[18px]">visibility</span>
-<span>Aperçu public</span>
-</button>
-<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" type="button">
-<span class="material-symbols-outlined text-[18px]">save</span>
-<span>Enregistrer les modifications</span>
-</button>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-lowest px-3.5 text-[13px] font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container" href="{% url 'portal:prof_settings' %}"><span class="material-symbols-outlined text-[18px]">lock</span>Paramètres</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" href="#profile-edit"><span class="material-symbols-outlined text-[18px]">save</span>Modifier mes informations</a>
 </div>
 </div>
-<!-- Grille principale : 8 colonnes contenu + 4 colonnes assistant -->
 <div class="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-<!-- Colonne principale -->
 <div class="flex min-w-0 flex-col gap-5 lg:col-span-8">
-<!-- 1. Carte profil -->
 <div class="rounded bg-surface-container-lowest p-4 shadow-sm">
 <div class="flex flex-col gap-4 md:flex-row md:items-center">
-<div class="relative h-24 w-24 shrink-0 md:h-28 md:w-28">
-<img class="h-full w-full rounded object-cover shadow-sm" data-alt="Photographie portrait professionnelle en studio d'une professeure d'université en informatique d'une cinquantaine d'années, souriante, regard bienveillant et assuré. Éclairage doux, fond architectural sobre et flouté aux teintes bleutées et crème, style institutionnel moderne et élégant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5dvQzwfaKlIm5B0HmHyeW651W0UvyzHmbv5kXxx6SYODPpC_KWe4QLD13XvayThq2qJHlZ0ewEYf-rCLtz9Qyk9ZxIyu2CoZyuqn4mlJjpOLSvSjtjWCy2YjZx_ahjaFo5c104GgXZA06k2aTD0P_CJNAg6nnLu29JSc1bw9tmZXLLkYcn0YI5heLwVCXSqXOA-WHov52MkMkoow6j9Ipf1INImypKk5Bcx1fkYY"/>
-<span class="absolute -bottom-1.5 -right-1.5 rounded-full bg-primary p-1 text-on-primary shadow" title="Identité vérifiée par le Rectorat et l'ORCID">
-<span class="material-symbols-outlined block text-[16px]">verified</span>
-</span>
-</div>
+<span class="flex h-24 w-24 shrink-0 items-center justify-center rounded bg-primary text-2xl font-extrabold text-on-primary md:h-28 md:w-28">{{ portal_user_initials }}</span>
 <div class="min-w-0 flex-1">
 <div class="flex flex-wrap items-center gap-2">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Prof. Hélène Vasseur</h2>
-<span class="rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-data-metric text-[12px] font-semibold text-on-tertiary-fixed">
-                  ORCID: 0000-0002-1825-0097
-                </span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">{{ portal_user_name }}</h2>
+<span class="rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-data-metric text-[12px] font-semibold text-on-tertiary-fixed">{{ portal_scope_label }}</span>
 </div>
 <div class="mt-2 flex flex-wrap gap-1.5">
-<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-bold uppercase text-primary">
-<span class="material-symbols-outlined text-[16px]">workspace_premium</span>
-                  Professeure des Universités (Classe Exceptionnelle)
-                </span>
-<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-[11px] font-bold uppercase text-on-secondary-fixed">
-<span class="material-symbols-outlined text-[16px]">biotech</span>
-                  Laboratoire IRIF - CNRS (UMR 8243)
-                </span>
-<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 text-[11px] font-bold uppercase text-on-surface-variant">
-<span class="material-symbols-outlined text-[16px]">category</span>
-                  Section CNU 27 (Informatique)
-                </span>
+{% if profile.grade %}<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-bold uppercase text-primary"><span class="material-symbols-outlined text-[16px]">workspace_premium</span>{{ profile.get_grade_display }}</span>{% endif %}
+{% if profile.department %}<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-[11px] font-bold uppercase text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">apartment</span>{{ profile.department }}</span>{% endif %}
+{% if profile.speciality %}<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 text-[11px] font-bold uppercase text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">category</span>{{ profile.speciality }}</span>{% endif %}
 </div>
 <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12px] text-on-surface-variant">
-<div class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
-<span>Statut : <strong class="text-on-surface">Titulaire de Chaire</strong></span>
-</div>
-<div class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[16px] text-secondary">timelapse</span>
-<span>Service d'enseignement : <strong class="font-data-metric text-on-surface">192h / 192h (100%)</strong></span>
-</div>
-<div class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[16px] text-tertiary">military_tech</span>
-<span>Habilitation : <strong class="text-on-surface">HDR (2016)</strong></span>
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">mail</span><span>{{ portal_user_email }}</span></div>
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-secondary">account_balance</span><span>{% if portal_university %}{{ portal_university.name }}{% else %}Aucune université courante{% endif %}</span></div>
 </div>
 </div>
 </div>
 </div>
-</div>
-<!-- 2. Affiliations -->
 <section class="rounded bg-surface-container-lowest p-4 shadow-sm">
 <div class="flex items-center justify-between gap-2">
 <div class="flex items-center gap-2.5">
-<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary">
-<span class="material-symbols-outlined text-[20px]">account_balance</span>
-</div>
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-[20px]">account_balance</span></div>
 <div>
-<h3 class="text-[14px] font-semibold text-on-surface">Affiliations &amp; Établissements Rattachés</h3>
-<p class="text-[12px] text-on-surface-variant">Gérez votre rattachement principal, vos postes secondaires et les synchronisations ENT associées.</p>
+<h3 class="text-[14px] font-semibold text-on-surface">Affiliations &amp; établissements rattachés</h3>
+<p class="text-[12px] text-on-surface-variant">Vos rattachements et le contexte dans lequel vous travaillez.</p>
 </div>
 </div>
-<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-low px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" type="button">
-<span class="material-symbols-outlined text-[16px]">add_link</span>
-<span>Lier un établissement</span>
-</button>
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-low px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" href="{% url 'portal:prof_universities' %}"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Mes universités</a>
 </div>
 <div class="mt-3 flex flex-col gap-2">
-<!-- Université principale -->
+{% for membership in memberships %}
 <div class="flex flex-col gap-3 rounded bg-surface-container-low p-3 md:flex-row md:items-center md:justify-between">
 <div class="flex min-w-0 items-start gap-3">
-<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-headline-sm font-bold text-on-primary">UP</div>
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {% if portal_university and membership.university_id == portal_university.pk %}bg-primary text-on-primary{% else %}bg-secondary-container text-on-secondary-container{% endif %} font-headline-sm font-bold">{{ membership.university.code|default:membership.university.name|slice:":2"|upper }}</div>
 <div class="min-w-0">
-<div class="flex items-center gap-2">
-<h4 class="text-[14px] font-semibold text-on-surface">Université Paris Cité</h4>
-<span class="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold uppercase text-on-primary">Principal</span>
+<div class="flex flex-wrap items-center gap-2">
+<h4 class="text-[14px] font-semibold text-on-surface">{{ membership.university.name }}</h4>
+{% if portal_university and membership.university_id == portal_university.pk %}<span class="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold uppercase text-on-primary">Principal</span>{% endif %}
 </div>
-<p class="mt-0.5 text-[12px] text-on-surface-variant">UFR Informatique • Campus des Grands Moulins (Bâtiment Sophie Germain)</p>
-<p class="mt-0.5 font-data-metric text-[11px] text-primary">Rôle : Enseignant-Chercheur Titulaire • Contrat ID : #UPC-ENS-44018</p>
+<p class="mt-0.5 text-[12px] text-on-surface-variant">{{ membership.university.city|default:"Ville non renseignée" }}{% if membership.university.country %}, {{ membership.university.country }}{% endif %}</p>
+<p class="mt-0.5 font-data-metric text-[11px] text-primary">Rôle : {{ membership.get_role_display }}</p>
 </div>
 </div>
 <div class="flex shrink-0 items-center gap-2 self-end md:self-center">
-<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-lowest px-2.5 py-1 font-data-metric text-[11px] font-semibold text-secondary">
-<span class="h-2 w-2 rounded-full bg-secondary"></span> Synchronisé (ENT Actif)
-                </span>
-<button aria-label="Paramètres de délégation UPC" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container" type="button">
-<span class="material-symbols-outlined text-[18px]">tune</span>
-</button>
+{% if membership.is_active %}{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+{% if membership.is_active and portal_university and membership.university_id != portal_university.pk %}
+<form method="post" action="{% url 'portal:university_switch' %}">
+{% csrf_token %}
+<input type="hidden" name="university" value="{{ membership.university.pk }}"/>
+<input type="hidden" name="next" value="{% url 'portal:prof_profile' %}"/>
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" type="submit"><span class="material-symbols-outlined text-[16px]">swap_horiz</span>Travailler ici</button>
+</form>
+{% endif %}
 </div>
 </div>
-<!-- Université secondaire 1 -->
-<div class="flex flex-col gap-3 rounded bg-surface-bright p-3 md:flex-row md:items-center md:justify-between">
-<div class="flex min-w-0 items-start gap-3">
-<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-container font-headline-sm font-bold text-on-secondary-container">SU</div>
-<div class="min-w-0">
-<div class="flex items-center gap-2">
-<h4 class="text-[14px] font-semibold text-on-surface">Sorbonne Université</h4>
-<span class="rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">Secondaire</span>
-</div>
-<p class="mt-0.5 text-[12px] text-on-surface-variant">Campus Pierre et Marie Curie (Jussieu) • Master 2 Recherche Informatique Fondamentale</p>
-<p class="mt-0.5 font-data-metric text-[11px] text-on-surface-variant">Rôle : Vacataire Associé • Délégation 32h/an</p>
-</div>
-</div>
-<div class="flex shrink-0 items-center gap-2 self-end md:self-center">
-<span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1 font-data-metric text-[11px] font-semibold text-outline">
-                  Accès partiel (Moodle externe)
-                </span>
-<button aria-label="Gérer accès Sorbonne" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</div>
-<!-- Université secondaire 2 -->
-<div class="flex flex-col gap-3 rounded bg-surface-bright p-3 md:flex-row md:items-center md:justify-between">
-<div class="flex min-w-0 items-start gap-3">
-<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tertiary-container font-headline-sm font-bold text-on-tertiary-container">ENS</div>
-<div class="min-w-0">
-<div class="flex items-center gap-2">
-<h4 class="text-[14px] font-semibold text-on-surface">École Normale Supérieure (PSL)</h4>
-<span class="rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase text-on-surface-variant">Mission Ponctuelle</span>
-</div>
-<p class="mt-0.5 text-[12px] text-on-surface-variant">Département d'Informatique • Jury de concours &amp; Agrégation externe</p>
-<p class="mt-0.5 font-data-metric text-[11px] text-on-surface-variant">Rôle : Membre titulaire du Jury 2024-2025</p>
-</div>
-</div>
-<div class="flex shrink-0 items-center gap-2 self-end md:self-center">
-<span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2.5 py-1 font-data-metric text-[11px] font-semibold text-outline">
-                  Session printemps 2025
-                </span>
-<button aria-label="Gérer accès ENS" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</div>
-</div>
-<!-- Sélecteur d'établissement par défaut -->
-<div class="mt-3 flex flex-col gap-3 rounded bg-surface-container p-3 md:flex-row md:items-center md:justify-between">
-<div class="space-y-0.5">
-<span class="text-[11px] font-bold uppercase text-on-surface-variant">Établissement sélectionné par défaut à la connexion</span>
-<p class="text-[12px] text-on-surface">Les devoirs, relevés et espaces de cours s'ouvriront par défaut sous cette instance universitaire.</p>
-</div>
-<div class="flex shrink-0 flex-wrap items-center gap-2">
-<select class="rounded-full bg-surface-container-lowest px-4 py-2 text-[13px] font-semibold text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
-<option selected="" value="upc">Université Paris Cité (Principal)</option>
-<option value="sorbonne">Sorbonne Université</option>
-<option value="ens">École Normale Supérieure</option>
-</select>
-<button class="h-9 rounded-full bg-surface-container-highest px-3.5 text-[13px] font-semibold text-primary transition-colors hover:bg-surface-container-low" type="button">
-                Gérer les clés d'API
-              </button>
-</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-center text-[12px] text-on-surface-variant">Aucune affiliation enregistrée.</p>
+{% endfor %}
 </div>
 </section>
-<!-- 3. Disponibilités -->
-<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2.5">
-<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary">
-<span class="material-symbols-outlined text-[20px]">calendar_clock</span>
+<section class="rounded bg-surface-container-lowest shadow-sm" id="profile-edit">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Informations du compte</h2>
+<p class="text-xs text-on-surface-variant">Ces informations apparaissent sur vos pages et vos supports pédagogiques.</p>
 </div>
-<div>
-<h3 class="text-[14px] font-semibold text-on-surface">Disponibilités, Permanences &amp; Tutorat</h3>
-<p class="text-[12px] text-on-surface-variant">Configuration de vos créneaux d'accueil étudiants et de la prise de rendez-vous tutorat individuel.</p>
+<form class="flex flex-col gap-5 p-5" method="post" novalidate>
+{% csrf_token %}
+<div class="grid gap-4 sm:grid-cols-2">
+{% for field in account_form.visible_fields %}{% include "portal/_form_field.html" with field=field %}{% endfor %}
 </div>
+{% for error in account_form.non_field_errors %}<p class="text-xs font-semibold text-error">{{ error }}</p>{% endfor %}
+{% if profile_form %}
+<div class="border-t border-outline-variant/40 pt-4">
+<h3 class="font-title-md text-title-md text-on-surface">Profil professeur — {% if portal_university %}{{ portal_university.name }}{% else %}université courante{% endif %}</h3>
+<p class="text-xs text-on-surface-variant">Ces informations ne concernent que l'université courante.</p>
+<div class="mt-3 grid gap-4 sm:grid-cols-2">
+{% for field in profile_form.visible_fields %}{% include "portal/_form_field.html" with field=field %}{% endfor %}
 </div>
-<span class="inline-flex items-center gap-1 rounded-full bg-secondary-fixed px-3 py-1 text-[11px] font-bold uppercase text-secondary">
-<span class="material-symbols-outlined text-[16px]">sync</span>
-              Sync Outlook 365 Active
-            </span>
+{% for error in profile_form.non_field_errors %}<p class="text-xs font-semibold text-error">{{ error }}</p>{% endfor %}
 </div>
-<div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-<!-- Permanence libre -->
-<div class="flex flex-col justify-between gap-3 rounded bg-surface-container-low p-3">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="text-[11px] font-bold uppercase text-on-surface-variant">Permanence Libre Étudiants</span>
-<span class="rounded-full bg-primary-fixed px-2 py-0.5 font-data-metric text-[11px] font-semibold text-on-primary-fixed">Hebdomadaire</span>
+{% else %}
+<div class="rounded bg-tertiary-fixed/30 px-4 py-3 text-xs text-on-surface">Aucun profil professeur pour l'université courante. Votre rattachement est peut-être en attente de validation.</div>
+{% endif %}
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+<p class="text-xs text-on-surface-variant">Les champs sont enregistrés pour l'université courante uniquement.</p>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer</button>
 </div>
-<div class="flex items-center gap-2.5">
-<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-container-lowest text-primary">
-<span class="material-symbols-outlined text-[20px]">event</span>
-</div>
-<div>
-<p class="text-[14px] font-semibold text-on-surface">Tous les Jeudis • 14h00 - 17h00</p>
-<p class="text-[12px] text-on-surface-variant">Bât. Sophie Germain, Bureau 412A ou Visio Chiffrée</p>
-</div>
-</div>
-<p class="rounded bg-surface-container-lowest/70 p-2.5 text-[12px] text-on-surface-variant">
-                  Accès sans rendez-vous préalable pour les étudiants de Licence 3 &amp; Master 1. File d'attente virtuelle activée sur le Hub.
-                </p>
-</div>
-<div class="flex items-center justify-between border-t border-outline-variant/40 pt-2">
-<label class="flex cursor-pointer items-center gap-2 text-[13px] text-on-surface">
-<input checked="" class="h-4 w-4 rounded accent-primary" type="checkbox"/>
-<span>Activer la file d'attente virtuelle</span>
-</label>
-<button class="text-[13px] font-semibold text-primary hover:underline" type="button">Modifier</button>
-</div>
-</div>
-<!-- Tutorat -->
-<div class="flex flex-col justify-between gap-3 rounded bg-surface-container-low p-3">
-<div class="space-y-2">
-<div class="flex items-center justify-between">
-<span class="text-[11px] font-bold uppercase text-on-surface-variant">Tutorat Référent &amp; Soutien</span>
-<span class="rounded-full bg-secondary-fixed px-2 py-0.5 font-data-metric text-[11px] font-semibold text-on-secondary-fixed">Sur Réservation</span>
-</div>
-<div class="space-y-1.5">
-<div class="flex items-center justify-between text-[12px]">
-<span class="text-on-surface-variant">Durée standard du créneau :</span>
-<span class="font-data-metric font-bold text-on-surface">30 minutes</span>
-</div>
-<div class="flex items-center justify-between text-[12px]">
-<span class="text-on-surface-variant">Délai d'anticipation minimum :</span>
-<span class="font-data-metric font-bold text-on-surface">24 heures</span>
-</div>
-<div class="flex items-center justify-between text-[12px]">
-<span class="text-on-surface-variant">Quota max réservations :</span>
-<span class="font-data-metric font-bold text-primary">6 étudiants / semaine</span>
-</div>
-</div>
-<div class="h-2 w-full overflow-hidden rounded-full bg-surface-container">
-<div class="h-full rounded-full bg-secondary" style="width: 66%;"></div>
-</div>
-<div class="flex justify-between font-data-metric text-[11px] text-on-surface-variant">
-<span>Réservés cette semaine : 4/6</span>
-<span>Disponibles : 2</span>
-</div>
-</div>
-<div class="flex items-center justify-between border-t border-outline-variant/40 pt-2">
-<span class="text-[11px] text-on-surface-variant">Visio BBB / Renater intégrée</span>
-<button class="text-[13px] font-semibold text-primary hover:underline" type="button">Ajuster quotas</button>
-</div>
-</div>
-</div>
+</form>
 </section>
-<!-- 4. Paramètres pédagogiques -->
-<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2.5">
-<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary">
-<span class="material-symbols-outlined text-[20px]">tune</span>
 </div>
-<div>
-<h3 class="text-[14px] font-semibold text-on-surface">Paramètres Pédagogiques &amp; Barèmes IA</h3>
-<p class="text-[12px] text-on-surface-variant">Configurez les critères d'évaluation automatisée, le traitement LaTeX et l'assistance de notation.</p>
-</div>
-</div>
-<span class="rounded-full bg-tertiary-fixed px-3 py-1 font-data-metric text-[12px] font-semibold text-on-tertiary-fixed">
-              Mode : Rigueur Mathématique
-            </span>
-</div>
-<div class="mt-3 flex flex-col gap-1">
-<!-- Ligne 1 -->
-<div class="flex flex-col gap-2 rounded p-2 transition-colors hover:bg-surface-container-low sm:flex-row sm:items-center sm:justify-between">
-<div class="max-w-xl space-y-0.5">
-<div class="flex items-center gap-1.5">
-<span class="text-[13px] font-semibold text-on-surface">Vérification formelle des étapes intermédiaires</span>
-<span class="material-symbols-outlined text-[16px] text-primary" title="Vérification par moteur symbolique">verified</span>
-</div>
-<p class="text-[12px] text-on-surface-variant">
-                  Exige de l'assistant IA qu'il valide mathématiquement chaque transition de preuve algorithmique avant d'attribuer les points de barème.
-                </p>
-</div>
-<div class="flex items-center gap-3">
-<label class="relative inline-flex cursor-pointer items-center">
-<input checked="" class="peer sr-only" type="checkbox"/>
-<div class="h-6 w-11 rounded-full bg-surface-container-highest after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none"></div>
-</label>
-</div>
-</div>
-<!-- Ligne 2 -->
-<div class="flex flex-col gap-2 rounded p-2 transition-colors hover:bg-surface-container-low sm:flex-row sm:items-center sm:justify-between">
-<div class="max-w-xl space-y-0.5">
-<span class="text-[13px] font-semibold text-on-surface">Tolérance aux approximations numériques</span>
-<p class="text-[12px] text-on-surface-variant">
-                  Seuil d'erreur autorisé pour les calculs de complexité asymptotique et valeurs numériques discrètes.
-                </p>
-</div>
-<div class="flex w-48 items-center gap-3">
-<input class="w-full cursor-pointer accent-primary" max="5" min="0" step="0.5" type="range" value="1"/>
-<span class="shrink-0 font-data-metric text-[13px] font-semibold text-on-surface">± 1.0%</span>
-</div>
-</div>
-<!-- Ligne 3 -->
-<div class="flex flex-col gap-2 rounded p-2 transition-colors hover:bg-surface-container-low sm:flex-row sm:items-center sm:justify-between">
-<div class="max-w-xl space-y-0.5">
-<span class="text-[13px] font-semibold text-on-surface">Exigence de syntaxe LaTeX pour les devoirs manuscrits scannés</span>
-<p class="text-[12px] text-on-surface-variant">
-                  Transcrit automatiquement les équations manuscrites via OCR multimodal et exige la conformité AMS-LaTeX avant injection dans le barème.
-                </p>
-</div>
-<div class="flex items-center gap-3">
-<label class="relative inline-flex cursor-pointer items-center">
-<input checked="" class="peer sr-only" type="checkbox"/>
-<div class="h-6 w-11 rounded-full bg-surface-container-highest after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none"></div>
-</label>
-</div>
-</div>
-<!-- Ligne 4 : modèles d'appréciations -->
-<div class="space-y-2 pt-2">
-<div class="flex flex-wrap items-center justify-between gap-2">
-<span class="text-[13px] font-semibold text-on-surface">Modèles d'appréciations personnalisées (Feedback Bienveillant &amp; Rigoureux)</span>
-<button class="inline-flex items-center gap-1 text-[12px] font-semibold text-primary hover:underline" type="button">
-<span class="material-symbols-outlined text-[16px]">edit_note</span>
-                  Éditer les prompts de rétroaction
-                </button>
-</div>
-<div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
-<div class="flex flex-col justify-between gap-2 rounded bg-surface-container-low p-3">
-<span class="text-[11px] font-bold uppercase text-primary">Standard Licence</span>
-<p class="text-[12px] text-on-surface-variant">"Identification précise de l'erreur d'invariant avec renvoi au TD 3."</p>
-<span class="font-data-metric text-[11px] text-outline">Actif sur 3 cours</span>
-</div>
-<div class="flex flex-col justify-between gap-2 rounded bg-surface-container-low p-3">
-<span class="text-[11px] font-bold uppercase text-secondary">Avancé Master</span>
-<p class="text-[12px] text-on-surface-variant">"Analyse de la réduction NP-difficile et suggestion de lecture d'articles."</p>
-<span class="font-data-metric text-[11px] text-outline">Actif sur 2 cours</span>
-</div>
-<div class="flex flex-col justify-between gap-2 rounded bg-surface-container-low p-3">
-<span class="text-[11px] font-bold uppercase text-tertiary-container">Projet &amp; Soutenance</span>
-<p class="text-[12px] text-on-surface-variant">"Évaluation de la clarté pédagogique et de la rigueur des benchmarks."</p>
-<span class="font-data-metric text-[11px] text-outline">Actif sur 1 cours</span>
-</div>
-</div>
-</div>
+<div class="flex flex-col gap-5 lg:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Profil métier</h2>
+<dl class="mt-3 space-y-3 text-sm">
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Département</dt><dd class="font-semibold text-on-surface">{{ profile.department|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Spécialité</dt><dd class="font-semibold text-on-surface">{{ profile.speciality|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Grade</dt><dd class="font-semibold text-on-surface">{{ profile.get_grade_display|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Université courante</dt><dd class="font-semibold text-on-surface">{{ portal_university.name|default:"—" }}</dd></div>
+</dl>
+</section>
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Raccourcis</h2>
+<div class="mt-3 flex flex-col gap-2">
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:prof_classes' %}">Mes classes &amp; groupes<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:prof_universities' %}">Mes universités<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:prof_settings' %}">Paramètres du compte<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
 </div>
 </section>
 </div>
-<!-- Colonne latérale : assistant IA -->
-<aside aria-label="Assistant IA Enseignant" class="flex flex-col gap-4 lg:sticky lg:top-20 lg:col-span-4">
-<div class="rounded bg-surface-container-lowest p-4 shadow-sm">
-<div class="flex items-center justify-between gap-2">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[20px] text-secondary">auto_awesome</span>
-<h3 class="text-[14px] font-semibold text-on-surface">Assistant IA Profil &amp; Synthèse</h3>
-</div>
-<span class="rounded-full bg-secondary-fixed px-2.5 py-0.5 font-data-metric text-[11px] font-bold uppercase tracking-wider text-on-secondary-fixed-variant">
-              BÊTA MULTIMODALE
-            </span>
-</div>
-<p class="mt-2 text-[12px] leading-relaxed text-on-surface-variant">
-            Génération adaptative de fiches enseignants, résumé d'activités pour les comités d'évaluation HCÉRES et harmonisation de vos syllabus.
-          </p>
-<div class="mt-3">
-<label class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Objectif de génération :</label>
-<div class="mt-1 grid grid-cols-3 gap-1 rounded bg-surface-container-low p-1 text-center">
-<button class="rounded-full bg-primary py-1.5 px-2 text-[12px] font-semibold text-on-primary shadow-sm transition-all" type="button">
-                Recherche
-              </button>
-<button class="rounded-full px-2 py-1.5 text-[12px] font-medium text-on-surface-variant transition-all hover:text-on-surface" type="button">
-                Vulgarisation
-              </button>
-<button class="rounded-full px-2 py-1.5 text-[12px] font-medium text-on-surface-variant transition-all hover:text-on-surface" type="button">
-                Syllabus M1
-              </button>
 </div>
 </div>
-<button class="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-secondary text-[13px] font-semibold text-on-secondary transition-colors hover:bg-secondary/90" type="button">
-<span class="material-symbols-outlined text-[18px]">psychology</span>
-<span>Générer une synthèse de recherche</span>
-</button>
-<div class="mt-3 rounded bg-surface-container-low p-3">
-<div class="flex items-center justify-between gap-2">
-<span class="flex items-center gap-1 text-[11px] font-bold uppercase text-secondary">
-<span class="material-symbols-outlined text-[16px]">tips_and_updates</span>
-                Suggestion actualisée
-              </span>
-<span class="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-2 py-0.5 font-data-metric text-[11px] font-bold text-primary">
-<span class="material-symbols-outlined text-[16px]">analytics</span>
-                Cohérence : 98%
-              </span>
-</div>
-<div class="mt-2 space-y-2 rounded bg-surface-container-lowest p-3 text-[12px] leading-relaxed text-on-surface">
-<p>
-<strong class="text-primary">Prof. Hélène Vasseur</strong> est professeure d'informatique à l'Université Paris Cité et chercheuse à l'IRIF (CNRS). Ses travaux récents publiés à <em class="font-semibold text-on-surface">NeurIPS 2024</em> portent sur la vérification formelle des réseaux de neurones profonds et les garanties d'équité algorithmique.
-              </p>
-<p class="text-[11px] text-on-surface-variant">
-                Elle coordonne l'unité d'enseignement "Deep Learning Fondations &amp; Éthique" en Master 2 et préside le comité de tutorat transversal.
-              </p>
-</div>
-<div class="mt-2 flex items-center gap-2">
-<button class="flex flex-1 items-center justify-center gap-1 rounded-full bg-primary py-1.5 text-[12px] font-semibold text-on-primary transition-colors hover:bg-primary/90" type="button">
-<span class="material-symbols-outlined text-[16px]">check</span>
-<span>Garder</span>
-</button>
-<button class="flex flex-1 items-center justify-center gap-1 rounded-full bg-surface-container-highest py-1.5 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" type="button">
-<span class="material-symbols-outlined text-[16px]">edit</span>
-<span>Modifier</span>
-</button>
-<button class="flex items-center justify-center rounded-full bg-error-container px-3 py-1.5 text-on-error-container transition-colors hover:bg-error/20" title="Refuser cette proposition" type="button">
-<span class="material-symbols-outlined text-[16px]">close</span>
-</button>
-</div>
-</div>
-<div class="mt-3 space-y-1.5">
-<span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Sources de synchronisation :</span>
-<div class="space-y-1.5 font-data-metric text-[11px] text-on-surface-variant">
-<div class="flex items-center justify-between rounded bg-surface-container p-2">
-<span class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[16px] text-primary">feed</span>
-                  HAL-SHS / arXiv (Vasseur-H)
-                </span>
-<span class="font-semibold text-primary">Il y a 3h</span>
-</div>
-<div class="flex items-center justify-between rounded bg-surface-container p-2">
-<span class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[16px] text-secondary">menu_book</span>
-                  Moodle UPC - Syllabus 2024/25
-                </span>
-<span class="font-semibold text-secondary">À jour</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Bandeau de résilience -->
-<div class="rounded bg-surface-container-low p-3 shadow-sm">
-<div class="flex items-start gap-2.5">
-<span class="material-symbols-outlined mt-0.5 shrink-0 text-[18px] text-primary">policy</span>
-<div class="space-y-1">
-<h4 class="text-[13px] font-bold text-on-surface">Garantie de service universitaire</h4>
-<p class="text-[12px] leading-relaxed text-on-surface-variant">
-                L'IA est un outil d'assistance optionnel. La modification manuelle reste accessible à 100% sans interruption.
-              </p>
-</div>
-</div>
-<div class="mt-2 flex items-center justify-between border-t border-outline-variant/40 pt-2 font-data-metric text-[11px] text-outline">
-<span>Audit conformité RGPD &amp; RGAA : Valide</span>
-<a class="text-primary underline hover:text-primary-container" href="#">En savoir plus</a>
-</div>
-</div>
-</aside>
-</div>
-</div></main>
+</main>
 {% endblock %}

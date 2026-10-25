@@ -17,10 +17,21 @@
 </div>
 <div class="relative mx-5 mb-4 flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 ring-1 ring-primary/10 shadow-sm">
 <span class="material-symbols-outlined text-[18px] text-primary">account_balance</span>
-<div class="min-w-0">
+<div class="min-w-0 flex-1">
 <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-on-surface-variant/70">Établissement</p>
-<p class="truncate text-body-sm font-semibold text-on-surface">Université Paris Cité</p>
+{% if portal_university %}
+<p class="truncate text-body-sm font-semibold text-on-surface">{{ portal_university.name }}</p>
+{% elif portal_is_platform_admin %}
+<p class="truncate text-body-sm font-semibold text-on-surface">Toutes les universités</p>
+{% else %}
+<p class="truncate text-body-sm font-semibold text-on-surface">Aucune université</p>
+{% endif %}
 </div>
+{% if portal_can_switch_university %}
+<a class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-primary-fixed hover:text-primary" href="{% url 'portal:university_switch' %}" title="Changer d'université">
+<span class="material-symbols-outlined text-[18px]">swap_horiz</span>
+</a>
+{% endif %}
 </div>
 <nav aria-label="Sections du portail" class="portal-nav-scroll relative flex-1 overflow-y-auto px-3 pb-4">
 {% for section in portal_nav_sections %}
@@ -52,8 +63,8 @@
 </a>
 </div>
 <div class="mt-2 flex items-center justify-between gap-2 px-1">
-<a class="text-[11px] font-semibold text-primary transition-colors hover:text-primary-container" href="{% url portal_profile_url_name %}">Mon profil</a>
-<span class="rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">{{ portal_role_label }}</span>
+<a class="text-[11px] font-semibold text-primary transition-colors hover:text-primary-container" href="{% url portal_profile_url_name %}">{{ portal_profile_label }}</a>
+<span class="rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">{{ portal_scope_label }}</span>
 </div>
 </div>
 </aside>

@@ -1,0 +1,6 @@
+<div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-5 py-10 text-center">
+<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-container text-primary"><span class="material-symbols-outlined text-[24px]">{{ icon|default:"inbox" }}</span></span>
+<p class="text-sm font-semibold text-on-surface">{{ title|default:"Aucun élément" }}</p>
+{% if hint %}<p class="max-w-md text-xs text-on-surface-variant">{{ hint }}</p>{% endif %}
+{% if url and label %}<a class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{{ url }}">{{ label }}<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>{% endif %}
+</div>

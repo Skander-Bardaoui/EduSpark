@@ -88,9 +88,13 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.tenancy.TenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Modèle tenant utilisé par le socle multi-universités.
+TENANT_MODEL = 'accounts.University'
 
 ROOT_URLCONF = 'EduSpark.urls'
 

@@ -1,618 +1,200 @@
 {% extends "portal/base_admin.html" %}
 {% block title %}Étudiants &amp; Inscriptions — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
-<div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5 pb-2">
-<div class="flex flex-col gap-2">
-<div class="flex items-center gap-3">
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Gestion des Étudiants &amp; Inscriptions Académiques</h1>
-<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wide">
-<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-          Synchronisation Apogée
-        </span>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant max-w-4xl">
-        Supervision des comptes étudiants, affectations de cohortes et importations massives certifiées Apogée / SI-Scol pour l'Université Paris Cité.
-      </p>
+<main class="relative min-h-[calc(100vh-4rem)] w-full bg-surface px-4 py-5 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+<div class="flex flex-col gap-5 pb-2 xl:flex-row xl:items-center xl:justify-between">
+<div class="flex min-w-0 flex-col gap-2">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Étudiants &amp; Inscriptions Académiques</h1>
+<p class="max-w-4xl font-body-md text-body-md text-on-surface-variant">Supervision des comptes étudiants, affectations de cohortes et inscriptions de {{ portal_university.name|default:"l'université courante" }}.</p>
 </div>
 <div class="flex flex-wrap items-center gap-2">
-<button class="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-high hover:bg-secondary-fixed text-primary transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" id="toggle-ia-btn" type="button">
-<span class="material-symbols-outlined text-[20px] text-secondary group-hover:rotate-12 transition-transform">auto_awesome</span>
-<span class="font-label-md text-label-md">Assistant IA d'importation</span>
-<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-secondary font-label-sm text-[11px] uppercase font-bold">Beta</span>
-</button>
-<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-on-secondary hover:bg-secondary-container transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary" id="open-import-modal" type="button">
-<span class="material-symbols-outlined text-[20px]">upload_file</span>
-<span class="font-label-md text-label-md">Importer CSV / XLSX</span>
-</button>
-<button class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-primary-fixed" type="button">
-<span class="material-symbols-outlined text-[20px]">person_add</span>
-<span class="font-label-md text-label-md">+ Inscrire un étudiant</span>
-</button>
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-5 py-2.5 font-label-md text-label-md text-primary shadow-sm transition-all duration-200 hover:bg-secondary-fixed focus:outline-none focus:ring-2 focus:ring-primary" href="{% url 'portal:admin_invitations' %}"><span class="material-symbols-outlined text-[20px] text-secondary">mark_email_read</span>Inviter</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 font-label-md text-label-md text-on-primary shadow-md transition-all duration-200 hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary-fixed" href="{% url 'portal:admin_student_create' %}"><span class="material-symbols-outlined text-[20px]">person_add</span>Inscrire un étudiant</a>
 </div>
 </div>
 <section aria-labelledby="kpis-title" class="flex flex-col gap-3">
 <h2 class="sr-only" id="kpis-title">Indicateurs clés d'inscription</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-<div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
 <div class="flex items-start justify-between">
 <div>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Total Inscrits</span>
-<div class="font-data-metric text-[20px] font-bold text-primary mt-1">14 820</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Total inscrits</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-primary">{{ stats.students }}</div>
 </div>
-<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-[26px]">groups</span>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-fixed text-on-primary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">groups</span></div>
 </div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Membres actifs</span>
+<span class="font-data-metric text-data-metric font-bold text-primary">{{ stats.students }} comptes</span>
 </div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Campus Grands Moulins &amp; Odéon</span>
-<span class="font-data-metric text-data-metric text-primary font-bold">+6.2% a/a</span>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
 <div class="flex items-start justify-between">
 <div>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Nouveaux arrivants S2</span>
-<div class="font-data-metric text-[20px] font-bold text-secondary mt-1">+430</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Comptes en attente</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-secondary">{{ stats.pending }}</div>
 </div>
-<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-[26px]">person_add_alt</span>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-fixed text-on-secondary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">pending_actions</span></div>
 </div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Demandes à valider</span>
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric font-semibold text-secondary"><span class="material-symbols-outlined text-sm">bolt</span>{{ stats.pending }} en attente</span>
 </div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Mobilités &amp; doubles licences</span>
-<span class="inline-flex items-center gap-1 font-data-metric text-data-metric text-secondary font-semibold">
-<span class="material-symbols-outlined text-sm">bolt</span> 100% traités
-          </span>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
 <div class="flex items-start justify-between">
 <div>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Comptes Actifs</span>
-<div class="font-data-metric text-[20px] font-bold text-on-surface mt-1">98.4%</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Filières</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-on-surface">{{ stats.programs }}</div>
 </div>
-<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
-<svg class="w-8 h-8 -rotate-90" viewbox="0 0 36 36">
-<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
-<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="98.4, 100" stroke-linecap="round" stroke-width="3.5"></path>
-</svg>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-high text-primary transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">account_tree</span></div>
 </div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Filières représentées</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface-variant">{{ stats.programs }} filières</span>
 </div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Authentification SSO active</span>
-<span class="font-data-metric text-data-metric text-on-surface-variant font-bold">14 582 usagers</span>
-</div>
-</div>
-<div class="relative overflow-hidden bg-surface-container-lowest p-5 rounded shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
 <div class="flex items-start justify-between">
 <div>
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-error">Alertes SI-Scol / Doublons</span>
-<div class="font-data-metric text-[20px] font-bold text-error mt-1">12</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Classes</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-on-surface">{{ stats.classes }}</div>
 </div>
-<div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error group-hover:scale-105 transition-transform">
-<span class="material-symbols-outlined text-[26px]">warning</span>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">layers</span></div>
 </div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Classes avec étudiants</span>
+<a class="font-label-sm text-label-sm font-semibold text-primary underline hover:opacity-80" href="{% url 'portal:admin_classes' %}">Gérer ({{ stats.classes }})</a>
 </div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Incohérences de cursus</span>
-<button class="font-label-sm text-label-sm text-error underline font-semibold hover:opacity-80" type="button">Traiter (12)</button>
-</div>
-</div>
+</article>
 </div>
 </section>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-<div class="lg:col-span-8 flex flex-col gap-5 min-w-0">
-<section aria-labelledby="import-card-title" class="bg-surface-container-lowest p-7 rounded shadow-sm flex flex-col gap-5">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
-<span class="material-symbols-outlined text-[22px]">dataset</span>
-</div>
+<div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 lg:col-span-8">
+<section aria-labelledby="students-directory-title" class="overflow-hidden rounded bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-4 border-b border-outline-variant/40 p-6">
+<div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="import-card-title">Import massif SI-Scol &amp; Harmonisation</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Conforme aux spécifications du schéma national Apogée V6.4</p>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="students-directory-title">Annuaire des étudiants</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ profiles|length }}{% endif %} étudiant{{ profiles|length|pluralize }} affiché{{ profiles|length|pluralize }}</p>
 </div>
+{% if is_filtered %}<a class="inline-flex items-center gap-1.5 self-start rounded-full bg-surface-container-high px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant transition-colors hover:bg-surface-variant" href="{% url 'portal:admin_students' %}"><span class="material-symbols-outlined text-[16px]">restart_alt</span>Réinitialiser</a>{% endif %}
 </div>
-<div class="flex items-center gap-2">
-<a class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-label-sm text-label-sm transition-colors" href="#">
-<span class="material-symbols-outlined text-[16px]">download</span>
-              Gabarit CSV Type (.csv)
-            </a>
+<form class="grid gap-3 md:grid-cols-12" method="get">
+<div class="relative flex items-center md:col-span-5">
+<span class="material-symbols-outlined pointer-events-none absolute left-3.5 text-[20px] text-on-surface-variant">search</span>
+<input aria-label="Recherche d'étudiant" class="h-10 w-full rounded-full bg-surface-container-low pl-10 pr-4 font-body-sm text-body-sm text-on-surface shadow-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/>
 </div>
-</div>
-<div class="group relative rounded p-8 bg-surface-container-low hover:bg-surface-container transition-all text-center flex flex-col items-center justify-center gap-3 cursor-pointer">
-<input accept=".csv, .xlsx" aria-label="Déposer le fichier CSV des étudiants" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" id="csv-upload-input" type="file"/>
-<div class="w-14 h-14 rounded-full bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined text-[32px]">cloud_upload</span>
-</div>
-<div class="flex flex-col items-center gap-1">
-<p class="font-title-md text-title-md text-on-surface">
-<span class="text-primary font-semibold">Glissez-déposez votre export universitaire</span> ou cliquez pour parcourir
-            </p>
-<p class="font-body-sm text-body-sm text-on-surface-variant max-w-xl">
-              Prise en charge directe des exports Apogée (.csv avec délimiteur point-virgule ou virgule, encodage UTF-8 obligatoire).
-            </p>
-</div>
-<div class="flex flex-wrap items-center justify-center gap-2 mt-2">
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">INE (11 car.)</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Nom</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Prénom</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Email Univ</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Filière</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Promo</span>
-<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-mono">Tiers-temps</span>
-</div>
-</div>
-<div class="rounded bg-surface-container-low p-5 flex flex-col gap-4">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
-<span class="font-title-md text-title-md text-on-surface">Dernier rapport de pré-validation en direct</span>
-</div>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Fichier : promo_M1_IA_2024.csv (480 Ko)</span>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-<div class="bg-surface-container-lowest p-3.5 rounded flex items-center justify-between">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Lignes scannées</span>
-<span class="font-headline-sm text-headline-sm font-bold text-on-surface">142</span>
-</div>
-<div class="bg-surface-container-lowest p-3.5 rounded flex items-center justify-between">
-<span class="font-body-sm text-body-sm text-primary">Conformes &amp; Prêtes</span>
-<span class="font-headline-sm text-headline-sm font-bold text-primary">138</span>
-</div>
-<div class="bg-surface-container-lowest p-3.5 rounded flex items-center justify-between">
-<span class="font-body-sm text-body-sm text-tertiary-container">Avertissements</span>
-<span class="font-headline-sm text-headline-sm font-bold text-tertiary-container">4</span>
-</div>
-</div>
-<div class="p-3 bg-surface-container rounded flex items-center justify-between gap-3 text-on-surface">
-<div class="flex items-center gap-2 min-w-0">
-<span class="material-symbols-outlined text-secondary shrink-0 text-[18px]">verified</span>
-<p class="font-body-sm text-body-sm">
-                4 adresses personnelles <span class="font-mono text-xs">@gmail.com</span> corrigées automatiquement en <span class="font-mono text-xs">@etu.u-paris.fr</span> via l'annuaire LDAP de l'université.
-              </p>
-</div>
-<button class="shrink-0 px-4 py-1.5 rounded-full bg-primary text-on-primary hover:bg-primary-container text-label-sm font-label-sm transition-colors shadow-sm" type="button">
-              Valider l'injection (138)
-            </button>
-</div>
-</div>
-</section>
-<section aria-labelledby="students-directory-title" class="bg-surface-container-lowest rounded shadow-sm flex flex-col overflow-hidden">
-<div class="p-5 flex flex-col gap-5">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-<div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="students-directory-title">Répertoire des Étudiants Inscrits</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Filtrez par identifiant unique national, cohorte pédagogique ou statut d'accès</p>
-</div>
-<div class="flex items-center gap-2">
-<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px]">tune</span>
-                Filtres avancés
-              </button>
-<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px]">file_download</span>
-                Exporter sélection
-              </button>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-<div class="md:col-span-5 relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">search</span>
-<input aria-label="Recherche d'étudiant" class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" placeholder="Rechercher par nom, prénom ou INE..." type="search"/>
-</div>
-<div class="md:col-span-4">
-<select aria-label="Filtrer par Département ou UFR" class="w-full h-10 px-4 rounded-full bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer">
-<option value="">Tous les Départements &amp; UFR</option>
-<option value="info">UFR Informatique (Paris Rive Gauche)</option>
-<option value="math">UFR Mathématiques &amp; Modélisation</option>
-<option value="sante">Faculté de Santé &amp; Biomédicale</option>
-<option value="shs">UFR Sciences Humaines et Sociales</option>
+{% for filter in filters %}
+<div class="md:col-span-2">
+<select aria-label="Filtrer par {{ filter.label }}" class="h-10 w-full cursor-pointer rounded-full bg-surface-container-low px-4 font-body-sm text-body-sm text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" name="{{ filter.param }}">
+<option value="">{{ filter.label }} — tous</option>
+{% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
 </select>
 </div>
-<div class="md:col-span-3">
-<select aria-label="Filtrer par statut de compte" class="w-full h-10 px-4 rounded-full bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer">
-<option value="">Tous les statuts</option>
-<option value="actif">Comptes Actifs (SSO)</option>
-<option value="attente">En attente d'activation</option>
-<option value="tiers">Aménagement Tiers-Temps</option>
-<option value="suspendu">Comptes Suspendus</option>
-</select>
+{% endfor %}
+<div class="md:col-span-1">
+<button class="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 font-label-sm text-label-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
 </div>
-</div>
+</form>
 </div>
 <div class="overflow-x-auto">
-<table class="w-full text-left" role="table">
-<thead class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<table class="w-full min-w-[880px] text-left" role="table">
+<thead class="bg-surface-container-high font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
 <tr>
-<th class="py-2.5 pl-6 pr-3" scope="col">
-<span class="sr-only">Sélectionner tout</span>
-<input aria-label="Sélectionner tous les étudiants visibles" class="w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
-</th>
-<th class="py-2.5 px-3" scope="col">Étudiant &amp; INE</th>
+<th class="py-2.5 pl-6 pr-3" scope="col">Étudiant &amp; Matricule</th>
 <th class="py-2.5 px-3" scope="col">Formation &amp; Cohorte</th>
-<th class="py-2.5 px-3" scope="col">Statut &amp; Aménagements</th>
-<th class="py-2.5 px-3" scope="col">Dernière activité</th>
+<th class="py-2.5 px-3" scope="col">Groupes</th>
+<th class="py-2.5 px-3" scope="col">Statut</th>
 <th class="py-2.5 pl-3 pr-6 text-right" scope="col">Actions</th>
 </tr>
 </thead>
-<tbody class="divide-y-0 text-on-surface font-body-sm text-body-sm">
-<tr class="hover:bg-surface-container-low transition-colors">
+<tbody class="text-body-sm font-body-sm text-on-surface">
+{% for profile in profiles %}
+<tr class="transition-colors hover:bg-surface-container-low">
 <td class="py-4 pl-6 pr-3">
-<input aria-label="Sélectionner Sophie Martin" class="w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
-</td>
-<td class="py-4 px-3">
 <div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-body-sm shrink-0">
-                      SM
-                    </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Sophie Martin</span>
+<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-fixed text-body-sm font-bold text-on-secondary-fixed">{{ profile.user.first_name|slice:":1"|upper }}{{ profile.user.last_name|slice:":1"|upper }}</div>
+<div class="flex min-w-0 flex-col">
+<span class="truncate font-title-md text-title-md font-semibold text-on-surface">{{ profile.user.get_full_name|default:profile.user.email }}</span>
 <div class="flex items-center gap-2">
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0712398451C</span>
+<span class="font-data-metric text-xs text-on-surface-variant">{% if profile.student_number %}{{ profile.student_number }}{% else %}Sans matricule{% endif %}</span>
 <span class="text-on-surface-variant/40">•</span>
-<span class="text-on-surface-variant text-xs truncate">sophie.martin@etu.u-paris.fr</span>
+<span class="truncate text-xs text-on-surface-variant">{{ profile.user.email }}</span>
 </div>
 </div>
 </div>
 </td>
 <td class="py-4 px-3">
 <div class="flex flex-col">
-<span class="font-semibold text-on-surface">M1 Informatique &amp; IA</span>
-<span class="font-body-sm text-on-surface-variant text-xs">Groupe TD 4 - Promo 2024/2025</span>
+<span class="font-semibold text-on-surface">{{ profile.program|default:"Filière non renseignée" }}</span>
+<span class="font-body-sm text-xs text-on-surface-variant">{{ profile.promotion|default:"Promotion non renseignée" }}</span>
 </div>
 </td>
 <td class="py-4 px-3">
 <div class="flex flex-wrap items-center gap-1.5">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">check_circle</span>
-                      Actif
-                    </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold" title="Aménagement médicalisé certifié">
-<span class="material-symbols-outlined text-sm">timer</span>
-                      Tiers-temps
-                    </span>
+{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary">{{ group.name }}</span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
 </div>
 </td>
 <td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-data-metric text-data-metric text-on-surface">Aujourd'hui, 09:41</span>
-<span class="font-body-sm text-on-surface-variant text-[11px]">Lab Multimodal Virtuel</span>
-</div>
+{% if profile.membership.is_active %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary"><span class="material-symbols-outlined text-sm">check_circle</span>Actif</span>{% else %}<span class="inline-flex items-center gap-1 rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-on-tertiary-fixed"><span class="material-symbols-outlined text-sm">schedule</span>En attente</span>{% endif %}
 </td>
 <td class="py-4 pl-3 pr-6 text-right">
 <div class="inline-flex items-center justify-end gap-1">
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Voir le dossier universitaire" type="button">
-<span class="material-symbols-outlined text-[18px]">folder_shared</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Réinitialiser l'accès SSO" type="button">
-<span class="material-symbols-outlined text-[18px]">lock_reset</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Plus d'actions" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
+<a class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{% url 'portal:admin_student_update' profile.pk %}" title="Modifier"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+<a class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Retirer de l'université" href="{% url 'portal:admin_student_delete' profile.pk %}"><span class="material-symbols-outlined text-[18px]">person_remove</span></a>
 </div>
 </td>
 </tr>
-<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-low/40">
-<td class="py-4 pl-6 pr-3">
-<input aria-label="Sélectionner Alexandre Chen" class="w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold text-body-sm shrink-0">
-                      AC
-                    </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Alexandre Chen</span>
-<div class="flex items-center gap-2">
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0891240182E</span>
-<span class="text-on-surface-variant/40">•</span>
-<span class="text-on-surface-variant text-xs truncate">alexandre.chen@etu.u-paris.fr</span>
-</div>
-</div>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-semibold text-on-surface">L3 Mathématiques &amp; Informatique</span>
-<span class="font-body-sm text-on-surface-variant text-xs">Parcours Magistère</span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-1.5">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">check_circle</span>
-                      Actif
-                    </span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-data-metric text-data-metric text-on-surface">Hier, 17:15</span>
-<span class="font-body-sm text-on-surface-variant text-[11px]">Dépôt d'examen S1</span>
-</div>
-</td>
-<td class="py-4 pl-3 pr-6 text-right">
-<div class="inline-flex items-center justify-end gap-1">
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Voir le dossier universitaire" type="button">
-<span class="material-symbols-outlined text-[18px]">folder_shared</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Réinitialiser l'accès SSO" type="button">
-<span class="material-symbols-outlined text-[18px]">lock_reset</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Plus d'actions" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="py-4 pl-6 pr-3">
-<input aria-label="Sélectionner Fatima Benali" class="w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold text-body-sm shrink-0">
-                      FB
-                    </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Fatima Benali</span>
-<div class="flex items-center gap-2">
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0945812034K</span>
-<span class="text-on-surface-variant/40">•</span>
-<span class="text-on-surface-variant text-xs truncate">fatima.benali@etu.u-paris.fr</span>
-</div>
-</div>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-semibold text-on-surface">M2 Neurosciences &amp; Santé</span>
-<span class="font-body-sm text-on-surface-variant text-xs">Institut Saint-Germain</span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-1.5">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">forward_to_inbox</span>
-                      Invitation envoyée
-                    </span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-data-metric text-data-metric text-on-surface-variant">En attente S1</span>
-<span class="font-body-sm text-on-surface-variant text-[11px]">Activation non finalisée</span>
-</div>
-</td>
-<td class="py-4 pl-3 pr-6 text-right">
-<div class="inline-flex items-center justify-end gap-1">
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Renvoyer le lien d'activation" type="button">
-<span class="material-symbols-outlined text-[18px]">send</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-primary transition-colors" title="Modifier l'étudiant" type="button">
-<span class="material-symbols-outlined text-[18px]">edit</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Plus d'actions" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-low transition-colors bg-surface-container-low/40">
-<td class="py-4 pl-6 pr-3">
-<input aria-label="Sélectionner Julien Vasseur" class="w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-3">
-<div class="w-9 h-9 rounded-full bg-error-container text-error flex items-center justify-center font-bold text-body-sm shrink-0">
-                      JV
-                    </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Julien Vasseur</span>
-<div class="flex items-center gap-2">
-<span class="font-data-metric text-xs text-error font-semibold">INE 0612984102P</span>
-<span class="text-on-surface-variant/40">•</span>
-<span class="text-on-surface-variant text-xs truncate">j.vasseur@etu.u-paris.fr</span>
-</div>
-</div>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-semibold text-on-surface">L1 Portail Sciences &amp; Technologie</span>
-<span class="font-body-sm text-error text-xs font-medium">Conflit double inscription S2</span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex items-center gap-1.5">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-error font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">pause_circle</span>
-                      Accès Suspendu
-                    </span>
-</div>
-</td>
-<td class="py-4 px-3">
-<div class="flex flex-col">
-<span class="font-data-metric text-data-metric text-on-surface-variant">Il y a 14 jours</span>
-<span class="font-body-sm text-on-surface-variant text-[11px]">Bloqué par DSI / Scolarité</span>
-</div>
-</td>
-<td class="py-4 pl-3 pr-6 text-right">
-<div class="inline-flex items-center justify-end gap-1">
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors" title="Résoudre le conflit" type="button">
-<span class="material-symbols-outlined text-[18px]">build</span>
-</button>
-<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Plus d'actions" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
-</tr>
+{% empty %}
+<tr><td class="px-6 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun étudiant ne correspond à votre recherche. <a class="font-bold text-primary hover:underline" href="{% url 'portal:admin_student_create' %}">Inscrire un étudiant</a></td></tr>
+{% endfor %}
 </tbody>
 </table>
 </div>
-<div class="p-4 bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-4">
-<div class="flex items-center gap-2">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Affichage de <span class="font-semibold text-on-surface">1</span> à <span class="font-semibold text-on-surface">10</span> sur <span class="font-semibold text-on-surface">14 820</span> étudiants</span>
-</div>
-<div class="flex items-center gap-1">
-<button aria-label="Page précédente" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high disabled:opacity-40" disabled="" type="button">
-<span class="material-symbols-outlined text-[20px]">chevron_left</span>
-</button>
-<button aria-current="page" class="w-9 h-9 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center shadow-sm" type="button">1</button>
-<button class="w-9 h-9 rounded-full text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center" type="button">2</button>
-<button class="w-9 h-9 rounded-full text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center" type="button">3</button>
-<span class="px-1 text-on-surface-variant">...</span>
-<button class="w-9 h-9 rounded-full text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center" type="button">1482</button>
-<button aria-label="Page suivante" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high" type="button">
-<span class="material-symbols-outlined text-[20px]">chevron_right</span>
-</button>
-</div>
-</div>
+{% include "portal/_pagination.html" %}
 </section>
 </div>
-<aside class="lg:col-span-4 flex flex-col gap-5">
-<div class="p-4 rounded bg-surface-container-high text-on-surface flex items-start gap-3 shadow-sm" role="status">
-<span class="material-symbols-outlined text-secondary shrink-0 text-[20px] mt-0.5">verified_user</span>
-<div class="flex flex-col gap-1">
-<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold text-secondary">Garantie de Service Universitaire</span>
-<p class="font-body-sm text-body-sm leading-relaxed">
-            L'IA est momentanément indisponible. Le pilotage manuel des données reste opérationnel sans interruption.
-          </p>
-</div>
-</div>
-<div class="bg-surface-container-lowest p-5 rounded shadow-sm flex flex-col gap-5">
-<div class="flex items-center justify-between pb-3 bg-surface-container-low -mx-6 -mt-6 p-5 rounded-t">
+<aside class="flex flex-col gap-5 lg:col-span-4">
+<section class="rounded bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between rounded-t bg-surface-container-low p-5">
 <div class="flex items-center gap-2.5">
-<div class="w-9 h-9 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-[20px]">psychology</span>
-</div>
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-tertiary shadow-sm"><span class="material-symbols-outlined text-[20px]">how_to_reg</span></div>
 <div>
-<div class="flex items-center gap-2">
-<h3 class="font-title-md text-title-md text-on-surface">Assistant IA Vérification</h3>
-<span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-[11px] uppercase font-bold tracking-wider">Beta</span>
-</div>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Modèle d'alignement académique UPC</span>
+<h2 class="font-title-md text-title-md text-on-surface">Inscriptions en attente</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Validation des accès étudiants</span>
 </div>
 </div>
-<button aria-label="Actualiser les suggestions" class="text-on-surface-variant hover:text-on-surface" type="button">
-<span class="material-symbols-outlined text-[20px]">sync</span>
-</button>
+<span class="rounded-full bg-tertiary-fixed px-2 py-0.5 font-label-sm text-[11px] font-bold uppercase tracking-wider text-on-tertiary-fixed">{{ stats.pending }}</span>
 </div>
-<div class="rounded bg-surface-container-low p-4 flex flex-col gap-3">
+<div class="flex flex-col gap-2 p-5">
+{% for membership in pending_memberships %}
+<div class="rounded bg-surface-container-low p-3">
 <div class="flex items-start justify-between gap-2">
-<div class="flex items-center gap-1.5 text-secondary">
-<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
-<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Suggestion IA #409</span>
-</div>
-<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-data-metric text-[11px] font-bold">Confiance 94%</span>
-</div>
-<p class="font-title-md text-title-md text-on-surface font-semibold">
-            Détection de 3 étudiants inscrits dans deux parcours concurrents
-          </p>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-            Les étudiants suivants apparaissent à la fois en <span class="font-semibold text-on-surface">L3 Informatique</span> et <span class="font-semibold text-on-surface">L3 Miashs</span>. L'IA propose une consolidation automatique sous cursus bi-diplômant avec dispense de double droits :
-          </p>
-<div class="space-y-1.5 pt-1">
-<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between text-on-surface">
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-secondary"></span>
-<span class="font-body-sm text-body-sm font-medium">Julien Vasseur</span>
-</div>
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0612984102P</span>
-</div>
-<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between text-on-surface">
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-secondary"></span>
-<span class="font-body-sm text-body-sm font-medium">Nadia Touati</span>
-</div>
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0799120443L</span>
-</div>
-<div class="p-2 rounded bg-surface-container-lowest flex items-center justify-between text-on-surface">
-<div class="flex items-center gap-2">
-<span class="w-2 h-2 rounded-full bg-secondary"></span>
-<span class="font-body-sm text-body-sm font-medium">Lucas Moreau</span>
-</div>
-<span class="font-data-metric text-xs text-on-surface-variant">INE 0834190281M</span>
+<div class="min-w-0">
+<p class="truncate font-body-sm text-body-sm font-semibold text-on-surface">{{ membership.user.get_full_name|default:membership.user.email }}</p>
+<p class="truncate text-[11px] text-on-surface-variant">{{ membership.user.email }} · {{ membership.created_at|date:"d/m/Y" }}</p>
 </div>
 </div>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2 pt-2 bg-surface-container-high/40 -mx-4 -mb-4 p-4 rounded-b">
-<button class="px-3 py-2 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-sm text-label-sm text-center transition-colors shadow-sm" type="button">
-              Garder &amp; Fusionner
-            </button>
-<button class="px-3 py-2 rounded-full bg-surface-container-highest text-on-surface hover:bg-surface-variant font-label-sm text-label-sm text-center transition-colors" type="button">
-              Modifier
-            </button>
-<button class="px-3 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-error font-label-sm text-label-sm text-center transition-colors" type="button">
-              Refuser
-            </button>
+<div class="mt-2 flex gap-2">
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"/><button class="w-full rounded-full bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-surface-variant transition-colors hover:text-error" type="submit">Refuser</button></form>
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="approve"/><button class="w-full rounded-full bg-primary px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Valider</button></form>
 </div>
 </div>
-<div class="p-4 rounded bg-surface-container-low flex flex-col gap-3">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Audit qualité des bases Apogée</span>
-<span class="font-data-metric text-data-metric text-primary font-bold">Score 99.2%</span>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-center font-body-sm text-body-sm text-on-surface-variant">Aucune inscription en attente. Les nouveaux comptes apparaîtront ici.</p>
+{% endfor %}
 </div>
-<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
-<div class="h-full bg-primary rounded-full" style="width: 99.2%"></div>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant text-xs">
-            Conformité RGPD et référentiel national Supérieur validés par la gouvernance DSI Paris Cité.
-          </p>
-</div>
-<div class="relative overflow-hidden rounded p-5 bg-gradient-to-br from-primary to-secondary text-on-primary flex flex-col gap-3 shadow-md">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary-fixed">Synchronisation automatique</span>
-<span class="material-symbols-outlined text-primary-fixed text-[20px]">sync_saved_locally</span>
-</div>
-<p class="font-title-md text-title-md font-semibold text-on-primary">
-            Flux quotidien Apogée planifié à 02:00 UTC
-          </p>
-<p class="font-body-sm text-body-sm text-on-primary/80">
-            Dernière mise à niveau exécutée avec succès sans rupture d'authentification pour les 14 820 comptes.
-          </p>
-<div class="pt-2">
-<button class="px-4 py-2 rounded-full bg-surface-container-lowest text-primary hover:bg-primary-fixed font-label-md text-label-md font-semibold transition-colors shadow-sm" type="button">
-              Forcer un rafraîchissement
-            </button>
-</div>
-</div>
-</div>
+</section>
+<section class="flex flex-col gap-3 rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Actions rapides</h2>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_invitations' %}">Gérer les invitations<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_classes' %}">Voir les classes<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_student_create' %}">Inscrire un étudiant<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+</section>
 </aside>
 </div>
 </div>
-<script>
-  (function initDashboardInteractions() {
-    const importBtn = document.getElementById('open-import-modal');
-    const csvInput = document.getElementById('csv-upload-input');
-    const iaBtn = document.getElementById('toggle-ia-btn');
-
-    if (csvInput) {
-      csvInput.addEventListener('change', function(e) {
-        if (e.target.files && e.target.files.length > 0) {
-          const fileName = e.target.files[0].name;
-          alert('Fichier sélectionné : ' + fileName + '\nAnalyse de pré-validation en cours...');
-        }
-      });
-    }
-
-    if (importBtn && csvInput) {
-      importBtn.addEventListener('click', function() {
-        csvInput.click();
-      });
-    }
-
-    if (iaBtn) {
-      iaBtn.addEventListener('click', function() {
-        const aside = document.querySelector('main aside');
-        if (aside) {
-          aside.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      });
-    }
-  })();
-</script></main>
+</main>
 {% endblock %}

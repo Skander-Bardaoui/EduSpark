@@ -1,0 +1,99 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}{{ school_class }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Classe</p>
+<div class="flex flex-wrap items-center gap-3">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ school_class.name }}</h1>
+{% if school_class.academic_year %}{% include "portal/_badge.html" with label=school_class.academic_year tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if school_class.level %}{% include "portal/_badge.html" with label=school_class.level tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+</div>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }} · {{ school_class.university.name }}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:admin_classes' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Classes</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:admin_class_update' school_class.pk %}"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-error/30 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-error shadow-sm transition-colors hover:bg-error-container" href="{% url 'portal:admin_class_delete' school_class.pk %}"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'portal:admin_group_create' school_class.pk %}"><span class="material-symbols-outlined text-[18px]">group_add</span>Nouveau groupe</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-3">
+{% include "portal/_stat_card.html" with label="Étudiants" value=students|length icon="group" hint="Membres de la classe" %}
+{% include "portal/_stat_card.html" with label="Groupes" value=groups|length icon="workspaces" icon_class="bg-surface-container text-secondary" hint="TD / TP de la classe" %}
+{% include "portal/_stat_card.html" with label="Professeurs" value=professors|length icon="school" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Enseignants rattachés" %}
+</div>
+<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+<div class="flex flex-col gap-5">
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Groupes de la classe</h2>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'portal:admin_group_create' school_class.pk %}"><span class="material-symbols-outlined text-[16px]">add</span>Ajouter un groupe</a>
+</div>
+<div class="mt-4 flex flex-col gap-3">
+{% for group in groups %}
+<article class="rounded-xl border border-outline-variant/40 bg-surface p-4">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="min-w-0">
+<h3 class="font-title-md text-title-md text-on-surface">{{ group.name }}</h3>
+<p class="text-xs text-on-surface-variant">{% with members=group.students.all %}{{ members|length }} étudiant{{ members|length|pluralize }}{% endwith %}{% if group.capacity %} · capacité {{ group.capacity }}{% endif %}</p>
+</div>
+<div class="flex items-center gap-1">
+<a class="inline-flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'portal:admin_group_update' school_class.pk group.pk %}" title="Modifier le groupe"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+<a class="inline-flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" href="{% url 'portal:admin_group_delete' school_class.pk group.pk %}" title="Supprimer le groupe"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap gap-1.5">
+{% for student in group.students.all %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant">
+<span class="flex h-4 w-4 items-center justify-center rounded-full bg-primary-fixed text-[8px] font-extrabold text-primary">{{ student.user.first_name|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}</span>
+{{ student.user.get_full_name|default:student.user.email }}
+</span>
+{% empty %}<span class="text-xs text-on-surface-variant">Aucun étudiant dans ce groupe.</span>{% endfor %}
+</div>
+</article>
+{% empty %}
+<div class="rounded-xl border border-dashed border-outline-variant/60 px-4 py-8 text-center text-sm text-on-surface-variant">Aucun groupe. Créez un premier groupe de TD / TP pour cette classe.</div>
+{% endfor %}
+</div>
+</section>
+{% if ungrouped %}
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Étudiants sans groupe</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Membres de l'université qui ne sont encore dans aucun groupe de cette classe.</p>
+<div class="mt-3 flex flex-wrap gap-1.5">
+{% for student in ungrouped %}
+<span class="rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant">{{ student.user.get_full_name|default:student.user.email }}</span>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+</div>
+<div class="flex flex-col gap-5">
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Encadrement</h2>
+<ul class="mt-3 space-y-3">
+{% for professor in professors %}
+<li class="flex items-center gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-on-primary">{{ professor.user.first_name|slice:":1"|upper }}{{ professor.user.last_name|slice:":1"|upper }}</span>
+<div class="min-w-0"><p class="truncate text-sm font-semibold text-on-surface">{{ professor.user.get_full_name|default:professor.user.email }}</p><p class="truncate text-xs text-on-surface-variant">{{ professor.department|default:"Département non renseigné" }}{% if professor.grade %} · {{ professor.get_grade_display }}{% endif %}</p></div>
+</li>
+{% empty %}<li class="text-sm text-on-surface-variant">Aucun professeur rattaché. Modifiez la classe pour en ajouter.</li>{% endfor %}
+</ul>
+</section>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Informations</h2>
+<dl class="mt-3 space-y-3 text-sm">
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt><dd class="font-semibold text-on-surface">{{ school_class.level|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ school_class.program|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Année universitaire</dt><dd class="font-semibold text-on-surface">{{ school_class.academic_year|default:"—" }}</dd></div>
+</dl>
+{% if school_class.description %}<p class="mt-3 border-t border-outline-variant/40 pt-3 text-sm leading-relaxed text-on-surface-variant">{{ school_class.description|linebreaksbr }}</p>{% endif %}
+</section>
+</div>
+</div>
+</div>
+</main>
+{% endblock %}

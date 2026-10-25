@@ -9,6 +9,7 @@ urlpatterns = [
     path("connexion/", views.login_view, name="login"),
     path("inscription/", views.signup_view, name="signup"),
     path("deconnexion/", views.logout_view, name="logout"),
+    path("invitation/<uuid:token>/", views.invitation_accept, name="invitation_accept"),
     # Compatibilité avec l'ancienne route unique.
     path("auth/", views.auth_view, name="auth"),
     # Mot de passe oublié (vues Django + envoi d'e-mail).

@@ -7,168 +7,51 @@
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevés officiels &amp; Jurys</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Registre central des relevés de notes publiés, signatures eIDAS des procès-verbaux et suivi des jurys de délibération.</p>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Délibérations et relevés de notes des classes de {{ portal_university.name }}.</p>
 </div>
 <div class="flex flex-wrap gap-2">
-<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-print type="button"><span class="material-symbols-outlined text-[18px]">print</span>Imprimer le registre</button>
-<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:admin_exam_sessions' %}"><span class="material-symbols-outlined text-[18px]">event_available</span>Sessions d'examen</a>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#sign-pv-modal" type="button"><span class="material-symbols-outlined text-[18px]">draw</span>Signer un PV</button>
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Registre des relevés exporté." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Formulaire de signature de PV ouvert." type="button"><span class="material-symbols-outlined text-[18px]">draw</span>Signer un PV</button>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Relevés publiés" value="1 284" icon="workspace_premium" icon_class="bg-primary-fixed text-primary" hint="+42 relevés ce mois-ci" %}
-{% include "portal/_stat_card.html" with label="Jurys programmés" value="6" icon="gavel" icon_class="bg-surface-container text-secondary" hint="2 jurys en délibération active" %}
-{% include "portal/_stat_card.html" with label="PV signés eIDAS" value="4" suffix=" /6" icon="verified_user" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="2 signatures en attente" %}
-{% include "portal/_stat_card.html" with label="Litiges ouverts" value="2" icon="report" icon_class="bg-error-container text-on-error-container" hint="Réclamations étudiants en cours" %}
+{% include "portal/_stat_card.html" with label="Jurys programmés" value=jury_count icon="gavel" hint="Une délibération par classe" %}
+{% include "portal/_stat_card.html" with label="Relevés publiés" value=published_count icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Consultables par les étudiants" %}
+{% include "portal/_stat_card.html" with label="PV à signer" value=pending_count icon="draw" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Après clôture des notes" %}
+{% include "portal/_stat_card.html" with label="Litiges ouverts" value="0" icon="check_circle" hint="Aucune réclamation en cours" %}
 </div>
-<div class="grid grid-cols-1 gap-5 2xl:grid-cols-12">
-<section class="flex flex-col gap-4 xl:col-span-8" data-filter-scope>
-<div class="flex flex-wrap items-center justify-between gap-3">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Registre des relevés officiels</h2>
-<p class="text-xs text-on-surface-variant"><span data-filter-count>6</span> relevés affichés · Semestre 1 · 2026 – 2027</p>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Relevés par classe</h2>
+<p class="text-xs text-on-surface-variant"><span data-filter-count>{{ jury_count }}</span> relevés affichés · {{ semester }}</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>
 <button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="publie" type="button">Publiés</button>
 <button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="attente" type="button">En attente</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="litige" type="button">Litiges</button>
 </div>
 </div>
-<div class="overflow-x-auto rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
-<table class="w-full min-w-[880px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Formation</th><th class="px-5 py-3 font-bold">Jury</th><th class="px-5 py-3 font-bold">Mention</th><th class="px-5 py-3 font-bold">Statut</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[1040px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Semestre</th><th class="px-5 py-3 font-bold">Étudiants</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">PV du jury</th><th class="px-5 py-3 font-bold">Relevé</th><th class="px-5 py-3 text-right font-bold">Action</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="publie">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Camille Martin</p><p class="text-xs text-on-surface-variant">INE 20248912AA</p></td>
-<td class="px-5 py-3 text-on-surface-variant">M1 Informatique &amp; IA</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury M1-IA · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">Bien</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Relevé de Camille Martin ouvert en lecture seule." type="button">Consulter</button></td>
+{% for record in records %}
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{% if record.transcript_published %}publie{% else %}attente{% endif %}">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ record.school_class.name }}</p><p class="text-xs text-on-surface-variant">{{ record.school_class.level }}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">S1</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ record.students }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ record.average }}</td>
+<td class="px-5 py-3">{% if record.pv_signed %}{% include "portal/_badge.html" with label="PV signé" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="PV en attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}</td>
+<td class="px-5 py-3">{% if record.transcript_published %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<td class="px-5 py-3 text-right">{% if record.transcript_published %}<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Relevé consulté pour {{ record.school_class.name }}." type="button">Consulter</button>{% else %}<button class="rounded-full bg-primary px-3 py-1 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Le PV de {{ record.school_class.name }} est prêt à être signé." type="button">Signer le PV</button>{% endif %}</td>
 </tr>
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="attente">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Lucas Moreau</p><p class="text-xs text-on-surface-variant">INE 0834190281M</p></td>
-<td class="px-5 py-3 text-on-surface-variant">M1 Informatique &amp; IA</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury M1-IA · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">—</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="En attente PV" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full bg-primary px-3 py-1 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#sign-pv-modal" type="button">Signer le PV</button></td>
-</tr>
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="publie">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Fatima Benali</p><p class="text-xs text-on-surface-variant">INE 194827014C</p></td>
-<td class="px-5 py-3 text-on-surface-variant">M1 Systèmes distribués</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury M1-SD · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">Très bien</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Relevé de Fatima Benali ouvert en lecture seule." type="button">Consulter</button></td>
-</tr>
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="litige">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Julien Vasseur</p><p class="text-xs text-on-surface-variant">INE 0612984102P</p></td>
-<td class="px-5 py-3 text-on-surface-variant">L3 Mathématiques-Informatique</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury L3-MI · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">Passable</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="Litige ouvert" tone_class="bg-error-container text-on-error-container" %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full border border-error/40 px-3 py-1 text-xs font-bold text-error transition-colors hover:bg-error-container/50" data-toast="Dossier de litige transmis à la commission pédagogique." data-toast-type="info" type="button">Traiter</button></td>
-</tr>
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="publie">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Amine Cherif</p><p class="text-xs text-on-surface-variant">INE 172938402K</p></td>
-<td class="px-5 py-3 text-on-surface-variant">M2 Sciences des données</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury M2-SD · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">Bien</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-toast="Relevé d'Amine Cherif ouvert en lecture seule." type="button">Consulter</button></td>
-</tr>
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="attente litige">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">Sarah Cohen</p><p class="text-xs text-on-surface-variant">INE 203984712S</p></td>
-<td class="px-5 py-3 text-on-surface-variant">M1 Neurosciences</td>
-<td class="px-5 py-3 text-on-surface-variant">Jury M1-NEURO · S1</td>
-<td class="px-5 py-3 text-on-surface-variant">—</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label="En attente PV" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td>
-<td class="px-5 py-3 text-right"><button class="rounded-full bg-primary px-3 py-1 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#sign-pv-modal" type="button">Signer le PV</button></td>
-</tr>
+{% endfor %}
 </tbody>
 </table>
 </div>
-<p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun relevé ne correspond à ce filtre.</p>
-<div class="flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest p-4 text-xs text-on-surface-variant shadow-sm">
-<span class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">lock</span>Registre scellé SHA-256 · archivage CINES certifié · traçabilité RGPD</span>
-<button class="rounded-full bg-surface-container px-3 py-1.5 font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Horodatage du registre vérifié : aucune anomalie détectée." type="button">Vérifier l'intégrité</button>
-</div>
+<p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun relevé ne correspond à ce filtre.</p>
 </section>
-<aside class="flex flex-col gap-4 xl:col-span-4">
-<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<div class="flex items-center justify-between gap-2">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Jurys de délibération</h2>
-<span class="font-data-metric text-data-metric text-on-surface-variant">4 / 6 signés</span>
-</div>
-<ul class="mt-4 space-y-3">
-<li class="rounded bg-surface-container-low p-3.5"><div class="flex items-start justify-between gap-2"><div><p class="text-sm font-semibold text-on-surface">M1 Informatique &amp; IA</p><p class="text-xs text-on-surface-variant">Président : Pr. Alain R. · 142 étudiants</p></div>{% include "portal/_badge.html" with label="En cours" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:72%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">138 / 142 notes renseignées</p></li>
-<li class="rounded bg-surface-container-low p-3.5"><div class="flex items-start justify-between gap-2"><div><p class="text-sm font-semibold text-on-surface">L3 Mathématiques-Informatique</p><p class="text-xs text-on-surface-variant">Présidente : Dr. E. Moreau · 210 étudiants</p></div>{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" dot=True %}</div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:100%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">PV UPC-2026-PV-8894 · cachet eIDAS</p></li>
-<li class="rounded bg-surface-container-low p-3.5"><div class="flex items-start justify-between gap-2"><div><p class="text-sm font-semibold text-on-surface">M2 Neurosciences</p><p class="text-xs text-on-surface-variant">Président : Pr. Marc V. · 48 étudiants</p></div>{% include "portal/_badge.html" with label="En attente" tone_class="bg-surface-container-high text-on-surface-variant" %}</div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-outline" style="width:52%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">25 / 48 épreuves versées</p></li>
-<li class="rounded bg-surface-container-low p-3.5"><div class="flex items-start justify-between gap-2"><div><p class="text-sm font-semibold text-on-surface">M2 Sciences des données</p><p class="text-xs text-on-surface-variant">Présidente : Pr. H. Vasseur · 24 étudiants</p></div>{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" dot=True %}</div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:100%"></div></div><p class="mt-1 text-[11px] text-on-surface-variant">PV UPC-2026-PV-8901 · cachet eIDAS</p></li>
-</ul>
-</section>
-<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Contrôle qualité</h2>
-<ul class="mt-3 space-y-3 text-sm">
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">verified</span><div><p class="font-semibold text-on-surface">Conformité eIDAS</p><p class="text-xs text-on-surface-variant">4 PV sur 6 portent un cachet qualifié conforme.</p></div></li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-tertiary">schedule</span><div><p class="font-semibold text-on-surface">2 signatures attendues</p><p class="text-xs text-on-surface-variant">Échéance réglementaire : 28 octobre 2026.</p></div></li>
-<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-error">gavel</span><div><p class="font-semibold text-on-surface">2 litiges en instruction</p><p class="text-xs text-on-surface-variant">Commission pédagogique réunie le 5 novembre.</p></div></li>
-</ul>
-<button class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-surface-container px-4 py-2.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-high" data-toast="Rapport de contrôle qualité généré." type="button"><span class="material-symbols-outlined text-[18px]">description</span>Générer le rapport qualité</button>
-</section>
-<section class="rounded border border-outline-variant/40 bg-surface-container-low p-5 shadow-sm">
-<div class="flex items-center gap-3">
-<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary"><span class="material-symbols-outlined text-[20px]">history_edu</span></span>
-<div><p class="text-sm font-semibold text-on-surface">Archivage CINES</p><p class="text-xs text-on-surface-variant">Dernière synchronisation : aujourd'hui, 06 h 40</p></div>
-</div>
-<button class="mt-3 w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-toast="Synchronisation CINES relancée." type="button">Forcer la synchronisation</button>
-</section>
-</aside>
-</div>
 </div>
 </main>
-<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="sign-pv-modal">
-<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
-<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
-<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
-<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Signer un procès-verbal</h2><p class="text-xs text-on-surface-variant">Signature électronique qualifiée eIDAS.</p></div>
-<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
-</div>
-<form class="grid gap-3 p-5" data-sign-form>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Jury concerné</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus required><option>M1 Informatique &amp; IA · S1</option><option>M2 Neurosciences · S1</option><option>M1 Systèmes distribués · S1</option></select></label>
-<div class="grid gap-3 sm:grid-cols-2">
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Référence du PV</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" placeholder="UPC-2026-PV-XXXX" required type="text"/></label>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Date de délibération</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" type="date" value="2026-10-24"/></label>
-</div>
-<label class="flex items-start gap-2 rounded bg-surface-container-low p-3 text-xs text-on-surface-variant"><input checked class="mt-0.5" type="checkbox"/>Je certifie l'exactitude des notes et la conformité du PV au règlement des études.</label>
-<div class="flex flex-wrap justify-end gap-2 pt-1">
-<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">draw</span>Apposer la signature</button>
-</div>
-</form>
-</div>
-</div>
-{% endblock %}
-{% block page_scripts %}
-<script>
-(function () {
-  var printBtn = document.querySelector('[data-print]');
-  if (printBtn) printBtn.addEventListener('click', function () { window.print(); });
-  var form = document.querySelector('[data-sign-form]');
-  if (form) {
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      var modal = form.closest('[data-modal]');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.classList.remove('portal-drawer-open');
-      }
-      window.portalToast('PV signé et horodaté. La signature eIDAS a été apposée.', 'success');
-    });
-  }
-})();
-</script>
 {% endblock %}

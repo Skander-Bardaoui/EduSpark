@@ -1,10 +1,7 @@
-from functools import wraps
-
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 
 from .models import Profil
+from .tenancy import Role, tenant_required
 
 
 def get_user_role(user):
@@ -21,17 +18,26 @@ def get_user_role(user):
     return profil.role
 
 
+_PROFIL_TO_MEMBERSHIP_ROLE = {
+    Profil.ROLE_ADMIN: Role.UNIVERSITY_ADMIN,
+    Profil.ROLE_PROF: Role.PROFESSOR,
+    Profil.ROLE_ETUDIANT: Role.STUDENT,
+}
+
+
 def role_required(*allowed_roles):
-    """Décorateur : accès réservé aux rôles donnés (superuser = admin)."""
-    def decorator(view_func):
-        @wraps(view_func)
-        @login_required
-        def _wrapped(request, *args, **kwargs):
-            if get_user_role(request.user) not in allowed_roles:
-                raise PermissionDenied("Accès réservé : rôle requis.")
-            return view_func(request, *args, **kwargs)
-        return _wrapped
-    return decorator
+    """Accès réservé aux rôles exercés dans l'université courante.
+
+    Les vues passent des rôles globaux (``Profil.ROLE_*``) ; ils sont
+    traduits en rôles d'appartenance pour que le droit dépende de
+    l'université sélectionnée, pas seulement du rôle global du compte.
+    """
+    tenant_roles = tuple(
+        _PROFIL_TO_MEMBERSHIP_ROLE[role]
+        for role in allowed_roles
+        if role in _PROFIL_TO_MEMBERSHIP_ROLE
+    )
+    return tenant_required(*tenant_roles)
 
 
 admin_required = role_required(Profil.ROLE_ADMIN)
@@ -42,6 +48,8 @@ etudiant_required = role_required(
 
 def role_home_url(user):
     """URL d'accueil selon le rôle après connexion / inscription."""
+    if user and user.is_authenticated and user.is_superuser:
+        return reverse("portal:admin_universities")
     role = get_user_role(user)
     if role == Profil.ROLE_ADMIN:
         return reverse("coaching:admin_dashboard")

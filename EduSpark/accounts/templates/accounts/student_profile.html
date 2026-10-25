@@ -1,445 +1,134 @@
 {% extends "portal/base_student.html" %}
-{% block title %}Mon Profil &amp; Paramètres — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Mon Profil Étudiant &amp; Préférences — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
-<!-- EN-TÊTE DE LA PAGE & NAVIGATION -->
-<div class="flex flex-col gap-space-sm mb-space-lg">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+<div class="max-w-3xl">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Espace étudiant</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Profil Académique &amp; Préférences d'Apprentissage</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">Gérez vos affiliations universitaires, votre profil étudiant et vos informations de connexion.</p>
+</div>
+<div class="flex shrink-0 flex-wrap items-center gap-2">
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-lowest px-3.5 text-[13px] font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container" href="{% url 'portal:student_class' %}"><span class="material-symbols-outlined text-[18px]">groups</span>Ma classe</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" href="#profile-edit"><span class="material-symbols-outlined text-[18px]">save</span>Modifier mes informations</a>
+</div>
+</div>
+<div class="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 lg:col-span-8">
+<div class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex flex-col gap-4 md:flex-row md:items-center">
+<span class="flex h-24 w-24 shrink-0 items-center justify-center rounded bg-primary text-2xl font-extrabold text-on-primary md:h-28 md:w-28">{{ portal_user_initials }}</span>
+<div class="min-w-0 flex-1">
+<div class="flex flex-wrap items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">{{ portal_user_name }}</h2>
+<span class="rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-data-metric text-[12px] font-semibold text-on-tertiary-fixed">{{ portal_scope_label }}</span>
+</div>
+<div class="mt-2 flex flex-wrap gap-1.5">
+{% if profile.promotion %}<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-bold uppercase text-primary"><span class="material-symbols-outlined text-[16px]">school</span>Promotion {{ profile.promotion }}</span>{% endif %}
+{% if profile.program %}<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-[11px] font-bold uppercase text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">category</span>{{ profile.program }}</span>{% endif %}
+{% if profile.student_number %}<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 text-[11px] font-bold uppercase text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">badge</span>{{ profile.student_number }}</span>{% endif %}
+</div>
+<div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12px] text-on-surface-variant">
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">mail</span><span>{{ portal_user_email }}</span></div>
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-secondary">account_balance</span><span>{% if portal_university %}{{ portal_university.name }}{% else %}Aucune université courante{% endif %}</span></div>
+</div>
+</div>
+</div>
+</div>
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2.5">
+<div class="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container text-primary"><span class="material-symbols-outlined text-[20px]">account_balance</span></div>
 <div>
-<div class="flex items-center gap-space-xs text-primary font-label-sm uppercase tracking-wider mb-space-xs">
-<span class="material-symbols-outlined text-[16px]">badge</span>
-<span>Espace Étudiant • Compte</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mon Profil &amp; Paramètres du Compte</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-1 max-w-3xl">
-          Gérez vos informations personnelles, votre présentation académique, vos préférences d'accessibilité et la sécurité de votre compte.
-        </p>
-</div>
-<div class="flex items-center gap-space-sm self-start md:self-center">
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md">
-<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
-          Connecté(e) via SSO Paris Cité
-        </span>
-</div>
-</div>
-<!-- TABS NAVIGATION -->
-<div class="flex items-center gap-space-sm mt-space-md overflow-x-auto pb-1">
-<button class="flex items-center gap-2 px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
-<span class="material-symbols-outlined text-[18px]">person</span>
-<span>Mon Profil public</span>
-</button>
-<button class="flex items-center gap-2 px-space-md py-2.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
-<span class="material-symbols-outlined text-[18px]">accessibility_new</span>
-<span>Paramètres &amp; Accessibilité</span>
-</button>
-<button class="flex items-center gap-2 px-space-md py-2.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
-<span class="material-symbols-outlined text-[18px]">lock</span>
-<span>Sécurité &amp; Mot de passe</span>
-</button>
-<a class="flex items-center gap-1.5 px-space-md py-2.5 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary ml-auto" href="{% url 'portal:student_class' %}">
-<span class="material-symbols-outlined text-[18px]">groups</span>
-<span>Ma Classe &amp; Groupes</span>
-<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
-</a>
-</div>
-</div>
-<!-- CONTENU PRINCIPAL EN 2 COLONNES (PROFIL & FORMULAIRE + PANNEAU ASSISTANT IA) -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start pb-24">
-<!-- COLONNE GAUCHE / CENTRALE : PROFIL ET FORMULAIRE (7 COLS XL) -->
-<div class="xl:col-span-7 flex flex-col gap-space-lg">
-<!-- CARTE D'IDENTITÉ ÉTUDIANT -->
-<div class="relative overflow-hidden bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)]">
-<!-- Fond décoratif discret -->
-<div class="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-surface-container-high/60 pointer-events-none"></div>
-<div class="relative flex flex-col sm:flex-row items-start sm:items-center gap-space-md">
-<!-- Avatar et bouton de modification -->
-<div class="relative group">
-<div class="w-24 h-24 rounded-full overflow-hidden bg-surface-container-high shadow-inner">
-<img class="w-full h-full object-cover" data-alt="Portrait professionnel soigné d'une étudiante universitaire nommée Camille Martin, style naturel et souriant avec éclairage doux en studio, vêtue d'un pull sobre bleu profond, fond flou universitaire moderne." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzUJxLMnppBrxs3EdkXX4obMuHhZLmqnibSJmV-xkxwlfr1vMZQi67hUejWzCLGi0Uh6RfsuTaNz-UZUQ351NeKqZGxW4iNd1odiSQIWu5tV3bNlcI1eFU8Uc-O5ML9WLFDt8V65eRI6FsLlUHnlo-rTCpLbQCOiColrv8k0aVkGP4J8Eku2CtqfN8K4bObyBI-2ygvK9lptq9NRSwDFPx-jTArGegxLCKUX0JEZc"/>
-</div>
-<button aria-label="Modifier la photo de profil" class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
-<span class="material-symbols-outlined text-[16px]">photo_camera</span>
-</button>
-</div>
-<!-- Informations d'identité -->
-<div class="flex-1 min-w-0">
-<div class="flex flex-wrap items-center gap-2 mb-1">
-<h2 class="font-headline-sm text-headline-sm text-on-surface truncate">Camille Martin</h2>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-sm">school</span>
-                Étudiant régulier
-              </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-sm">check_circle</span>
-                Statut: Inscrit actif
-              </span>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[18px] text-outline">domain</span>
-              Campus Grands Moulins • Université Paris Cité
-            </p>
-<div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-body-sm text-body-sm text-on-surface-variant">
-<span>Promotion <strong class="font-semibold text-on-surface">2024–2026</strong></span>
-<span>•</span>
-<span>N° Étudiant : <code class="font-data-metric text-data-metric text-primary bg-surface-container px-1.5 py-0.5 rounded">20248912</code></span>
-</div>
-</div>
-</div>
-</div>
-<!-- FORMULAIRE DÉTAILLÉ DU PROFIL -->
-<form class="flex flex-col gap-space-lg" id="student-profile-form" onsubmit="event.preventDefault();">
-<!-- SECTION 1: INFORMATIONS ACADÉMIQUES -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)] flex flex-col gap-space-md">
-<div class="flex items-center gap-2 pb-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">account_balance</span>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">1. Informations Académiques</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Données administratives certifiées par la scolarité centrale.</p>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-<!-- Filière -->
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="field-faculty">Filière &amp; Spécialité</label>
-<div class="relative">
-<input class="w-full px-space-md py-2.5 rounded bg-surface-container-low text-on-surface font-body-md text-body-md cursor-not-allowed outline-none select-none" id="field-faculty" readonly="" type="text" value="Master 1 Informatique &amp; IA"/>
-<span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">lock</span>
-</div>
-<span class="font-body-sm text-xs text-on-surface-variant">Délivré par le département Sciences Fondamentales.</span>
-</div>
-<!-- Promotion -->
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="field-promo">Année d'étude &amp; Promotion</label>
-<div class="relative">
-<input class="w-full px-space-md py-2.5 rounded bg-surface-container-low text-on-surface font-body-md text-body-md cursor-not-allowed outline-none select-none" id="field-promo" readonly="" type="text" value="Master 1 (Promotion 2024-2026)"/>
-<span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">lock</span>
-</div>
-<span class="font-body-sm text-xs text-on-surface-variant">Cycle complet de 2 années académiques.</span>
-</div>
-<!-- N° Étudiant -->
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="field-student-id">Identifiant National Étudiant (INE / N° Étudiant)</label>
-<div class="relative">
-<input class="w-full px-space-md py-2.5 rounded bg-surface-container-low text-primary font-data-metric text-data-metric cursor-not-allowed outline-none select-none" id="field-student-id" readonly="" type="text" value="20248912"/>
-<span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-outline">lock</span>
-</div>
-<span class="font-body-sm text-xs text-on-surface-variant">Identifiant officiel non modifiable.</span>
-</div>
-<!-- Email institutionnel -->
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="field-email">Adresse email institutionnelle</label>
-<div class="relative">
-<input class="w-full px-space-md py-2.5 rounded bg-surface-container-low text-on-surface font-body-md text-body-md cursor-not-allowed outline-none select-none" id="field-email" readonly="" type="email" value="camille.martin@etu.u-paris.fr"/>
-<span class="material-symbols-outlined absolute right-3 top-3 text-[18px] text-primary" title="Vérifiée par SSO">verified</span>
-</div>
-<span class="font-body-sm text-xs text-primary flex items-center gap-1 font-medium">
-<span class="material-symbols-outlined text-sm">check</span> Email certifié actif
-              </span>
-</div>
-</div>
-</div>
-<!-- SECTION 2: BIOGRAPHIE & PROJET ACADÉMIQUE -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)] flex flex-col gap-space-md">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-2">
-<div class="flex items-center gap-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">edit_note</span>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">2. Biographie &amp; Projet Académique</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Visible par vos enseignants, tuteurs et camarades d'UE.</p>
-</div>
-</div>
-<!-- Bouton déclencheur IA secondaire avec étincelles -->
-<button class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all font-label-md text-label-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary" id="trigger-ai-btn" onclick="document.getElementById('ai-panel').scrollIntoView({ behavior: 'smooth' }); document.getElementById('ai-panel').classList.add('ring-2', 'ring-secondary'); setTimeout(() =&gt; document.getElementById('ai-panel').classList.remove('ring-2', 'ring-secondary'), 1200);" type="button">
-<span class="material-symbols-outlined text-[18px] text-secondary">auto_awesome</span>
-<span>Générer ma bio avec l'IA</span>
-</button>
-</div>
-<div class="flex flex-col gap-2">
-<div class="flex items-center justify-between">
-<label class="font-label-md text-label-md text-on-surface" for="bio-textarea">Biographie académique &amp; centres d'intérêt</label>
-<span class="font-data-metric text-data-metric text-on-surface-variant" id="bio-counter">340 / 600 caractères</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-              Présentez brièvement vos compétences, vos axes de recherche et vos aspirations professionnelles auprès de vos enseignants et camarades de promotion.
-            </p>
-<div class="relative">
-<textarea class="w-full p-space-md rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary outline-none transition-all shadow-inner" id="bio-textarea" oninput="document.getElementById('bio-counter').innerText = `${this.value.length} / 600 caractères`;" rows="5">Étudiante en Master 1 Informatique &amp; Intelligence Artificielle à l'Université Paris Cité, je m'intéresse particulièrement aux architectures d'apprentissage profond et aux algorithmes distribués. Passionnée par la mise en pratique de réseaux convolutionnels sous PyTorch et l'implémentation de consensus Raft.</textarea>
-</div>
-</div>
-</div>
-<!-- SECTION 3: CENTRES D'INTÉRÊT & COMPÉTENCES CLÉS -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)] flex flex-col gap-space-md">
-<div class="flex items-center gap-2 pb-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">psychology</span>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">3. Centres d'intérêt &amp; Compétences clés</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Mots-clés facilitant la formation de groupes pour les projets et ateliers.</p>
-</div>
-</div>
-<div class="flex flex-wrap gap-2 items-center" id="tags-container">
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
-<span>Vision par ordinateur</span>
-<button aria-label="Supprimer Vision par ordinateur" class="text-on-surface-variant hover:text-error transition-colors" onclick="this.parentElement.remove();" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button>
-</span>
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
-<span>PyTorch</span>
-<button aria-label="Supprimer PyTorch" class="text-on-surface-variant hover:text-error transition-colors" onclick="this.parentElement.remove();" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button>
-</span>
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
-<span>Systèmes distribués</span>
-<button aria-label="Supprimer Systèmes distribués" class="text-on-surface-variant hover:text-error transition-colors" onclick="this.parentElement.remove();" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button>
-</span>
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
-<span>Éthique de l'IA</span>
-<button aria-label="Supprimer Éthique de l'IA" class="text-on-surface-variant hover:text-error transition-colors" onclick="this.parentElement.remove();" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button>
-</span>
-<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md">
-<span>Raft Consensus</span>
-<button aria-label="Supprimer Raft Consensus" class="text-on-surface-variant hover:text-error transition-colors" onclick="this.parentElement.remove();" type="button"><span class="material-symbols-outlined text-[16px]">close</span></button>
-</span>
-<!-- Ajout rapide de tag -->
-<div class="inline-flex items-center gap-1 px-3 py-1 bg-surface-container-low rounded-full">
-<input class="bg-transparent border-none outline-none font-body-sm text-body-sm text-on-surface placeholder:text-outline w-32 focus:w-44 transition-all" id="input-new-tag" onkeydown="if(event.key === 'Enter') { event.preventDefault(); if(this.value.trim()){ const span = document.createElement('span'); span.className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md'; span.innerHTML=`&lt;span&gt;${this.value.trim()}&lt;/span&gt;&lt;button type='button' class='text-on-surface-variant hover:text-error' onclick='this.parentElement.remove();'&gt;&lt;span class='material-symbols-outlined text-[16px]'&gt;close&lt;/span&gt;&lt;/button&gt;`; document.getElementById('tags-container').insertBefore(span, this.parentElement); this.value=''; } }" placeholder="+ Ajouter un domaine" type="text"/>
-</div>
-</div>
-</div>
-<!-- SECTION 4: LIENS PROFESSIONNELS -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)] flex flex-col gap-space-md">
-<div class="flex items-center gap-2 pb-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">share</span>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">4. Liens professionnels &amp; Travaux</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Valorisez vos dépôts de code et productions universitaires.</p>
-</div>
-</div>
-<div class="flex flex-col gap-space-sm">
-<!-- GitHub -->
-<div class="flex flex-col sm:flex-row sm:items-center gap-2">
-<div class="w-32 flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
-<span class="material-symbols-outlined text-[20px]">terminal</span>
-<span>GitHub</span>
-</div>
-<div class="flex-1 relative">
-<input class="w-full px-space-md py-2 rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary outline-none transition-all shadow-inner" type="url" value="https://github.com/camille-martin-ai"/>
-</div>
-</div>
-<!-- LinkedIn -->
-<div class="flex flex-col sm:flex-row sm:items-center gap-2">
-<div class="w-32 flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
-<span class="material-symbols-outlined text-[20px]">work</span>
-<span>LinkedIn</span>
-</div>
-<div class="flex-1 relative">
-<input class="w-full px-space-md py-2 rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary outline-none transition-all shadow-inner" type="url" value="https://linkedin.com/in/camille-martin-uparis"/>
-</div>
-</div>
-<!-- Portfolio Personnel -->
-<div class="flex flex-col sm:flex-row sm:items-center gap-2">
-<div class="w-32 flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
-<span class="material-symbols-outlined text-[20px]">language</span>
-<span>Portfolio</span>
-</div>
-<div class="flex-1 relative">
-<input class="w-full px-space-md py-2 rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder:text-outline focus:ring-2 focus:ring-primary outline-none transition-all shadow-inner" placeholder="https://camillemartin.dev" type="url"/>
-</div>
-</div>
-</div>
-</div>
-<!-- SECTION ACCESSIBILITÉ & PRÉFÉRENCES (APERÇU RAPIDE INTÉGRÉ) -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-[0_1px_8px_rgba(6,22,75,0.04)] flex flex-col gap-space-md">
-<div class="flex items-center gap-2 pb-2">
-<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">tune</span>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">5. Préférences d'Accessibilité &amp; Interface (WCAG 2.2 AA)</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Personnalisez votre confort de lecture multimodal.</p>
-</div>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-<!-- Thème Visuel -->
-<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded">
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface">Mode d'affichage</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Clair standard</span>
-</div>
-<div class="flex items-center gap-1 bg-surface-container-lowest p-1 rounded-full shadow-xs">
-<button class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center" title="Mode clair actif" type="button"><span class="material-symbols-outlined text-[16px]">light_mode</span></button>
-<button class="w-8 h-8 rounded-full text-on-surface-variant hover:text-on-surface flex items-center justify-center" title="Basculer vers mode sombre" type="button"><span class="material-symbols-outlined text-[16px]">dark_mode</span></button>
-</div>
-</div>
-<!-- Taille de police augmentée -->
-<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded">
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface">Police Confort WCAG</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Taille standard (100%)</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer">
-<input class="sr-only peer" type="checkbox" value=""/>
-<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-</label>
-</div>
-<!-- Contraste renforcé -->
-<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded">
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface">Contraste Élevé (≥ 7:1)</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Renforce la lisibilité</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer">
-<input class="sr-only peer" type="checkbox" value=""/>
-<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-</label>
-</div>
-<!-- Réduction des animations -->
-<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded">
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface">Réduction des mouvements</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Animations atténuées</span>
-</div>
-<label class="relative inline-flex items-center cursor-pointer">
-<input checked="" class="sr-only peer" type="checkbox" value=""/>
-<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-</label>
-</div>
-</div>
+<h3 class="text-[14px] font-semibold text-on-surface">Affiliations &amp; établissements rattachés</h3>
+<p class="text-[12px] text-on-surface-variant">Vos rattachements et le contexte dans lequel vous étudiez.</p>
+</div>
+</div>
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-low px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" href="{% url 'portal:university_switch' %}"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Mes universités</a>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for membership in memberships %}
+<div class="flex flex-col gap-3 rounded bg-surface-container-low p-3 md:flex-row md:items-center md:justify-between">
+<div class="flex min-w-0 items-start gap-3">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {% if portal_university and membership.university_id == portal_university.pk %}bg-primary text-on-primary{% else %}bg-secondary-container text-on-secondary-container{% endif %} font-headline-sm font-bold">{{ membership.university.code|default:membership.university.name|slice:":2"|upper }}</div>
+<div class="min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<h4 class="text-[14px] font-semibold text-on-surface">{{ membership.university.name }}</h4>
+{% if portal_university and membership.university_id == portal_university.pk %}<span class="rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold uppercase text-on-primary">Principal</span>{% endif %}
+</div>
+<p class="mt-0.5 text-[12px] text-on-surface-variant">{{ membership.university.city|default:"Ville non renseignée" }}{% if membership.university.country %}, {{ membership.university.country }}{% endif %}</p>
+<p class="mt-0.5 font-data-metric text-[11px] text-primary">Rôle : {{ membership.get_role_display }}</p>
+</div>
+</div>
+<div class="flex shrink-0 items-center gap-2 self-end md:self-center">
+{% if membership.is_active %}{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+{% if membership.is_active and portal_university and membership.university_id != portal_university.pk %}
+<form method="post" action="{% url 'portal:university_switch' %}">
+{% csrf_token %}
+<input type="hidden" name="university" value="{{ membership.university.pk }}"/>
+<input type="hidden" name="next" value="{% url 'portal:student_profile' %}"/>
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] font-semibold text-primary transition-colors hover:bg-surface-container" type="submit"><span class="material-symbols-outlined text-[16px]">swap_horiz</span>Étudier ici</button>
+</form>
+{% endif %}
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-center text-[12px] text-on-surface-variant">Aucune affiliation enregistrée.</p>
+{% endfor %}
+</div>
+</section>
+<section class="rounded bg-surface-container-lowest shadow-sm" id="profile-edit">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Informations du compte</h2>
+<p class="text-xs text-on-surface-variant">Ces informations apparaissent sur vos pages et vos supports pédagogiques.</p>
+</div>
+<form class="flex flex-col gap-5 p-5" method="post" novalidate>
+{% csrf_token %}
+<div class="grid gap-4 sm:grid-cols-2">
+{% for field in account_form.visible_fields %}{% include "portal/_form_field.html" with field=field %}{% endfor %}
+</div>
+{% for error in account_form.non_field_errors %}<p class="text-xs font-semibold text-error">{{ error }}</p>{% endfor %}
+{% if profile_form %}
+<div class="border-t border-outline-variant/40 pt-4">
+<h3 class="font-title-md text-title-md text-on-surface">Profil étudiant — {% if portal_university %}{{ portal_university.name }}{% else %}université courante{% endif %}</h3>
+<p class="text-xs text-on-surface-variant">Ces informations ne concernent que l'université courante.</p>
+<div class="mt-3 grid gap-4 sm:grid-cols-2">
+{% for field in profile_form.visible_fields %}{% include "portal/_form_field.html" with field=field %}{% endfor %}
+</div>
+{% for error in profile_form.non_field_errors %}<p class="text-xs font-semibold text-error">{{ error }}</p>{% endfor %}
+</div>
+{% else %}
+<div class="rounded bg-tertiary-fixed/30 px-4 py-3 text-xs text-on-surface">Aucun profil étudiant pour l'université courante. Votre inscription est peut-être en attente de validation.</div>
+{% endif %}
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+<p class="text-xs text-on-surface-variant">Les champs sont enregistrés pour l'université courante uniquement.</p>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer</button>
 </div>
 </form>
+</section>
 </div>
-<!-- COLONNE DROITE : PANNEAU ASSISTANT IA DOCKÉ (5 COLS XL) -->
-<div class="xl:col-span-5 sticky top-28" id="ai-panel">
-<div class="bg-surface-container-lowest rounded shadow-[0_4px_24px_rgba(6,22,75,0.08)] flex flex-col overflow-hidden transition-all">
-<!-- En-tête du Panneau IA -->
-<div class="p-space-lg bg-surface-container-high/40 flex items-center justify-between">
-<div class="flex items-center gap-space-sm">
-<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-xs">
-<span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+<div class="flex flex-col gap-5 lg:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Profil étudiant</h2>
+<dl class="mt-3 space-y-3 text-sm">
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Matricule</dt><dd class="font-data-metric font-semibold text-on-surface">{{ profile.student_number|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ profile.program|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Promotion</dt><dd class="font-semibold text-on-surface">{{ profile.promotion|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Groupes</dt><dd class="font-semibold text-on-surface">{{ groups|length }} groupe{{ groups|length|pluralize }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Université courante</dt><dd class="font-semibold text-on-surface">{{ portal_university.name|default:"—" }}</dd></div>
+</dl>
+</section>
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Raccourcis</h2>
+<div class="mt-3 flex flex-col gap-2">
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:student_class' %}">Ma classe &amp; groupes<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:university_switch' %}">Mes universités<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'coaching:student_dashboard' %}">Mon tableau de bord<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
 </div>
-<div>
-<div class="flex items-center gap-2">
-<h3 class="font-title-md text-title-md text-on-surface">Assistant IA</h3>
-<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] tracking-wider uppercase">Beta Multimodale</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Rédacteur de bio académique personnalisé</p>
-</div>
-</div>
-<button aria-label="Fermer ou replier le panneau" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<!-- Contenu interactif du Panneau IA -->
-<div class="p-space-lg flex flex-col gap-space-md">
-<!-- Note de contexte source -->
-<div class="flex items-start gap-2 p-space-sm rounded bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm">
-<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">info</span>
-<span>Génération contextualisée sur votre filière <strong>Master 1 IA</strong>, vos UE validées et vos dépôts d'ateliers récents.</span>
-</div>
-<!-- Configuration des paramètres de génération -->
-<div class="flex flex-col gap-space-sm">
-<!-- Ton -->
-<div class="flex flex-col gap-1">
-<label class="font-label-md text-label-md text-on-surface" for="ai-tone-select">Ton de rédaction</label>
-<div class="relative">
-<select class="w-full px-space-md py-2 rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary outline-none appearance-none cursor-pointer" id="ai-tone-select">
-<option selected="">Académique &amp; Professionnel</option>
-<option>Synthétique &amp; Percutant</option>
-<option>Orienté recherche &amp; Thèse</option>
-</select>
-<span class="material-symbols-outlined absolute right-3 top-2.5 text-[20px] text-outline pointer-events-none">arrow_drop_down</span>
-</div>
-</div>
-<!-- Projets à mettre en avant -->
-<div class="flex flex-col gap-1">
-<label class="font-label-md text-label-md text-on-surface" for="ai-keywords">Mots-clés ou projets à souligner</label>
-<input class="w-full px-space-md py-2 rounded bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:ring-2 focus:ring-primary outline-none" id="ai-keywords" type="text" value="TP CNN, consensus Raft, projet Master IA"/>
-</div>
-<!-- Longueur souhaitée -->
-<div class="flex flex-col gap-1.5">
-<span class="font-label-md text-label-md text-on-surface">Longueur du texte</span>
-<div class="flex gap-2">
-<button class="flex-1 py-1.5 px-2 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-container-high transition-colors text-center" type="button">Courte (~50 mots)</button>
-<button class="flex-1 py-1.5 px-2 rounded-full bg-primary text-on-primary font-label-sm text-label-sm shadow-xs text-center" type="button">Moyenne (~100 mots)</button>
+</section>
 </div>
 </div>
 </div>
-<!-- Bouton de relance de génération -->
-<button class="w-full py-2.5 px-space-md rounded-full bg-surface-container text-primary hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center gap-2 transition-all shadow-xs focus:ring-2 focus:ring-primary" id="regenerate-ai-btn" onclick="const btn = this; const orig = btn.innerHTML; btn.innerHTML = '&lt;span class=\'material-symbols-outlined text-[18px] animate-spin\'&gt;sync&lt;/span&gt;&lt;span&gt;Génération en cours...&lt;/span&gt;'; setTimeout(() =&gt; { btn.innerHTML = orig; }, 1000);" type="button">
-<span class="material-symbols-outlined text-[18px]">sync</span>
-<span>Régénérer une alternative</span>
-</button>
-<!-- BOX DE SUGGESTION IA AVEC ACTIONS OBLIGATOIRES -->
-<div class="mt-space-xs rounded bg-surface-container-low p-space-md flex flex-col gap-space-sm relative">
-<div class="flex items-center justify-between">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-sm">auto_awesome</span>
-                Suggestion IA
-              </span>
-<div class="flex items-center gap-1 text-primary font-data-metric text-data-metric" title="Indice d'adéquation avec votre cursus">
-<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim fill-1">stars</span>
-<span>Confiance 96%</span>
-</div>
-</div>
-<!-- Texte proposé -->
-<p class="font-body-md text-body-md text-on-surface leading-relaxed italic bg-surface-container-lowest/80 p-3 rounded" id="ai-proposed-text">
-              "Étudiante en Master 1 Informatique &amp; Intelligence Artificielle à l'Université Paris Cité, je m'intéresse particulièrement aux architectures d'apprentissage profond et aux algorithmes distribués. Passionnée par la mise en pratique de réseaux convolutionnels sous PyTorch et l'implémentation de protocoles de consensus tolérants aux pannes, je prépare un stage axé sur l'alignement éthique des modèles génératifs."
-            </p>
-<!-- Les 3 actions obligatoires du pattern IA -->
-<div class="flex flex-col sm:flex-row items-center gap-2 pt-space-xs">
-<!-- Action 1: GARDER -->
-<button class="w-full sm:flex-1 py-2 px-3 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md flex items-center justify-center gap-1.5 shadow-sm transition-all focus:ring-2 focus:ring-offset-1 focus:ring-primary" id="ai-action-keep" onclick="document.getElementById('bio-textarea').value = document.getElementById('ai-proposed-text').innerText.replace(/^&quot;|&quot;$/g, '').trim(); document.getElementById('bio-counter').innerText = `${document.getElementById('bio-textarea').value.length} / 600 caractères`; this.classList.add('bg-green-700'); this.innerHTML = '&lt;span class=\'material-symbols-outlined text-[16px]\'&gt;check&lt;/span&gt; Appliqué !'; setTimeout(() =&gt; { this.classList.remove('bg-green-700'); this.innerHTML = '&lt;span class=\'material-symbols-outlined text-[16px]\'&gt;check&lt;/span&gt; Garder'; }, 2000);" type="button">
-<span class="material-symbols-outlined text-[16px]">check</span>
-<span>Garder</span>
-</button>
-<!-- Action 2: MODIFIER -->
-<button class="w-full sm:flex-1 py-2 px-3 rounded-full bg-surface-container-lowest text-on-surface hover:bg-surface-container-high font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all shadow-xs" id="ai-action-edit" onclick="document.getElementById('bio-textarea').focus(); document.getElementById('bio-textarea').scrollIntoView({ behavior: 'smooth' });" type="button">
-<span class="material-symbols-outlined text-[16px]">edit</span>
-<span>Modifier</span>
-</button>
-<!-- Action 3: REFUSER -->
-<button class="py-2 px-3 rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/30 font-label-md text-label-md flex items-center justify-center gap-1 transition-colors" id="ai-action-dismiss" onclick="this.closest('.relative').style.opacity = '0.5'; setTimeout(() =&gt; { this.closest('.relative').style.opacity = '1'; }, 1000);" title="Refuser cette proposition" type="button">
-<span class="material-symbols-outlined text-[16px]">close</span>
-<span class="sm:hidden">Refuser</span>
-</button>
-</div>
-</div>
-<!-- BANNIÈRE DE RÉSILIENCE / GESTION D'ERREUR -->
-<div class="flex items-center gap-2 p-2.5 rounded bg-surface-container-high text-on-surface-variant font-body-sm text-xs">
-<span class="material-symbols-outlined text-[16px] text-outline shrink-0">shield</span>
-<span>En cas d'indisponibilité du service IA, la saisie et la modification manuelles demeurent accessibles en continu.</span>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- BARRE D'ACTIONS STICKY EN BAS DE PAGE -->
-<div class="fixed bottom-0 left-0 right-0 z-30 flex flex-col items-center justify-between gap-space-md bg-surface/90 p-space-md shadow-[0_-4px_16px_rgba(6,22,75,0.06)] backdrop-blur-md sm:flex-row lg:left-72">
-<div class="flex min-w-0 flex-wrap items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
-<span class="material-symbols-outlined text-[18px] text-outline">history</span>
-<span>Dernière sauvegarde automatique il y a <strong>3 minutes</strong></span>
-<span class="hidden md:inline text-outline">•</span>
-<span class="hidden md:inline text-primary flex items-center gap-1 font-medium">
-<span class="w-2 h-2 rounded-full bg-primary"></span>
-        Modifications prêtes à être publiées
-      </span>
-</div>
-<div class="flex w-full flex-wrap items-center justify-end gap-space-sm sm:w-auto">
-<!-- Annuler -->
-<button class="px-space-md py-2.5 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-outline" type="button">
-        Annuler les modifications
-      </button>
-<!-- Enregistrer -->
-<button class="px-space-lg py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-on-primary hover:opacity-95 active:scale-95 font-label-md text-label-md shadow-md hover:shadow-lg transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" onclick="const b = this; b.innerText='Enregistrement...'; setTimeout(()=&gt;{ b.innerHTML='&lt;span class=\'material-symbols-outlined text-[18px]\'&gt;check&lt;/span&gt; Enregistré !'; setTimeout(()=&gt;{ b.innerText='Enregistrer les modifications'; }, 2000); }, 600);" type="button">
-<span class="material-symbols-outlined text-[18px]">save</span>
-<span>Enregistrer les modifications</span>
-</button>
-</div>
-</div>
-</div></main>
+</main>
 {% endblock %}

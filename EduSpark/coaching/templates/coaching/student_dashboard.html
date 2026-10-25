@@ -19,10 +19,10 @@
         </span>
 </div>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface mt-1" id="greeting-heading">
-        Bonjour, Camille <span aria-hidden="true">👋</span>
+        Bonjour, {{ portal_user_first_name }} <span aria-hidden="true">👋</span>
 </h1>
 <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-        Voici un aperçu complet de vos activités académiques, échéances et progression pour le <strong class="font-semibold text-on-surface">Master 1 Informatique &amp; Intelligence Artificielle</strong> à l’Université Paris Cité.
+        Voici un aperçu complet de vos activités académiques, échéances et progression pour votre formation à {{ portal_university.name }}.
       </p>
 </div>
 <!-- Quick action to trigger AI panel -->
@@ -812,7 +812,7 @@
 <!-- Announcement 3 -->
 <article class="p-space-sm rounded bg-surface-container-low flex flex-col gap-1.5">
 <div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-bold">Université Paris Cité</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-bold">{{ portal_university.name }}</span>
 <span class="font-data-metric text-xs text-on-surface-variant">18 Oct</span>
 </div>
 <h3 class="font-title-md text-title-md text-on-surface">Maintenance programmée des serveurs de GPU de calcul</h3>

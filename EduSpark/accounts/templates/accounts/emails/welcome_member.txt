@@ -1,0 +1,10 @@
+Bonjour {{ user.get_full_name|default:user.email }},
+
+Un compte EduSpark vient d'être créé pour vous au sein de {{ university.name }}.
+
+Pour choisir votre mot de passe et accéder à votre espace, ouvrez le lien suivant :
+{{ link }}
+
+Ce lien est à usage unique et expire après quelques jours. Si vous pensez avoir reçu cet e-mail par erreur, ignorez-le.
+
+— L'équipe EduSpark
