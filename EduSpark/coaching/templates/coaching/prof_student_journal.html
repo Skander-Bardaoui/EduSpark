@@ -50,7 +50,7 @@
 <div class="hidden flex-col gap-4" data-journal-detail="camille">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <div class="flex flex-wrap items-start justify-between gap-3">
-<div class="flex items-center gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-on-primary">CM</span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Camille Martin</h2><p class="text-xs text-on-surface-variant">M1 Intelligence Artificielle · Référente : H. Vasseur</p></div></div>
+<div class="flex items-center gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-on-primary">CM</span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Camille Martin</h2><p class="text-xs text-on-surface-variant">M1 Intelligence Artificielle · Référente : {{ portal_user_name }}</p></div></div>
 <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:prof_tutoring' %}"><span class="material-symbols-outlined text-[16px]">event</span>Proposer un rendez-vous</a>
 </div>
 <div class="mt-4 grid gap-3 sm:grid-cols-3">
@@ -72,7 +72,7 @@
 <ul class="mt-3 space-y-3">
 <li class="border-l-2 border-primary pl-3"><p class="text-xs font-bold uppercase tracking-wide text-primary">Aujourd'hui · 08:40</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">J'ai compris la chaîne de dérivation après avoir refait l'exercice 2. Je me sens plus prête pour la soutenance.</p></li>
 <li class="border-l-2 border-outline-variant/60 pl-3"><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">21 octobre · 19:15</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">Le TP 3 avance bien, mais la gestion du cache me prend plus de temps que prévu.</p></li>
-<li class="border-l-2 border-outline-variant/60 pl-3"><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">19 octobre · 12:05</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">Point de suivi avec Mme Vasseur : plan de révision ajusté sur deux semaines.</p></li>
+<li class="border-l-2 border-outline-variant/60 pl-3"><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">19 octobre · 12:05</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">Point de suivi avec {{ portal_user_name }} : plan de révision ajusté sur deux semaines.</p></li>
 </ul>
 </section>
 </div>

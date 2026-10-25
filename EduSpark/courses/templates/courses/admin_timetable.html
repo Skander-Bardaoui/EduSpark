@@ -1,551 +1,89 @@
 {% extends "portal/base_admin.html" %}
 {% block title %}Emploi du temps global — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
-<!-- En-tête de page & Fil d'Ariane -->
-<div class="flex flex-col gap-5 mb-6">
-<div class="flex flex-col xl:flex-row xl:items-start justify-between gap-5">
-<div class="max-w-3xl">
-<div class="flex items-center gap-3 mb-2">
-<span class="px-2.5 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase tracking-wider">Supervision Centrale</span>
-<span class="flex items-center gap-1 font-data-metric text-data-metric text-secondary font-semibold">
-<span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
-            Sync En Direct
-          </span>
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours &amp; Catalogue</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Emploi du temps global</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Semaine du 20 au 24 octobre 2025 · planning hebdomadaire de chaque classe de {{ portal_university.name }}.</p>
 </div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Emploi du Temps Global &amp; Détection des Conflits</h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
-          Supervision centrale de l'occupation des amphithéâtres, gestion des salles spécialisées et résolution assistée des chevauchements de promotions.
-        </p>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Emploi du temps exporté au format iCal." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Formulaire de planification ouvert." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Planifier une séance</button>
 </div>
-<div class="flex flex-wrap items-center gap-2">
-<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors font-label-md text-label-md shadow-sm" type="button">
-<span class="material-symbols-outlined text-[20px]">file_download</span>
-<span>Exporter planning (ICS / PDF balisé)</span>
-</button>
-<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary text-on-secondary hover:bg-secondary/90 transition-all font-label-md text-label-md shadow-sm hover:shadow-md" type="button">
-<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
-<span>Résoudre les conflits IA</span>
-</button>
-<button class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-label-md shadow-md" type="button">
-<span class="material-symbols-outlined text-[20px]">add</span>
-<span>+ Planifier une session</span>
-</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Classes" value=class_count icon="groups" hint="Toutes promotions" %}
+{% include "portal/_stat_card.html" with label="Séances cette semaine" value=session_count icon="calendar_month" icon_class="bg-secondary-fixed text-on-secondary" hint="Toutes classes confondues" %}
+{% include "portal/_stat_card.html" with label="Enseignants mobilisés" value=teacher_count icon="school" icon_class="bg-surface-container text-secondary" hint="Intervenants planifiés" %}
+{% include "portal/_stat_card.html" with label="Conflits à traiter" value="0" icon="check_circle" hint="Aucun chevauchement détecté" %}
 </div>
-</div>
-</div>
-<!-- KPI & Indicateurs Logistiques Centraux -->
-<section aria-label="Indicateurs clés de supervision logistique" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-<div class="relative overflow-hidden p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-center justify-between mb-4">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Salles Supervisées</span>
-<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[22px]">apartment</span>
-</div>
-</div>
-<div class="font-data-metric text-[20px] font-bold leading-tight text-on-surface">142</div>
-<div class="flex items-center justify-between mt-3 pt-3 bg-surface-container-low/50 rounded-lg px-2.5 py-1.5">
-<span class="font-body-sm text-body-sm text-on-surface-variant">Grands Moulins, St-Germain, Odéon</span>
-<span class="font-data-metric text-data-metric font-semibold text-primary">100% connectées</span>
-</div>
-</div>
-<div class="relative overflow-hidden p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-center justify-between mb-4">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Occupation Globale</span>
-<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-[22px]">bar_chart</span>
-</div>
-</div>
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold leading-tight text-on-surface">94.2%</span>
-<span class="font-label-sm text-label-sm text-secondary font-bold flex items-center">
-<span class="material-symbols-outlined text-[16px]">trending_up</span> +3.1%
-        </span>
-</div>
-<div class="w-full bg-surface-container-high rounded-full h-2 mt-4 overflow-hidden">
-<div class="bg-secondary h-2 rounded-full" style="width: 94.2%;"></div>
-</div>
-</div>
-<div class="relative overflow-hidden p-5 rounded bg-error-container text-on-error-container shadow-sm">
-<div class="flex items-center justify-between mb-3">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-error font-bold flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[18px]">warning</span>
-          Alerte Prioritaire
-        </span>
-<span class="px-2.5 py-0.5 rounded-full bg-error text-on-error font-data-metric text-xs font-bold">Action Requise</span>
-</div>
-<div class="flex items-baseline gap-3">
-<span class="font-data-metric text-[20px] font-bold leading-tight text-error">3</span>
-<span class="font-title-md text-title-md font-bold text-on-error-container">Conflits Détectés</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-error-container/90 mt-2">
-        2 doubles réservations d'amphis • 1 chevauchement de promo (M1 IA / L3 Math).
-      </p>
-</div>
-<div class="relative overflow-hidden p-5 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-center justify-between mb-4">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Salles Hybrides Actives</span>
-<div class="w-10 h-10 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
-<span class="material-symbols-outlined text-[22px]">videocam</span>
-</div>
-</div>
-<div class="font-data-metric text-[20px] font-bold leading-tight text-on-surface">18<span class="font-headline-sm text-on-surface-variant text-[20px] font-normal"> / 20</span></div>
-<div class="flex items-center gap-2 mt-3 pt-3 bg-surface-container-low/50 rounded-lg px-2.5 py-1.5 text-on-surface-variant font-body-sm text-body-sm">
-<span class="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block"></span>
-<span>Captation auto opérationnelle (DSI)</span>
-</div>
-</div>
-</section>
-<!-- Filtres, Navigation Temporelle & Bascule Accessibilité -->
-<section aria-label="Contrôles du calendrier" class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 p-4 rounded bg-surface-container-lowest shadow-sm mb-6">
-<div class="flex flex-wrap items-center gap-3">
-<div class="flex min-w-0 max-w-full items-center rounded-full bg-surface-container p-1 shadow-inner">
-<button aria-label="Semaine précédente" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">chevron_left</span>
-</button>
-<div class="flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 font-headline-sm text-headline-sm text-on-surface">
-<span>Semaine 43</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant font-normal">• 21 au 26 Octobre 2024</span>
-</div>
-<button aria-label="Semaine suivante" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors" type="button">
-<span class="material-symbols-outlined text-[20px]">chevron_right</span>
-</button>
-</div>
-<button class="px-3.5 py-2 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors" type="button">
-        Aujourd'hui
-      </button>
-<div class="h-6 w-px bg-outline-variant/40 hidden sm:block mx-1"></div>
-<!-- Sélecteurs Campus & UFR -->
-<div class="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-<label class="sr-only" for="campus-filter">Filtrer par Campus</label>
-<select class="h-10 w-full min-w-0 max-w-full rounded-full border-0 bg-surface-container-low px-3.5 py-1.5 font-label-md text-label-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary sm:w-auto" id="campus-filter">
-<option value="all">Tous les Campus (Paris Rive Gauche)</option>
-<option selected="" value="gm">Campus Grands Moulins</option>
-<option value="buffon">Site Buffon</option>
-<option value="farines">Halle aux Farines</option>
-<option value="odeong">Saint-Germain / Odéon</option>
-</select>
-<label class="sr-only" for="ufr-filter">Filtrer par UFR</label>
-<select class="h-10 w-full min-w-0 max-w-full rounded-full border-0 bg-surface-container-low px-3.5 py-1.5 font-label-md text-label-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary sm:w-auto" id="ufr-filter">
-<option value="all">Toutes les UFR</option>
-<option selected="" value="info">UFR Informatique</option>
-<option value="math">UFR Mathématiques</option>
-<option value="physique">UFR Physique</option>
-<option value="lsh">UFR Lettres &amp; Sciences Humaines</option>
-</select>
-</div>
-</div>
-<!-- Toggle Vue Grille / Accessible -->
-<div aria-label="Mode d'affichage" class="flex items-center self-end lg:self-auto bg-surface-container-high rounded-full p-1" role="group">
-<button aria-pressed="true" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-sm transition-all" id="toggle-grid" type="button">
-<span class="material-symbols-outlined text-[18px]">calendar_view_week</span>
-<span>Vue Grille</span>
-</button>
-<button aria-pressed="false" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-on-surface hover:text-primary font-label-md text-label-md transition-all" id="toggle-list" type="button">
-<span class="material-symbols-outlined text-[18px]">view_agenda</span>
-<span>Vue Accessible (WCAG)</span>
-</button>
-</div>
-</section>
-<!-- Disposition principale : Grille de Supervision & Volet IA -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-<!-- Colonne Grille & Salles (8 colonnes sur XL) -->
-<div class="xl:col-span-8 flex flex-col gap-5">
-<!-- Vue Grille Calendrier Active -->
-<div class="bg-surface-container-lowest rounded p-5 shadow-sm overflow-hidden flex flex-col gap-5" id="grid-view">
-<div class="flex items-center justify-between pb-4 bg-surface-container-low/40 px-4 py-3 rounded-lg">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary text-[24px]">view_timeline</span>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Occupations Hebdomadaires en Temps Réel</h2>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Affichage des 3 infrastructures critiques du campus</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Plannings par classe</h2>
+<p class="text-xs text-on-surface-variant">{{ class_count }} classe{{ class_count|pluralize }} · {{ session_count }} séance{{ session_count|pluralize }} cette semaine</p>
+</div>
+<div class="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-primary"></span>Cours magistral (CM)</span>
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-secondary"></span>Travaux pratiques (TP)</span>
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-tertiary-fixed-dim"></span>Travaux dirigés (TD)</span>
 </div>
 </div>
-<div class="flex min-w-0 flex-wrap items-center gap-2 font-data-metric text-data-metric text-on-surface-variant">
-<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Session confirmée
-            <span class="w-2.5 h-2.5 rounded-full bg-error ml-2"></span> Conflit
-            <span class="w-2.5 h-2.5 rounded-full bg-secondary ml-2"></span> Hybride
-          </div>
+{% for entry in timetables %}
+<section aria-labelledby="class-{{ entry.school_class.pk }}" class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div class="flex min-w-0 items-center gap-3">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary-fixed text-primary">
+<span class="material-symbols-outlined text-[20px]">groups</span>
 </div>
-<!-- Salle 1: Amphi Buffon -->
-<article aria-labelledby="room-buffon-title" class="p-5 rounded bg-surface-container-low hover:bg-surface-container/60 transition-colors">
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded bg-primary text-on-primary flex items-center justify-center font-bold">
-                AB
-              </div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2" id="room-buffon-title">
-                  Amphi Buffon • Bâtiment Buffon
-                  <span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">400 places</span>
-</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Équipé captation automatique, 3 vidéoprojecteurs laser, régie audio Midas</p>
+<div class="min-w-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface" id="class-{{ entry.school_class.pk }}">{{ entry.school_class.name }}</h3>
+<p class="mt-0.5 text-xs text-on-surface-variant">
+{{ entry.school_class.level }}{% if entry.school_class.program %} · {{ entry.school_class.program }}{% endif %}{% if entry.school_class.academic_year %} · {{ entry.school_class.academic_year }}{% endif %} · {{ entry.group_count }} groupe{{ entry.group_count|pluralize }}
+</p>
 </div>
 </div>
-<div class="flex min-w-0 flex-wrap items-center gap-2 font-data-metric text-data-metric text-on-surface-variant">
-<span>Capacité Max: 400</span> • <span>PMR: 12 places</span>
+<div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
+<span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">{{ entry.session_count }} séance{{ entry.session_count|pluralize }}</span>
+<span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">{{ entry.teacher_count }} enseignant{{ entry.teacher_count|pluralize }}</span>
 </div>
 </div>
-<!-- Créneaux Buffon -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- Créneau Matin Confirmé -->
-<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-2">
-<span class="font-data-metric text-data-metric font-semibold text-primary">08h30 – 11h30 (3h00)</span>
-<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-sm text-label-sm font-semibold flex items-center gap-1">
-<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Confirmé • Hybride
-                  </span>
-</div>
-<h4 class="font-title-md text-title-md text-on-surface">INF501 – Réseaux de Neurones &amp; Deep Learning</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Master 1 Informatique • Promo IA (142 inscrits)</p>
-</div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low/50 rounded-lg px-3 py-1.5">
-<span class="font-label-md text-label-md text-on-surface flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[18px] text-primary">person</span>
-                  Pr. J-M. Vasseur
-                </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Diffusion Stream UPC #4</span>
-</div>
-</div>
-<!-- Créneau Après-Midi CONFLIT -->
-<div class="p-4 rounded-xl bg-error-container text-on-error-container shadow-sm flex flex-col justify-between" role="alert">
-<div>
-<div class="flex items-center justify-between mb-2">
-<span class="font-data-metric text-data-metric font-bold text-error">14h00 – 17h00 (3h00)</span>
-<span class="px-2.5 py-0.5 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold flex items-center gap-1 animate-pulse">
-<span class="material-symbols-outlined text-sm">report</span> CONFLIT DÉTECTÉ
-                  </span>
-</div>
-<h4 class="font-title-md text-title-md text-error font-bold">Double Réservation Simultanée</h4>
-<div class="space-y-1 mt-2 text-on-error-container">
-<div class="p-2 rounded bg-surface-container-lowest/80 text-on-surface flex items-center justify-between">
-<span class="font-label-md text-label-md">1. MATH201 – Algèbre Bilinéaire (L2 Math, 190 ét.)</span>
-<span class="font-data-metric text-data-metric text-primary">Dr. Leroux</span>
-</div>
-<div class="p-2 rounded bg-surface-container-lowest/80 text-on-surface flex items-center justify-between">
-<span class="font-label-md text-label-md">2. PHYS301 – Thermodynamique (L3 Phys, 160 ét.)</span>
-<span class="font-data-metric text-data-metric text-primary">Pr. Benali</span>
-</div>
-</div>
-</div>
-<div class="mt-3 flex items-center justify-between">
-<span class="font-body-sm text-body-sm text-error font-semibold">Dépassement jauge + Collision horaire</span>
-<button class="px-3 py-1 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold hover:bg-error/90 transition-colors" type="button">
-                  Arbitrer manuellement
-                </button>
-</div>
-</div>
-</div>
+{% if entry.session_count %}
+<div class="overflow-x-auto p-4">
+<div class="grid min-w-[900px] grid-cols-5 gap-3">
+{% for day in entry.days %}
+<div class="min-h-[220px] rounded bg-surface-container/50 p-2">
+<p class="px-1 pb-2 text-center text-xs font-bold text-on-surface">{{ day.label }}</p>
+<div class="space-y-2">
+{% for session in day.sessions %}
+<article class="rounded border-l-4 p-2.5 {% if session.kind == 'CM' %}border-primary bg-primary-fixed/50{% elif session.kind == 'TP' %}border-secondary bg-secondary-fixed/60{% else %}border-tertiary-fixed-dim bg-tertiary-fixed/40{% endif %}">
+<p class="text-[11px] font-bold {% if session.kind == 'CM' %}text-primary{% elif session.kind == 'TP' %}text-secondary{% else %}text-tertiary{% endif %}">{{ session.start }} – {{ session.end }}</p>
+<p class="mt-1 text-xs font-bold leading-tight text-on-surface">{{ session.code }} · {{ session.title }}</p>
+<p class="mt-1 text-[11px] text-on-surface-variant">{{ session.kind }} · {{ session.room }}</p>
+<p class="mt-0.5 text-[11px] text-on-surface-variant">{{ session.teacher }}</p>
 </article>
-<!-- Salle 2: Salle Farines 214B -->
-<article aria-labelledby="room-farines-title" class="p-5 rounded bg-surface-container-low hover:bg-surface-container/60 transition-colors">
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded bg-secondary text-on-secondary flex items-center justify-center font-bold">
-                F2
-              </div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2" id="room-farines-title">
-                  Salle Farines 214B • Halle aux Farines
-                  <span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">36 stations GPU</span>
-</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Laboratoire de calcul parallèle • Postes Linux Nvidia RTX A5000</p>
+{% empty %}
+<p class="rounded border border-dashed border-outline-variant/50 px-2 py-4 text-center text-[11px] text-outline">Libre</p>
+{% endfor %}
 </div>
 </div>
-<div class="flex min-w-0 flex-wrap items-center gap-2 font-data-metric text-data-metric text-on-surface-variant">
-<span>Cluster CUDA-12</span> • <span>Climatisation serveur OK</span>
+{% endfor %}
 </div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<!-- TP En cours -->
-<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-2">
-<span class="font-data-metric text-data-metric font-semibold text-secondary">14h00 – 16h00 (2h00)</span>
-<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold flex items-center gap-1">
-<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> En cours d'exécution
-                  </span>
-</div>
-<h4 class="font-title-md text-title-md text-on-surface">TP INF501 Gr. A – Entraînement PyTorch &amp; Cloud</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Master 1 IA • 32 postes occupés sur 36</p>
-</div>
-<div class="flex items-center justify-between mt-4 pt-3 bg-surface-container-low/50 rounded-lg px-3 py-1.5">
-<span class="font-label-md text-label-md text-on-surface flex items-center gap-1.5">
-<span class="material-symbols-outlined text-[18px] text-secondary">terminal</span>
-                  Superviseur : L. Girard (Doctorant)
-                </span>
-<span class="font-data-metric text-data-metric text-emerald-700 font-semibold">Télémétrie 88% GPU</span>
-</div>
-</div>
-<!-- Prochain Créneau Libre / Entretien -->
-<div class="p-4 rounded-xl bg-surface-container/40 flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-2">
-<span class="font-data-metric text-data-metric text-on-surface-variant">16h15 – 18h15</span>
-<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Créneau Réservable</span>
-</div>
-<h4 class="font-title-md text-title-md text-on-surface-variant">Disponibilité Libre / Maintenance Nocturne</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant/80 mt-1">Mise à jour des images conteneurs planifiée à 20h00.</p>
-</div>
-<div class="mt-4 flex justify-end">
-<button class="px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-primary hover:bg-surface-container font-label-md text-label-md transition-colors shadow-sm" type="button">
-                  + Allouer ce créneau
-                </button>
-</div>
-</div>
-</div>
-</article>
-<!-- Salle 3: Amphi Turing -->
-<article aria-labelledby="room-turing-title" class="p-5 rounded bg-surface-container-low hover:bg-surface-container/60 transition-colors">
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded bg-tertiary text-on-tertiary flex items-center justify-center font-bold">
-                AT
-              </div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2" id="room-turing-title">
-                  Amphi Alan Turing • Bâtiment Sophie Germain
-                  <span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">250 places</span>
-</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Amphithéâtre gradiné • Protocole d'examen certifié UPC</p>
-</div>
-</div>
-<div class="flex items-center gap-2 font-data-metric text-data-metric text-tertiary font-semibold">
-<span class="material-symbols-outlined text-[16px]">verified_user</span> Dispositif Épreuve Officielle
-            </div>
-</div>
-<div class="p-4 rounded-xl bg-surface-container-lowest shadow-sm">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-<div>
-<span class="font-data-metric text-data-metric font-semibold text-primary">09h00 – 12h00 (3h00)</span>
-<h4 class="font-title-md text-title-md text-on-surface mt-1">Évaluation Mi-Parcours INF503 – Architectures Distribuées</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">198 étudiants convoqués • Responsable : Dr. É. Moreau</p>
-</div>
-<div class="shrink-0 flex items-center gap-2">
-<span class="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px]">accessible</span> Aménagement Tiers-Temps
-                </span>
-</div>
-</div>
-<div class="p-3 rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm flex items-center justify-between">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[18px]">info</span>
-<span>Salle attenante 102 mobilisée pour 14 étudiants à temps aménagé (Surveillance DSI assurée).</span>
-</div>
-<span class="font-data-metric text-data-metric text-on-surface font-semibold">Jury n°4</span>
-</div>
-</div>
-</article>
-</div>
-<!-- Vue Liste Linéaire Accessible (WCAG AA) masquée par défaut via script toggle -->
-<section aria-label="Planning sous format liste linéaire accessible" class="hidden bg-surface-container-lowest rounded p-5 shadow-sm flex-col gap-5" id="list-view">
-<div class="flex items-center justify-between pb-4 bg-surface-container-low/40 px-4 py-3 rounded-lg">
-<div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Vue Liste Linéaire (Conforme Norme RGAA / WCAG 2.2 AA)</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Structure tabulaire et linéaire pour lecteurs d'écran et synthèse vocale.</p>
-</div>
-<span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-label-sm text-label-sm font-bold">Lecteur d'écran optimisé</span>
-</div>
-<ul class="space-y-4" role="list">
-<li class="p-4 rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
-<div class="space-y-1">
-<div class="font-data-metric text-data-metric font-bold text-primary">08h30 - 11h30 | Amphi Buffon (400 places)</div>
-<h3 class="font-title-md text-title-md text-on-surface">INF501 - Réseaux de Neurones &amp; Deep Learning</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Promo: M1 Informatique (142 étudiants). Enseignant: Pr. Vasseur. Statut: Confirmé en présentiel avec captation hybride.</p>
-</div>
-<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant" type="button">Détails de la séance</button>
-</li>
-<li class="p-4 rounded-xl bg-error-container text-on-error-container flex flex-col md:flex-row md:items-center justify-between gap-4" role="alert">
-<div class="space-y-1">
-<div class="font-data-metric text-data-metric font-bold text-error">14h00 - 17h00 | Amphi Buffon - CONFLIT CRITIQUE</div>
-<h3 class="font-title-md text-title-md text-error">Chevauchement de cours : MATH201 et PHYS301</h3>
-<p class="font-body-sm text-body-sm text-on-error-container">Les promotions L2 Mathématiques et L3 Physique sont affectées simultanément à cet amphithéâtre.</p>
-</div>
-<button class="shrink-0 px-4 py-2 rounded-full bg-error text-on-error font-label-md text-label-md font-bold hover:bg-error/90" type="button">Traiter le conflit</button>
-</li>
-<li class="p-4 rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-4">
-<div class="space-y-1">
-<div class="font-data-metric text-data-metric font-bold text-secondary">14h00 - 16h00 | Salle Farines 214B (36 postes GPU)</div>
-<h3 class="font-title-md text-title-md text-on-surface">TP INF501 Groupe A - Entraînement PyTorch</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Promo: M1 IA. Responsable: L. Girard. Statut: En cours avec 32 machines assignées.</p>
-</div>
-<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant" type="button">Détails de la séance</button>
-</li>
-</ul>
+{% else %}
+<p class="px-5 py-8 text-center text-sm text-on-surface-variant">Aucune séance planifiée pour cette classe.</p>
+{% endif %}
 </section>
-<!-- Aperçu cartographique campus / localisation rapide -->
-<div class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-<div class="flex items-center gap-3">
-<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[26px]">map</span>
+{% empty %}
+<div class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest px-5 py-10 text-center">
+<span class="material-symbols-outlined text-[36px] text-outline">event_busy</span>
+<p class="mt-2 text-sm text-on-surface-variant">Aucune classe n'est enregistrée pour cette université.</p>
 </div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">Topologie des Bâtiments Campus Paris Rive Gauche</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Liaison piétonne inter-bâtiments: Buffon ↔ Sophie Germain (50m, 2 min à pied).</p>
+{% endfor %}
 </div>
 </div>
-<div class="shrink-0">
-<button class="px-4 py-2 rounded-full bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md transition-colors flex items-center gap-1.5" type="button">
-<span class="material-symbols-outlined text-[18px]">near_me</span>
-            Consulter le plan PMR
-          </button>
-</div>
-</div>
-</div>
-<!-- Volet latéral droit (4 colonnes) : Assistant IA Logistique & Planning -->
-<aside aria-labelledby="assistant-ia-title" class="xl:col-span-4 flex flex-col gap-5">
-<div class="p-5 rounded bg-surface-container-lowest shadow-md flex flex-col gap-5">
-<!-- En-tête Assistant IA -->
-<div class="flex items-center justify-between pb-3 bg-surface-container-low/60 -mx-6 -mt-6 p-5 rounded-t">
-<div class="flex items-center gap-2.5">
-<div class="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-sm">
-<span class="material-symbols-outlined text-[20px]">smart_toy</span>
-</div>
-<div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2" id="assistant-ia-title">
-                Assistant Résolution Logistique
-                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-extrabold uppercase">BETA</span>
-</h2>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Modèle d'optimisation sous contraintes UPC</span>
-</div>
-</div>
-</div>
-<!-- Détection proactive -->
-<div class="p-3.5 rounded-xl bg-error-container/40 flex items-start gap-3">
-<span class="material-symbols-outlined text-error text-[22px] shrink-0 mt-0.5">crisis_alert</span>
-<div>
-<div class="font-label-md text-label-md text-error font-bold">3 Conflits identifiés sur la Semaine 43</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-              Priorité absolue : La collision horaire en Amphi Buffon affecte 350 étudiants simultanés.
-            </p>
-</div>
-</div>
-<!-- Proposition d'arbitrage automatisé -->
-<div class="p-4 rounded-xl bg-surface-container-low space-y-3">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px]">auto_fix_high</span>
-              Recommandation Optimale
-            </span>
-<div class="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-data-metric text-data-metric font-bold">
-<span>99% pertinence</span>
-</div>
-</div>
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">Déplacement suggéré : PHYS301 Thermodynamique</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
-              Réaffectation de l'enseignement magistral du Pr. Benali vers un amphithéâtre disponible immédiat.
-            </p>
-</div>
-<div class="p-3 rounded-lg bg-surface-container-lowest space-y-2">
-<div class="flex items-center justify-between text-on-surface font-body-sm text-body-sm">
-<span class="text-on-surface-variant">Nouvelle Salle :</span>
-<span class="font-semibold text-primary">Amphi Sophie Germain</span>
-</div>
-<div class="flex items-center justify-between text-on-surface font-body-sm text-body-sm">
-<span class="text-on-surface-variant">Capacité :</span>
-<span class="font-data-metric text-data-metric">300 places (160 requises)</span>
-</div>
-<div class="flex items-center justify-between text-on-surface font-body-sm text-body-sm">
-<span class="text-on-surface-variant">Distance :</span>
-<span class="font-data-metric text-data-metric">50 mètres (Bât. attenant)</span>
-</div>
-<div class="flex items-center justify-between text-on-surface font-body-sm text-body-sm">
-<span class="text-on-surface-variant">Impact Étudiants :</span>
-<span class="text-emerald-700 font-semibold font-body-sm text-body-sm">0 rupture d'agenda • Ponctualité 100%</span>
-</div>
-</div>
-<!-- 3 Boutons d'actions normés -->
-<div class="flex flex-col gap-2 pt-2">
-<button class="w-full py-2.5 px-4 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md transition-all shadow-sm flex items-center justify-center gap-2" type="button">
-<span class="material-symbols-outlined text-[18px]">check_circle</span>
-<span>Appliquer le déplacement</span>
-</button>
-<button class="w-full py-2 px-4 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-variant font-label-md text-label-md transition-colors flex items-center justify-center gap-2" type="button">
-<span class="material-symbols-outlined text-[18px]">tune</span>
-<span>Modifier le créneau</span>
-</button>
-<button class="w-full py-1.5 px-4 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-body-sm text-body-sm transition-colors text-center" type="button">
-              Ignorer / Forcer le chevauchement
-            </button>
-</div>
-</div>
-<!-- 2e Conflit en file d'attente (Synthèse) -->
-<div class="p-3 rounded-lg bg-surface-container-low/60 flex items-center justify-between">
-<div class="flex items-center gap-2.5">
-<span class="material-symbols-outlined text-tertiary text-[20px]">swap_horiz</span>
-<div>
-<span class="font-label-md text-label-md text-on-surface block leading-snug">Conflit #2 • Vendredi 25 Octobre</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">L1 Info Gr. 4 / Salle 103 Halle Farines</span>
-</div>
-</div>
-<button aria-label="Voir le conflit #2" class="p-1 rounded-full text-primary hover:bg-surface-container" type="button">
-<span class="material-symbols-outlined text-[20px]">chevron_right</span>
-</button>
-</div>
-<!-- Bandeau de résilience WCAG obligatoire -->
-<div class="p-3.5 rounded-xl bg-surface-container text-on-surface-variant font-body-sm text-body-sm flex items-start gap-2.5">
-<span class="material-symbols-outlined text-[20px] text-on-surface-variant shrink-0 mt-0.5">verified</span>
-<p class="leading-relaxed">
-<strong class="font-semibold text-on-surface block">Garantie d'accessibilité &amp; Résilience continue :</strong>
-            Si l'IA est momentanément indisponible, la modification manuelle des plannings et l'attribution des salles restent directement accessibles sans interruption.
-          </p>
-</div>
-</div>
-<!-- Journal d'Audit & Conformité RGPD -->
-<div class="p-5 rounded bg-surface-container-lowest shadow-sm space-y-3">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Traçabilité &amp; Audit</span>
-<span class="font-data-metric text-[11px] text-on-surface-variant">Registre CNIL / RGPD</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-          Dernière modification appliquée par <span class="font-semibold text-on-surface">M. Dupont (Admin Central)</span> le 21/10/2024 à 10:14:22.
-        </p>
-<div class="pt-2 flex items-center justify-between text-primary font-label-md text-label-md">
-<a class="hover:underline flex items-center gap-1" href="#">
-<span>Télécharger le journal d'attribution</span>
-<span class="material-symbols-outlined text-[16px]">open_in_new</span>
-</a>
-</div>
-</div>
-</aside>
-</div>
-</div>
-<script>
-  (function() {
-    const toggleGridBtn = document.getElementById('toggle-grid');
-    const toggleListBtn = document.getElementById('toggle-list');
-    const gridView = document.getElementById('grid-view');
-    const listView = document.getElementById('list-view');
-
-    if (toggleGridBtn && toggleListBtn && gridView && listView) {
-      toggleGridBtn.addEventListener('click', function() {
-        gridView.classList.remove('hidden');
-        listView.classList.add('hidden');
-        
-        toggleGridBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
-        toggleGridBtn.classList.remove('text-on-surface');
-        toggleGridBtn.setAttribute('aria-pressed', 'true');
-
-        toggleListBtn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
-        toggleListBtn.classList.add('text-on-surface');
-        toggleListBtn.setAttribute('aria-pressed', 'false');
-      });
-
-      toggleListBtn.addEventListener('click', function() {
-        gridView.classList.add('hidden');
-        listView.classList.remove('hidden');
-
-        toggleListBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
-        toggleListBtn.classList.remove('text-on-surface');
-        toggleListBtn.setAttribute('aria-pressed', 'true');
-
-        toggleGridBtn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
-        toggleGridBtn.classList.add('text-on-surface');
-        toggleGridBtn.setAttribute('aria-pressed', 'false');
-      });
-    }
-  })();
-</script></main>
+</main>
 {% endblock %}

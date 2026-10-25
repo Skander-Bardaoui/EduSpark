@@ -60,7 +60,7 @@ main form label{font-size:13px;font-weight:600;}
 @media print{.portal-topbar,#portal-sidebar,#portal-drawer-backdrop,#portal-toasts,[data-flash],[data-modal]{display:none!important;}body.portal-drawer-open,body.portal-modal-open{overflow:visible!important;}}
 </style>
 </head>
-<body class="{% block body_class %}bg-surface{% endblock %} font-body-md text-on-surface antialiased">
+<body class="{% block body_class %}bg-surface{% endblock %} font-body-md text-on-surface antialiased" data-portal-role="{{ portal_role|default:'' }}">
 <a class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:font-label-md focus:text-label-md focus:text-on-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="#main-content">Aller au contenu</a>
 {% include "portal/_sidebar.html" %}
 {% include "portal/_topbar.html" %}

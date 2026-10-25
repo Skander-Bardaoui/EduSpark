@@ -1,0 +1,62 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Universités — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Plateforme</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Universités</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Créez les établissements (tenants), invitez leurs administrateurs et suivez leurs effectifs.</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'portal:admin_university_create' %}"><span class="material-symbols-outlined text-[18px]">add_business</span>Nouvelle université</a>
+</header>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Établissements</h2>
+<p class="text-xs text-on-surface-variant">{{ paginator.count }} université{{ paginator.count|pluralize }} enregistrée{{ paginator.count|pluralize }}</p>
+</div>
+<form class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center" method="get">
+<label class="relative block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary sm:w-56" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/></label>
+{% for filter in filters %}
+<select class="rounded-full border border-outline-variant/60 bg-surface px-3 py-2 text-xs text-on-surface outline-none focus:border-primary" name="{{ filter.param }}">
+<option value="">{{ filter.label }} — tous</option>
+{% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+</select>
+{% endfor %}
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-primary-fixed-dim" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if is_filtered %}<a class="text-xs font-bold text-on-surface-variant hover:text-primary" href="{% url 'portal:admin_universities' %}">Réinitialiser</a>{% endif %}
+</form>
+</div>
+{% if universities %}
+<div class="overflow-x-auto">
+<table class="w-full min-w-[980px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Université</th><th class="px-5 py-3 font-bold">Localisation</th><th class="px-5 py-3 font-bold">Domaine e-mail</th><th class="px-5 py-3 font-bold">Professeurs</th><th class="px-5 py-3 font-bold">Étudiants</th><th class="px-5 py-3 font-bold">Statut</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for university in universities %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[18px]">account_balance</span></span><div class="min-w-0"><a class="truncate font-semibold text-on-surface hover:text-primary" href="{% url 'portal:admin_university_detail' university.pk %}">{{ university.name }}</a><p class="text-xs text-on-surface-variant">{{ university.code|default:"—" }} · créée le {{ university.created_at|date:"d/m/Y" }}</p></div></div></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ university.city|default:"—" }}{% if university.country %} · {{ university.country }}{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ university.email_domain|default:"—" }}</td>
+<td class="px-5 py-3 font-semibold text-on-surface">{{ university.professor_count }}</td>
+<td class="px-5 py-3 font-semibold text-on-surface">{{ university.student_count }}</td>
+<td class="px-5 py-3">{% if university.is_active %}{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Désactivée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<td class="px-5 py-3"><div class="flex justify-end gap-1">
+<a class="inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-bold text-primary transition-colors hover:bg-primary-fixed" href="{% url 'portal:admin_university_detail' university.pk %}">Détail</a>
+<a aria-label="Modifier" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'portal:admin_university_update' university.pk %}" title="Modifier"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+<a aria-label="Supprimer" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" href="{% url 'portal:admin_university_delete' university.pk %}" title="Supprimer"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+</div></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% include "portal/_pagination.html" %}
+{% else %}
+<div class="p-5">{% include "portal/_empty_state.html" with icon="account_balance" title="Aucune université" hint="Créez le premier établissement pour commencer." %}</div>
+{% endif %}
+</section>
+</div>
+</main>
+{% endblock %}

@@ -57,7 +57,7 @@ ROLE_META = {
         "label": "Administration",
         "portal_label": "Portail Administration",
         "home_url_name": "coaching:admin_dashboard",
-        "profile_url_name": "portal:admin_university",
+        "profile_url_name": "portal:admin_profile",
         "notifications": (
             {
                 "icon": "mark_email_read",
@@ -87,13 +87,6 @@ NAV_SECTIONS = {
             "label": "Tableau de bord",
             "items": (
                 {"label": "Mon Tableau de bord", "icon": "home", "url_name": "coaching:student_dashboard"},
-            ),
-        },
-        {
-            "label": "Compte",
-            "items": (
-                {"label": "Mon Profil & Paramètres", "icon": "person_outline", "url_name": "portal:student_profile"},
-                {"label": "Ma Classe & Groupes", "icon": "groups", "url_name": "portal:student_class"},
             ),
         },
         {
@@ -141,15 +134,6 @@ NAV_SECTIONS = {
             "label": "Tableau de bord",
             "items": (
                 {"label": "Mon Tableau de bord", "icon": "space_dashboard", "url_name": "coaching:prof_dashboard"},
-            ),
-        },
-        {
-            "label": "Compte",
-            "items": (
-                {"label": "Mon Profil & Grades", "icon": "badge", "url_name": "portal:prof_profile"},
-                {"label": "Mes Universités", "icon": "account_balance", "url_name": "portal:prof_universities"},
-                {"label": "Mes Classes & Groupes", "icon": "groups", "url_name": "portal:prof_classes"},
-                {"label": "Paramètres du compte", "icon": "settings", "url_name": "portal:prof_settings"},
             ),
         },
         {
@@ -214,6 +198,17 @@ NAV_SECTIONS = {
             ),
         },
         {
+            "label": "Plateforme",
+            "items": (
+                {"label": "Universités", "icon": "account_balance", "url_name": "portal:admin_universities",
+                 "platform_only": True, "tenant_free": True},
+                {"label": "Comptes & Accès", "icon": "manage_accounts", "url_name": "portal:admin_accounts",
+                 "platform_only": True, "tenant_free": True},
+                {"label": "Paramètres de la plateforme", "icon": "settings",
+                 "url_name": "portal:admin_platform_settings", "platform_only": True, "tenant_free": True},
+            ),
+        },
+        {
             "label": "Cours & Catalogue",
             "items": (
                 {"label": "Départements & Filières", "icon": "account_tree", "url_name": "courses:admin_program_offer"},
@@ -249,12 +244,6 @@ NAV_SECTIONS = {
             "items": (
                 {"label": "Tableau de bord de suivi", "icon": "monitoring", "url_name": "coaching:admin_monitoring"},
                 {"label": "Attribution des tuteurs", "icon": "how_to_reg", "url_name": "coaching:admin_perseverance"},
-            ),
-        },
-        {
-            "label": "Paramètres",
-            "items": (
-                {"label": "Paramètres de la plateforme", "icon": "settings", "url_name": "portal:admin_platform_settings"},
             ),
         },
     ),
