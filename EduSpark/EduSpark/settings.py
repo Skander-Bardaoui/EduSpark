@@ -163,7 +163,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = os.environ.get('DJANGO_LANGUAGE_CODE', 'en-us')
 
-TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'UTC')
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'Europe/Paris')
 
 USE_I18N = True
 
@@ -174,6 +174,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Fichiers téléversés (copies d'examen numérisées...).
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentification : pages du projet.
 LOGIN_URL = '/accounts/connexion/'

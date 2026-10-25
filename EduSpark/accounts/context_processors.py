@@ -65,7 +65,8 @@ def portal_context(request):
                 continue
             visible_url_names.add(item["url_name"])
             is_active = False
-            if not active_found and item["url_name"] == view_name:
+            matches_view = view_name == item["url_name"] or view_name in item.get("related_url_names", ())
+            if not active_found and matches_view:
                 is_active = True
                 active_found = True
                 current_label = item["label"]

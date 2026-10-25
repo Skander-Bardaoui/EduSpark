@@ -227,8 +227,8 @@ NAV_SECTIONS = {
             "label": "Examens & Notes",
             "items": (
                 {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:admin_exam_sessions"},
-                {"label": "Relevés officiels & Jurys", "icon": "workspace_premium", "url_name": "exams:admin_official_records"},
-                {"label": "Statistiques & Taux de réussite", "icon": "insights", "url_name": "exams:admin_statistics"},
+                {"label": "Relevés officiels & Jurys", "icon": "workspace_premium", "url_name": "exams:admin_official_records", "related_url_names": ("exams:admin_grade_record_detail",)},
+                {"label": "Statistiques & réussite", "icon": "insights", "url_name": "exams:admin_statistics"},
             ),
         },
         {
