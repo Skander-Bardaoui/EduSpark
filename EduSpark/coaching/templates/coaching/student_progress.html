@@ -21,10 +21,10 @@
 <span class="material-symbols-outlined text-[20px] text-secondary group-hover:text-on-secondary transition-colors" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
 <span>Générer mon plan d'étude avec l'IA</span>
 </button>
-<button class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button">
+<a class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="{% url 'coaching:student_progress_export' %}">
 <span class="material-symbols-outlined text-[18px]">download</span>
 <span>Rapport Synthèse</span>
-</button>
+</a>
 </div>
 </header>
 <!-- Metrics Grid -->
@@ -38,16 +38,16 @@
 </div>
 </div>
 <div class="flex items-baseline gap-space-xs mb-space-sm">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">8</span>
-<span class="font-title-md text-title-md text-outline">/ 12</span>
-<span class="ml-auto font-data-metric text-data-metric text-primary bg-primary-fixed px-2 py-0.5 rounded-full font-semibold">67%</span>
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ goal_stats.achieved }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ goal_stats.total }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-primary bg-primary-fixed px-2 py-0.5 rounded-full font-semibold">{{ goal_stats.percent }}%</span>
 </div>
 <div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
-<div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: 67%;"></div>
+<div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: {{ goal_stats.percent }}%;"></div>
 </div>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
 <span class="material-symbols-outlined text-sm text-secondary">trending_up</span>
-<span>+2 complétés depuis 15 jours</span>
+<span>{{ achieved_hint }}</span>
 </p>
 </div>
 <!-- Metric 2: Heures de révision -->
@@ -59,16 +59,16 @@
 </div>
 </div>
 <div class="flex items-baseline gap-space-xs mb-space-sm">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">14h</span>
-<span class="font-title-md text-title-md text-outline">/ 20h</span>
-<span class="ml-auto font-data-metric text-data-metric text-secondary font-bold">70%</span>
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ completed_hours }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ target_hours }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-secondary font-bold">{{ revision_percent }}%</span>
 </div>
 <div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
-<div class="bg-secondary h-2 rounded-full transition-all duration-500" style="width: 70%;"></div>
+<div class="bg-secondary h-2 rounded-full transition-all duration-500" style="width: {{ revision_percent }}%;"></div>
 </div>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
 <span class="material-symbols-outlined text-sm text-primary">schedule</span>
-<span>6h restantes d'ici dimanche</span>
+<span>{{ revision_hint }}</span>
 </p>
 </div>
 <!-- Metric 3: Tâches d'études -->
@@ -80,16 +80,16 @@
 </div>
 </div>
 <div class="flex items-baseline gap-space-xs mb-space-sm">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">23</span>
-<span class="font-title-md text-title-md text-outline">/ 28</span>
-<span class="ml-auto font-data-metric text-data-metric text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-semibold">82%</span>
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ task_counts.done }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ task_counts.total }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-semibold">{{ task_counts.progress }}%</span>
 </div>
 <div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
-<div class="bg-surface-tint h-2 rounded-full transition-all duration-500" style="width: 82%;"></div>
+<div class="bg-surface-tint h-2 rounded-full transition-all duration-500" style="width: {{ task_counts.progress }}%;"></div>
 </div>
 <p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
 <span class="material-symbols-outlined text-sm text-tertiary">assignment_late</span>
-<span>5 tâches urgentes actives</span>
+<span>{{ task_urgent_hint }}</span>
 </p>
 </div>
 <!-- Metric 4: Prochain jalon critique -->
@@ -101,12 +101,22 @@
 </div>
 </div>
 <div class="flex flex-col mb-space-xs">
-<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">Partiel Systèmes Distribués</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">INF502 • Amphi Poincaré</span>
+{% if exam %}
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">{{ exam.title }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">{{ exam.course_code }}{% if exam.location %} • {{ exam.location }}{% endif %}</span>
+{% else %}
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">Aucun jalon à venir</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Planifiez vos prochaines échéances.</span>
+{% endif %}
 </div>
 <div class="flex items-center justify-between pt-space-xs">
-<span class="px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-data-metric text-data-metric rounded-full font-bold">Dans 6 jours</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">24 Nov - 09:00</span>
+{% if exam %}
+<span class="px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-data-metric text-data-metric rounded-full font-bold">{{ exam_countdown|default:"À venir" }}</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ exam_when_label }}</span>
+{% else %}
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant font-data-metric text-data-metric rounded-full font-bold">—</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Aucune date</span>
+{% endif %}
 </div>
 </div>
 </section>
@@ -129,131 +139,82 @@
 </button>
 </div>
 <div class="flex flex-col gap-space-md">
-<!-- Objectif 1: En cours -->
+{% for item in goal_items %}
+{% with goal=item.goal %}
 <article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
 <div class="flex-1 flex flex-col gap-space-xs">
 <div class="flex items-center gap-space-sm flex-wrap">
 <span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
-                  Filière IA &amp; Deep Learning
-                </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-surface-container text-primary font-label-sm text-label-sm rounded-full font-semibold">
-<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">sync</span>
-<span>En cours</span>
+{{ goal.semester }}
 </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">INF501</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 {{ item.meta.badge }} font-label-sm text-label-sm rounded-full font-semibold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">{{ item.meta.icon }}</span>
+<span>{{ item.meta.label }}</span>
+</span>
+{% if goal.course_code %}
+<span class="font-data-metric text-data-metric text-on-surface-variant">{{ goal.course_code }}</span>
+{% endif %}
 </div>
-<h3 class="font-title-md text-title-md text-on-surface">
-                Maîtriser les architectures ResNet et Transformer
-              </h3>
+<h3 class="font-title-md text-title-md text-on-surface{% if goal.status == 'achieved' %} line-through text-outline{% endif %}">
+{{ goal.title }}
+</h3>
+{% if goal.description %}
 <p class="font-body-sm text-body-sm text-on-surface-variant">
-                Implémentation en PyTorch, analyse des couches d'auto-attention et optimisation sur TPU.
-              </p>
+{{ goal.description }}
+</p>
+{% endif %}
 <div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+{% if item.skills_label %}
 <span class="flex items-center gap-1 font-label-sm">
 <span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
-<span>4/5 compétences acquises</span>
+<span>{{ item.skills_label }}</span>
 </span>
-<span class="flex items-center gap-1 font-label-sm">
-<span class="material-symbols-outlined text-[16px] text-outline">event</span>
-<span>Échéance: 08 Janvier</span>
+{% endif %}
+{% if goal.status == 'achieved' %}
+<span class="flex items-center gap-1 font-label-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">workspace_premium</span>
+<span>{% if item.grade_label %}Objectif validé · Note : {{ item.grade_label }}/20{% else %}Objectif validé{% endif %}</span>
 </span>
+{% else %}
+<span class="flex items-center gap-1 font-label-sm{% if goal.status == 'at_risk' %} text-error{% endif %}">
+<span class="material-symbols-outlined text-[16px]{% if goal.status != 'at_risk' %} text-outline{% endif %}">{% if goal.status == 'at_risk' %}schedule{% else %}event{% endif %}</span>
+<span>{% if goal.status == 'at_risk' %}Échéance critique :{% else %}Échéance :{% endif %} {{ item.target_label }}</span>
+</span>
+{% endif %}
 </div>
 </div>
 <div class="md:w-48 flex flex-col items-end gap-space-xs">
 <div class="flex items-baseline gap-1">
-<span class="font-headline-sm text-headline-sm font-bold text-primary">85%</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">avancement</span>
+<span class="font-headline-sm text-headline-sm font-bold {{ item.meta.value }}">{{ goal.progress }}%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{% if goal.status == 'achieved' %}complété{% else %}avancement{% endif %}</span>
 </div>
 <div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
-<div class="bg-primary h-2.5 rounded-full" style="width: 85%;"></div>
+<div class="{{ item.meta.progress }} h-2.5 rounded-full" style="width: {{ goal.progress }}%;"></div>
 </div>
+{% if goal.status == 'at_risk' %}
+<form class="mt-space-xs flex justify-end" method="post" action="{% url 'coaching:student_goal_postpone' goal.pk %}">
+{% csrf_token %}
+<button class="font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="submit">
+<span>Reprogrammer</span>
+<span class="material-symbols-outlined text-sm">schedule_send</span>
+</button>
+</form>
+{% elif goal.status == 'achieved' %}
+<span class="font-label-sm text-label-sm text-outline mt-space-xs">Archivé au relevé</span>
+{% else %}
 <button class="mt-space-xs font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
 <span>Détails &amp; Jalons</span>
 <span class="material-symbols-outlined text-sm">chevron_right</span>
 </button>
+{% endif %}
 </div>
 </article>
-<!-- Objectif 2: En retard / Vigilance -->
-<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
-<div class="flex-1 flex flex-col gap-space-xs">
-<div class="flex items-center gap-space-sm flex-wrap">
-<span class="px-2 py-0.5 bg-surface-container-high text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
-                  Méthodologie &amp; Recherche
-                </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-error-container text-on-error-container font-label-sm text-label-sm rounded-full font-bold">
-<span class="material-symbols-outlined text-sm text-error">warning</span>
-<span>En retard</span>
-</span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">HUM501</span>
+{% endwith %}
+{% empty %}
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-sm text-center font-body-md text-body-md text-on-surface-variant">
+Aucun objectif défini pour ce semestre.
 </div>
-<h3 class="font-title-md text-title-md text-on-surface">
-                Rédiger l'état de l'art du projet Master 1
-              </h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                Synthèse critique de 15 articles IEEE/ACM sur les modèles multimodaux de diffusion latente.
-              </p>
-<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
-<span class="flex items-center gap-1 font-label-sm text-error">
-<span class="material-symbols-outlined text-[16px]">schedule</span>
-<span>Échéance critique: 15 Décembre</span>
-</span>
-<span class="flex items-center gap-1 font-label-sm">
-<span class="material-symbols-outlined text-[16px] text-outline">description</span>
-<span>8 pages rédigées / 12 requises</span>
-</span>
-</div>
-</div>
-<div class="md:w-48 flex flex-col items-end gap-space-xs">
-<div class="flex items-baseline gap-1">
-<span class="font-headline-sm text-headline-sm font-bold text-error">70%</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">avancement</span>
-</div>
-<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
-<div class="bg-error h-2.5 rounded-full" style="width: 70%;"></div>
-</div>
-<button class="mt-space-xs font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
-<span>Reprogrammer</span>
-<span class="material-symbols-outlined text-sm">schedule_send</span>
-</button>
-</div>
-</article>
-<!-- Objectif 3: Objectif Atteint -->
-<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
-<div class="flex-1 flex flex-col gap-space-xs">
-<div class="flex items-center gap-space-sm flex-wrap">
-<span class="px-2 py-0.5 bg-surface-container-high text-on-surface rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
-                  Génie Logiciel
-                </span>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-surface-variant text-primary font-label-sm text-label-sm rounded-full font-bold">
-<span class="material-symbols-outlined text-sm text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span>Objectif atteint</span>
-</span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">INF502</span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface line-through text-outline">
-                Valider le TP Consensus Raft sans pénalité de retard
-              </h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                Code distribué validé avec tests unitaires de partition réseau à 100% de couverture.
-              </p>
-<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
-<span class="flex items-center gap-1 font-label-sm text-primary">
-<span class="material-symbols-outlined text-[16px]">workspace_premium</span>
-<span>Validé le 18 Octobre (Note: 19.5/20)</span>
-</span>
-</div>
-</div>
-<div class="md:w-48 flex flex-col items-end gap-space-xs">
-<div class="flex items-baseline gap-1">
-<span class="font-headline-sm text-headline-sm font-bold text-primary">100%</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">complété</span>
-</div>
-<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
-<div class="bg-primary h-2.5 rounded-full" style="width: 100%;"></div>
-</div>
-<span class="font-label-sm text-label-sm text-outline mt-space-xs">Archivé au relevé</span>
-</div>
-</article>
+{% endfor %}
 </div>
 </section>
 <!-- Section: Mon Plan d'étude & Planning hebdomadaire -->
@@ -264,7 +225,7 @@
               Mon Plan d'étude &amp; Planning hebdomadaire
             </h2>
 <p class="font-body-sm text-body-sm text-on-surface-variant">
-              Semaine 47 • 18 au 24 Novembre
+              Semaine {{ week_number }} • {{ week_start }} au {{ week_end }}
             </p>
 </div>
 <!-- Accessible View Switcher (WCAG Compliant) -->
@@ -283,98 +244,56 @@
 <div class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-lg">
 <div class="flex items-center justify-between">
 <span class="font-title-md text-title-md font-bold text-on-surface">Sessions de travail programmées</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">3 sessions restantes cette semaine</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ sessions_hint }}</span>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
-<!-- Session 1: INF501 -->
+{% for item in session_items %}
+{% with session=item.session %}
 <div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
 <div class="flex items-center justify-between">
-<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-data-metric text-data-metric font-semibold">INF501</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="px-2 py-0.5 {{ item.meta.variant }} rounded-full font-data-metric text-data-metric font-semibold">{{ session.course_code|default:session.get_kind_display }}</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm {{ item.meta.tone }} font-semibold">
+{% if item.meta.icon %}
+<span class="material-symbols-outlined text-sm">{{ item.meta.icon }}</span>
+{% else %}
 <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-<span>Programmé</span>
+{% endif %}
+<span>{{ item.meta.label }}</span>
 </span>
 </div>
 <div>
-<h4 class="font-title-md text-title-md font-bold text-on-surface">Vision par Ordinateur</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">TP Noté &amp; Inférence CNN</p>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">{{ session.title }}</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">{{ session.get_kind_display }}{% if session.location %} · {{ session.location }}{% endif %}</p>
 </div>
 <div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
 <span class="flex items-center gap-1">
 <span class="material-symbols-outlined text-[16px]">schedule</span>
-<span>Aujourd'hui • 16:30 - 18:30 (2h)</span>
+<span>{{ item.when_label }}</span>
 </span>
 </div>
 </div>
-<!-- Session 2: INF502 -->
-<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
-<div class="flex items-center justify-between">
-<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-data-metric text-data-metric font-semibold">INF502</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant font-semibold">
-<span class="material-symbols-outlined text-sm">event_repeat</span>
-<span>Reporté</span>
-</span>
-</div>
-<div>
-<h4 class="font-title-md text-title-md font-bold text-on-surface">Systèmes Répartis</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Révision Raft &amp; Paxos</p>
-</div>
-<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
-<span class="flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px]">schedule</span>
-<span>Demain • 14:00 - 17:00 (3h)</span>
-</span>
-</div>
-</div>
-<!-- Session 3: HUM501 -->
-<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
-<div class="flex items-center justify-between">
-<span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded-full font-data-metric text-data-metric font-semibold">HUM501</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
-<span class="material-symbols-outlined text-sm">check</span>
-<span>Complété</span>
-</span>
-</div>
-<div>
-<h4 class="font-title-md text-title-md font-bold text-on-surface">Méthodologie</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Revue de Littérature</p>
-</div>
-<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between">
-<span class="flex items-center gap-1">
-<span class="material-symbols-outlined text-[16px]">schedule</span>
-<span>Hier • 10:00 - 12:00 (2h)</span>
-</span>
-</div>
-</div>
+{% endwith %}
+{% empty %}
+<p class="p-space-md bg-surface-container-low rounded font-body-sm text-body-sm text-on-surface-variant md:col-span-3">Aucune session planifiée cette semaine.</p>
+{% endfor %}
 </div>
 <!-- Associated Tasks with WCAG Compliant Hitboxes (>=44px) -->
 <div class="flex flex-col gap-space-sm pt-space-md">
 <span class="font-title-md text-title-md font-bold text-on-surface">Tâches prioritaires associées</span>
 <div class="flex flex-col gap-space-xs">
-<!-- Task 1 -->
-<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
+{% for item in task_items %}
+<form class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors min-h-[44px]" data-progress-task method="post" action="{% url 'coaching:student_task_toggle' item.task.pk %}">
+{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.path }}"/>
 <input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
 <div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-<span class="font-body-md text-body-md text-on-surface font-medium">Relire cours 4 ConvNets &amp; Residual Connections</span>
-<span class="font-data-metric text-data-metric text-outline">INF501 • Estimé 45 min</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">{{ item.task.title }}</span>
+<span class="font-data-metric text-data-metric text-outline">{{ item.detail }}</span>
 </div>
-</label>
-<!-- Task 2 -->
-<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
-<input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
-<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-<span class="font-body-md text-body-md text-on-surface font-medium">Résoudre 5 exercices de la banque sur le consensus distribué</span>
-<span class="font-data-metric text-data-metric text-outline">INF502 • Estimé 1h30</span>
-</div>
-</label>
-<!-- Task 3 -->
-<label class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors cursor-pointer min-h-[44px]">
-<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
-<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-<span class="font-body-md text-body-md text-on-surface line-through text-outline">Rédiger synthèse bibliographique (Articles Vaswani et Devlin)</span>
-<span class="font-data-metric text-data-metric text-outline">HUM501 • Complété le 19 Nov</span>
-</div>
-</label>
+</form>
+{% empty %}
+<p class="p-space-sm font-body-sm text-body-sm text-on-surface-variant">Aucune tâche prioritaire en attente.</p>
+{% endfor %}
 </div>
 </div>
 </div>
@@ -388,55 +307,70 @@
             </h2>
 <span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full">Partage tuteur</span>
 </div>
-<button class="font-label-md text-label-md text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="button">
+<a class="font-label-md text-label-md text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" href="{{ journal_add_url }}">
 <span class="material-symbols-outlined text-[18px]">rate_review</span>
 <span>Nouvelle réflexion</span>
-</button>
+</a>
 </div>
 <div class="space-y-space-md">
-<!-- Journal Entry 1 -->
+{% if tutor_notification %}
+<div class="flex items-start gap-space-md p-space-md bg-secondary-fixed/30 rounded">
+<span class="material-symbols-outlined shrink-0 text-[20px] text-secondary">notifications_active</span>
+<div class="flex-1">
+<div class="flex flex-wrap items-center justify-between gap-2"><p class="font-label-md text-label-md font-bold text-on-surface">Notification ENT{% if tutor_notification.tutor_name %} · {{ tutor_notification.tutor_name }}{% endif %}</p><span class="font-data-metric text-data-metric text-xs text-outline">{{ tutor_notification.when_label }}</span></div>
+<p class="mt-1 font-body-sm text-body-sm text-on-surface-variant">{{ tutor_notification.notification.message }}</p>
+</div>
+</div>
+{% endif %}
+{% if entry_view %}
 <article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col gap-space-md">
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
 <div class="flex items-center gap-space-sm">
 <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-bold">
-                  CM
-                </div>
+{{ entry_view.initials }}
+</div>
 <div>
-<h3 class="font-title-md text-title-md text-on-surface">Auto-évaluation Semaine 46 • Maîtrise des Graphes de Calcul</h3>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Posté le 15 Novembre 2024 à 18:20</span>
+<h3 class="font-title-md text-title-md text-on-surface">{{ entry_view.entry.title }}</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Posté le {{ entry_view.when_label }}</span>
 </div>
 </div>
-<!-- Rating Stars -->
-<div aria-label="Auto-évaluation : 4 étoiles sur 5" class="flex items-center gap-1 text-tertiary-container">
+<div aria-label="Auto-évaluation : {{ entry_view.score }} étoiles sur 5" class="flex items-center gap-1 text-tertiary-container">
+{% for filled in entry_view.stars %}
+{% if filled %}
 <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
-<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+{% else %}
 <span class="material-symbols-outlined text-[20px] text-surface-container-high">star</span>
-<span class="ml-1 font-data-metric text-data-metric text-on-surface font-bold">4/5</span>
+{% endif %}
+{% endfor %}
+<span class="ml-1 font-data-metric text-data-metric text-on-surface font-bold">{{ entry_view.score }}</span>
 </div>
 </div>
-<!-- Student Reflection -->
 <blockquote class="p-space-md bg-surface-container-low rounded font-body-md text-body-md text-on-surface-variant italic">
-              « J'ai éprouvé de réelles facilités lors de la mise en pratique du backpropagation manuel sur PyTorch, mais les mécanismes de cache mémoire pour le consensus distribué Raft demandent encore du travail de synthèse avant le partiel. »
-            </blockquote>
-<!-- Tutor Feedback (Dr. Hélène Vasseur) -->
+« {{ entry_view.entry.reflection }} »
+</blockquote>
+{% if entry_view.tutor_name %}
 <div class="flex items-start gap-space-md p-space-md bg-surface-container rounded">
-<img class="w-11 h-11 rounded-full object-cover shrink-0" data-alt="Portrait photographique professionnel de Dr. Hélène Vasseur, professeure d'informatique, souriante en environnement académique lumineux, tonalité bleue institutionnelle sobre et chaleureuse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAeTJr2yfHTZQQ3zjAKjp_a_kMtbZeNQgBeFuxTtmtb4OpA1vikGRrCRBpCDrjXckvVoRmhovttxoN94IAvYGf9Hg6nZ6p1T3m7ccxafRlkJyx9Pk-9BeONp2dKkfhFMqOF5VJntg3-vVMiL3GLMmD_qIa9NmI7QjGL4srENwWcfzHCL5PS9oeUpzcBnvCfvs-HGS-Rse94s6ZO7G4Dt9qQMTrvUJp7JJsUwK64Xlqui2uMn4UPYmP"/>
+<span class="w-11 h-11 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold shrink-0">{{ entry_view.tutor_initials }}</span>
 <div class="flex flex-col gap-space-xs flex-1">
 <div class="flex items-center justify-between flex-wrap gap-1">
 <div class="flex items-center gap-2">
-<span class="font-label-md text-label-md font-bold text-on-surface">Dr. Hélène Vasseur</span>
-<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-label-sm text-[11px] font-bold uppercase">Professeure Référente</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">{{ entry_view.tutor_name }}</span>
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-label-sm text-[11px] font-bold uppercase">Professeur Référent</span>
 </div>
-<span class="font-data-metric text-data-metric text-outline text-xs">16 Nov. 09:45</span>
+<span class="font-data-metric text-data-metric text-outline text-xs">{{ entry_view.feedback_when }}</span>
 </div>
 <p class="font-body-sm text-body-sm text-on-surface">
-                  Excellente rigueur sur votre démarche algorithmique. Pour Raft, focalisez-vous sur le journal d'états et les règles d'élection en cas de partition réseau asymétrique. N'hésitez pas à solliciter la permanence jeudi matin.
-                </p>
+{{ entry_view.entry.feedback }}
+</p>
 </div>
 </div>
+{% endif %}
 </article>
+{% else %}
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm text-center font-body-md text-body-md text-on-surface-variant">
+Aucune entrée de journal pour le moment. <a class="font-semibold text-primary hover:underline" href="{{ journal_add_url }}">Rédiger ma première réflexion</a>.
+</article>
+{% endif %}
 </div>
 </section>
 </div>
@@ -598,6 +532,13 @@
       btnCalendar.classList.add('text-on-surface-variant');
     });
   }
+
+  // Planifier / marquer une tâche prioritaire via son formulaire POST
+  document.querySelectorAll('[data-progress-task] input[type="checkbox"]').forEach((box) => {
+    box.addEventListener('change', () => {
+      if (box.form) box.form.requestSubmit();
+    });
+  });
 
   // Smooth scroll or focus to IA panel when clicking hero button
   const toggleIaBtn = document.getElementById('toggle-ia-panel');

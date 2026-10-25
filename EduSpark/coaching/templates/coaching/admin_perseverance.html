@@ -11,8 +11,11 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:admin_monitoring' %}"><span class="material-symbols-outlined text-[18px]">monitoring</span>Tableau de bord</a>
-<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Répartition des tuteurs exportée au format CSV." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Attribution automatique proposée pour {{ row_count }} classe{{ row_count|pluralize }} : {{ waiting_total }} étudiant{{ waiting_total|pluralize }} à répartir." type="button"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Attribution automatique</button>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ export_url }}"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</a>
+<form class="inline-flex" method="post" action="{% url 'coaching:admin_auto_assign' %}">
+{% csrf_token %}
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Attribution automatique</button>
+</form>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -66,7 +69,7 @@
 </td>
 <td class="px-5 py-3">{% include "portal/_badge.html" with label=row.status tone_class=row.status_class dot=True %}</td>
 <td class="px-5 py-3 text-right">
-<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:bg-surface-container hover:text-primary" data-assign="{{ row.school_class.name }}" data-modal-open="#tutor-modal" type="button">Affecter un tuteur</button>
+<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:bg-surface-container hover:text-primary" data-assign="{{ row.school_class.pk }}" data-modal-open="#tutor-modal" type="button">Affecter un tuteur</button>
 </td>
 </tr>
 {% empty %}
@@ -88,10 +91,11 @@
 <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Affecter un tuteur</h2><p class="text-xs text-on-surface-variant">Le tuteur devient référent de la classe pour l'année {{ academic_year }}.</p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<form class="grid gap-3 p-5" data-tutor-form>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Classe</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-tutor-class required><option disabled selected value="">Sélectionner une classe</option>{% for row in rows %}<option value="{{ row.school_class.name }}">{{ row.school_class.name }} · {{ row.students }} étudiants</option>{% endfor %}</select></label>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Tuteur</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-tutor-person required><option disabled selected value="">Sélectionner un tuteur</option>{% for tutor in tutor_options %}<option value="{{ tutor }}">{{ tutor }}</option>{% endfor %}{% if not tutor_options %}<option value="Tuteur pair · Master 2">Tuteur pair · Master 2</option>{% endif %}</select></label>
-<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nombre d'étudiants à suivre</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="30" min="1" type="number" value="6"/></label>
+<form action="{% url 'coaching:admin_assign_tutor' %}" class="grid gap-3 p-5" data-tutor-form data-validate-form method="post" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Classe</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Sélectionnez une classe." data-tutor-class name="school_class" required><option disabled selected value="">Sélectionner une classe</option>{% for row in rows %}<option value="{{ row.school_class.pk }}">{{ row.school_class.name }} · {{ row.waiting }} en attente</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Tuteur</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Sélectionnez un tuteur." data-tutor-person name="professor" required><option disabled selected value="">Sélectionner un tuteur</option>{% for tutor in tutor_options %}<option value="{{ tutor.id }}">{{ tutor.label }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nombre d'étudiants à suivre</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="60" min="1" name="count" required step="1" type="number" value="6"/></label>
 <div class="flex flex-wrap justify-end gap-2 pt-1">
 <button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
 <button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">person_add</span>Affecter</button>
@@ -101,28 +105,17 @@
 </div>
 {% endblock %}
 {% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
 <script>
 (function () {
   var form = document.querySelector('[data-tutor-form]');
-
+  if (!form) return;
   document.addEventListener('click', function (event) {
     var trigger = event.target.closest('[data-assign]');
-    if (!trigger || !form) return;
+    if (!trigger) return;
     var select = form.querySelector('[data-tutor-class]');
     if (select) select.value = trigger.getAttribute('data-assign');
   });
-
-  if (form) {
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      var schoolClass = form.querySelector('[data-tutor-class]').value;
-      var tutor = form.querySelector('[data-tutor-person]').value;
-      if (!schoolClass || !tutor) return;
-      if (window.portalCloseModal) window.portalCloseModal(form.closest('[data-modal]'));
-      form.reset();
-      window.portalToast(tutor + ' affecté à ' + schoolClass + '.', 'success');
-    });
-  }
 })();
 </script>
 {% endblock %}

@@ -11,69 +11,59 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:admin_perseverance' %}"><span class="material-symbols-outlined text-[18px]">how_to_reg</span>Attribution des tuteurs</a>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Rapport de pilotage généré et envoyé à la direction." type="button"><span class="material-symbols-outlined text-[18px]">summarize</span>Générer le rapport</button>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{{ report_url }}"><span class="material-symbols-outlined text-[18px]">summarize</span>Générer le rapport</a>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Étudiants suivis" value="1 388" icon="groups" hint="5 promotions · 23 classes" %}
-{% include "portal/_stat_card.html" with label="Alertes actives" value="14" icon="warning" icon_class="bg-error-container text-on-error-container" hint="4 priorités hautes" %}
-{% include "portal/_stat_card.html" with label="Taux de persévérance" value="92,1" suffix=" %" icon="trending_up" icon_class="bg-surface-container text-secondary" hint="+1,8 pt sur un an" %}
-{% include "portal/_stat_card.html" with label="Actions de remédiation" value="31" icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="23 clôturées ce mois-ci" %}
+{% include "portal/_stat_card.html" with label="Étudiants suivis" value=summary.followed icon="groups" hint=followed_hint %}
+{% include "portal/_stat_card.html" with label="Alertes actives" value=summary.active_alerts icon="warning" icon_class="bg-error-container text-on-error-container" hint=alerts_hint %}
+{% include "portal/_stat_card.html" with label="Taux de persévérance" value=summary.perseverance_rate suffix=" %" icon="trending_up" icon_class="bg-surface-container text-secondary" hint=perseverance_hint %}
+{% include "portal/_stat_card.html" with label="Actions de remédiation" value=summary.open_sheets icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=remediation_hint %}
 </div>
 <section class="grid gap-4 lg:grid-cols-3">
+{% for cohort in cohorts %}
 <article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<div class="flex items-center justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Licence 1</h2><p class="text-xs text-on-surface-variant">320 étudiants · 6 alertes</p></div><span class="rounded-full bg-error-container px-2.5 py-1 text-[11px] font-bold text-on-error-container">Vigilance</span></div>
-<div class="mt-4"><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">Progression annuelle</span><span class="text-on-surface-variant">68 %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:68%"></div></div></div>
-<ul class="mt-4 space-y-1.5 text-xs text-on-surface-variant"><li>Assiduité : 84 % · moyenne 11,8</li><li>12 étudiants en suivi renforcé</li></ul>
+<div class="flex items-center justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">{{ cohort.school_class.name }}</h2><p class="text-xs text-on-surface-variant">{{ cohort.students }} étudiant{{ cohort.students|pluralize }} · {{ cohort.alerts }} alerte{{ cohort.alerts|pluralize }}</p></div><span class="rounded-full px-2.5 py-1 text-[11px] font-bold {{ cohort.status_class }}">{{ cohort.status }}</span></div>
+<div class="mt-4"><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">Progression des objectifs</span><span class="text-on-surface-variant">{{ cohort.goal_progress }} %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full {% if cohort.high %}bg-error{% elif cohort.alerts %}bg-tertiary-fixed-dim{% else %}bg-primary{% endif %}" style="width:{{ cohort.goal_progress }}%"></div></div></div>
+<ul class="mt-4 space-y-1.5 text-xs text-on-surface-variant"><li>Assiduité : {{ cohort.attendance }} % · moyenne {{ cohort.average|default:"—" }}</li><li>{{ cohort.high }} étudiant{{ cohort.high|pluralize }} en suivi renforcé</li></ul>
 </article>
-<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<div class="flex items-center justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Licence 3</h2><p class="text-xs text-on-surface-variant">280 étudiants · 4 alertes</p></div><span class="rounded-full bg-tertiary-fixed px-2.5 py-1 text-[11px] font-bold text-on-tertiary-fixed">Sous surveillance</span></div>
-<div class="mt-4"><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">Progression annuelle</span><span class="text-on-surface-variant">76 %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:76%"></div></div></div>
-<ul class="mt-4 space-y-1.5 text-xs text-on-surface-variant"><li>Assiduité : 89 % · moyenne 12,4</li><li>8 étudiants en suivi renforcé</li></ul>
-</article>
-<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<div class="flex items-center justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">M1 Intelligence Artificielle</h2><p class="text-xs text-on-surface-variant">24 étudiants · 2 alertes</p></div><span class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">Stable</span></div>
-<div class="mt-4"><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">Progression annuelle</span><span class="text-on-surface-variant">84 %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:84%"></div></div></div>
-<ul class="mt-4 space-y-1.5 text-xs text-on-surface-variant"><li>Assiduité : 94 % · moyenne 13,8</li><li>3 étudiants en suivi renforcé</li></ul>
-</article>
+{% empty %}
+<article class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest p-5 text-center text-sm text-on-surface-variant lg:col-span-3">Aucune cohorte ne dispose encore d'étudiants référents pour {{ year }}.</article>
+{% endfor %}
 </section>
 <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes de persévérance</h2>
-<span class="text-xs text-on-surface-variant"><span data-monitoring-alerts>14</span> alertes actives</span>
+<span class="text-xs text-on-surface-variant"><span data-monitoring-alerts>{{ summary.active_alerts }}</span> alerte{{ summary.active_alerts|pluralize }} active{{ summary.active_alerts|pluralize }}</span>
 </div>
 <ul class="divide-y divide-outline-variant/30" id="monitoring-alerts">
+{% for row in alert_rows %}
 <li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[18px]">priority_high</span></span><div><p class="text-sm font-semibold text-on-surface">Absences répétées · Yanis Bensaïd</p><p class="text-xs text-on-surface-variant">L3 Informatique · 4 absences en 2 semaines · Priorité haute</p></div></div>
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-alert-treat type="button">Prendre en charge</button>
+<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span><div><p class="text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}</p></div></div>
+{% if row.is_open %}
+<form class="inline-flex" method="post" action="{% url 'coaching:admin_alert_take' row.alert.pk %}">
+{% csrf_token %}
+<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" type="submit">Prendre en charge</button>
+</form>
+{% else %}
+<span class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-primary">{{ row.status_label }}</span>
+{% endif %}
 </li>
-<li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[18px]">priority_high</span></span><div><p class="text-sm font-semibold text-on-surface">Décrochage plateforme · Thomas Lefèvre</p><p class="text-xs text-on-surface-variant">L1 MI · Aucune connexion depuis 12 jours · Priorité haute</p></div></div>
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-alert-treat type="button">Prendre en charge</button>
-</li>
-<li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[18px]">trending_down</span></span><div><p class="text-sm font-semibold text-on-surface">Baisse de moyenne · Sarah Benali</p><p class="text-xs text-on-surface-variant">M1 IA · −2,4 pts entre les deux derniers devoirs · Priorité normale</p></div></div>
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-alert-treat type="button">Prendre en charge</button>
-</li>
-<li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[18px]">psychology_alt</span></span><div><p class="text-sm font-semibold text-on-surface">Confiance en baisse · Nora Rahmani</p><p class="text-xs text-on-surface-variant">M2 Data · Journal de progression · Priorité normale</p></div></div>
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-alert-treat type="button">Prendre en charge</button>
-</li>
-<li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">event_busy</span></span><div><p class="text-sm font-semibold text-on-surface">Devoir non déposé · Groupe 3 · L3</p><p class="text-xs text-on-surface-variant">Projet compilateur · 3 étudiants concernés · Priorité basse</p></div></div>
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-alert-treat type="button">Prendre en charge</button>
-</li>
+{% empty %}
+<li class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucune alerte de persévérance en cours.</li>
+{% endfor %}
 </ul>
 </section>
 <aside class="flex flex-col gap-4">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Activité récente</h2>
 <ol class="mt-4 space-y-4">
-<li class="relative border-l-2 border-primary/30 pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-primary"></span><p class="text-xs font-bold uppercase tracking-wide text-primary">Aujourd'hui · 09:20</p><p class="mt-1 text-sm text-on-surface-variant">3 alertes de suivi assignées à H. Vasseur.</p></li>
-<li class="relative border-l-2 border-outline-variant/40 pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-outline-variant"></span><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Hier · 16:45</p><p class="mt-1 text-sm text-on-surface-variant">Rapport hebdomadaire de persévérance envoyé.</p></li>
-<li class="relative border-l-2 border-outline-variant/40 pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-outline-variant"></span><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">22 octobre · 11:10</p><p class="mt-1 text-sm text-on-surface-variant">12 étudiants L1 passés en suivi renforcé.</p></li>
-<li class="relative border-l-2 border-outline-variant/40 pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-outline-variant"></span><p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">21 octobre · 14:30</p><p class="mt-1 text-sm text-on-surface-variant">Atelier « méthodes de travail » planifié.</p></li>
+{% for activity in activities %}
+<li class="relative border-l-2 {% if activity.first %}border-primary/30{% else %}border-outline-variant/40{% endif %} pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full {% if activity.first %}bg-primary{% else %}bg-outline-variant{% endif %}"></span><p class="text-xs font-bold uppercase tracking-wide {% if activity.first %}text-primary{% else %}text-on-surface-variant{% endif %}">{{ activity.when }}{% if activity.time %} · {{ activity.time }}{% endif %}</p><p class="mt-1 text-sm text-on-surface-variant">{{ activity.label }} — {{ activity.text }}</p></li>
+{% empty %}
+<li class="text-sm text-on-surface-variant">Aucune activité récente dans le module de suivi.</li>
+{% endfor %}
 </ol>
 </section>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
@@ -88,24 +78,4 @@
 </div>
 </div>
 </main>
-{% endblock %}
-{% block page_scripts %}
-<script>
-(function () {
-  var alerts = document.querySelector('[data-monitoring-alerts]');
-  document.querySelectorAll('[data-alert-treat]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var item = btn.closest('[data-alert-item]');
-      if (item) {
-        item.style.opacity = '0.55';
-        btn.textContent = 'Prise en charge';
-        btn.disabled = true;
-        btn.classList.add('opacity-60');
-      }
-      if (alerts) alerts.textContent = String(Math.max(0, parseInt(alerts.textContent, 10) - 1));
-      window.portalToast('Alerte assignée à un référent pédagogique.', 'info');
-    });
-  });
-})();
-</script>
 {% endblock %}
