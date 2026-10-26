@@ -175,6 +175,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Fichiers statiques partagés par tous les modules (thème clair / sombre).
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 # Fichiers téléversés (copies d'examen numérisées...).
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

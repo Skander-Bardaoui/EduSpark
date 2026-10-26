@@ -1,0 +1,282 @@
+/*
+ * Thème clair / sombre partagé par tous les modules (tokens).
+ *
+ * Toutes les couleurs sont des triplets « R G B » : Tailwind les lit via
+ * rgb(var(--md-x) / <alpha-value>), ce qui garde les modificateurs d'opacité
+ * (bg-primary/10…). En CSS maison : rgb(var(--text)), rgb(var(--accent) / .2).
+ *
+ * - :root                         thème clair (palette du portail enseignant)
+ * - :root[data-palette=…]         nuances claires propres aux portails admin / étudiant
+ * - :root[data-theme="dark"]      thème sombre, choisi par le bouton ou le système
+ * - @media (prefers-color-scheme) même thème sombre quand aucun choix n'est appliqué
+ *
+ * Le bloc sombre est volontairement répété dans la media query : le script de
+ * contrôle (scripts/check_contrast.py) vérifie que les deux copies sont identiques.
+ */
+
+:root {
+  color-scheme: light;
+  --md-background: 251 248 255;  /* #fbf8ff */
+  --md-error: 186 26 26;  /* #ba1a1a */
+  --md-error-container: 255 218 214;  /* #ffdad6 */
+  --md-hero-from: 0 39 82;  /* #002752 */
+  --md-hero-to: 0 26 63;  /* #001a3f */
+  --md-hero-via: 0 65 145;  /* #004191 */
+  --md-info: 75 65 225;  /* #4b41e1 */
+  --md-inverse-on-surface: 239 239 255;  /* #efefff */
+  --md-inverse-primary: 173 198 255;  /* #adc6ff */
+  --md-inverse-surface: 31 45 97;  /* #1f2d61 */
+  --md-on-background: 6 22 75;  /* #06164b */
+  --md-on-error: 255 255 255;  /* #ffffff */
+  --md-on-error-container: 147 0 10;  /* #93000a */
+  --md-on-hero: 255 255 255;  /* #ffffff */
+  --md-on-primary: 255 255 255;  /* #ffffff */
+  --md-on-primary-container: 141 177 255;  /* #8db1ff */
+  --md-on-primary-fixed: 0 26 66;  /* #001a42 */
+  --md-on-primary-fixed-variant: 0 67 149;  /* #004395 */
+  --md-on-secondary: 255 255 255;  /* #ffffff */
+  --md-on-secondary-container: 255 251 255;  /* #fffbff */
+  --md-on-secondary-fixed: 15 0 105;  /* #0f0069 */
+  --md-on-secondary-fixed-variant: 51 35 204;  /* #3323cc */
+  --md-on-surface: 6 22 75;  /* #06164b */
+  --md-on-surface-variant: 66 71 84;  /* #424754 */
+  --md-on-tertiary: 255 255 255;  /* #ffffff */
+  --md-on-tertiary-container: 250 207 116;  /* #facf74 */
+  --md-on-tertiary-fixed: 38 26 0;  /* #261a00 */
+  --md-on-tertiary-fixed-variant: 92 67 0;  /* #5c4300 */
+  --md-outline: 114 119 133;  /* #727785 */
+  --md-outline-variant: 195 198 211;  /* #c3c6d3 */
+  --md-primary: 0 65 145;  /* #004191 */
+  --md-primary-container: 0 65 145;  /* #004191 */
+  --md-primary-fixed: 216 226 255;  /* #d8e2ff */
+  --md-primary-fixed-dim: 174 198 255;  /* #aec6ff */
+  --md-scrim: 6 22 75;  /* #06164b */
+  --md-secondary: 75 65 225;  /* #4b41e1 */
+  --md-secondary-container: 101 93 251;  /* #655dfb */
+  --md-secondary-fixed: 226 223 255;  /* #e2dfff */
+  --md-secondary-fixed-dim: 195 192 255;  /* #c3c0ff */
+  --md-success: 21 128 61;  /* #15803d */
+  --md-surface: 251 248 255;  /* #fbf8ff */
+  --md-surface-bright: 251 248 255;  /* #fbf8ff */
+  --md-surface-container: 236 237 255;  /* #ecedff */
+  --md-surface-container-high: 228 231 255;  /* #e4e7ff */
+  --md-surface-container-highest: 221 225 255;  /* #dde1ff */
+  --md-surface-container-low: 243 242 255;  /* #f3f2ff */
+  --md-surface-container-lowest: 255 255 255;  /* #ffffff */
+  --md-surface-dim: 210 216 255;  /* #d2d8ff */
+  --md-surface-tint: 8 90 192;  /* #085ac0 */
+  --md-surface-variant: 221 225 255;  /* #dde1ff */
+  --md-tertiary: 89 65 0;  /* #594100 */
+  --md-tertiary-container: 89 65 0;  /* #594100 */
+  --md-tertiary-fixed: 255 223 159;  /* #ffdf9f */
+  --md-tertiary-fixed-dim: 230 194 119;  /* #e6c277 */
+  --md-warning: 217 119 6;  /* #d97706 */
+
+  /* Rôles génériques (élévation : bg < surface-1 … surface-6) */
+  --bg: var(--md-background);
+  --surface-1: var(--md-surface-container-low);       /* zones en creux, champs */
+  --surface-2: var(--md-surface-container-lowest);    /* cartes */
+  --surface-3: var(--md-surface-container);
+  --surface-4: var(--md-surface-container-high);      /* survol, sélection */
+  --surface-5: var(--md-surface-container-highest);
+  --surface-6: var(--md-surface-container-lowest);    /* menus, modales, popovers */
+  --text: var(--md-on-surface);
+  --text-muted: var(--md-on-surface-variant);
+  --border: var(--md-outline-variant);
+  --accent: var(--md-primary);
+  --accent-contrast: var(--md-on-primary);
+  --success: var(--md-success);
+  --warning: var(--md-warning);
+  --danger: var(--md-error);
+  --info: var(--md-info);
+  --edge-light: transparent;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --overlay: rgb(var(--md-scrim) / 0.6);
+  --theme-transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+:root[data-palette="admin"] {
+  --md-on-primary-container: 254 252 255;  /* #fefcff */
+  --md-on-primary-fixed-variant: 6 68 148;  /* #064494 */
+  --md-on-surface-variant: 67 71 81;  /* #434751 */
+  --md-on-tertiary-container: 208 174 101;  /* #d0ae65 */
+  --md-on-tertiary-fixed-variant: 91 67 2;  /* #5b4302 */
+  --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+  --md-primary-container: 33 112 228;  /* #2170e4 */
+  --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+  --md-surface-dim: 209 216 255;  /* #d1d8ff */
+  --md-surface-tint: 45 92 173;  /* #2d5cad */
+  --md-tertiary-container: 149 110 0;  /* #956e00 */
+  --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
+}
+
+:root[data-palette="student"] {
+  --md-inverse-primary: 174 198 255;  /* #aec6ff */
+  --md-on-primary-container: 254 252 255;  /* #fefcff */
+  --md-on-primary-fixed-variant: 6 68 148;  /* #064494 */
+  --md-on-secondary-fixed-variant: 51 34 204;  /* #3322cc */
+  --md-on-surface-variant: 67 71 81;  /* #434751 */
+  --md-on-tertiary-container: 208 174 101;  /* #d0ae65 */
+  --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+  --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+  --md-secondary-container: 100 94 251;  /* #645efb */
+  --md-surface-container: 236 236 255;  /* #ececff */
+  --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --md-background: 11 15 24;  /* #0b0f18 */
+  --md-error: 255 182 173;  /* #ffb6ad */
+  --md-error-container: 80 34 33;  /* #502221 */
+  --md-hero-from: 23 38 64;  /* #172640 */
+  --md-hero-to: 16 26 45;  /* #101a2d */
+  --md-hero-via: 35 56 92;  /* #23385c */
+  --md-info: 178 173 251;  /* #b2adfb */
+  --md-inverse-on-surface: 25 31 44;  /* #191f2c */
+  --md-inverse-primary: 0 65 145;  /* #004191 */
+  --md-inverse-surface: 230 234 244;  /* #e6eaf4 */
+  --md-on-background: 230 234 244;  /* #e6eaf4 */
+  --md-on-error: 94 8 8;  /* #5e0808 */
+  --md-on-error-container: 255 213 209;  /* #ffd5d1 */
+  --md-on-hero: 230 234 244;  /* #e6eaf4 */
+  --md-on-primary: 10 25 56;  /* #0a1938 */
+  --md-on-primary-container: 10 25 56;  /* #0a1938 */
+  --md-on-primary-fixed: 211 225 253;  /* #d3e1fd */
+  --md-on-primary-fixed-variant: 184 206 249;  /* #b8cef9 */
+  --md-on-secondary: 23 18 73;  /* #171249 */
+  --md-on-secondary-container: 231 229 255;  /* #e7e5ff */
+  --md-on-secondary-fixed: 218 214 255;  /* #dad6ff */
+  --md-on-secondary-fixed-variant: 193 187 251;  /* #c1bbfb */
+  --md-on-surface: 230 234 244;  /* #e6eaf4 */
+  --md-on-surface-variant: 182 189 206;  /* #b6bdce */
+  --md-on-tertiary: 55 40 6;  /* #372806 */
+  --md-on-tertiary-container: 55 40 6;  /* #372806 */
+  --md-on-tertiary-fixed: 255 230 168;  /* #ffe6a8 */
+  --md-on-tertiary-fixed-variant: 246 216 142;  /* #f6d88e */
+  --md-outline: 156 163 180;  /* #9ca3b4 */
+  --md-outline-variant: 63 73 95;  /* #3f495f */
+  --md-primary: 163 193 250;  /* #a3c1fa */
+  --md-primary-container: 192 213 252;  /* #c0d5fc */
+  --md-primary-fixed: 34 50 83;  /* #223253 */
+  --md-primary-fixed-dim: 47 67 106;  /* #2f436a */
+  --md-scrim: 4 6 11;  /* #04060b */
+  --md-secondary: 178 173 251;  /* #b2adfb */
+  --md-secondary-container: 62 56 148;  /* #3e3894 */
+  --md-secondary-fixed: 43 40 77;  /* #2b284d */
+  --md-secondary-fixed-dim: 57 54 99;  /* #393663 */
+  --md-success: 117 209 156;  /* #75d19c */
+  --md-surface: 11 15 24;  /* #0b0f18 */
+  --md-surface-bright: 42 50 68;  /* #2a3244 */
+  --md-surface-container: 31 38 53;  /* #1f2635 */
+  --md-surface-container-high: 36 44 61;  /* #242c3d */
+  --md-surface-container-highest: 42 50 68;  /* #2a3244 */
+  --md-surface-container-low: 18 23 35;  /* #121723 */
+  --md-surface-container-lowest: 25 31 44;  /* #191f2c */
+  --md-surface-dim: 8 11 18;  /* #080b12 */
+  --md-surface-tint: 163 193 250;  /* #a3c1fa */
+  --md-surface-variant: 42 50 68;  /* #2a3244 */
+  --md-tertiary: 236 200 121;  /* #ecc879 */
+  --md-tertiary-container: 227 187 99;  /* #e3bb63 */
+  --md-tertiary-fixed: 67 55 30;  /* #43371e */
+  --md-tertiary-fixed-dim: 226 185 90;  /* #e2b95a */
+  --md-warning: 246 189 90;  /* #f6bd5a */
+  --surface-6: 47 56 75;  /* #2f384b : menus, modales, popovers */
+  --edge-light: rgb(214 224 255 / 0.09);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.55), 0 4px 10px -4px rgb(0 0 0 / 0.45);
+  --overlay: rgb(var(--md-scrim) / 0.72);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --md-background: 11 15 24;  /* #0b0f18 */
+    --md-error: 255 182 173;  /* #ffb6ad */
+    --md-error-container: 80 34 33;  /* #502221 */
+    --md-hero-from: 23 38 64;  /* #172640 */
+    --md-hero-to: 16 26 45;  /* #101a2d */
+    --md-hero-via: 35 56 92;  /* #23385c */
+    --md-info: 178 173 251;  /* #b2adfb */
+    --md-inverse-on-surface: 25 31 44;  /* #191f2c */
+    --md-inverse-primary: 0 65 145;  /* #004191 */
+    --md-inverse-surface: 230 234 244;  /* #e6eaf4 */
+    --md-on-background: 230 234 244;  /* #e6eaf4 */
+    --md-on-error: 94 8 8;  /* #5e0808 */
+    --md-on-error-container: 255 213 209;  /* #ffd5d1 */
+    --md-on-hero: 230 234 244;  /* #e6eaf4 */
+    --md-on-primary: 10 25 56;  /* #0a1938 */
+    --md-on-primary-container: 10 25 56;  /* #0a1938 */
+    --md-on-primary-fixed: 211 225 253;  /* #d3e1fd */
+    --md-on-primary-fixed-variant: 184 206 249;  /* #b8cef9 */
+    --md-on-secondary: 23 18 73;  /* #171249 */
+    --md-on-secondary-container: 231 229 255;  /* #e7e5ff */
+    --md-on-secondary-fixed: 218 214 255;  /* #dad6ff */
+    --md-on-secondary-fixed-variant: 193 187 251;  /* #c1bbfb */
+    --md-on-surface: 230 234 244;  /* #e6eaf4 */
+    --md-on-surface-variant: 182 189 206;  /* #b6bdce */
+    --md-on-tertiary: 55 40 6;  /* #372806 */
+    --md-on-tertiary-container: 55 40 6;  /* #372806 */
+    --md-on-tertiary-fixed: 255 230 168;  /* #ffe6a8 */
+    --md-on-tertiary-fixed-variant: 246 216 142;  /* #f6d88e */
+    --md-outline: 156 163 180;  /* #9ca3b4 */
+    --md-outline-variant: 63 73 95;  /* #3f495f */
+    --md-primary: 163 193 250;  /* #a3c1fa */
+    --md-primary-container: 192 213 252;  /* #c0d5fc */
+    --md-primary-fixed: 34 50 83;  /* #223253 */
+    --md-primary-fixed-dim: 47 67 106;  /* #2f436a */
+    --md-scrim: 4 6 11;  /* #04060b */
+    --md-secondary: 178 173 251;  /* #b2adfb */
+    --md-secondary-container: 62 56 148;  /* #3e3894 */
+    --md-secondary-fixed: 43 40 77;  /* #2b284d */
+    --md-secondary-fixed-dim: 57 54 99;  /* #393663 */
+    --md-success: 117 209 156;  /* #75d19c */
+    --md-surface: 11 15 24;  /* #0b0f18 */
+    --md-surface-bright: 42 50 68;  /* #2a3244 */
+    --md-surface-container: 31 38 53;  /* #1f2635 */
+    --md-surface-container-high: 36 44 61;  /* #242c3d */
+    --md-surface-container-highest: 42 50 68;  /* #2a3244 */
+    --md-surface-container-low: 18 23 35;  /* #121723 */
+    --md-surface-container-lowest: 25 31 44;  /* #191f2c */
+    --md-surface-dim: 8 11 18;  /* #080b12 */
+    --md-surface-tint: 163 193 250;  /* #a3c1fa */
+    --md-surface-variant: 42 50 68;  /* #2a3244 */
+    --md-tertiary: 236 200 121;  /* #ecc879 */
+    --md-tertiary-container: 227 187 99;  /* #e3bb63 */
+    --md-tertiary-fixed: 67 55 30;  /* #43371e */
+    --md-tertiary-fixed-dim: 226 185 90;  /* #e2b95a */
+    --md-warning: 246 189 90;  /* #f6bd5a */
+    --surface-6: 47 56 75;  /* #2f384b : menus, modales, popovers */
+    --edge-light: rgb(214 224 255 / 0.09);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.55), 0 4px 10px -4px rgb(0 0 0 / 0.45);
+    --overlay: rgb(var(--md-scrim) / 0.72);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root:not([data-theme="dark"]) {
+    --md-on-surface-variant: 43 48 64;  /* #2b3040 */
+    --md-outline: 79 84 102;  /* #4f5466 */
+    --md-outline-variant: 114 119 133;  /* #727785 */
+  }
+  :root[data-theme="dark"] {
+    --md-on-surface-variant: 210 216 228;  /* #d2d8e4 */
+    --md-outline: 184 190 204;  /* #b8becc */
+    --md-outline-variant: 122 133 159;  /* #7a859f */
+    --edge-light: rgb(214 224 255 / 0.22);
+  }
+}
+
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --md-on-surface-variant: 210 216 228;  /* #d2d8e4 */
+    --md-outline: 184 190 204;  /* #b8becc */
+    --md-outline-variant: 122 133 159;  /* #7a859f */
+    --edge-light: rgb(214 224 255 / 0.22);
+  }
+}
