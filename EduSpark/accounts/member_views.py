@@ -1,10 +1,13 @@
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, FormView, ListView, UpdateView
 
+from .enrollment import assign_student_to_class, pending_students_by_level
 from .forms import ProfessorCreateForm, ProfessorProfileForm, StudentCreateForm, StudentProfileForm
 from .models import Membership, ProfessorProfile, SchoolClass, StudentProfile
 from .tenancy import Role, TenantRequiredMixin, TenantScopedMixin, tenant_required
@@ -44,6 +47,19 @@ class _MemberCreateView(TenantRequiredMixin, GenericFormMixin, FormView):
 
     def form_valid(self, form):
         membership, created = form.save_member()
+        if membership.role == Role.STUDENT:
+            profile = getattr(membership, "student_profile", None)
+            if profile is not None and (profile.level or profile.section):
+                try:
+                    school_class = assign_student_to_class(profile)
+                except ValidationError as error:
+                    messages.warning(self.request, error.messages[0])
+                else:
+                    messages.info(
+                        self.request,
+                        "%s a été affecté(e) à la classe « %s »."
+                        % (membership.user, school_class.name),
+                    )
         if created:
             send_set_password_email(self.request, membership.user, self.request.university)
             messages.success(
@@ -177,9 +193,9 @@ class StudentListView(_MemberListView):
     member_role = Role.STUDENT
     search_fields = (
         "membership__user__first_name", "membership__user__last_name",
-        "membership__user__email", "student_number", "program",
+        "membership__user__email", "student_number", "program", "level", "section",
     )
-    search_placeholder = "Nom, e-mail, matricule, filière…"
+    search_placeholder = "Nom, e-mail, matricule, filière, niveau…"
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related("groups__school_class")
@@ -212,6 +228,7 @@ class StudentListView(_MemberListView):
                     university=self.request.university, groups__students__isnull=False,
                 ).distinct().count(),
             },
+            "pending_groups": pending_students_by_level(self.request.university),
         })
         return context
 
@@ -232,6 +249,25 @@ class StudentUpdateView(_MemberUpdateView):
     page_icon = "badge"
     list_url_name = "portal:admin_students"
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        profile = self.object
+        if (
+            profile.membership.is_active
+            and not profile.groups.exists()
+            and (profile.level or profile.section)
+        ):
+            try:
+                school_class = assign_student_to_class(profile)
+            except ValidationError as error:
+                messages.warning(self.request, error.messages[0])
+            else:
+                messages.info(
+                    self.request,
+                    "Étudiant affecté à la classe « %s »." % school_class.name,
+                )
+        return response
+
 
 class StudentDeleteView(_MemberDeleteView):
     model = StudentProfile
@@ -249,16 +285,37 @@ class StudentDeleteView(_MemberDeleteView):
 @tenant_required(Role.UNIVERSITY_ADMIN)
 @require_POST
 def membership_decide(request, pk):
-    """Valide ou refuse une inscription en attente dans l'université courante."""
+    """Valide ou refuse une inscription en attente dans l'université courante.
+
+    Une inscription étudiante n'est validée que si l'étudiant peut être affecté
+    à une classe correspondant à son niveau et à sa section (30 étudiants max).
+    """
     membership = get_object_or_404(
         Membership.objects.select_related("user"), pk=pk, university=request.university, is_active=False,
     )
     target = "portal:admin_students" if membership.role == Role.STUDENT else "portal:admin_teachers"
     if request.POST.get("decision") == "approve":
-        membership.is_active = True
-        membership.save(update_fields=["is_active"])
-        membership.ensure_profile()
-        messages.success(request, "Inscription de %s validée." % membership.user)
+        try:
+            with transaction.atomic():
+                if membership.role == Role.STUDENT:
+                    profile = membership.ensure_profile()
+                    school_class = assign_student_to_class(profile)
+                else:
+                    membership.ensure_profile()
+                    school_class = None
+                membership.is_active = True
+                membership.save(update_fields=["is_active"])
+        except ValidationError as error:
+            messages.error(request, error.messages[0])
+            return redirect(target)
+        if school_class is not None:
+            messages.success(
+                request,
+                "Inscription de %s validée et affectée à la classe « %s »."
+                % (membership.user, school_class.name),
+            )
+        else:
+            messages.success(request, "Inscription de %s validée." % membership.user)
     else:
         messages.success(request, "Inscription de %s refusée." % membership.user)
         membership.delete()

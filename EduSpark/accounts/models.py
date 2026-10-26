@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models.signals import post_delete
 from django.db.models.signals import post_save
@@ -12,6 +13,10 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from .tenancy import MEMBERSHIP_ROLES, Role
+
+# Effectif maximal d'une classe. La capacité est vérifiée à l'affectation
+# automatique (validation d'une inscription) et dans la gestion des groupes.
+MAX_STUDENTS_PER_CLASS = 30
 
 
 class Profil(models.Model):
@@ -88,7 +93,7 @@ class University(models.Model):
     country = models.CharField("Pays", max_length=100, blank=True)
     email_domain = models.CharField(
         "Domaine e-mail", max_length=100, blank=True,
-        help_text="ex. esprit.tn — les étudiants inscrits avec ce domaine sont validés automatiquement.",
+        help_text="Domaine officiel de l'université (information, n'active plus les comptes automatiquement).",
     )
     website = models.URLField("Site web", blank=True)
     description = models.TextField("Description", blank=True)
@@ -257,6 +262,14 @@ class StudentProfile(_MembershipProfile):
     student_number = models.CharField("Matricule", max_length=40, blank=True)
     program = models.CharField("Filière", max_length=120, blank=True)
     promotion = models.CharField("Promotion", max_length=20, blank=True, help_text="ex. 2026")
+    level = models.CharField(
+        "Niveau", max_length=60, blank=True,
+        help_text="Niveau choisi à l'inscription, ex. 3e année, Master 1.",
+    )
+    section = models.CharField(
+        "Section", max_length=60, blank=True,
+        help_text="Section choisie à l'inscription, ex. A, B, Sciences.",
+    )
 
     class Meta:
         ordering = ("membership__user__last_name", "membership__user__first_name")
@@ -269,6 +282,16 @@ class StudentProfile(_MembershipProfile):
                 name="unique_student_number_per_university",
             ),
         ]
+
+    @property
+    def current_class(self):
+        """Classe de l'étudiant (celle de son premier groupe)."""
+        group = (
+            self.groups.select_related("school_class")
+            .order_by("-school_class__academic_year", "school_class__name")
+            .first()
+        )
+        return group.school_class if group else None
 
 
 class SchoolClass(models.Model):
@@ -326,6 +349,24 @@ class SchoolClass(models.Model):
             self.program = self.study_program.name
         super().save(*args, **kwargs)
 
+    def student_queryset(self):
+        """Étudiants affectés à la classe (via ses groupes)."""
+        return StudentProfile.objects.filter(
+            university_id=self.university_id, groups__school_class=self,
+        ).distinct()
+
+    @property
+    def enrolled_count(self):
+        return self.student_queryset().count()
+
+    @property
+    def seats_left(self):
+        return max(MAX_STUDENTS_PER_CLASS - self.enrolled_count, 0)
+
+    @property
+    def is_full(self):
+        return self.enrolled_count >= MAX_STUDENTS_PER_CLASS
+
 
 class StudentGroup(models.Model):
     """Groupe (TD / TP…) rattaché à une classe."""
@@ -339,7 +380,11 @@ class StudentGroup(models.Model):
         related_name="groups", verbose_name="Classe",
     )
     name = models.CharField("Nom", max_length=60)
-    capacity = models.PositiveSmallIntegerField("Capacité", null=True, blank=True)
+    capacity = models.PositiveSmallIntegerField(
+        "Capacité", null=True, blank=True,
+        validators=[MaxValueValidator(MAX_STUDENTS_PER_CLASS)],
+        help_text="Ne peut pas dépasser l'effectif maximal d'une classe (30).",
+    )
     students = models.ManyToManyField(
         StudentProfile, blank=True, related_name="groups", verbose_name="Étudiants",
     )

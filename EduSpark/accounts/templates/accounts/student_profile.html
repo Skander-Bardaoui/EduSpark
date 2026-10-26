@@ -114,6 +114,8 @@
 <dl class="mt-3 space-y-3 text-sm">
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Matricule</dt><dd class="font-data-metric font-semibold text-on-surface">{{ profile.student_number|default:"—" }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ profile.program|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt><dd class="font-semibold text-on-surface">{{ profile.level|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Section</dt><dd class="font-semibold text-on-surface">{{ profile.section|default:"—" }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Promotion</dt><dd class="font-semibold text-on-surface">{{ profile.promotion|default:"—" }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Groupes</dt><dd class="font-semibold text-on-surface">{{ groups|length }} groupe{{ groups|length|pluralize }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Université courante</dt><dd class="font-semibold text-on-surface">{{ portal_university.name|default:"—" }}</dd></div>

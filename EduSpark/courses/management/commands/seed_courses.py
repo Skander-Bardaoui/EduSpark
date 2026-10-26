@@ -76,7 +76,6 @@ SUBJECTS = (
 # (université, classe, matière, professeur)
 ASSIGNMENTS = (
     (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local"),
-    (PARIS, "Licence 3 Informatique", "INF501", "a.diallo@u-paris.fr"),
     (PARIS, "Licence 3 Informatique", "INF504", "m.traore@u-paris.fr"),
     (PARIS, "Licence 3 Informatique", "LAN301", "m.traore@u-paris.fr"),
     (PARIS, "Master 1 Génie Logiciel", "GEN401", "prof.test@eduspark.local"),
@@ -90,7 +89,6 @@ SLOTS = (
     (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local", "cm", 0, "08:30", "10:00", "Amphi A", ""),
     (PARIS, "Licence 3 Informatique", "INF504", "m.traore@u-paris.fr", "cm", 1, "10:15", "11:45", "Salle 204", ""),
     (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local", "td", 2, "13:30", "15:00", "Salle 105", "TD A"),
-    (PARIS, "Licence 3 Informatique", "INF501", "a.diallo@u-paris.fr", "tp", 2, "13:30", "15:00", "Salle machine B204", "TP B"),
     (PARIS, "Licence 3 Informatique", "INF504", "m.traore@u-paris.fr", "td", 3, "08:30", "10:00", "Salle 204", "TD A"),
     (PARIS, "Licence 3 Informatique", "LAN301", "m.traore@u-paris.fr", "cm", 4, "14:00", "16:00", "Salle D12", ""),
     (PARIS, "Master 1 Génie Logiciel", "GEN401", "prof.test@eduspark.local", "cm", 0, "10:15", "11:45", "Amphi B", ""),
@@ -119,7 +117,7 @@ COURSES = (
      "Cours en préparation : non publié.", (), (
          ("Algorithmes d'approximation", "À rédiger.", ()),
      ), ()),
-    (PARIS, "a.diallo@u-paris.fr", "INF501", "Travaux pratiques d'algorithmique",
+    (PARIS, "prof.test@eduspark.local", "INF501", "Travaux pratiques d'algorithmique",
      "Sujets de TP en salle machine, un sujet par séance.", ("Licence 3 Informatique",), (
          ("TP 1 — Implémenter Dijkstra", "Python, file de priorité.", (
              ("Énoncé du TP 1", ("Implémenter Dijkstra avec heapq", "Comparer avec Bellman-Ford")),
