@@ -66,16 +66,16 @@ Relevé officiel de vos notes publiées par l'université.
 {% endfor %}
 </div>
 <aside class="flex flex-col gap-4">
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Synthèse annuelle</p>
-<p class="font-data-metric text-[20px] font-bold mt-2">{{ average_label }}<span class="text-lg font-normal text-white/60">/20</span></p>
-<p class="mt-1 text-sm text-white/70">Mention {{ mention_label }} · {{ validated }} UE validée(s)</p>
-<div class="mt-4 space-y-2 border-t border-white/15 pt-3 text-xs text-white/75">
-<div class="flex justify-between"><span>UE validées</span><span class="font-bold text-white">{{ validated }} / {{ grade_count }}</span></div>
-<div class="flex justify-between"><span>Rang de promotion</span><span class="font-bold text-white">{% if rank %}{{ rank }}e / {{ promotion_size }}{% else %}—{% endif %}</span></div>
-<div class="flex justify-between"><span>Objectif personnel</span><span class="font-bold text-white">16 / 20</span></div>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Synthèse annuelle</p>
+<p class="font-data-metric text-[20px] font-bold mt-2">{{ average_label }}<span class="text-lg font-normal text-on-hero/60">/20</span></p>
+<p class="mt-1 text-sm text-on-hero/70">Mention {{ mention_label }} · {{ validated }} UE validée(s)</p>
+<div class="mt-4 space-y-2 border-t border-on-hero/15 pt-3 text-xs text-on-hero/75">
+<div class="flex justify-between"><span>UE validées</span><span class="font-bold text-on-hero">{{ validated }} / {{ grade_count }}</span></div>
+<div class="flex justify-between"><span>Rang de promotion</span><span class="font-bold text-on-hero">{% if rank %}{{ rank }}e / {{ promotion_size }}{% else %}—{% endif %}</span></div>
+<div class="flex justify-between"><span>Objectif personnel</span><span class="font-bold text-on-hero">16 / 20</span></div>
 </div>
-<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-label-md text-label-md font-bold text-primary transition-transform hover:scale-[1.01]" href="{% url 'exams:student_attestation_pdf' %}">
+<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-on-hero px-4 py-2.5 font-label-md text-label-md font-bold text-hero-via transition-transform hover:scale-[1.01]" href="{% url 'exams:student_attestation_pdf' %}">
 <span class="material-symbols-outlined text-[18px]">verified</span>Attestation de réussite
 </a>
 </div>

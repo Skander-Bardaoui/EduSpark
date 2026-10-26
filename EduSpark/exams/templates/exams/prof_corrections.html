@@ -108,7 +108,7 @@
 </div>
 </div>
 <div class="relative flex flex-col items-center rounded bg-surface-container-low p-3 shadow-md overflow-hidden border-0">
-<div class="relative w-full max-w-[680px] bg-white rounded shadow-lg overflow-hidden transition-transform duration-200" id="scan-container">
+<div class="relative w-full max-w-[680px] bg-surface-container-lowest rounded shadow-lg overflow-hidden transition-transform duration-200" id="scan-container">
 <div class="flex items-center justify-between border-b border-surface-container-high bg-surface-container-lowest px-5 pt-4 pb-3 text-on-surface-variant">
 <div>
 <span class="text-[11px] font-bold uppercase tracking-wider text-secondary">Épreuve {{ session.get_exam_type_display }} {% if session.code %} • {{ session.code }}{% endif %}</span>
@@ -239,7 +239,7 @@
 </div>
 </section>
 </div>
-<footer class="fixed bottom-0 left-0 right-0 z-40 flex flex-wrap items-center justify-between gap-2 bg-surface-container-lowest/95 px-4 py-3 shadow-[0_-2px_12px_rgba(6,22,75,0.08)] backdrop-blur-xl sm:px-6 lg:left-72">
+<footer class="fixed bottom-0 left-0 right-0 z-40 flex flex-wrap items-center justify-between gap-2 bg-surface-container-lowest/95 px-4 py-3 shadow-[0_-2px_12px_rgb(var(--md-scrim)/0.08)] backdrop-blur-xl sm:px-6 lg:left-72">
 <div class="flex flex-wrap items-center gap-2">
 {% if prev_student %}
 <a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-low px-3.5 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-container" href="{% url 'exams:prof_corrections' %}?session={{ session.pk }}&student={{ prev_student.pk }}">
