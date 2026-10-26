@@ -736,6 +736,12 @@ class Chapter(models.Model):
     )
     title = models.CharField("Titre", max_length=200)
     summary = models.TextField("Résumé", blank=True)
+    objectives = models.TextField(
+        "Objectifs d'apprentissage", blank=True, help_text="Un objectif par ligne.",
+    )
+    duration_hours = models.PositiveSmallIntegerField(
+        "Durée (heures)", null=True, blank=True, validators=[MinValueValidator(1)],
+    )
     order = models.PositiveIntegerField("Ordre", default=0)
     created_at = models.DateTimeField("Créé le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifié le", auto_now=True)

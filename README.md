@@ -195,6 +195,97 @@ Pages principales :
 | `/etudiant/emploi-du-temps/` | Étudiant | Emploi du temps de ma classe et de mes groupes |
 | `/etudiant/supports-de-cours/` | Étudiant | Supports des cours publiés |
 
+## IA du module courses
+
+Une seule fonctionnalité IA : le bouton **« Générer un plan de cours »** sur la page d'un cours (portail professeur). Le module fonctionne à 100 % sans IA.
+
+### Pipeline en deux étapes (« lecture → écriture »)
+
+```
+Supports du cours (PDF, PPTX, DOCX)          ┌──────────── serveur de l'université ────────────┐
+        │  texte extrait (pypdf, python-pptx) │                                                 │
+        ▼                                     │                                                 │
+ Étape 1 — LECTEUR local (Ollama, qwen2.5)  ──┼─► {"topics": ["...", ...]}  (8 thèmes max)      │
+        │                                     └─────────────────────────────────────────────────┘
+        │  titre + niveau + options + thèmes   (jamais les documents)
+        ▼
+ Étape 2 — RÉDACTEUR API (Groq, Google Gemini ou Anthropic)
+        │  {"chapters": [{"title", "objectives", "duration_hours"}]}  validé strictement
+        ▼
+ Aperçu modifiable ─► le professeur ajoute / retire / réordonne / corrige ─► « Enregistrer le plan »
+```
+
+**Les documents restent sur le serveur, seul un résumé (la liste des thèmes) part vers l'API.**
+
+| Situation | Comportement |
+| --- | --- |
+| Pas de support lisible (aucun, ou seulement vidéos/audios) | Étape 1 sautée, badge « Rédaction API seule » |
+| Ollama arrêté ou trop lent (`AI_LOCAL_TIMEOUT`) | L'API rédige seule, l'aperçu l'indique |
+| Réponse de l'API invalide | Un nouvel essai, puis bascule en saisie manuelle |
+| API en panne, clé absente, limite horaire atteinte | Avertissement + aperçu vide pour saisir le plan à la main |
+
+Rien n'est écrit en base avant le clic sur **« Enregistrer le plan »** : les chapitres sont alors créés dans une transaction, à la suite des chapitres existants. Le code IA est isolé dans `courses/services/ai.py` ; les vues (`courses/ai_views.py`) n'appellent jamais une API directement. Un cache (1 h, invalidé quand un support change) évite les appels en double, et chaque professeur est limité à `AI_RATE_LIMIT_PER_HOUR` générations par heure.
+
+### Variables d'environnement (`EduSpark/.env`)
+
+| Variable | Rôle | Défaut |
+| --- | --- | --- |
+| `AI_PROVIDER` | `groq` (offre gratuite), `gemini` (offre gratuite d'AI Studio), `anthropic` (payant) ou `fake` (plan fixe, aucun appel réseau) | `groq` (`fake` dans `.env.example`) |
+| `AI_API_TIMEOUT` | Délai max d'un appel au rédacteur (s) | `60` |
+| `COURSES_GROQ_API_KEY` | Clé Groq du module cours (distincte de `GROQ_API_KEY` du coaching). Absente = saisie manuelle | vide |
+| `COURSES_GROQ_MODEL` | Modèle rédacteur Groq (modèle « Production » ; `openai/gpt-oss-20b` pour plus de vitesse) | `openai/gpt-oss-120b` |
+| `GEMINI_API_KEY` | Clé Google AI Studio. Absente = saisie manuelle | vide |
+| `GEMINI_MODEL` | Modèle rédacteur Gemini | `gemini-2.5-flash` |
+| `ANTHROPIC_API_KEY` | Clé Anthropic. Absente = saisie manuelle | vide |
+| `ANTHROPIC_MODEL` | Modèle rédacteur Anthropic | `claude-sonnet-5-5` |
+| `ANTHROPIC_EFFORT` | Profondeur de réflexion : `low`, `medium`, `high` | `medium` |
+| `ANTHROPIC_FALLBACKS` | Si le modèle décline la demande, l'API la rejoue sur un modèle de repli | `True` |
+| `OLLAMA_URL` | Adresse d'Ollama | `http://localhost:11434` |
+| `OLLAMA_MODEL` | Modèle lecteur | `qwen2.5:3b` |
+| `OLLAMA_KEEP_ALIVE` | Durée de maintien du modèle en mémoire | `30m` |
+| `AI_LOCAL_TIMEOUT` | Délai max du lecteur local (s) ; au-delà, l'API rédige seule | `120` |
+| `AI_LOCAL_TEXT_LIMIT` | Caractères de supports envoyés au lecteur | `4000` |
+| `AI_RATE_LIMIT_PER_HOUR` | Générations par professeur et par heure | `10` |
+
+### Choisir le rédacteur
+
+- **Groq (`AI_PROVIDER=groq`, par défaut)** : clé propre au module cours, `COURSES_GROQ_API_KEY`, créée sur <https://console.groq.com> → *API Keys*. Elle est distincte de `GROQ_API_KEY` (test de langue du module coaching) : chaque module garde sa clé et son quota. Offre gratuite avec limites de requêtes. Groq n'impose pas de schéma à la sortie : la forme JSON est demandée dans la consigne puis vérifiée strictement, avec un nouvel essai si besoin.
+- **Gemini (`AI_PROVIDER=gemini`)** : créer une clé sur <https://aistudio.google.com> → *Get API key*, puis la mettre dans `EduSpark/.env` (`GEMINI_API_KEY=...`). L'offre gratuite suffit pour le développement et la démo (nombre de requêtes limité par minute et par jour). Sur l'offre gratuite, Google peut utiliser les requêtes pour améliorer ses produits : ici, il ne reçoit que le titre, le niveau et les thèmes, jamais les supports. Si `GEMINI_MODEL` n'existe plus, prendre un modèle « Flash » listé dans AI Studio.
+- **Anthropic (`AI_PROVIDER=anthropic`)** : payant à l'usage (`ANTHROPIC_API_KEY`).
+- Une clé ne doit **jamais** être commitée ni partagée (chat, capture d'écran). Si c'est arrivé, la supprimer et en créer une nouvelle.
+
+### Installer Ollama
+
+1. Installer Ollama sur le PC : <https://ollama.com/download> (recommandé sous Windows / macOS : utilise le GPU).
+2. Télécharger le modèle lecteur :
+
+   ```powershell
+   ollama pull qwen2.5:3b     # ~2 Go, ~4 Go de RAM : suffit pour extraire des thèmes
+   # ollama pull qwen2.5:7b   # seulement avec 16 Go de RAM ou un GPU (OLLAMA_MODEL=qwen2.5:7b)
+   ```
+
+3. Avec Docker (`docker-compose.yml` : Django, PostgreSQL et Ollama) :
+
+   ```powershell
+   docker compose up -d
+   docker compose exec ollama ollama pull qwen2.5:3b
+   ```
+
+   Dans Docker, Django joint Ollama à `OLLAMA_URL=http://ollama:11434` (valeur déjà posée par le compose). Si Ollama tourne sur le PC et Django dans Docker : `OLLAMA_URL=http://host.docker.internal:11434`.
+
+Conseils de démo : lancer une première génération deux minutes avant (le premier appel charge le modèle en mémoire), utiliser un PDF de 5 à 10 pages, et garder `AI_PROVIDER=fake` en secours.
+
+### Tests
+
+Aucun test n'appelle le réseau : Ollama (`requests.post`) et le client Anthropic sont simulés, ou `AI_PROVIDER=fake` est utilisé.
+
+```powershell
+cd EduSpark
+..\.venv\Scripts\python.exe manage.py test courses.tests.test_ai   # tests de l'IA
+..\.venv\Scripts\python.exe manage.py test courses                 # tout le module
+# avec pytest :  pip install pytest pytest-django  puis  pytest courses/tests/test_ai.py
+```
+
 ## URL principales
 
 | URL | Description |

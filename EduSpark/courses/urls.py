@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import admin_views as admin
+from . import ai_views as ai
 from . import file_views, prof_views as prof, student_views as student
 
 app_name = "courses"
@@ -30,6 +31,12 @@ urlpatterns = [
          {"direction": "monter"}, name="prof_chapter_up"),
     path("prof/cours/<int:pk>/chapitres/<int:chapter_pk>/descendre/", prof.chapter_move,
          {"direction": "descendre"}, name="prof_chapter_down"),
+    path("prof/cours/<int:pk>/plan-ia/", ai.SyllabusGenerateView.as_view(),
+         name="prof_ai_syllabus_generate"),
+    path("prof/cours/<int:pk>/plan-ia/manuel/", ai.SyllabusManualView.as_view(),
+         name="prof_ai_syllabus_manual"),
+    path("prof/cours/<int:pk>/plan-ia/enregistrer/", ai.SyllabusSaveView.as_view(),
+         name="prof_ai_syllabus_save"),
     path("prof/matieres/", prof.SubjectsView.as_view(), name="prof_subjects"),
     path("prof/emploi-du-temps/", prof.TimetableView.as_view(), name="prof_timetable"),
     path("prof/supports-de-cours/", prof.MaterialListView.as_view(), name="prof_course_materials"),
