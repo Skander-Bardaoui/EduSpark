@@ -21,40 +21,40 @@
 </div>
 {% if next_view %}
 <section class="grid gap-4 lg:grid-cols-[1fr_340px]">
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Prochain rendez-vous</p>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Prochain rendez-vous</p>
 <div class="mt-3 flex flex-wrap items-center justify-between gap-4">
 <div class="flex items-center gap-3">
-<span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-sm font-extrabold">{{ next_view.tutor_initials }}</span>
-<div><p class="font-headline-sm text-[17px] font-bold">{{ next_view.tutor_name }}</p><p class="text-xs text-white/70">Tuteur référent · {{ next_view.speciality }}</p></div>
+<span class="flex h-11 w-11 items-center justify-center rounded-full bg-on-hero/15 text-sm font-extrabold">{{ next_view.tutor_initials }}</span>
+<div><p class="font-headline-sm text-[17px] font-bold">{{ next_view.tutor_name }}</p><p class="text-xs text-on-hero/70">Tuteur référent · {{ next_view.speciality }}</p></div>
 </div>
-<div class="rounded bg-white/10 px-4 py-2 text-center ring-1 ring-white/15">
-<p class="text-[11px] font-bold uppercase tracking-wider text-white/60">{{ next_view.date_label }}</p>
+<div class="rounded bg-on-hero/10 px-4 py-2 text-center ring-1 ring-on-hero/15">
+<p class="text-[11px] font-bold uppercase tracking-wider text-on-hero/60">{{ next_view.date_label }}</p>
 <p class="font-data-metric text-lg font-bold">{{ next_view.time_label }}</p>
 </div>
 </div>
-<p class="mt-4 text-sm text-white/75">{{ next_view.topic }}</p>
+<p class="mt-4 text-sm text-on-hero/75">{{ next_view.topic }}</p>
 <div class="mt-4 flex flex-wrap gap-2">
 {% if next_view.session.mode == "video" %}
 {% if next_view.meeting_url %}
-<a class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" href="{{ next_view.meeting_url }}" rel="noopener" target="_blank"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-on-hero px-4 py-2 text-xs font-bold text-hero-via transition-transform hover:scale-[1.01]" href="{{ next_view.meeting_url }}" rel="noopener" target="_blank"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</a>
 {% else %}
-<button class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-toast="Le lien de visioconférence sera communiqué par votre tuteur." type="button"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-on-hero px-4 py-2 text-xs font-bold text-hero-via transition-transform hover:scale-[1.01]" data-toast="Le lien de visioconférence sera communiqué par votre tuteur." type="button"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</button>
 {% endif %}
 {% endif %}
 <form action="{% url 'coaching:student_appointment_reschedule' next_view.session.pk %}" method="post">
 {% csrf_token %}
-<button class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold text-white ring-1 ring-white/20 transition-colors hover:bg-white/20" type="submit"><span class="material-symbols-outlined text-[16px]">event_repeat</span>Reporter</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-on-hero/10 px-4 py-2 text-xs font-bold text-on-hero ring-1 ring-on-hero/20 transition-colors hover:bg-on-hero/20" type="submit"><span class="material-symbols-outlined text-[16px]">event_repeat</span>Reporter</button>
 </form>
 </div>
 </div>
 {% else %}
 <section class="grid gap-4 lg:grid-cols-[1fr_340px]">
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Prochain rendez-vous</p>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Prochain rendez-vous</p>
 <p class="mt-3 font-headline-sm text-[17px] font-bold">Aucun rendez-vous confirmé</p>
-<p class="mt-2 text-sm text-white/70">Choisissez un créneau ci-contre ou envoyez une demande à votre tuteur référent.</p>
-<button class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-modal-open="#appointment-modal" type="button"><span class="material-symbols-outlined text-[16px]">add</span>Demander un rendez-vous</button>
+<p class="mt-2 text-sm text-on-hero/70">Choisissez un créneau ci-contre ou envoyez une demande à votre tuteur référent.</p>
+<button class="mt-4 inline-flex items-center gap-2 rounded-full bg-on-hero px-4 py-2 text-xs font-bold text-hero-via transition-transform hover:scale-[1.01]" data-modal-open="#appointment-modal" type="button"><span class="material-symbols-outlined text-[16px]">add</span>Demander un rendez-vous</button>
 </div>
 {% endif %}
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
@@ -94,7 +94,7 @@
 </section>
 </div>
 <div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="appointment-modal">
-<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="absolute inset-0 bg-scrim/50 backdrop-blur-sm" data-modal-close=""></div>
 <div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
 <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Demander un rendez-vous</h2>

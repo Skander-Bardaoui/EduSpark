@@ -58,27 +58,27 @@
 </section>
 </div>
 <aside class="flex flex-col gap-4">
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Mon cap</p>
-<p class="mt-2 font-headline-sm text-headline-sm text-white">{% if goal_stats.goals %}{{ goal_stats.goals.0.title }}{% else %}Valider le semestre avec mention{% endif %}</p>
-<p class="mt-1 text-sm text-white/70">Progression des objectifs : {{ goal_stats.percent }} %</p>
-<div class="mt-4 space-y-2 border-t border-white/15 pt-3 text-xs text-white/75">
-<div class="flex justify-between gap-3"><span class="shrink-0">Confiance actuelle</span><span class="text-right font-bold text-white">{{ today_percent }} %</span></div>
-<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine révision</span><span class="text-right font-bold text-white">{{ next_study_label }}</span></div>
-<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine séance</span><span class="text-right font-bold text-white">{{ next_session_label }}</span></div>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Mon cap</p>
+<p class="mt-2 font-headline-sm text-headline-sm text-on-hero">{% if goal_stats.goals %}{{ goal_stats.goals.0.title }}{% else %}Valider le semestre avec mention{% endif %}</p>
+<p class="mt-1 text-sm text-on-hero/70">Progression des objectifs : {{ goal_stats.percent }} %</p>
+<div class="mt-4 space-y-2 border-t border-on-hero/15 pt-3 text-xs text-on-hero/75">
+<div class="flex justify-between gap-3"><span class="shrink-0">Confiance actuelle</span><span class="text-right font-bold text-on-hero">{{ today_percent }} %</span></div>
+<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine révision</span><span class="text-right font-bold text-on-hero">{{ next_study_label }}</span></div>
+<div class="flex justify-between gap-3"><span class="shrink-0">Prochaine séance</span><span class="text-right font-bold text-on-hero">{{ next_session_label }}</span></div>
 </div>
 {% if entry_views and entry_views.0.entry.feedback %}
-<div class="mt-4 border-t border-white/15 pt-3">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Dernier retour tuteur</p>
-<p class="mt-1 text-xs leading-relaxed text-white/80">{{ entry_views.0.entry.feedback|truncatechars:150 }}</p>
+<div class="mt-4 border-t border-on-hero/15 pt-3">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Dernier retour tuteur</p>
+<p class="mt-1 text-xs leading-relaxed text-on-hero/80">{{ entry_views.0.entry.feedback|truncatechars:150 }}</p>
 </div>
 {% endif %}
 {% if tutor_notification %}
-<div class="mt-4 border-t border-white/15 pt-3">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Notification ENT{% if tutor_notification.tutor_name %} · {{ tutor_notification.tutor_name }}{% endif %}</p>
-<p class="mt-1 text-xs font-semibold text-white">{{ tutor_notification.notification.title }}</p>
-<p class="mt-1 text-xs leading-relaxed text-white/80">{{ tutor_notification.notification.message|truncatechars:160 }}</p>
-<p class="mt-1 text-[10px] text-white/50">{{ tutor_notification.when_label }}</p>
+<div class="mt-4 border-t border-on-hero/15 pt-3">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Notification ENT{% if tutor_notification.tutor_name %} · {{ tutor_notification.tutor_name }}{% endif %}</p>
+<p class="mt-1 text-xs font-semibold text-on-hero">{{ tutor_notification.notification.title }}</p>
+<p class="mt-1 text-xs leading-relaxed text-on-hero/80">{{ tutor_notification.notification.message|truncatechars:160 }}</p>
+<p class="mt-1 text-[10px] text-on-hero/50">{{ tutor_notification.when_label }}</p>
 </div>
 {% endif %}
 </div>
@@ -95,7 +95,7 @@
 </section>
 </div>
 <div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="journal-modal">
-<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="absolute inset-0 bg-scrim/50 backdrop-blur-sm" data-modal-close=""></div>
 <div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
 <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvelle entrée</h2>

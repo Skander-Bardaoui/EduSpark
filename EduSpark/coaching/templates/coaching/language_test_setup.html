@@ -4,11 +4,11 @@
 {% block content %}
 <style>
   .option-card.is-selected {
-    border-color: #004191;
-    background-color: #d8e2ff;
-    box-shadow: inset 0 0 0 1px #004191;
+    border-color: rgb(var(--md-primary));
+    background-color: rgb(var(--md-primary-fixed));
+    box-shadow: inset 0 0 0 1px rgb(var(--md-primary));
   }
-  .option-card.is-selected .option-title { color: #004191; }
+  .option-card.is-selected .option-title { color: rgb(var(--md-primary)); }
 </style>
 <main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
 <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-space-lg">
@@ -67,13 +67,13 @@
 </div>
 </div>
 <aside class="flex flex-col gap-4">
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Avant de commencer</p>
-<ul class="mt-3 space-y-3 text-xs leading-relaxed text-white/80">
-<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-white">headset</span>Utilisez un casque avec micro pour éviter l’écho.</li>
-<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-white">mic</span>Autorisez l’accès au micro lorsque le navigateur le demande.</li>
-<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-white">volume_up</span>Écoutez la question de l’examinateur, puis répondez à voix haute.</li>
-<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-white">timer</span>Un test dure environ 14 à 15 minutes.</li>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Avant de commencer</p>
+<ul class="mt-3 space-y-3 text-xs leading-relaxed text-on-hero/80">
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-on-hero">headset</span>Utilisez un casque avec micro pour éviter l’écho.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-on-hero">mic</span>Autorisez l’accès au micro lorsque le navigateur le demande.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-on-hero">volume_up</span>Écoutez la question de l’examinateur, puis répondez à voix haute.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-on-hero">timer</span>Un test dure environ 14 à 15 minutes.</li>
 </ul>
 </div>
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
