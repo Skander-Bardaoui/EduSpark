@@ -16,7 +16,7 @@ ce qui a été branché, comment préparer les données, puis le parcours détai
 | Rendez-vous de tutorat | Demande sur créneau ou créneau libre, report | Créneaux, acceptation, refus motivé, clôture avec compte-rendu | — |
 | Journal | Écriture d'entrées, lecture des retours | Retour sur les entrées | — |
 | Notifications | Lecture, réponse au référent | Relance, signalement, e-mails | — |
-| Présences | — | Séances, saisie, recalcul d'assiduité, alerte automatique < 75 % | — |
+| Présences | — | Occurrences de l'emploi du temps, séances exceptionnelles, saisie, recalcul d'assiduité, alerte automatique < 75 % | — |
 | Fiches de difficulté | Notification d'ouverture | Création, notes, plan d'accompagnement, export | — |
 | Persévérance | — | Signalement d'un étudiant | Affectation, prise en charge et clôture des alertes, export |
 | Test de langue orale | Test IELTS / Cambridge, bilan détaillé | Consultation des bilans de son portefeuille | — |
@@ -169,21 +169,24 @@ Connexion : `prof.test@eduspark.local` / `Prof12345!` → `/prof/tableau-de-bord
 ### Étape 3 — Rendez-vous de tutorat
 1. Ouvrir **Rendez-vous de tutorat** (`/prof/tutorat/`).
 2. **Créer un créneau** : date future, heure, modalité (individuel / collectif / visio).
-3. Sur une demande en attente : **Accepter** → le créneau passe en réservé, l'étudiant reçoit une notification
-   et un e-mail de confirmation.
+3. Sur une demande en attente : **Accepter** → le créneau passe en réservé, un lien de visioconférence
+   réellement accessible est généré (Jitsi Meet par défaut, Google Meet si configuré), et l'étudiant
+   reçoit une notification et un e-mail avec le lien.
 4. Sur une autre demande : **Refuser** avec un motif → l'étudiant reçoit une notification et un e-mail,
    et peut proposer un autre créneau.
 5. Sur un rendez-vous confirmé : **Clôturer** avec les points abordés et les actions décidées
-   → le rendez-vous passe en « Réalisé », le dernier contact du tutorat est mis à jour.
+   → le rendez-vous passe en « Réalisé », le dernier contact du tutorat est mis à jour, le compte-rendu
+   et le lien visio sont envoyés automatiquement à l'étudiant.
 6. Vérifier les compteurs « cette semaine » (individuels / collectifs) et les créneaux ouverts.
 
 ### Étape 4 — Présences
-1. Ouvrir **Présences** (`/prof/presences/`).
-2. **Nouvelle séance** : classe, module (ex. Algorithmique avancée), type TD, date passée, heure, durée.
-3. Ouvrir la séance, saisir Présent / Retard / Absent / Absence justifiée pour chaque étudiant, puis **Enregistrer**.
-4. Le taux d'assiduité est recalculé et propagé au tutorat et aux fiches ouvertes.
-5. Si un étudiant passe sous 75 %, une alerte de persévérance « Assiduité faible » est ouverte automatiquement.
-6. Vérifier le tableau des taux par étudiant.
+1. Ouvrir **Présences** (`/prof/presences/`) ou cliquer sur **Appel** depuis l'emploi du temps.
+2. Les occurrences de la semaine et les séances passées non relevées viennent de l'emploi du temps : cliquer sur **Saisir**.
+3. Saisir Présent / Retard / Absent / Absence justifiée pour chaque étudiant, puis **Enregistrer**.
+4. Pour un cours hors emploi du temps, utiliser **Séance exceptionnelle** (classe, module, type, date, heure, durée).
+5. Le taux d'assiduité est recalculé et propagé au tutorat et aux fiches ouvertes.
+6. Si un étudiant passe sous 75 %, une alerte de persévérance « Assiduité faible » est ouverte automatiquement.
+7. Vérifier le tableau des taux par étudiant.
 
 ### Étape 5 — Fiches de difficulté
 1. Ouvrir **Fiches & Difficultés** (`/prof/fiches-difficultes/`).
@@ -222,10 +225,8 @@ Connexion : `admin.paris@u-paris.fr` / `Admin12345!` → `/administration/tablea
 2. Choisir une classe et un référent, puis **Affecter un référent** :
    → tous les étudiants de la classe sont affectés au même référent pour l'année,
    et chacun reçoit une notification « Votre référent pédagogique est désigné ».
-3. Utiliser **Attribution automatique** pour les classes en attente : le référent est choisi parmi
-   les professeurs de la classe, avec répartition de charge.
-4. Vérifier le taux d'affectation et les statuts « Complet / À jour / À compléter ».
-5. Exporter l'attribution en CSV.
+3. Vérifier le taux d'affectation et les statuts « Complet / À compléter / Référents multiples ».
+4. Exporter l'attribution en CSV.
 
 ### Étape 3 — Pilotage et alertes
 1. Ouvrir **Suivi & Pilotage** (`/administration/suivi/`).

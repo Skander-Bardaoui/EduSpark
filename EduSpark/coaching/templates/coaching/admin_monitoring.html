@@ -32,30 +32,73 @@
 {% endfor %}
 </section>
 <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
-<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes de persévérance</h2>
-<span class="text-xs text-on-surface-variant"><span data-monitoring-alerts>{{ summary.active_alerts }}</span> alerte{{ summary.active_alerts|pluralize }} active{{ summary.active_alerts|pluralize }}</span>
+<span class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface">{{ open_alert_rows|length }}</span> ouverte{{ open_alert_rows|length|pluralize }} · <span class="font-bold text-on-surface">{{ taken_alert_rows|length }}</span> prise{{ taken_alert_rows|length|pluralize }} en charge</span>
+</div>
+<form class="flex flex-col gap-3 border-b border-outline-variant/40 px-4 py-4 lg:flex-row lg:items-end" method="get">
+<label class="flex min-w-0 flex-1 flex-col gap-1"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Rechercher un étudiant</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="100" name="q" placeholder="Nom, prénom ou matricule" type="search" value="{{ query }}"/></label>
+<label class="flex flex-col gap-1 lg:w-44"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Du</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="date_from" type="date" value="{{ date_from_value }}"/></label>
+<label class="flex flex-col gap-1 lg:w-44"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Au</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="date_to" type="date" value="{{ date_to_value }}"/></label>
+<div class="flex flex-wrap items-end gap-2">
+<button class="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if has_alert_filters %}<a class="inline-flex h-10 items-center rounded-full border border-outline-variant/70 px-4 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'coaching:admin_monitoring' %}">Réinitialiser</a>{% endif %}
+</div>
+</form>
+<div class="grid gap-4 p-4 md:grid-cols-2">
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-low/40">
+<div class="flex items-center justify-between gap-2 border-b border-outline-variant/40 px-4 py-3">
+<div><h3 class="font-title-md text-title-md text-on-surface">Alertes ouvertes</h3><p class="text-[11px] text-on-surface-variant">À prendre en charge</p></div>
+<span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-tertiary-fixed px-2 text-xs font-bold text-on-tertiary-fixed">{{ open_alert_rows|length }}</span>
 </div>
 <ul class="divide-y divide-outline-variant/30" id="monitoring-alerts">
-{% for row in alert_rows %}
-<li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span><div><p class="text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>{% if row.handling_note %}<p class="mt-1 text-xs italic text-on-surface-variant">Prise en charge : {{ row.handling_note }}</p>{% endif %}{% if row.resolution_note %}<p class="mt-1 text-xs italic text-on-surface-variant">Résolution : {{ row.resolution_note }}</p>{% endif %}</div></div>
-<div class="flex flex-wrap items-center gap-2">
-{% if row.is_open %}
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-form-action="{% url 'coaching:admin_alert_take' row.alert.pk %}" data-modal-open="#alert-take-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Prendre en charge</button>
-{% elif row.is_taken %}
-<span class="rounded-full bg-tertiary-fixed px-3 py-1.5 text-xs font-bold text-on-tertiary-fixed">Prise en charge{% if row.taken_label %} · {{ row.taken_label }}{% endif %}</span>
-<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-form-action="{% url 'coaching:admin_alert_close' row.alert.pk %}" data-modal-open="#alert-close-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Clôturer</button>
-{% else %}
-<span class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant">Clôturée{% if row.closed_label %} · {{ row.closed_label }}{% endif %}</span>
-{% endif %}
+{% for row in open_alert_rows %}
+<li class="px-4 py-4" data-alert-item>
+<div class="flex min-w-0 items-start gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span>
+<div class="min-w-0 flex-1">
+<p class="break-words text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p>
+<p class="mt-0.5 break-words text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>
+{% if row.handling_note %}<p class="mt-1 break-words text-xs italic text-on-surface-variant">Note : {{ row.handling_note }}</p>{% endif %}
+</div>
+</div>
+<div class="mt-3 flex justify-end">
+<button class="w-full rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high sm:w-auto" data-form-action="{% url 'coaching:admin_alert_take' row.alert.pk %}" data-modal-open="#alert-take-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Prendre en charge</button>
 </div>
 </li>
 {% empty %}
-<li class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucune alerte de persévérance en cours.</li>
+<li class="px-4 py-10 text-center text-sm text-on-surface-variant">Aucune alerte ouverte.</li>
 {% endfor %}
 </ul>
+</section>
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-low/40">
+<div class="flex items-center justify-between gap-2 border-b border-outline-variant/40 px-4 py-3">
+<div><h3 class="font-title-md text-title-md text-on-surface">Prises en charge</h3><p class="text-[11px] text-on-surface-variant">Suivi en cours</p></div>
+<span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary-fixed px-2 text-xs font-bold text-primary">{{ taken_alert_rows|length }}</span>
+</div>
+<ul class="divide-y divide-outline-variant/30">
+{% for row in taken_alert_rows %}
+<li class="px-4 py-4" data-alert-item>
+<div class="flex min-w-0 items-start gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span>
+<div class="min-w-0 flex-1">
+<p class="break-words text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p>
+<p class="mt-0.5 break-words text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>
+{% if row.taken_label %}<p class="mt-1 text-[11px] font-bold text-tertiary">Prise en charge le {{ row.taken_label }}</p>{% endif %}
+{% if row.handling_note %}<p class="mt-1 break-words text-xs italic text-on-surface-variant">Note : {{ row.handling_note }}</p>{% endif %}
+</div>
+</div>
+<div class="mt-3 flex justify-end">
+<button class="w-full rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container sm:w-auto" data-form-action="{% url 'coaching:admin_alert_close' row.alert.pk %}" data-modal-open="#alert-close-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Clôturer</button>
+</div>
+</li>
+{% empty %}
+<li class="px-4 py-10 text-center text-sm text-on-surface-variant">Aucune alerte prise en charge.</li>
+{% endfor %}
+</ul>
+</section>
+</div>
 </section>
 <aside class="flex flex-col gap-4">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">

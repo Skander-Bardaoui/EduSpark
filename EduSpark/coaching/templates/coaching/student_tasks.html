@@ -60,6 +60,12 @@
 {% endif %}
 </div>
 </div>
+{% if item.task.is_done %}
+<form action="{% url 'coaching:student_task_delete' item.task.pk %}" class="mt-0.5 shrink-0" data-confirm-detail="Supprimer la tâche « {{ item.task.title }} » ?" method="post">
+{% csrf_token %}
+<button aria-label="Supprimer la tâche terminée" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Supprimer la tâche" type="submit"><span class="material-symbols-outlined text-[19px]">delete</span></button>
+</form>
+{% endif %}
 </div>
 {% endfor %}
 </div>
@@ -254,15 +260,6 @@
     render();
     stop('Minuteur réinitialisé à 25 minutes.');
     startBtn.textContent = 'Démarrer';
-  });
-
-  modal.addEventListener('click', function (event) {
-    if (event.target.closest('[data-modal-close]')) stop('Session en pause.');
-  });
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
-      stop('Session en pause.');
-    }
   });
 
   render();

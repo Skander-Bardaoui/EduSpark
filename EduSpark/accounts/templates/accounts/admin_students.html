@@ -73,29 +73,32 @@
 <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
 <div class="flex min-w-0 flex-col gap-5 lg:col-span-8">
 <section aria-labelledby="students-directory-title" class="overflow-hidden rounded bg-surface-container-lowest shadow-sm">
-<div class="flex flex-col gap-4 border-b border-outline-variant/40 p-6">
-<div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+<div class="border-b border-outline-variant/40 p-4">
+<div class="flex flex-wrap items-center justify-between gap-2">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="students-directory-title">Annuaire des étudiants</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ profiles|length }}{% endif %} étudiant{{ profiles|length|pluralize }} affiché{{ profiles|length|pluralize }}</p>
+<h2 class="text-lg font-semibold text-on-surface" id="students-directory-title">Annuaire des étudiants</h2>
+<p class="text-xs text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ profiles|length }}{% endif %} étudiant{{ profiles|length|pluralize }} affiché{{ profiles|length|pluralize }}</p>
 </div>
-{% if is_filtered %}<a class="inline-flex items-center gap-1.5 self-start rounded-full bg-surface-container-high px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant transition-colors hover:bg-surface-variant" href="{% url 'portal:admin_students' %}"><span class="material-symbols-outlined text-[16px]">restart_alt</span>Réinitialiser</a>{% endif %}
+{% if is_filtered %}<a class="inline-flex h-8 items-center gap-1.5 rounded-full border border-outline-variant/60 px-3 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'portal:admin_students' %}"><span class="material-symbols-outlined text-[15px]">restart_alt</span>Réinitialiser</a>{% endif %}
 </div>
-<form class="grid gap-3 md:grid-cols-12" method="get">
-<div class="relative flex items-center md:col-span-5">
-<span class="material-symbols-outlined pointer-events-none absolute left-3.5 text-[20px] text-on-surface-variant">search</span>
-<input aria-label="Recherche d'étudiant" class="h-10 w-full rounded-full bg-surface-container-low pl-10 pr-4 font-body-sm text-body-sm text-on-surface shadow-sm placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/>
+<form class="mt-3 space-y-3 rounded-xl border border-outline-variant/40 bg-surface-container-low/40 p-3" method="get">
+<div class="flex flex-col gap-2 sm:flex-row">
+<div class="relative min-w-0 flex-1">
+<span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[19px] text-on-surface-variant">search</span>
+<input aria-label="Recherche d'étudiant" class="h-11 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest pl-10 pr-3 text-sm text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/>
 </div>
+<button class="inline-flex h-11 items-center justify-center gap-1.5 rounded-lg bg-primary px-5 text-xs font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+</div>
+<div class="grid gap-2 sm:grid-cols-3">
 {% for filter in filters %}
-<div class="md:col-span-2">
-<select aria-label="Filtrer par {{ filter.label }}" class="h-10 w-full cursor-pointer rounded-full bg-surface-container-low px-4 font-body-sm text-body-sm text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" name="{{ filter.param }}">
+<label class="flex flex-col gap-1">
+<span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{{ filter.label }}</span>
+<select aria-label="Filtrer par {{ filter.label }}" class="h-10 w-full cursor-pointer rounded-lg border border-outline-variant/60 bg-surface-container-lowest px-3 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="{{ filter.param }}">
 <option value="">{{ filter.label }} — tous</option>
 {% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
 </select>
-</div>
+</label>
 {% endfor %}
-<div class="md:col-span-1">
-<button class="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 font-label-sm text-label-sm font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
 </div>
 </form>
 </div>
@@ -103,21 +106,21 @@
 <table class="w-full min-w-[880px] text-left" role="table">
 <thead class="bg-surface-container-high font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
 <tr>
-<th class="py-2.5 pl-6 pr-3" scope="col">Étudiant &amp; Matricule</th>
-<th class="py-2.5 px-3" scope="col">Formation &amp; Cohorte</th>
-<th class="py-2.5 px-3" scope="col">Groupes</th>
-<th class="py-2.5 px-3" scope="col">Statut</th>
-<th class="py-2.5 pl-3 pr-6 text-right" scope="col">Actions</th>
+<th class="py-2 pl-4 pr-3" scope="col">Étudiant &amp; Matricule</th>
+<th class="py-2 px-3" scope="col">Formation &amp; Cohorte</th>
+<th class="py-2 px-3" scope="col">Groupes</th>
+<th class="py-2 px-3" scope="col">Statut</th>
+<th class="py-2 pl-3 pr-4 text-right" scope="col">Actions</th>
 </tr>
 </thead>
 <tbody class="text-body-sm font-body-sm text-on-surface">
 {% for profile in profiles %}
 <tr class="transition-colors hover:bg-surface-container-low">
-<td class="py-4 pl-6 pr-3">
-<div class="flex items-center gap-3">
-<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary-fixed text-body-sm font-bold text-on-secondary-fixed">{{ profile.user.first_name|slice:":1"|upper }}{{ profile.user.last_name|slice:":1"|upper }}</div>
+<td class="py-3 pl-4 pr-3">
+<div class="flex items-center gap-2.5">
+<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-fixed text-xs font-bold text-on-secondary-fixed">{{ profile.user.first_name|slice:":1"|upper }}{{ profile.user.last_name|slice:":1"|upper }}</div>
 <div class="flex min-w-0 flex-col">
-<span class="truncate font-title-md text-title-md font-semibold text-on-surface">{{ profile.user.get_full_name|default:profile.user.email }}</span>
+<span class="truncate text-sm font-semibold text-on-surface">{{ profile.user.get_full_name|default:profile.user.email }}</span>
 <div class="flex items-center gap-2">
 <span class="font-data-metric text-xs text-on-surface-variant">{% if profile.student_number %}{{ profile.student_number }}{% else %}Sans matricule{% endif %}</span>
 <span class="text-on-surface-variant/40">•</span>
@@ -126,25 +129,25 @@
 </div>
 </div>
 </td>
-<td class="py-4 px-3">
+<td class="py-3 px-3">
 <div class="flex flex-col">
-<span class="font-semibold text-on-surface">{{ profile.program|default:"Filière non renseignée" }}</span>
-<span class="font-body-sm text-xs text-on-surface-variant">{{ profile.promotion|default:"Promotion non renseignée" }}</span>
-{% if profile.level %}<span class="text-xs text-on-surface-variant">Niveau : {{ profile.level }}{% if profile.section %} · Section {{ profile.section }}{% endif %}</span>{% endif %}
+<span class="text-sm font-semibold text-on-surface">{{ profile.program|default:"Filière non renseignée" }}</span>
+<span class="text-[11px] text-on-surface-variant">{{ profile.promotion|default:"Promotion non renseignée" }}</span>
+{% if profile.level %}<span class="text-[11px] text-on-surface-variant">Niveau : {{ profile.level }}{% if profile.section %} · Section {{ profile.section }}{% endif %}</span>{% endif %}
 </div>
 </td>
-<td class="py-4 px-3">
-<div class="flex flex-wrap items-center gap-1.5">
-{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary">{{ group.school_class.name }}<span class="font-normal text-on-surface-variant">· {{ group.name }}</span></span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
+<td class="py-3 px-3">
+<div class="flex flex-wrap items-center gap-1">
+{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-semibold text-primary">{{ group.school_class.name }}<span class="font-normal text-on-surface-variant">· {{ group.name }}</span></span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
 </div>
 </td>
-<td class="py-4 px-3">
+<td class="py-3 px-3">
 {% if profile.membership.is_active %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary"><span class="material-symbols-outlined text-sm">check_circle</span>Actif</span>{% else %}<span class="inline-flex items-center gap-1 rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-on-tertiary-fixed"><span class="material-symbols-outlined text-sm">schedule</span>En attente</span>{% endif %}
 </td>
-<td class="py-4 pl-3 pr-6 text-right">
-<div class="inline-flex items-center justify-end gap-1">
-<a class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{% url 'portal:admin_student_update' profile.pk %}" title="Modifier"><span class="material-symbols-outlined text-[18px]">edit</span></a>
-<a class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Retirer de l'université" href="{% url 'portal:admin_student_delete' profile.pk %}"><span class="material-symbols-outlined text-[18px]">person_remove</span></a>
+<td class="py-3 pl-3 pr-4 text-right">
+<div class="inline-flex items-center justify-end gap-0.5">
+<a class="flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{% url 'portal:admin_student_update' profile.pk %}" title="Modifier"><span class="material-symbols-outlined text-[16px]">edit</span></a>
+<a class="flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Retirer de l'université" href="{% url 'portal:admin_student_delete' profile.pk %}"><span class="material-symbols-outlined text-[16px]">person_remove</span></a>
 </div>
 </td>
 </tr>

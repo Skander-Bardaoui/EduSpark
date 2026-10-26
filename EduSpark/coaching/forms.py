@@ -184,6 +184,19 @@ class AppointmentForm(forms.Form):
             "max_length": "1000 caractères maximum.",
         },
     )
+    PLACEHOLDER_TOPICS = {
+        "précisez le motif de votre demande.",
+        "décrivez brièvement votre demande...",
+        "précisez votre situation, vos difficultés ou vos questions...",
+    }
+
+    def clean_topic(self):
+        topic = self.cleaned_data["topic"].strip()
+        if topic.casefold() in self.PLACEHOLDER_TOPICS:
+            raise ValidationError(
+                "Précisez un motif concret pour votre rendez-vous."
+            )
+        return topic
 
     def clean(self):
         data = super().clean()

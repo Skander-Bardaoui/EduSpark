@@ -1,6 +1,7 @@
 """Données du module Suivi Référent (coaching), cloisonnées par université."""
 
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -314,6 +315,7 @@ class TutoringSession(_TenantModel):
         default=TutoringSlot.MODE_INDIVIDUAL,
     )
     location = models.CharField("Lieu", max_length=120, blank=True)
+    meeting_url = models.URLField("Lien visioconférence", blank=True)
     topic = models.CharField("Motif", max_length=200)
     student_comment = models.TextField("Commentaire de l'étudiant", blank=True)
     priority = models.CharField(
@@ -360,6 +362,13 @@ class TutoringSession(_TenantModel):
     @property
     def display_at(self):
         return self.scheduled_at or self.preferred_at
+
+    @property
+    def effective_meeting_url(self):
+        """Lien visio du rendez-vous, ou celui du créneau s'il n'y en a pas."""
+        if self.meeting_url:
+            return self.meeting_url
+        return self.slot.meeting_url if self.slot_id else ""
 
     def clean(self):
         errors = []
@@ -1077,6 +1086,14 @@ class AttendanceSession(_TenantModel):
         (STATUS_CANCELLED, "Annulée"),
     )
 
+    slot = models.ForeignKey(
+        "courses.ScheduleSlot", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="attendance_sessions", verbose_name="Séance de l'emploi du temps",
+    )
+    session_date = models.DateField(
+        "Date de la séance", null=True, blank=True,
+        help_text="Date réelle de l'occurrence pour une séance issue de l'emploi du temps.",
+    )
     professor = models.ForeignKey(
         ProfessorProfile, on_delete=models.CASCADE,
         related_name="attendance_sessions", verbose_name="Enseignant",
@@ -1114,6 +1131,10 @@ class AttendanceSession(_TenantModel):
                 fields=("professor", "school_class", "starts_at", "title"),
                 name="unique_attendance_session_per_slot",
             ),
+            models.UniqueConstraint(
+                fields=("slot", "session_date"),
+                name="unique_attendance_session_per_timetable_date",
+            ),
             models.CheckConstraint(
                 condition=models.Q(duration_minutes__gt=0),
                 name="attendance_session_duration_positive",
@@ -1131,6 +1152,24 @@ class AttendanceSession(_TenantModel):
 
     def clean(self):
         errors = []
+        if self.slot_id:
+            slot = self.slot
+            if self.professor_id and slot.assignment.professor_id != self.professor_id:
+                errors.append(ValidationError(
+                    "La séance de l'emploi du temps n'est pas enseignée par ce professeur."
+                ))
+            if self.school_class_id and slot.assignment.school_class_id != self.school_class_id:
+                errors.append(ValidationError(
+                    "La séance de l'emploi du temps n'appartient pas à cette classe."
+                ))
+            if slot.group_id != self.student_group_id:
+                errors.append(ValidationError(
+                    "Le groupe de la séance ne correspond pas à celui de l'emploi du temps."
+                ))
+            if self.session_date and self.session_date.weekday() != slot.weekday:
+                errors.append(ValidationError(
+                    "La date choisie ne correspond pas au jour de la séance dans l'emploi du temps."
+                ))
         if self.school_class_id and self.professor_id:
             if self.school_class.university_id != self.professor.university_id:
                 errors.append(ValidationError(
@@ -1145,6 +1184,21 @@ class AttendanceSession(_TenantModel):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        if self.slot_id:
+            slot = self.slot
+            self.professor_id = slot.assignment.professor_id
+            self.school_class_id = slot.assignment.school_class_id
+            self.student_group_id = slot.group_id
+            self.title = slot.assignment.subject.name
+            self.kind = slot.session_type
+            self.duration_minutes = slot.duration_minutes
+            self.university_id = slot.university_id
+            if not self.session_date and self.starts_at:
+                self.session_date = timezone.localtime(self.starts_at).date()
+            if self.session_date:
+                self.starts_at = timezone.make_aware(
+                    datetime.combine(self.session_date, slot.start_time)
+                )
         if self.school_class_id:
             self.university_id = self.school_class.university_id
         super().save(*args, **kwargs)
