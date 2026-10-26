@@ -1,0 +1,9 @@
+{# Sélecteur de classe pour un étudiant qui en a plusieurs. Contexte : student_classes, school_class. #}
+{% if student_classes|length > 1 %}
+<nav aria-label="Choix de la classe" class="flex flex-wrap items-center gap-2">
+<span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Classe</span>
+{% for item in student_classes %}
+<a class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors {% if item.pk == school_class.pk %}is-active{% else %}text-on-surface-variant hover:border-primary/40 hover:text-primary{% endif %}" href="?classe={{ item.pk }}">{{ item.name }}{% if item.academic_year %} · {{ item.academic_year }}{% endif %}</a>
+{% endfor %}
+</nav>
+{% endif %}

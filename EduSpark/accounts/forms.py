@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django import forms
+from django.apps import apps
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -423,7 +424,7 @@ class StudentProfileForm(_MemberProfileForm):
 class SchoolClassForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = SchoolClass
-        fields = ("name", "level", "program", "academic_year", "description", "professors")
+        fields = ("name", "level", "study_program", "program", "academic_year", "description", "professors")
         widgets = {"professors": forms.CheckboxSelectMultiple}
 
     def __init__(self, *args, university=None, **kwargs):
@@ -432,6 +433,22 @@ class SchoolClassForm(StyledFormMixin, forms.ModelForm):
         self.fields["professors"].queryset = ProfessorProfile.objects.filter(
             university=university,
         ).select_related("membership__user")
+        programs = apps.get_model("courses", "Program").objects.filter(
+            university=university,
+        ).select_related("department")
+        if programs.exists():
+            # Des filières existent dans le catalogue : on en choisit une dans la
+            # liste, et le libellé texte de la classe la suit automatiquement.
+            study_program = self.fields["study_program"]
+            study_program.queryset = programs
+            study_program.label = "Filière"
+            study_program.help_text = "Filières créées dans « Départements & Filières »."
+            study_program.label_from_instance = lambda program: "%s — %s" % (
+                program.name, program.department.name,
+            )
+            self.fields.pop("program")
+        else:
+            self.fields.pop("study_program")
 
     def clean(self):
         cleaned = super().clean()
@@ -439,7 +456,36 @@ class SchoolClassForm(StyledFormMixin, forms.ModelForm):
         clash = SchoolClass.objects.filter(university=self.university, name=name, academic_year=year)
         if name and clash.exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError("Une classe porte déjà ce nom pour cette année universitaire.")
+        if self.instance.pk:
+            self._check_teaching_assignments(cleaned)
         return cleaned
+
+    def _check_teaching_assignments(self, cleaned):
+        """Les affectations du module cours doivent rester cohérentes avec la classe :
+        mêmes filière et mêmes enseignants que ceux qu'on s'apprête à enregistrer."""
+        assignments = list(
+            self.instance.teaching_assignments.select_related("subject", "professor__membership__user")
+        )
+        study_program = cleaned.get("study_program")
+        if study_program is not None:
+            foreign = sorted({a.subject.code for a in assignments if a.subject.program_id != study_program.pk})
+            if foreign:
+                self.add_error("study_program", (
+                    "Des matières affectées à cette classe n'appartiennent pas à la filière « %s » (%s) : "
+                    "retirez d'abord ces affectations."
+                ) % (study_program.name, ", ".join(foreign)))
+        professors = cleaned.get("professors")
+        if professors is not None:
+            kept = {professor.pk for professor in professors}
+            teaching = sorted({
+                a.professor.user.get_full_name() or a.professor.user.email
+                for a in assignments if a.professor_id not in kept
+            })
+            if teaching:
+                self.add_error("professors", (
+                    "Enseigne encore dans cette classe : %s. Retirez d'abord son affectation "
+                    "(Cours & Catalogue, Affectations enseignants)."
+                ) % ", ".join(teaching))
 
 
 class StudentGroupForm(StyledFormMixin, forms.ModelForm):

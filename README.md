@@ -146,6 +146,51 @@ for profil in Profil.objects.all():
 '@ | ..\.venv\Scripts\python.exe -
 ```
 
+## Cours, matières et emplois du temps
+
+Le module `courses` relie les trois rôles d'une université :
+
+| Rôle | Ce qu'il fait |
+| --- | --- |
+| **Admin université** | Crée les départements, filières et matières, **affecte** un professeur à chaque matière d'une classe, puis planifie l'**emploi du temps** de chaque classe (séances CM / TD / TP, avec détection des conflits de classe, de groupe, de professeur et de salle). Supervise les cours en lecture seule. |
+| **Professeur** | Voit ses matières et son emploi du temps (déduits de ses affectations), crée ses **cours**, leurs **chapitres** et leurs **supports** (PDF, présentations, vidéos, audios), puis **publie chaque cours classe par classe**. |
+| **Étudiant** | Voit l'emploi du temps de sa classe (et de ses groupes de TD / TP), ses matières avec leurs enseignants, et les cours **publiés pour sa classe** avec leurs supports. |
+
+Règles à connaître :
+
+- Un étudiant appartient à une classe par ses **groupes** (`StudentGroup`) : sans groupe, il n'a ni emploi du temps ni cours.
+- Un professeur ne peut créer un cours, et le publier pour une classe, que si l'admin lui a affecté la matière dans cette classe. Supprimer ou remplacer l'affectation retire ses cours de la classe.
+- Supprimer un département, une filière ou une matière encore utilisés est refusé avec un message (la suppression d'une université entière, elle, emporte son catalogue).
+- Les supports sont stockés dans **`EduSpark/protected_media/`** (hors `MEDIA_ROOT`, ignoré par git) et n'ont **aucune URL publique** : ils ne sont servis que par `/cours/supports/<id>/fichier/`, qui vérifie les droits (auteur, admin de l'université, étudiants des classes où le cours est publié) et gère la lecture partielle des vidéos et audios. Formats et tailles maximales : PDF (50 Mo), présentations `.ppt/.pptx/.pps/.ppsx/.odp` (100 Mo), vidéos `.mp4/.webm/.ogv/.mov/.m4v` (500 Mo), audios `.mp3/.wav/.ogg/.m4a/.aac/.flac` (100 Mo).
+- Une classe peut être rattachée à une filière du catalogue (formulaire de la classe) ; son libellé « Filière » suit alors le nom de la filière.
+
+Jeu de données de démonstration (développement uniquement, idempotent ; il lance d'abord `seed_demo`) :
+
+```powershell
+cd EduSpark
+..\.venv\Scripts\python.exe manage.py seed_courses
+# admin.paris@u-paris.fr / Admin12345!   -> catalogue, affectations, emploi du temps
+# prof.test@eduspark.local / Prof12345!  -> cours, chapitres, supports, publication
+#   (professeur de deux universités : choisir « Université Paris Cité » dans le sélecteur)
+# test.ui@example.com / Etudiant12345!   -> L3 Informatique, groupe TD A
+```
+
+Pages principales :
+
+| URL | Rôle | Description |
+| --- | --- | --- |
+| `/administration/offre-de-formation/` | Admin | Départements et filières |
+| `/administration/matieres/` | Admin | Matières (semestre, coefficient, ECTS, volumes) |
+| `/administration/affectations/` | Admin | Affectation des professeurs aux matières de chaque classe |
+| `/administration/emploi-du-temps/` | Admin | Emploi du temps de chaque classe |
+| `/administration/cours/` | Admin | Supervision des cours |
+| `/prof/cours/` | Professeur | Mes cours (chapitres, supports, publication par classe) |
+| `/prof/matieres/`, `/prof/emploi-du-temps/` | Professeur | Mes matières, mon emploi du temps |
+| `/prof/supports-de-cours/` | Professeur | Bibliothèque de mes supports |
+| `/etudiant/cours/` | Étudiant | Matières, enseignants et cours publiés de ma classe |
+| `/etudiant/emploi-du-temps/` | Étudiant | Emploi du temps de ma classe et de mes groupes |
+| `/etudiant/supports-de-cours/` | Étudiant | Supports des cours publiés |
+
 ## URL principales
 
 | URL | Description |

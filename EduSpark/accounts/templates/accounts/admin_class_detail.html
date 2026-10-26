@@ -59,6 +59,25 @@
 {% endfor %}
 </div>
 </section>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Matières et enseignants</h2>
+<div class="flex flex-wrap items-center gap-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:admin_timetable' %}?classe={{ school_class.pk }}"><span class="material-symbols-outlined text-[16px]">calendar_month</span>Emploi du temps</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:admin_assignment_create' %}?classe={{ school_class.pk }}"><span class="material-symbols-outlined text-[16px]">add</span>Affecter une matière</a>
+</div>
+</div>
+<ul class="mt-4 divide-y divide-outline-variant/30">
+{% for assignment in school_class.teaching_assignments.all %}
+<li class="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
+<span class="min-w-0 font-semibold text-on-surface"><span class="font-data-metric text-[11px] text-primary">{{ assignment.subject.code }}</span> · {{ assignment.subject.name }}</span>
+<span class="text-xs text-on-surface-variant">{{ assignment.professor_name }}</span>
+</li>
+{% empty %}
+<li class="py-3 text-sm text-on-surface-variant">Aucune matière affectée. Affectez des matières et leurs professeurs pour pouvoir planifier l'emploi du temps de la classe.</li>
+{% endfor %}
+</ul>
+</section>
 {% if ungrouped %}
 <section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Étudiants sans groupe</h2>
@@ -88,6 +107,7 @@
 <dl class="mt-3 space-y-3 text-sm">
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt><dd class="font-semibold text-on-surface">{{ school_class.level|default:"—" }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ school_class.program|default:"—" }}</dd></div>
+{% if school_class.study_program %}<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Département</dt><dd class="font-semibold text-on-surface">{{ school_class.study_program.department.name }}</dd></div>{% endif %}
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Année universitaire</dt><dd class="font-semibold text-on-surface">{{ school_class.academic_year|default:"—" }}</dd></div>
 </dl>
 {% if school_class.description %}<p class="mt-3 border-t border-outline-variant/40 pt-3 text-sm leading-relaxed text-on-surface-variant">{{ school_class.description|linebreaksbr }}</p>{% endif %}

@@ -79,8 +79,9 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
     allowed_roles = ADMIN
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(
+        return super().get_queryset().select_related("study_program__department").prefetch_related(
             "professors__membership__user", "groups__students__membership__user",
+            "teaching_assignments__subject", "teaching_assignments__professor__membership__user",
         )
 
     def get_context_data(self, **kwargs):
