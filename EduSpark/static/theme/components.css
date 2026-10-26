@@ -1,0 +1,68 @@
+/*
+ * Adaptations des composants communs du portail au thème (static/theme/theme.css).
+ * Le thème clair n'est pas modifié : les règles propres au sombre sont limitées
+ * à :root[data-theme="dark"] et à l'écran (l'impression reste claire).
+ */
+
+/* Barre de navigation latérale */
+.portal-nav-surface {
+  background-image: linear-gradient(to bottom, rgb(var(--nav-from)), rgb(var(--nav-via)), rgb(var(--nav-to)));
+  box-shadow: var(--nav-shadow);
+}
+
+/* Fond des modales et du tiroir mobile */
+.portal-overlay { background-color: var(--overlay); }
+
+/* Transition douce du changement de thème (couleurs seulement) */
+@media (prefers-reduced-motion: no-preference) {
+  :root.theme-animating,
+  :root.theme-animating *,
+  :root.theme-animating *::before,
+  :root.theme-animating *::after { transition: var(--theme-transition) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media screen {
+  /* Profondeur : en sombre, les ombres doivent être bien plus marquées. */
+  :root[data-theme="dark"] .shadow-sm { --tw-shadow: var(--shadow-sm); }
+  :root[data-theme="dark"] .shadow,
+  :root[data-theme="dark"] .shadow-md { --tw-shadow: var(--shadow-md); }
+  :root[data-theme="dark"] .shadow-lg,
+  :root[data-theme="dark"] .shadow-xl,
+  :root[data-theme="dark"] .shadow-2xl { --tw-shadow: var(--shadow-lg); }
+
+  /* Edge lighting : liseré clair et très transparent autour des cartes. */
+  :root[data-theme="dark"] .bg-surface-container-lowest[class*="border-outline-variant"]:not(input):not(select):not(textarea) {
+    border-color: var(--edge-light);
+  }
+
+  /* Couches au premier plan (menus, recherche, modales) : surface la plus claire. */
+  :root[data-theme="dark"] #portal-notif-menu,
+  :root[data-theme="dark"] #portal-user-menu,
+  :root[data-theme="dark"] [data-search-results],
+  :root[data-theme="dark"] [data-modal] > div:not(.absolute) {
+    background-color: rgb(var(--surface-6));
+    border-color: var(--edge-light);
+    --tw-shadow: var(--shadow-lg);
+  }
+
+  /* État sélectionné : distinct du conteneur, sans liseré (ce n'est pas une couche). */
+  :root[data-theme="dark"] .tab-btn.is-active { background-color: rgb(var(--surface-4)) !important; }
+  :root[data-theme="dark"] .tab-btn.is-active,
+  :root[data-theme="dark"] #portal-sidebar [aria-current="page"] { --tw-ring-color: transparent; }
+
+  /* Lecteurs et aperçus : pas de grand rectangle clair autour des médias. */
+  :root[data-theme="dark"] video,
+  :root[data-theme="dark"] iframe { color-scheme: dark; background-color: rgb(var(--md-surface-dim)); }
+
+  /* Images de contenu : légèrement atténuées, jamais inversées. */
+  :root[data-theme="dark"] main img:not([data-theme-keep]) { filter: brightness(0.92); }
+}
