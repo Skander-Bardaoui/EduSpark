@@ -222,8 +222,8 @@ SIMPLE_JWT = {
 
 # --- Intelligence artificielle (module coaching) ---------------------------
 # Aucune clé n'est écrite ici : tout vient de .env (voir .env.example).
-# GROQ sert au plan d'étude IA, à l'examinateur du test de langue et à
-# l'évaluation du bilan. ELEVENLABS fournit la transcription temps réel et
+# GROQ sert au plan d'étude IA, à l'examinateur du test de langue, à
+# l'évaluation du bilan et à la génération des QCM d'examen. ELEVENLABS fournit la transcription temps réel et
 # OPENAI la voix de l'examinateur; si elles manquent, le navigateur prend le
 # relais (Web Speech API).
 GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '').strip()

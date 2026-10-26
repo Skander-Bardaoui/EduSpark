@@ -1,6 +1,7 @@
 import re
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -600,3 +601,339 @@ class JuryMember(models.Model):
         if self.grade_record_id:
             self.university_id = self.grade_record.university_id
         super().save(*args, **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# QCM générés par IA
+# ---------------------------------------------------------------------------
+
+class Quiz(models.Model):
+    """Questionnaire à choix multiple rattaché à une épreuve.
+
+    Le QCM est généré depuis le contenu du cours puis relu par l'enseignant.
+    Il n'est accessible aux étudiants que lorsqu'il est publié et que la
+    fenêtre d'ouverture est active.
+    """
+
+    STATUS_DRAFT = "brouillon"
+    STATUS_PUBLISHED = "publie"
+    STATUS_CLOSED = "ferme"
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, "Brouillon"),
+        (STATUS_PUBLISHED, "Publié"),
+        (STATUS_CLOSED, "Fermé"),
+    )
+
+    university = models.ForeignKey(
+        University, on_delete=models.CASCADE,
+        related_name="quizzes", verbose_name="Université",
+    )
+    session = models.OneToOneField(
+        ExamSession, on_delete=models.CASCADE,
+        related_name="quiz", verbose_name="Épreuve",
+    )
+    course = models.ForeignKey(
+        "courses.Course", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="quizzes", verbose_name="Cours source",
+    )
+    instructions = models.TextField(
+        "Consignes", blank=True,
+        help_text="Affichées à l'étudiant avant le démarrage du QCM.",
+    )
+    duration_minutes = models.PositiveSmallIntegerField(
+        "Durée (minutes)", default=60,
+    )
+    question_count = models.PositiveSmallIntegerField(
+        "Nombre de questions", default=30,
+    )
+    pass_score = models.DecimalField(
+        "Note de validation", max_digits=4, decimal_places=2, default=10,
+        help_text="Seuil de réussite sur 20.",
+    )
+    shuffle_questions = models.BooleanField(
+        "Mélanger les questions", default=True,
+    )
+    status = models.CharField(
+        "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT,
+    )
+    opens_at = models.DateTimeField(
+        "Ouverture", null=True, blank=True,
+        help_text="Laisser vide pour utiliser l'horaire de l'épreuve.",
+    )
+    closes_at = models.DateTimeField(
+        "Fermeture", null=True, blank=True,
+        help_text="Laisser vide pour utiliser l'horaire de l'épreuve.",
+    )
+    generated_by_ai = models.BooleanField("Généré par IA", default=False)
+    ai_model = models.CharField("Modèle IA", max_length=80, blank=True)
+    source_chars = models.PositiveIntegerField(
+        "Caractères analysés", default=0,
+    )
+    published_at = models.DateTimeField("Publié le", null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="created_quizzes", verbose_name="Créé par",
+    )
+    created_at = models.DateTimeField("Créé le", auto_now_add=True)
+    updated_at = models.DateTimeField("Modifié le", auto_now=True)
+
+    class Meta:
+        ordering = ("session__date", "session__start_time")
+        verbose_name = "QCM"
+        verbose_name_plural = "QCM"
+
+    def __str__(self):
+        return "QCM — %s" % self.session.title
+
+    def clean(self):
+        if (
+            self.course_id and self.university_id
+            and self.course.university_id != self.university_id
+        ):
+            raise ValidationError("Le cours et le QCM doivent appartenir à la même université.")
+        if self.opens_at and self.closes_at and self.closes_at <= self.opens_at:
+            raise ValidationError({
+                "closes_at": "La fermeture doit être postérieure à l'ouverture.",
+            })
+
+    def save(self, *args, **kwargs):
+        if self.session_id:
+            self.university_id = self.session.university_id
+        super().save(*args, **kwargs)
+
+    def window(self):
+        """Bornes d'ouverture du QCM, avec repli sur l'horaire de l'épreuve."""
+        start, end = self.session.deposit_window()
+        return (self.opens_at or start, self.closes_at or end)
+
+    @property
+    def starts_at(self):
+        return self.window()[0]
+
+    @property
+    def ends_at(self):
+        return self.window()[1]
+
+    @property
+    def access_status(self):
+        """'draft' | 'closed' | 'before' | 'open' | 'after'."""
+        if self.status == self.STATUS_DRAFT:
+            return "draft"
+        if self.status == self.STATUS_CLOSED:
+            return "closed"
+        opens_at, closes_at = self.window()
+        now = timezone.now()
+        if now < opens_at:
+            return "before"
+        if now > closes_at:
+            return "after"
+        return "open"
+
+    @property
+    def is_published(self):
+        return self.status == self.STATUS_PUBLISHED
+
+    @property
+    def is_open(self):
+        return self.access_status == "open"
+
+    @property
+    def question_total(self):
+        return self.questions.count()
+
+    @property
+    def total_points(self):
+        return self.questions.aggregate(
+            total=models.Sum("points"),
+        )["total"] or Decimal("0")
+
+    @property
+    def status_label(self):
+        return {
+            "draft": "Brouillon",
+            "closed": "Fermé",
+            "before": "Ouverture programmée",
+            "open": "Ouvert",
+            "after": "Terminé",
+        }.get(self.access_status, "Brouillon")
+
+
+class QuizQuestion(models.Model):
+    """Question d'un QCM ; une seule bonne réponse parmi les choix."""
+
+    quiz = models.ForeignKey(
+        Quiz, on_delete=models.CASCADE,
+        related_name="questions", verbose_name="QCM",
+    )
+    order = models.PositiveIntegerField("Ordre", default=0)
+    prompt = models.TextField("Énoncé")
+    explanation = models.TextField(
+        "Explication", blank=True,
+        help_text="Affichée à l'étudiant après la soumission.",
+    )
+    points = models.DecimalField(
+        "Points", max_digits=4, decimal_places=2, default=1,
+    )
+    created_at = models.DateTimeField("Créée le", auto_now_add=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+        verbose_name = "Question de QCM"
+        verbose_name_plural = "Questions de QCM"
+
+    def __str__(self):
+        return "Q%d — %s" % (self.order, self.prompt[:60])
+
+    @property
+    def correct_choices(self):
+        return self.choices.filter(is_correct=True)
+
+    def is_correct_choice(self, choice_id):
+        return self.choices.filter(pk=choice_id, is_correct=True).exists()
+
+
+class QuizChoice(models.Model):
+    """Proposition de réponse d'une question."""
+
+    question = models.ForeignKey(
+        QuizQuestion, on_delete=models.CASCADE,
+        related_name="choices", verbose_name="Question",
+    )
+    order = models.PositiveIntegerField("Ordre", default=0)
+    label = models.TextField("Libellé")
+    is_correct = models.BooleanField("Bonne réponse", default=False)
+
+    class Meta:
+        ordering = ("order", "pk")
+        verbose_name = "Choix de QCM"
+        verbose_name_plural = "Choix de QCM"
+
+    def __str__(self):
+        return self.label[:80]
+
+
+class QuizAttempt(models.Model):
+    """Tentative unique d'un étudiant pour un QCM."""
+
+    STATUS_IN_PROGRESS = "en_cours"
+    STATUS_SUBMITTED = "soumise"
+    STATUS_EXPIRED = "expiree"
+    STATUS_CHOICES = (
+        (STATUS_IN_PROGRESS, "En cours"),
+        (STATUS_SUBMITTED, "Soumise"),
+        (STATUS_EXPIRED, "Expirée"),
+    )
+
+    university = models.ForeignKey(
+        University, on_delete=models.CASCADE,
+        related_name="quiz_attempts", verbose_name="Université",
+    )
+    quiz = models.ForeignKey(
+        Quiz, on_delete=models.CASCADE,
+        related_name="attempts", verbose_name="QCM",
+    )
+    student = models.ForeignKey(
+        StudentProfile, on_delete=models.CASCADE,
+        related_name="quiz_attempts", verbose_name="Étudiant",
+    )
+    started_at = models.DateTimeField("Démarrée le", default=timezone.now)
+    deadline_at = models.DateTimeField("Échéance")
+    question_order = models.JSONField(
+        "Ordre des questions", default=list, blank=True,
+        help_text="Ordre figé au démarrage pour cette tentative.",
+    )
+    submitted_at = models.DateTimeField("Soumise le", null=True, blank=True)
+    score = models.DecimalField(
+        "Note", max_digits=4, decimal_places=2, null=True, blank=True,
+    )
+    max_score = models.DecimalField(
+        "Barème", max_digits=6, decimal_places=2, default=0,
+    )
+    status = models.CharField(
+        "Statut", max_length=20, choices=STATUS_CHOICES,
+        default=STATUS_IN_PROGRESS,
+    )
+    created_at = models.DateTimeField("Créée le", auto_now_add=True)
+    updated_at = models.DateTimeField("Modifiée le", auto_now=True)
+
+    class Meta:
+        ordering = ("-started_at",)
+        verbose_name = "Tentative de QCM"
+        verbose_name_plural = "Tentatives de QCM"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("quiz", "student"),
+                name="unique_quiz_attempt_per_student",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s — %s" % (self.student, self.quiz)
+
+    def save(self, *args, **kwargs):
+        if self.quiz_id:
+            self.university_id = self.quiz.university_id
+        super().save(*args, **kwargs)
+
+    @property
+    def is_submitted(self):
+        return self.submitted_at is not None
+
+    @property
+    def is_expired(self):
+        return not self.is_submitted and timezone.now() >= self.deadline_at
+
+    def remaining_seconds(self, now=None):
+        now = now or timezone.now()
+        return max(0, int((self.deadline_at - now).total_seconds()))
+
+    @property
+    def score_20(self):
+        if self.score is None or not self.max_score:
+            return None
+        return (self.score * Decimal("20") / self.max_score).quantize(Decimal("0.01"))
+
+    @property
+    def passed(self):
+        value = self.score_20
+        return value is not None and value >= self.quiz.pass_score
+
+
+class QuizAnswer(models.Model):
+    """Réponse d'un étudiant à une question, dans le cadre d'une tentative."""
+
+    attempt = models.ForeignKey(
+        QuizAttempt, on_delete=models.CASCADE,
+        related_name="answers", verbose_name="Tentative",
+    )
+    question = models.ForeignKey(
+        QuizQuestion, on_delete=models.CASCADE,
+        related_name="answers", verbose_name="Question",
+    )
+    selected_choice = models.ForeignKey(
+        QuizChoice, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="answers", verbose_name="Réponse choisie",
+    )
+    answered_at = models.DateTimeField("Répondue le", auto_now=True)
+
+    class Meta:
+        ordering = ("question__order",)
+        verbose_name = "Réponse de QCM"
+        verbose_name_plural = "Réponses de QCM"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("attempt", "question"),
+                name="unique_answer_per_attempt_question",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s — Q%s" % (self.attempt.student, self.question.order)
+
+    @property
+    def is_correct(self):
+        return bool(
+            self.selected_choice_id
+            and self.selected_choice
+            and self.selected_choice.is_correct
+        )

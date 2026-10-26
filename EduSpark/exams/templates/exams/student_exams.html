@@ -10,10 +10,10 @@
 <span>{{ semester_label }}</span>
 </div>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
-        Mes Examens, Copies &amp; Relevés de Notes
+        Mes Examens, QCM &amp; Relevés de Notes
       </h1>
 <p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
-        Consultez vos épreuves à venir, déposez vos copies scannées et retrouvez le détail de vos corrections.
+        Consultez vos épreuves à venir, passez vos QCM en ligne et retrouvez le détail de vos corrections.
       </p>
 </div>
 <!-- AI Toggle Button -->
@@ -48,7 +48,7 @@
 <div class="flex flex-col gap-space-xl lg:col-span-8 transition-all duration-300" id="main-content-column">
 <!-- Tab panel : sessions & dépôt de copies -->
 <div data-tab-panel="sessions">
-<!-- Section 1: Sessions d'examen actives & à venir (dépôt de copie intégré à chaque carte) -->
+<!-- Section 1: Sessions d'examen actives & à venir (QCM en ligne intégré à chaque carte) -->
 <section aria-labelledby="heading-active-sessions" class="flex flex-col gap-space-md">
 <div class="flex items-center justify-between">
 <div class="flex items-center gap-space-sm">
@@ -119,6 +119,46 @@
               </p>
 </div>
 <!-- Card Actions -->
+{% if row.quiz %}
+<div class="border-t border-surface-container-high pt-space-md mt-space-xs flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary">quiz</span>
+<span class="font-label-md text-label-md text-on-surface">QCM en ligne</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
+<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">timer</span>
+<span>{{ row.quiz.question_total }} question(s) · {{ row.quiz.duration_minutes }} min · validation {{ row.quiz.pass_score }}/20</span>
+</div>
+</div>
+{% if row.quiz_submitted %}
+<a class="inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant transition-all font-label-md text-label-md" href="{% url 'exams:student_quiz_result' row.quiz_attempt.pk %}">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>QCM soumis le {{ row.quiz_attempt.submitted_at|date:"d/m/Y à H\hi" }} — voir mon corrigé</span>
+</a>
+{% elif row.quiz.is_open %}
+<a class="inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs" href="{% url 'exams:student_quiz_start' session.pk %}">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">{% if row.quiz_attempt %}play_circle{% else %}play_arrow{% endif %}</span>
+<span>{% if row.quiz_attempt %}Reprendre le QCM{% else %}Commencer le QCM{% endif %}</span>
+</a>
+{% elif row.quiz.access_status == "before" %}
+<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock_clock</span>
+<span>QCM accessible à partir du {{ row.quiz.starts_at|date:"d/m/Y à H:i" }}</span>
+</span>
+{% elif row.quiz.access_status == "after" %}
+<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock</span>
+<span>QCM terminé — épreuve clôturée</span>
+</span>
+{% else %}
+<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">pending_actions</span>
+<span>QCM en préparation par l'enseignant</span>
+</span>
+{% endif %}
+</div>
+{% endif %}
 <div class="flex flex-wrap items-center justify-between gap-space-md pt-space-xs">
 <div class="flex flex-wrap items-center gap-space-sm">
 {% if session.is_convoked %}
@@ -166,6 +206,7 @@
 {% endif %}
 </div>
 </div>
+{% if not row.quiz %}
 <!-- Dépôt de copie (PDF ou ZIP) -->
 <div class="border-t border-surface-container-high pt-space-md mt-space-xs flex flex-col gap-space-md">
 <div class="flex flex-wrap items-center justify-between gap-space-sm">
@@ -259,13 +300,14 @@
 </div>
 {% endif %}
 </div>
+{% endif %}
 </article>
 {% endwith %}
 {% empty %}
 <div class="flex flex-col items-center justify-center gap-space-sm p-space-xl rounded bg-surface-container-lowest shadow-sm text-center">
 <span aria-hidden="true" class="material-symbols-outlined text-[40px] text-on-surface-variant">event_busy</span>
 <p class="font-title-md text-title-md text-on-surface">Aucune session à venir</p>
-<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Aucune épreuve n'est planifiée pour vos classes. Le dépôt de copie s'ouvrira dans chaque carte pendant la durée de l'épreuve. Consultez vos relevés de notes pour retrouver vos résultats publiés.</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Aucune épreuve n'est planifiée pour vos classes. Le QCM de chaque épreuve s'ouvrira dans sa carte pendant la durée prévue. Consultez vos relevés de notes pour retrouver vos résultats publiés.</p>
 <a class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs mt-space-xs" href="{% url 'exams:student_transcript' %}">
 <span aria-hidden="true" class="material-symbols-outlined text-[18px]">grade</span>
 <span class="font-label-md text-label-md">Voir mes relevés de notes</span>

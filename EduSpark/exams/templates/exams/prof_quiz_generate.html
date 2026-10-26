@@ -1,0 +1,109 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Générer le QCM — {{ session.title }}{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+  <header class="flex flex-col gap-3">
+    <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+      <a class="hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Sessions d'examen</a>
+      <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      <span class="text-primary">QCM par IA</span>
+    </nav>
+    <div>
+      <p class="font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Évaluation en ligne</p>
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Générer le QCM de l'épreuve</h1>
+      <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
+        {{ session.title }} · {{ session.school_class.name }} · {{ session.date_label }} ({{ session.time_label }})
+      </p>
+    </div>
+  </header>
+
+  {% if not ai_available %}
+  <div class="flex items-start gap-3 rounded border border-error/30 bg-error-container px-4 py-3 text-on-error-container">
+    <span class="material-symbols-outlined text-[20px]">key_off</span>
+    <p class="text-sm">La clé <strong>GROQ_API_KEY</strong> n'est pas configurée. Ajoutez-la dans <code>.env</code> puis redémarrez le serveur.</p>
+  </div>
+  {% endif %}
+
+  {% if course_count == 0 %}
+  <div class="flex items-start gap-3 rounded border border-outline-variant/50 bg-surface-container-low px-4 py-3">
+    <span class="material-symbols-outlined text-[20px] text-primary">info</span>
+    <p class="text-sm text-on-surface-variant">Aucun cours ne correspond à cette matière. Créez d'abord un cours (avec chapitres ou PDF) depuis votre espace cours.</p>
+  </div>
+  {% endif %}
+
+  {% if quiz %}
+  <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-secondary/30 bg-secondary-fixed/40 px-4 py-3">
+    <p class="text-sm text-on-surface">
+      Un QCM existe déjà ({{ quiz.question_total }} question(s), statut : {{ quiz.status_label }}).
+      Générer à nouveau <strong>remplacera</strong> toutes les questions.
+    </p>
+    <a class="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3.5 py-2 text-sm font-semibold text-on-secondary-container hover:bg-secondary-fixed" href="{% url 'exams:prof_quiz_edit' quiz.pk %}">
+      <span class="material-symbols-outlined text-[18px]">edit_note</span>Relire le QCM
+    </a>
+  </div>
+  {% endif %}
+
+  <form class="flex flex-col gap-5 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="rounded border border-error/30 bg-error-container px-4 py-3 text-sm text-on-error-container">
+      {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.course.id_for_label }}">{{ form.course.label }}</label>
+        {{ form.course }}
+        {% for error in form.course.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+        <p class="mt-1 text-xs text-on-surface-variant">Le texte du cours, des chapitres et des PDF sert de source à l'IA.</p>
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.question_count.id_for_label }}">Nombre de questions</label>
+        {{ form.question_count }}
+        {% for error in form.question_count.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}</label>
+        {{ form.difficulty }}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.duration_minutes.id_for_label }}">Durée (minutes)</label>
+        {{ form.duration_minutes }}
+        {% for error in form.duration_minutes.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.pass_score.id_for_label }}">Note de validation /20</label>
+        {{ form.pass_score }}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.opens_at.id_for_label }}">Ouverture (optionnel)</label>
+        {{ form.opens_at }}
+        {% for error in form.opens_at.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+      </div>
+      <div>
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.closes_at.id_for_label }}">Fermeture (optionnel)</label>
+        {{ form.closes_at }}
+        {% for error in form.closes_at.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="sm:col-span-2">
+        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.instructions.id_for_label }}">Consignes aux étudiants</label>
+        {{ form.instructions }}
+      </div>
+      <label class="flex items-center gap-2 text-sm text-on-surface sm:col-span-2" for="{{ form.shuffle_questions.id_for_label }}">
+        {{ form.shuffle_questions }} Mélanger l'ordre des questions pour chaque étudiant
+      </label>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+      <a class="text-sm font-semibold text-on-surface-variant hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Annuler</a>
+      <button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:opacity-60" type="submit"{% if not ai_available or course_count == 0 %} disabled{% endif %}>
+        <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+        Générer le QCM
+      </button>
+    </div>
+  </form>
+</div>
+</main>
+{% endblock %}

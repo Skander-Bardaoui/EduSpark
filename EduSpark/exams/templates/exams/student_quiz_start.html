@@ -1,0 +1,57 @@
+{% extends "portal/base_student.html" %}
+{% block title %}QCM — {{ session.title }}{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-6 px-4 py-8 sm:px-6">
+  <header class="flex flex-col gap-2">
+    <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+      <a class="hover:text-primary" href="{% url 'exams:student_exams' %}">Mes examens</a>
+      <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      <span class="text-primary">QCM</span>
+    </nav>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ session.title }}</h1>
+    <p class="text-sm text-on-surface-variant">{{ session.school_class.name }} · {{ session.get_exam_type_display }} · coefficient {{ session.coefficient }}</p>
+  </header>
+
+  <section class="grid gap-3 sm:grid-cols-3">
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Questions</p>
+      <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ question_total }}</p>
+    </div>
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Durée</p>
+      <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ quiz.duration_minutes }} min</p>
+    </div>
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Validation</p>
+      <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ quiz.pass_score }}/20</p>
+    </div>
+  </section>
+
+  <section class="rounded border border-tertiary/30 bg-tertiary-fixed p-5 text-on-tertiary-fixed">
+    <div class="flex items-start gap-3">
+      <span class="material-symbols-outlined text-[22px]">info</span>
+      <div class="flex flex-col gap-2 text-sm">
+        <p class="font-bold">Avant de commencer</p>
+        {% if quiz.instructions %}<p>{{ quiz.instructions|linebreaksbr }}</p>{% endif %}
+        <ul class="list-disc space-y-1 pl-5">
+          <li>Le chronomètre démarre dès que vous cliquez sur « Commencer ».</li>
+          <li>Vos réponses sont sauvegardées automatiquement.</li>
+          <li>Une seule tentative est autorisée : vous ne pourrez pas recommencer.</li>
+          <li>À l'expiration du temps, le QCM est soumis automatiquement.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <form class="flex flex-wrap items-center justify-between gap-3" method="post">
+    {% csrf_token %}
+    <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container" href="{% url 'exams:student_exams' %}">Retour</a>
+    <button class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-container" type="submit">
+      <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+      Commencer le QCM
+    </button>
+  </form>
+</div>
+</main>
+{% endblock %}

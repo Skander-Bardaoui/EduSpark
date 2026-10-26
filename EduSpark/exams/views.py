@@ -1,12 +1,14 @@
 import csv
 import os
-from datetime import date, datetime
+import random
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.http import FileResponse, HttpResponse
+from django.db import transaction
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -16,13 +18,19 @@ from PIL import Image, ImageChops
 
 from accounts.decorators import role_required
 from accounts.models import Profil, ProfessorProfile, SchoolClass, StudentProfile
+from courses.models import Course
 
-from .forms import ExamSessionForm, GradeRecordForm
+from .forms import ExamSessionForm, GradeRecordForm, QuizGenerateForm
 from .models import (
     DEFAULT_CRITERIA, ExamCopy, ExamCopyPage, ExamSession, ExamSubject,
-    GradeRecord, JuryMember, StudentGrade, semester_for,
+    GradeRecord, JuryMember, Quiz, QuizAnswer, QuizAttempt, QuizChoice,
+    QuizQuestion, StudentGrade, semester_for,
 )
 from .pdf import attestation_pdf, convocation_pdf, transcript_pdf
+from .services.ai_quiz import (
+    QuizGenerationError, ai_quiz_available, generate_quiz_questions,
+    save_generated_quiz,
+)
 
 EXAM_SEMESTER = "Semestre 1 · 2025-2026"
 COPY_EXTENSIONS = (".pdf", ".zip")
@@ -40,7 +48,9 @@ def _tenant_classes(request):
 def _tenant_sessions(request):
     return (
         ExamSession.objects.filter(university=request.university)
-        .select_related("school_class", "created_by", "course_subject", "subject")
+        .select_related(
+            "school_class", "created_by", "course_subject", "subject", "quiz",
+        )
         .order_by("date", "start_time", "school_class__name")
     )
 
@@ -193,7 +203,9 @@ def student_exams(request):
     today = timezone.localdate()
     sessions = (
         ExamSession.objects.filter(school_class__in=classes)
-        .select_related("school_class", "school_class__university", "subject")
+        .select_related(
+            "school_class", "school_class__university", "subject", "quiz",
+        )
         .order_by("date", "start_time")
     )
     upcoming = [s for s in sessions if s.date >= today]
@@ -204,10 +216,18 @@ def student_exams(request):
             student=student, session__in=upcoming,
         ).prefetch_related("pages")
     }
+    attempts = {
+        attempt.quiz.session_id: attempt
+        for attempt in QuizAttempt.objects.filter(
+            student=student, quiz__session__in=upcoming,
+        ).select_related("quiz")
+    }
     session_rows = []
     for session in upcoming:
         copy = copies.get(session.pk)
         pages = list(copy.pages.all()) if copy else []
+        quiz = getattr(session, "quiz", None)
+        attempt = attempts.get(session.pk)
         convocation_hash = None
         if session.is_convoked:
             buffer = convocation_pdf(session, student)
@@ -229,6 +249,9 @@ def student_exams(request):
             "subject_status": subject.availability_status if subject else "none",
             "deposit_open": session.deposit_open,
             "deposit_status": session.deposit_status,
+            "quiz": quiz,
+            "quiz_attempt": attempt,
+            "quiz_submitted": bool(attempt and attempt.is_submitted),
         })
 
     published_grades = (
@@ -545,6 +568,358 @@ def student_copy_page_replace(request, pk):
     return redirect("exams:student_exams")
 
 
+# ---------------------------------------------------------------------------
+# QCM : parcours étudiant
+# ---------------------------------------------------------------------------
+
+@role_required(Profil.ROLE_ETUDIANT)
+def student_quiz_start(request, pk):
+    """Page de consignes puis création de la tentative (une seule par étudiant)."""
+    session = _student_session(request, pk)
+    quiz = getattr(session, "quiz", None)
+    if quiz is None:
+        messages.error(request, "Le QCM de cette épreuve n'est pas encore publié.")
+        return redirect("exams:student_exams")
+
+    student = _student_profile(request)
+    attempt = QuizAttempt.objects.filter(quiz=quiz, student=student).first()
+    if attempt is not None and attempt.is_submitted:
+        return redirect("exams:student_quiz_result", pk=attempt.pk)
+
+    if not quiz.is_published:
+        messages.error(request, "Le QCM de cette épreuve n'est pas encore publié.")
+        return redirect("exams:student_exams")
+    if not quiz.is_open:
+        messages.error(request, _quiz_unavailable_message(quiz))
+        return redirect("exams:student_exams")
+
+    if attempt is not None:
+        return redirect("exams:student_quiz_take", pk=attempt.pk)
+
+    if request.method == "POST":
+        attempt = _start_quiz_attempt(quiz, student)
+        messages.success(
+            request,
+            "QCM démarré : vous avez %s minutes pour répondre."
+            % quiz.duration_minutes,
+        )
+        return redirect("exams:student_quiz_take", pk=attempt.pk)
+
+    return render(request, "exams/student_quiz_start.html", {
+        "session": session,
+        "quiz": quiz,
+        "question_total": quiz.questions.count(),
+        "total_points": quiz.total_points,
+    })
+
+
+@role_required(Profil.ROLE_ETUDIANT)
+@require_GET
+def student_quiz_take(request, pk):
+    attempt = _student_quiz_attempt(request, pk)
+    if attempt.is_submitted:
+        return redirect("exams:student_quiz_result", pk=attempt.pk)
+    if attempt.is_expired:
+        _grade_quiz_attempt(attempt)
+        messages.info(
+            request,
+            "Le temps imparti est écoulé : votre QCM a été soumis automatiquement.",
+        )
+        return redirect("exams:student_quiz_result", pk=attempt.pk)
+
+    questions = _attempt_questions(attempt)
+    answers = {
+        answer.question_id: answer.selected_choice_id
+        for answer in attempt.answers.all()
+    }
+    question_rows = [
+        {"question": question, "selected": answers.get(question.pk)}
+        for question in questions
+    ]
+    return render(request, "exams/student_quiz_take.html", {
+        "attempt": attempt,
+        "quiz": attempt.quiz,
+        "question_rows": question_rows,
+        "remaining_seconds": attempt.remaining_seconds(),
+        "deadline_iso": attempt.deadline_at.isoformat(),
+    })
+
+
+@role_required(Profil.ROLE_ETUDIANT)
+@require_POST
+def student_quiz_save(request, pk):
+    attempt = _student_quiz_attempt(request, pk)
+    if attempt.is_submitted:
+        return JsonResponse({"submitted": True, "remaining_seconds": 0})
+    if attempt.is_expired:
+        _grade_quiz_attempt(attempt)
+        return JsonResponse({"submitted": True, "remaining_seconds": 0})
+
+    saved = _store_answers(attempt, request.POST)
+
+    return JsonResponse({
+        "saved": saved,
+        "submitted": False,
+        "remaining_seconds": attempt.remaining_seconds(),
+    })
+
+
+@role_required(Profil.ROLE_ETUDIANT)
+@require_POST
+def student_quiz_submit(request, pk):
+    attempt = _student_quiz_attempt(request, pk)
+    if attempt.is_submitted:
+        messages.info(request, "Votre QCM a déjà été soumis.")
+    else:
+        expired = attempt.is_expired
+        if not expired:
+            _collect_attempt_answers(attempt, request.POST)
+        _grade_quiz_attempt(attempt)
+        if expired:
+            messages.info(
+                request,
+                "Le temps imparti est écoulé : seules les réponses sauvegardées "
+                "ont été prises en compte.",
+            )
+        else:
+            messages.success(
+                request,
+                "QCM soumis : votre note est enregistrée et transmise au correcteur.",
+            )
+    return redirect("exams:student_quiz_result", pk=attempt.pk)
+
+
+@role_required(Profil.ROLE_ETUDIANT)
+def student_quiz_result(request, pk):
+    attempt = _student_quiz_attempt(request, pk)
+    if not attempt.is_submitted:
+        if attempt.is_expired:
+            _grade_quiz_attempt(attempt)
+        else:
+            return redirect("exams:student_quiz_take", pk=attempt.pk)
+
+    answers = {
+        answer.question_id: answer
+        for answer in attempt.answers.select_related("selected_choice")
+    }
+    rows = []
+    for question in _attempt_questions(attempt):
+        answer = answers.get(question.pk)
+        selected = answer.selected_choice if answer else None
+        correct = question.correct_choices.first()
+        rows.append({
+            "question": question,
+            "selected": selected,
+            "correct": correct,
+            "is_correct": bool(selected and selected.is_correct),
+        })
+
+    return render(request, "exams/student_quiz_result.html", {
+        "attempt": attempt,
+        "quiz": attempt.quiz,
+        "session": attempt.quiz.session,
+        "rows": rows,
+        "score_20": attempt.score_20,
+        "score_label": _format_decimal(attempt.score_20),
+        "passed": attempt.passed,
+    })
+
+
+# ---------------------------------------------------------------------------
+# QCM : parcours professeur
+# ---------------------------------------------------------------------------
+
+@role_required(Profil.ROLE_PROF)
+def prof_quiz_generate(request, pk):
+    """Génère le QCM d'une session depuis le contenu d'un cours du professeur."""
+    session = get_object_or_404(
+        ExamSession.objects.select_related("school_class", "course_subject"),
+        pk=pk, school_class__in=_prof_classes(request),
+    )
+    quiz = getattr(session, "quiz", None)
+    if quiz is not None and quiz.attempts.exists():
+        messages.error(
+            request,
+            "Des étudiants ont déjà passé ce QCM : il ne peut plus être régénéré.",
+        )
+        return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+    courses = Course.objects.filter(
+        university=request.university, professor=_prof_profile(request),
+    ).select_related("subject")
+    if session.course_subject_id:
+        courses = courses.filter(subject=session.course_subject)
+
+    if request.method == "POST":
+        form = QuizGenerateForm(
+            request.POST, course_queryset=courses, instance=quiz,
+        )
+        if form.is_valid():
+            course = form.cleaned_data["course"]
+            try:
+                questions, metadata = generate_quiz_questions(
+                    course,
+                    count=form.cleaned_data["question_count"],
+                    difficulty=form.cleaned_data["difficulty"],
+                )
+            except QuizGenerationError as exc:
+                form.add_error(None, str(exc))
+            else:
+                with transaction.atomic():
+                    if quiz is None:
+                        quiz = Quiz(
+                            session=session, university=request.university,
+                            created_by=request.user,
+                        )
+                    for field in (
+                        "course", "question_count", "duration_minutes", "pass_score",
+                        "opens_at", "closes_at", "shuffle_questions", "instructions",
+                    ):
+                        setattr(quiz, field, form.cleaned_data[field])
+                    quiz.save()
+                    save_generated_quiz(quiz, questions, metadata)
+                messages.success(
+                    request,
+                    "QCM généré : %s question(s) sur %s demandée(s). Relisez-le "
+                    "puis publiez-le." % (
+                        metadata["generated"], metadata["requested"],
+                    ),
+                )
+                return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+    else:
+        initial = {}
+        if quiz is None:
+            start, end = session.deposit_window()
+            initial = {
+                "duration_minutes": max(
+                    5, min(480, int((end - start).total_seconds() // 60)),
+                ),
+                "opens_at": start,
+                "closes_at": end,
+            }
+        form = QuizGenerateForm(
+            course_queryset=courses, instance=quiz, initial=initial,
+        )
+
+    return render(request, "exams/prof_quiz_generate.html", {
+        "session": session,
+        "quiz": quiz,
+        "form": form,
+        "ai_available": ai_quiz_available(),
+        "course_count": courses.count(),
+    })
+
+
+@role_required(Profil.ROLE_PROF)
+def prof_quiz_edit(request, pk):
+    quiz = get_object_or_404(
+        Quiz.objects.select_related("session", "course", "session__school_class"),
+        pk=pk, session__school_class__in=_prof_classes(request),
+    )
+    action = request.POST.get("action") if request.method == "POST" else None
+    has_attempts = quiz.attempts.exists()
+    if has_attempts and action and action != "close":
+        messages.error(
+            request,
+            "Des étudiants ont déjà passé ce QCM : les questions et le barème "
+            "sont verrouillés. Vous pouvez seulement le fermer.",
+        )
+        return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+
+    if action in ("save", "add", "publish"):
+        saved, save_errors = _update_quiz_questions(quiz, request.POST)
+        if saved:
+            messages.success(request, "%s question(s) enregistrée(s)." % saved)
+        for error in save_errors:
+            messages.error(request, error)
+        if action == "save" or save_errors:
+            return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+
+    if action == "add":
+        last = quiz.questions.order_by("-order").first()
+        order = (last.order if last else 0) + 1
+        question = QuizQuestion.objects.create(
+            quiz=quiz, order=order, prompt="Nouvelle question", points=1,
+        )
+        for index in range(4):
+            QuizChoice.objects.create(
+                question=question, order=index + 1,
+                label="Proposition %s" % "ABCD"[index],
+                is_correct=index == 0,
+            )
+        messages.info(request, "Question ajoutée : complétez son énoncé et ses choix.")
+        return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+
+    if action == "delete":
+        question = quiz.questions.filter(pk=request.POST.get("question")).first()
+        if question is not None:
+            question.delete()
+            messages.success(request, "Question supprimée.")
+        return redirect("exams:prof_quiz_edit", pk=quiz.pk)
+
+    if action == "publish":
+        errors = _publish_quiz(quiz)
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            messages.success(
+                request,
+                "QCM « %s » publié : les étudiants peuvent y accéder pendant "
+                "la fenêtre d'ouverture." % quiz.session.title,
+            )
+            return redirect("exams:prof_exam_sessions")
+
+    if action == "close":
+        quiz.status = Quiz.STATUS_CLOSED
+        quiz.save(update_fields=["status", "updated_at"])
+        messages.success(request, "QCM fermé : plus aucune tentative possible.")
+        return redirect("exams:prof_exam_sessions")
+
+    questions = list(
+        quiz.questions.prefetch_related("choices").order_by("order", "pk")
+    )
+    return render(request, "exams/prof_quiz_edit.html", {
+        "quiz": quiz,
+        "session": quiz.session,
+        "questions": questions,
+        "correct_count": sum(
+            1 for question in questions
+            if question.choices.filter(is_correct=True).count() == 1
+        ),
+        "window": quiz.window(),
+        "has_attempts": has_attempts,
+    })
+
+
+@role_required(Profil.ROLE_PROF)
+@require_GET
+def prof_quiz_results(request, pk):
+    quiz = get_object_or_404(
+        Quiz.objects.select_related("session", "session__school_class"),
+        pk=pk, session__school_class__in=_prof_classes(request),
+    )
+    attempts = list(
+        quiz.attempts.select_related(
+            "student__membership__user", "student__membership",
+        ).order_by("-started_at")
+    )
+    submitted = [attempt for attempt in attempts if attempt.is_submitted]
+    scores = [
+        attempt.score_20 for attempt in submitted
+        if attempt.score_20 is not None
+    ]
+    average = (sum(scores) / len(scores)) if scores else None
+    return render(request, "exams/prof_quiz_results.html", {
+        "quiz": quiz,
+        "session": quiz.session,
+        "attempts": attempts,
+        "submitted_count": len(submitted),
+        "average": average,
+        "average_label": _format_decimal(average),
+        "passed_count": sum(1 for attempt in submitted if attempt.passed),
+    })
+
+
 @role_required(Profil.ROLE_PROF)
 def prof_corrections(request):
     classes = _prof_classes(request)
@@ -741,7 +1116,7 @@ def prof_exam_sessions(request):
     classes = _prof_classes(request)
     sessions = list(
         ExamSession.objects.filter(school_class__in=classes)
-        .select_related("school_class", "course_subject", "subject")
+        .select_related("school_class", "course_subject", "subject", "quiz")
         .order_by("date", "start_time")
     )
     today = timezone.localdate()
@@ -763,6 +1138,10 @@ def prof_exam_sessions(request):
         "published_subject_count": sum(
             1 for s in sessions
             if getattr(s, "subject", None) is not None and s.subject.is_published
+        ),
+        "published_quiz_count": sum(
+            1 for s in sessions
+            if getattr(s, "quiz", None) is not None and s.quiz.is_published
         ),
         "conflict_count": conflicts,
         "conflict_hint": (
@@ -1563,6 +1942,260 @@ def _student_copy_page(request, pk):
         pk=pk, copy__student=_student_profile(request),
         copy__university=request.university,
     )
+
+
+def _quiz_unavailable_message(quiz):
+    status = quiz.access_status
+    opens_at, closes_at = quiz.window()
+    if status == "before":
+        return "Le QCM s'ouvre le %s à %s." % (
+            timezone.localtime(opens_at).strftime("%d/%m/%Y"),
+            timezone.localtime(opens_at).strftime("%H:%M"),
+        )
+    if status == "after":
+        return "Le QCM est terminé depuis le %s à %s." % (
+            timezone.localtime(closes_at).strftime("%d/%m/%Y"),
+            timezone.localtime(closes_at).strftime("%H:%M"),
+        )
+    if status == "closed":
+        return "Ce QCM a été fermé par l'enseignant."
+    return "Le QCM n'est pas encore publié."
+
+
+def _start_quiz_attempt(quiz, student):
+    now = timezone.now()
+    _opens_at, closes_at = quiz.window()
+    deadline = now + timedelta(minutes=quiz.duration_minutes)
+    if closes_at and deadline > closes_at:
+        deadline = closes_at
+
+    question_ids = list(
+        quiz.questions.order_by("order", "pk").values_list("pk", flat=True)
+    )
+    if quiz.shuffle_questions:
+        random.shuffle(question_ids)
+
+    with transaction.atomic():
+        attempt, _created = QuizAttempt.objects.get_or_create(
+            quiz=quiz, student=student,
+            defaults={
+                "deadline_at": deadline,
+                "question_order": question_ids,
+                "status": QuizAttempt.STATUS_IN_PROGRESS,
+            },
+        )
+    return attempt
+
+
+def _student_quiz_attempt(request, pk):
+    return get_object_or_404(
+        QuizAttempt.objects.select_related(
+            "quiz", "quiz__session", "quiz__session__school_class",
+        ),
+        pk=pk, student=_student_profile(request), university=request.university,
+        quiz__session__school_class__in=_student_classes(request),
+    )
+
+
+def _attempt_questions(attempt):
+    questions = {
+        question.pk: question
+        for question in attempt.quiz.questions.prefetch_related("choices")
+    }
+    order = attempt.question_order or []
+    ordered = [questions[pk] for pk in order if pk in questions]
+    if len(ordered) != len(questions):
+        ordered = list(questions.values())
+    return ordered
+
+
+def _store_answers(attempt, data):
+    """Enregistre les réponses envoyées ; retourne le nombre traité."""
+    questions = {
+        question.pk: question
+        for question in attempt.quiz.questions.prefetch_related("choices")
+    }
+    saved = 0
+    for key, raw_value in data.items():
+        if not key.startswith("q_"):
+            continue
+        try:
+            question_id = int(key[2:])
+        except ValueError:
+            continue
+        question = questions.get(question_id)
+        if question is None:
+            continue
+        raw_value = (raw_value or "").strip()
+        if not raw_value:
+            QuizAnswer.objects.filter(attempt=attempt, question=question).delete()
+            saved += 1
+            continue
+        try:
+            choice = question.choices.get(pk=raw_value)
+        except (QuizChoice.DoesNotExist, ValueError):
+            continue
+        QuizAnswer.objects.update_or_create(
+            attempt=attempt, question=question,
+            defaults={"selected_choice": choice},
+        )
+        saved += 1
+    return saved
+
+
+def _collect_attempt_answers(attempt, data):
+    return _store_answers(attempt, data)
+
+
+def _grade_quiz_attempt(attempt):
+    """Note la tentative côté serveur et synchronise la note officielle."""
+    if attempt.is_submitted:
+        return attempt
+
+    questions = list(
+        attempt.quiz.questions.prefetch_related("choices").order_by("order", "pk")
+    )
+    answers = {
+        answer.question_id: answer
+        for answer in attempt.answers.select_related("selected_choice", "question")
+    }
+    max_score = sum((question.points for question in questions), Decimal("0"))
+    score = Decimal("0")
+    criteria = []
+    for question in questions:
+        answer = answers.get(question.pk)
+        is_correct = bool(
+            answer and answer.selected_choice_id and answer.selected_choice.is_correct
+        )
+        if is_correct:
+            score += question.points
+        criteria.append({
+            "label": "Q%d. %s" % (question.order, question.prompt[:90]),
+            "weight": float(question.points),
+            "points": float(question.points if is_correct else 0),
+            "comment": "Correct" if is_correct else "Incorrect",
+        })
+
+    with transaction.atomic():
+        attempt.score = score
+        attempt.max_score = max_score
+        attempt.submitted_at = timezone.now()
+        attempt.status = QuizAttempt.STATUS_SUBMITTED
+        attempt.save(update_fields=[
+            "score", "max_score", "submitted_at", "status", "updated_at",
+        ])
+        _sync_quiz_grade(attempt, score, max_score, criteria)
+    return attempt
+
+
+def _sync_quiz_grade(attempt, score, max_score, criteria):
+    """Crée ou met à jour la note officielle rattachée à l'épreuve."""
+    score_20 = (
+        (score * Decimal("20") / max_score).quantize(Decimal("0.01"))
+        if max_score else Decimal("0")
+    )
+    grade, _created = StudentGrade.objects.get_or_create(
+        session=attempt.quiz.session,
+        student=attempt.student,
+        defaults={"university": attempt.university},
+    )
+    grade.university = attempt.university
+    grade.score = score_20
+    grade.max_score = Decimal("20")
+    grade.criteria = criteria
+    grade.comment = "QCM noté automatiquement (%s/%s points)." % (
+        _format_decimal(score), _format_decimal(max_score),
+    )
+    grade.status = StudentGrade.STATUS_VALIDATED
+    grade.graded_by = attempt.quiz.created_by
+    grade.save()
+
+
+def _update_quiz_questions(quiz, data):
+    """Met à jour les questions et choix depuis le formulaire d'édition."""
+    saved = 0
+    errors = []
+    questions = list(quiz.questions.prefetch_related("choices"))
+    for question in questions:
+        prompt_key = "q_%s_prompt" % question.pk
+        if prompt_key not in data:
+            continue
+        prompt = (data.get(prompt_key) or "").strip()
+        explanation = (data.get("q_%s_explanation" % question.pk) or "").strip()
+        points = _to_decimal(data.get("q_%s_points" % question.pk, "1"))
+        choices = list(question.choices.all())
+        labels = {
+            choice.pk: (data.get("choice_%s_label" % choice.pk) or "").strip()
+            for choice in choices
+        }
+        correct_raw = (data.get("q_%s_correct" % question.pk) or "").strip()
+
+        local_errors = []
+        if len(prompt) < 3:
+            local_errors.append("Énoncé manquant.")
+        if points <= 0:
+            local_errors.append("Les points doivent être supérieurs à 0.")
+        if any(not label for label in labels.values()):
+            local_errors.append("Toutes les propositions doivent être renseignées.")
+        try:
+            correct_pk = int(correct_raw)
+        except (TypeError, ValueError):
+            correct_pk = None
+        if correct_pk not in labels:
+            local_errors.append("Sélectionnez la bonne réponse.")
+        if local_errors:
+            errors.append(
+                "Question %s : %s" % (question.order, " ".join(local_errors))
+            )
+            continue
+
+        with transaction.atomic():
+            question.prompt = prompt
+            question.explanation = explanation
+            question.points = points
+            question.save(update_fields=["prompt", "explanation", "points"])
+            for choice in choices:
+                choice.label = labels[choice.pk]
+                choice.is_correct = choice.pk == correct_pk
+                choice.save(update_fields=["label", "is_correct"])
+        saved += 1
+
+    if saved:
+        quiz.question_count = quiz.questions.count()
+        quiz.save(update_fields=["question_count", "updated_at"])
+    return saved, errors
+
+
+def _publish_quiz(quiz):
+    """Valide le QCM puis le publie ; retourne la liste des erreurs."""
+    questions = list(quiz.questions.prefetch_related("choices").order_by("order", "pk"))
+    if not questions:
+        return ["Ajoutez au moins une question avant de publier le QCM."]
+
+    errors = []
+    for question in questions:
+        choices = list(question.choices.all())
+        prefix = "Question %s" % question.order
+        if len(question.prompt.strip()) < 3:
+            errors.append("%s : énoncé manquant." % prefix)
+        if question.points <= 0:
+            errors.append("%s : points invalides." % prefix)
+        if len(choices) < 2:
+            errors.append("%s : au moins deux propositions sont nécessaires." % prefix)
+        elif any(not choice.label.strip() for choice in choices):
+            errors.append("%s : une proposition est vide." % prefix)
+        if sum(1 for choice in choices if choice.is_correct) != 1:
+            errors.append("%s : sélectionnez exactement une bonne réponse." % prefix)
+    if errors:
+        return errors[:10]
+
+    quiz.question_count = len(questions)
+    quiz.status = Quiz.STATUS_PUBLISHED
+    quiz.published_at = timezone.now()
+    quiz.save(update_fields=[
+        "question_count", "status", "published_at", "updated_at",
+    ])
+    return []
 
 
 def _deposit_locked_message(session):

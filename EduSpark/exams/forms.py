@@ -3,9 +3,9 @@ import uuid
 from django import forms
 
 from accounts.models import SchoolClass
-from courses.models import Subject
+from courses.models import Course, Subject
 
-from .models import ExamSession, GradeRecord
+from .models import ExamSession, GradeRecord, Quiz
 
 _INPUT_CLASS = (
     "w-full rounded-md border border-outline-variant/70 bg-surface px-3.5 py-2.5 "
@@ -409,4 +409,87 @@ class GradeRecordForm(forms.ModelForm):
             self.add_error("admitted_count", "Le nombre d'admis ne peut pas dépasser l'effectif.")
         if average is not None and (average < 0 or average > 20):
             self.add_error("average", "La moyenne doit être comprise entre 0 et 20.")
+        return cleaned
+
+
+_DATETIME_INPUT_FORMATS = ("%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M")
+
+
+class QuizGenerateForm(forms.ModelForm):
+    """Paramètres du QCM lors de la génération par IA."""
+
+    DIFFICULTY_CHOICES = (
+        ("facile", "Facile"),
+        ("moyen", "Moyen"),
+        ("difficile", "Difficile"),
+    )
+
+    difficulty = forms.ChoiceField(
+        label="Difficulté", choices=DIFFICULTY_CHOICES, initial="moyen",
+        widget=forms.Select(attrs={"class": _SELECT_CLASS}),
+    )
+
+    class Meta:
+        model = Quiz
+        fields = (
+            "course", "question_count", "duration_minutes", "pass_score",
+            "opens_at", "closes_at", "shuffle_questions", "instructions",
+        )
+        widgets = {
+            "course": forms.Select(attrs={"class": _SELECT_CLASS}),
+            "question_count": forms.NumberInput(attrs={
+                "class": _INPUT_CLASS, "min": 1, "max": 100, "step": 1,
+            }),
+            "duration_minutes": forms.NumberInput(attrs={
+                "class": _INPUT_CLASS, "min": 5, "max": 480, "step": 5,
+            }),
+            "pass_score": forms.NumberInput(attrs={
+                "class": _INPUT_CLASS, "min": 0, "max": 20, "step": "0.5",
+            }),
+            "opens_at": forms.DateTimeInput(
+                attrs={"class": _INPUT_CLASS, "type": "datetime-local"},
+                format="%Y-%m-%dT%H:%M",
+            ),
+            "closes_at": forms.DateTimeInput(
+                attrs={"class": _INPUT_CLASS, "type": "datetime-local"},
+                format="%Y-%m-%dT%H:%M",
+            ),
+            "shuffle_questions": forms.CheckboxInput(attrs={
+                "class": "h-4 w-4 rounded border-outline-variant text-primary",
+            }),
+            "instructions": forms.Textarea(attrs={
+                "class": _INPUT_CLASS, "rows": 3,
+                "placeholder": "Consignes affichées avant le démarrage du QCM…",
+            }),
+        }
+
+    def __init__(self, *args, course_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["course"].queryset = course_queryset or Course.objects.none()
+        self.fields["course"].empty_label = "— Choisir un cours —"
+        self.fields["course"].required = True
+        self.fields["opens_at"].input_formats = _DATETIME_INPUT_FORMATS
+        self.fields["closes_at"].input_formats = _DATETIME_INPUT_FORMATS
+        self.fields["opens_at"].required = False
+        self.fields["closes_at"].required = False
+        self.fields["question_count"].initial = 30
+        self.fields["duration_minutes"].initial = 60
+        self.fields["pass_score"].initial = 10
+        self.fields["question_count"].help_text = "Entre 1 et 100 questions."
+        self.fields["duration_minutes"].help_text = (
+            "Temps accordé à l'étudiant à partir du démarrage."
+        )
+        self.fields["opens_at"].help_text = (
+            "Vide : début officiel de l'épreuve."
+        )
+        self.fields["closes_at"].help_text = (
+            "Vide : fin officielle de l'épreuve."
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        opens_at = cleaned.get("opens_at")
+        closes_at = cleaned.get("closes_at")
+        if opens_at and closes_at and closes_at <= opens_at:
+            self.add_error("closes_at", "La fermeture doit être postérieure à l'ouverture.")
         return cleaned

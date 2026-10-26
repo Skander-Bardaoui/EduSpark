@@ -7,7 +7,7 @@
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Sessions d'examen</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves planifiées par l'administration : déposez puis publiez le sujet de chaque épreuve pour vos étudiants.</p>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves planifiées par l'administration : générez le QCM de chaque épreuve depuis le cours, relisez-le puis publiez-le pour vos étudiants.</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_corrections' %}"><span class="material-symbols-outlined text-[18px]">draw</span>Copies à corriger</a>
@@ -16,7 +16,7 @@
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 {% include "portal/_stat_card.html" with label="Sessions à venir" value=session_count icon="event_available" hint="Dont {{ convocation_count }} convoquée(s)" %}
 {% include "portal/_stat_card.html" with label="Étudiants convoqués" value=student_count icon="group" icon_class="bg-surface-container text-secondary" hint="Sessions envoyées" %}
-{% include "portal/_stat_card.html" with label="Sujets publiés" value=published_subject_count icon="description" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Visibles des étudiants" %}
+{% include "portal/_stat_card.html" with label="QCM publiés" value=published_quiz_count icon="quiz" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Ouverts aux étudiants" %}
 {% include "portal/_stat_card.html" with label="Salles réservées" value=room_count icon="meeting_room" hint=conflict_hint %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
@@ -34,7 +34,7 @@
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[1120px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Horaire</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">Sujet d'épreuve</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Horaire</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">QCM</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for session in sessions %}
 <tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.exam_type }}">
@@ -44,36 +44,27 @@
 <td class="px-5 py-3 text-on-surface-variant">{{ session.time_label }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ session.room }}</td>
 <td class="px-5 py-3">
-{% if session.subject %}
+{% if session.quiz %}
 <div class="flex flex-col items-start gap-1.5">
-{% if session.subject.is_published %}
+{% if session.quiz.is_published %}
 {% include "portal/_badge.html" with label="Publié" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
-<p class="text-[10px] text-on-surface-variant">Accessible aux étudiants : {{ session.date_label }} · {{ session.time_label }}</p>
+{% elif session.quiz.access_status == "after" or session.quiz.access_status == "closed" %}
+{% include "portal/_badge.html" with label="Terminé" tone_class="bg-surface-container text-on-surface-variant" %}
 {% else %}
 {% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}
-<p class="text-[10px] text-on-surface-variant">Non visible des étudiants tant qu'il n'est pas publié.</p>
 {% endif %}
+<p class="text-[10px] text-on-surface-variant">{{ session.quiz.question_total }} question(s) · {{ session.quiz.duration_minutes }} min · {{ session.quiz.status_label }}</p>
 <div class="flex flex-wrap items-center gap-1">
-<form action="{% url 'exams:prof_subject_publish' session.pk %}" method="post">
-{% csrf_token %}
-<button class="rounded-full px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" type="submit">{% if session.subject.is_published %}Dépublier{% else %}Publier{% endif %}</button>
-</form>
-<form action="{% url 'exams:prof_subject_upload' session.pk %}" enctype="multipart/form-data" method="post">
-{% csrf_token %}
-<label aria-label="Remplacer le sujet de {{ session.title }}" class="cursor-pointer rounded-full px-2 py-0.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" for="subject-input-{{ session.pk }}">Remplacer</label>
-<input accept="application/pdf" class="sr-only" id="subject-input-{{ session.pk }}" name="file" onchange="this.form.submit()" type="file"/>
-</form>
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" href="{% url 'exams:prof_quiz_edit' session.quiz.pk %}">Relire</a>
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'exams:prof_quiz_results' session.quiz.pk %}">Résultats</a>
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'exams:prof_quiz_generate' session.pk %}">Régénérer</a>
 </div>
 </div>
 {% else %}
-<form action="{% url 'exams:prof_subject_upload' session.pk %}" enctype="multipart/form-data" method="post">
-{% csrf_token %}
-<label aria-label="Déposer le sujet PDF de {{ session.title }}" class="inline-flex cursor-pointer items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" for="subject-input-{{ session.pk }}">
-<span class="material-symbols-outlined text-[15px]">upload_file</span>
-<span>Déposer le sujet PDF</span>
-</label>
-<input accept="application/pdf" class="sr-only" id="subject-input-{{ session.pk }}" name="file" onchange="this.form.submit()" type="file"/>
-</form>
+<a aria-label="Générer le QCM de {{ session.title }}" class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:prof_quiz_generate' session.pk %}">
+<span class="material-symbols-outlined text-[15px]">auto_awesome</span>
+<span>Générer le QCM</span>
+</a>
 {% endif %}
 </td>
 <td class="px-5 py-3 text-right">{% if session.is_convoked %}{% include "portal/_badge.html" with label="Convocation envoyée" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Planifiée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>

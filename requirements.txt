@@ -15,3 +15,5 @@ psycopg[binary]==3.3.6
 reportlab==5.1.0
 # Traitement des pages de copies numérisées (rotation, recadrage).
 Pillow==13.0.0
+# Extraction du texte des supports PDF pour la génération de QCM par IA.
+pypdf==5.1.0
