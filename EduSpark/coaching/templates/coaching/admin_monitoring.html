@@ -40,15 +40,17 @@
 <ul class="divide-y divide-outline-variant/30" id="monitoring-alerts">
 {% for row in alert_rows %}
 <li class="flex flex-wrap items-start justify-between gap-3 px-5 py-4" data-alert-item>
-<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span><div><p class="text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}</p></div></div>
+<div class="flex items-start gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span><div><p class="text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>{% if row.handling_note %}<p class="mt-1 text-xs italic text-on-surface-variant">Prise en charge : {{ row.handling_note }}</p>{% endif %}{% if row.resolution_note %}<p class="mt-1 text-xs italic text-on-surface-variant">Résolution : {{ row.resolution_note }}</p>{% endif %}</div></div>
+<div class="flex flex-wrap items-center gap-2">
 {% if row.is_open %}
-<form class="inline-flex" method="post" action="{% url 'coaching:admin_alert_take' row.alert.pk %}">
-{% csrf_token %}
-<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" type="submit">Prendre en charge</button>
-</form>
+<button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-form-action="{% url 'coaching:admin_alert_take' row.alert.pk %}" data-modal-open="#alert-take-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Prendre en charge</button>
+{% elif row.is_taken %}
+<span class="rounded-full bg-tertiary-fixed px-3 py-1.5 text-xs font-bold text-on-tertiary-fixed">Prise en charge{% if row.taken_label %} · {{ row.taken_label }}{% endif %}</span>
+<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-form-action="{% url 'coaching:admin_alert_close' row.alert.pk %}" data-modal-open="#alert-close-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Clôturer</button>
 {% else %}
-<span class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-primary">{{ row.status_label }}</span>
+<span class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant">Clôturée{% if row.closed_label %} · {{ row.closed_label }}{% endif %}</span>
 {% endif %}
+</div>
 </li>
 {% empty %}
 <li class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucune alerte de persévérance en cours.</li>
@@ -77,5 +79,63 @@
 </aside>
 </div>
 </div>
+<!-- Modal : prise en charge d'alerte -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-take-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Prendre en charge l'alerte</h2><p class="text-xs text-on-surface-variant"><span id="take-alert-label">Alerte</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-take-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Note de prise en charge (facultatif)</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus id="take-handling-note" maxlength="2000" name="handling_note" placeholder="Référent assigné, premières démarches…" rows="3"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Confirmer la prise en charge</button></div>
+</form>
+</div>
+</div>
+<!-- Modal : clôture d'alerte -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-close-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Clôturer l'alerte</h2><p class="text-xs text-on-surface-variant"><span id="close-alert-label">Alerte</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-close-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Note de résolution</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-required-message="Rédigez une note de résolution pour clôturer l'alerte." data-words-min="2" id="close-resolution-note" maxlength="2000" minlength="5" name="resolution_note" placeholder="Issue du dossier, actions réalisées, retour à la normale…" required rows="3"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Clôturer l'alerte</button></div>
+</form>
+</div>
+</div>
 </main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var takeForm = document.getElementById('alert-take-form');
+  var closeForm = document.getElementById('alert-close-form');
+  if (!takeForm && !closeForm) return;
+  function fill(trigger) {
+    var target = trigger.getAttribute('data-modal-open');
+    var label = [trigger.getAttribute('data-alert-label'), trigger.getAttribute('data-student-name')]
+      .filter(Boolean).join(' · ');
+    if (target === '#alert-take-modal' && takeForm) {
+      takeForm.setAttribute('action', trigger.getAttribute('data-form-action') || takeForm.getAttribute('action'));
+      var takeLabel = document.getElementById('take-alert-label');
+      if (takeLabel) takeLabel.textContent = label;
+    } else if (target === '#alert-close-modal' && closeForm) {
+      closeForm.setAttribute('action', trigger.getAttribute('data-form-action') || closeForm.getAttribute('action'));
+      var closeLabel = document.getElementById('close-alert-label');
+      if (closeLabel) closeLabel.textContent = label;
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-form-action][data-modal-open]');
+    if (trigger) fill(trigger);
+  });
+})();
+</script>
 {% endblock %}

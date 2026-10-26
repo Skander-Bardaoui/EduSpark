@@ -5,11 +5,33 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from .forms import InvitationSignupForm, SignInForm, SignUpForm
-from .models import Invitation, University
+from .models import Invitation, SchoolClass, University
 from .tenancy import request_home_url, resolve_tenant, switch_tenant
 from .view_mixins import redirect_next
 
 User = get_user_model()
+
+
+def _class_options():
+    """Niveaux et sections proposés à l'inscription, par université."""
+    options = {}
+    queryset = SchoolClass.objects.filter(university__is_active=True).values(
+        "university_id", "level", "section",
+    )
+    for row in queryset:
+        entry = options.setdefault(
+            str(row["university_id"]), {"levels": [], "sections": []},
+        )
+        level = (row["level"] or "").strip()
+        section = (row["section"] or "").strip()
+        if level and level not in entry["levels"]:
+            entry["levels"].append(level)
+        if section and section not in entry["sections"]:
+            entry["sections"].append(section)
+    for entry in options.values():
+        entry["levels"].sort()
+        entry["sections"].sort()
+    return options
 
 
 @require_http_methods(["GET", "POST"])
@@ -83,7 +105,10 @@ def signup_view(request):
             if university is not None:
                 initial["university"] = university.pk
         form = SignUpForm(initial=initial)
-    return render(request, "accounts/signup.html", {"form": form})
+    return render(request, "accounts/signup.html", {
+        "form": form,
+        "class_options": _class_options(),
+    })
 
 
 @require_http_methods(["GET", "POST"])

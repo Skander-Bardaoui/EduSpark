@@ -1,858 +1,187 @@
 {% extends "portal/base_student.html" %}
-{% block title %}Mon Tableau de bord — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Mon tableau de bord — Suivi &amp; Progression{% endblock %}
 {% block content %}
-<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 text-on-surface">
-<!-- 1. GREETING & CONTEXT HEADER BANNER -->
-<section aria-labelledby="greeting-heading" class="relative bg-surface-container-lowest rounded p-space-lg shadow-sm overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-space-md">
-<!-- Ambient subtle background decorative glow -->
-<div aria-hidden="true" class="absolute -right-20 -top-24 w-80 h-80 rounded-full bg-secondary-fixed opacity-40 blur-3xl pointer-events-none"></div>
-<div aria-hidden="true" class="absolute left-1/3 -bottom-24 w-60 h-60 rounded-full bg-surface-container-high opacity-60 blur-2xl pointer-events-none"></div>
-<div class="relative z-10 flex flex-col gap-space-xs max-w-3xl">
-<div class="flex flex-wrap items-center gap-space-xs">
-<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary font-label-sm text-label-sm tracking-wide">
-<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">school</span>
-          Semestre d'Automne 2024–2025
-        </span>
-<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px]">event</span>
-          Mardi 22 Octobre 2024
-        </span>
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+
+<header class="flex flex-col gap-4 rounded bg-surface-container-lowest p-5 shadow-sm xl:flex-row xl:items-center xl:justify-between">
+<div class="flex min-w-0 flex-col gap-2">
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 font-label-sm text-label-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">school</span>{{ academic_year }}
+</span>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 font-label-sm text-label-sm text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[16px]">event</span>{{ today_label }}
+</span>
 </div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface mt-1" id="greeting-heading">
-        Bonjour, {{ portal_user_first_name }} <span aria-hidden="true">👋</span>
-</h1>
-<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-        Voici un aperçu complet de vos activités académiques, échéances et progression pour votre formation à {{ portal_university.name }}.
-      </p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Bonjour, {{ portal_user_first_name }} 👋</h1>
+<p class="max-w-3xl font-body-md text-body-md text-on-surface-variant">
+  Voici votre suivi pédagogique réel : objectifs, planning, rendez-vous et relances de votre référent à {{ portal_university.name }}.
+</p>
 </div>
-<!-- Quick action to trigger AI panel -->
-<div class="relative z-10 flex items-center shrink-0">
-<button aria-controls="ai-planner-panel" aria-expanded="true" class="inline-flex items-center justify-center gap-2 px-space-md py-3 rounded-full bg-secondary text-on-secondary font-label-md text-label-md shadow-sm hover:bg-secondary/90 focus:outline-none focus:ring-4 focus:ring-secondary/20 transition-all min-h-[44px]" id="btn-toggle-ai-planner" type="button">
-<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-<span>Optimiser mon planning avec l’IA</span>
-</button>
+<div class="flex flex-wrap items-center gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2.5 font-label-md text-label-md text-on-secondary transition-colors hover:bg-secondary/90" href="{% url 'coaching:student_progress' %}">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>Plan d'étude &amp; IA
+</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:student_appointments' %}">
+<span class="material-symbols-outlined text-[18px]">event_available</span>Prendre rendez-vous
+</a>
 </div>
+</header>
+
+<section aria-label="Indicateurs clés" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Progression des objectifs" value=goal_progress suffix=" %" icon="flag" hint="Moyenne d'avancement de vos objectifs actifs" %}
+{% include "portal/_stat_card.html" with label="Révision cette semaine" value=completed_hours icon="hourglass_top" icon_class="bg-secondary-fixed text-secondary" hint=planned_hint %}
+{% include "portal/_stat_card.html" with label="Tâches terminées" value=task_counts.done suffix=task_counts.total|stringformat:"s" icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=tasks_hint %}
+{% include "portal/_stat_card.html" with label="Assiduité" value=attendance_rate|default_if_none:"—" suffix=" %" icon="fact_check" icon_class="bg-surface-container text-primary" hint=attendance_hint %}
 </section>
-<!-- 2. HIGH-LEVEL METRICS & ACCESSIBLE GRAPHICAL OVERVIEW -->
-<section aria-labelledby="overview-heading" class="flex flex-col gap-space-md">
-<h2 class="sr-only" id="overview-heading">Indicateurs clés et progression académique</h2>
-<!-- 4 High-contrast metric cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
-<!-- Metric 1: Semester progression -->
-<article class="bg-surface-container-lowest rounded p-space-md shadow-sm flex flex-col justify-between gap-space-sm relative overflow-hidden">
-<div class="flex items-start justify-between">
-<span class="font-label-md text-label-md text-on-surface-variant">Progression semestre</span>
-<span class="p-2 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">timelapse</span>
-</span>
-</div>
-<div>
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold leading-none text-primary">68%</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">complété</span>
-</div>
-<!-- Visual bar -->
-<div aria-label="Progression globale du semestre" aria-valuemax="100" aria-valuemin="0" aria-valuenow="68" class="w-full h-2 rounded-full bg-surface-container mt-2.5 overflow-hidden" role="progressbar">
-<div class="h-full bg-primary rounded-full transition-all duration-700" style="width: 68%;"></div>
-</div>
-</div>
-<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px] text-primary">flag</span>
-<span>Semaine 8 sur 12 d'enseignement</span>
-</div>
-</article>
-<!-- Metric 2: Assignments completed -->
-<article class="bg-surface-container-lowest rounded p-space-md shadow-sm flex flex-col justify-between gap-space-sm">
-<div class="flex items-start justify-between">
-<span class="font-label-md text-label-md text-on-surface-variant">Devoirs rendus</span>
-<span class="p-2 rounded-full bg-surface-container text-secondary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
-</span>
-</div>
-<div>
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold leading-none text-on-surface">14<span class="text-[20px] font-normal text-outline">/18</span></span>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-semibold">78%</span>
-</div>
-<div aria-label="Devoirs rendus" aria-valuemax="100" aria-valuemin="0" aria-valuenow="78" class="w-full h-2 rounded-full bg-surface-container mt-2.5 overflow-hidden" role="progressbar">
-<div class="h-full bg-secondary rounded-full" style="width: 78%;"></div>
-</div>
-</div>
-<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px] text-outline">pending_actions</span>
-<span>2 en attente de note • 2 à rendre</span>
-</div>
-</article>
-<!-- Metric 3: Grade Average -->
-<article class="bg-surface-container-lowest rounded p-space-md shadow-sm flex flex-col justify-between gap-space-sm">
-<div class="flex items-start justify-between">
-<span class="font-label-md text-label-md text-on-surface-variant">Moyenne actuelle estimée</span>
-<span class="p-2 rounded-full bg-surface-container-high text-tertiary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">grade</span>
-</span>
-</div>
-<div>
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold leading-none text-on-surface">15.4<span class="text-[20px] font-normal text-outline">/20</span></span>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">Mention Bien</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-2.5">Basée sur 7 notes d’évaluation continue</p>
-</div>
-<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
-<span class="material-symbols-outlined text-[16px] text-primary">trending_up</span>
-<span>+0.6 pt par rapport au semestre précédent</span>
-</div>
-</article>
-<!-- Metric 4: Critical milestones -->
-<article class="bg-surface-container-lowest rounded p-space-md shadow-sm flex flex-col justify-between gap-space-sm">
-<div class="flex items-start justify-between">
-<span class="font-label-md text-label-md text-on-surface-variant">Jalons critiques</span>
-<span class="p-2 rounded-full bg-error-container text-on-error-container flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">notification_important</span>
-</span>
-</div>
-<div>
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold leading-none text-error">3</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">échéances à J-7</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-2.5">1 devoir urgent, 1 examen mi-parcours, 1 tutorat</p>
-</div>
-<div class="flex items-center gap-1.5 text-error font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-[16px]">priority_high</span>
-<span>Prochaine remise dans 48 heures</span>
-</div>
-</article>
-</div>
-<!-- Multimodal Course Completion Graphic Widget with text alternative -->
-<div class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
-<div>
-<h3 class="font-title-md text-title-md text-on-surface">Avancement par Unité d'Enseignement (UE)</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Progression des modules théoriques, séances de travaux pratiques et livrables multimodaux.</p>
-</div>
-<span class="inline-flex items-center gap-1.5 text-on-surface-variant font-data-metric text-data-metric">
-<span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span>
-          Mis à jour aujourd'hui à 08:30
-        </span>
-</div>
-<!-- Graphical progress visualization (Bar breakdown) -->
-<div aria-hidden="true" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md pt-space-xs">
-<!-- UE 1 -->
-<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-md text-label-md font-semibold text-on-surface">Intelligence Artificielle</span>
-<span class="font-data-metric text-[16px] font-bold text-primary">82%</span>
-</div>
-<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden">
-<div class="h-full bg-primary rounded-full" style="width: 82%;"></div>
-</div>
-<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm mt-1">
-<span>9/11 modules validés</span>
-<span class="text-primary font-semibold">Avancé</span>
-</div>
-</div>
-<!-- UE 2 -->
-<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-md text-label-md font-semibold text-on-surface">Algorithmique Avancée</span>
-<span class="font-data-metric text-[16px] font-bold text-secondary">65%</span>
-</div>
-<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden">
-<div class="h-full bg-secondary rounded-full" style="width: 65%;"></div>
-</div>
-<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm mt-1">
-<span>7/10 modules validés</span>
-<span class="text-secondary font-semibold">Dans les temps</span>
-</div>
-</div>
-<!-- UE 3 -->
-<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-md text-label-md font-semibold text-on-surface">Systèmes Distribués</span>
-<span class="font-data-metric text-[16px] font-bold text-tertiary">58%</span>
-</div>
-<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden">
-<div class="h-full bg-tertiary-fixed-dim rounded-full" style="width: 58%;"></div>
-</div>
-<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm mt-1">
-<span>5/9 modules validés</span>
-<span class="text-tertiary font-semibold">À intensifier</span>
-</div>
-</div>
-<!-- UE 4 -->
-<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-xs">
-<div class="flex items-center justify-between">
-<span class="font-label-md text-label-md font-semibold text-on-surface">Éthique du Numérique</span>
-<span class="font-data-metric text-[16px] font-bold text-primary">74%</span>
-</div>
-<div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden">
-<div class="h-full bg-primary rounded-full" style="width: 74%;"></div>
-</div>
-<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm mt-1">
-<span>6/8 modules validés</span>
-<span class="text-primary font-semibold">Régulier</span>
-</div>
-</div>
-</div>
-<!-- WCAG Accessible text alternative details -->
-<details class="group bg-surface-container-low rounded p-space-sm text-on-surface transition-all">
-<summary class="cursor-pointer font-label-md text-label-md text-primary font-semibold focus:outline-none focus:ring-2 focus:ring-primary rounded p-space-xs flex items-center justify-between select-none">
-<span class="flex items-center gap-2">
-<span class="material-symbols-outlined text-[20px]">accessibility_new</span>
-            Afficher le tableau des données textuelles équivalentes (Accessibilité)
-          </span>
-<span class="material-symbols-outlined text-[20px] transition-transform duration-200 group-open:rotate-180">expand_more</span>
-</summary>
-<div class="mt-space-sm p-space-xs overflow-x-auto">
-<table class="w-full text-left font-body-sm text-body-sm text-on-surface-variant">
-<caption class="sr-only">Tableau de progression par Unité d'Enseignement</caption>
-<thead>
-<tr class="text-on-surface font-label-sm text-label-sm uppercase bg-surface-container">
-<th class="py-2.5 px-4 rounded-l" scope="col">Discipline / Unité d'Enseignement</th>
-<th class="py-2.5 px-4" scope="col">Taux de complétion</th>
-<th class="py-2.5 px-4" scope="col">Modules validés</th>
-<th class="py-2.5 px-4 rounded-r" scope="col">Statut de suivi</th>
-</tr>
-</thead>
-<tbody>
-<tr class="hover:bg-surface-container-high/40">
-<th class="py-3 px-4 font-semibold text-on-surface" scope="row">Intelligence Artificielle</th>
-<td class="py-3 px-4 font-data-metric text-primary font-bold">82%</td>
-<td class="py-3 px-4">9 modules sur 11</td>
-<td class="py-3 px-4"><span class="inline-flex items-center gap-1 font-semibold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span> Avancé</span></td>
-</tr>
-<tr class="hover:bg-surface-container-high/40">
-<th class="py-3 px-4 font-semibold text-on-surface" scope="row">Algorithmique Avancée</th>
-<td class="py-3 px-4 font-data-metric text-secondary font-bold">65%</td>
-<td class="py-3 px-4">7 modules sur 10</td>
-<td class="py-3 px-4"><span class="inline-flex items-center gap-1 font-semibold text-secondary"><span class="material-symbols-outlined text-[16px]">schedule</span> Dans les temps</span></td>
-</tr>
-<tr class="hover:bg-surface-container-high/40">
-<th class="py-3 px-4 font-semibold text-on-surface" scope="row">Systèmes Distribués</th>
-<td class="py-3 px-4 font-data-metric text-tertiary font-bold">58%</td>
-<td class="py-3 px-4">5 modules sur 9</td>
-<td class="py-3 px-4"><span class="inline-flex items-center gap-1 font-semibold text-tertiary"><span class="material-symbols-outlined text-[16px]">warning</span> À intensifier</span></td>
-</tr>
-<tr class="hover:bg-surface-container-high/40">
-<th class="py-3 px-4 font-semibold text-on-surface" scope="row">Éthique du Numérique</th>
-<td class="py-3 px-4 font-data-metric text-primary font-bold">74%</td>
-<td class="py-3 px-4">6 modules sur 8</td>
-<td class="py-3 px-4"><span class="inline-flex items-center gap-1 font-semibold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span> Régulier</span></td>
-</tr>
-</tbody>
-</table>
-</div>
-</details>
-</div>
-</section>
-<!-- 3. AI STUDY ASSISTANT EXPANDABLE EMBEDDED PANEL (Requested Pattern) -->
-<aside aria-labelledby="ai-panel-title" class="relative bg-surface-container-lowest rounded p-space-lg shadow-md overflow-hidden flex flex-col gap-space-md" id="ai-planner-panel">
-<!-- Header banner in panel -->
-<div class="flex items-start justify-between gap-space-sm">
-<div class="flex items-center gap-space-sm">
-<span class="w-10 h-10 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-</span>
-<div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="ai-panel-title">Assistant d’Étude IA</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Suggestion d'optimisation intelligente de votre emploi du temps et des devoirs de la semaine.</p>
-</div>
-</div>
-<button aria-label="Fermer le panneau d'assistance IA" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center" id="btn-close-ai-panel" type="button">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<!-- Resilience Alert Banner -->
-<div class="flex items-center gap-space-sm p-space-md rounded bg-surface-container-high text-on-surface font-body-sm text-body-sm" role="status">
-<span class="material-symbols-outlined text-primary text-[22px] shrink-0">info</span>
-<div class="flex-1">
-<span class="font-semibold text-on-surface">Service opérationnel :</span>
-<span class="text-on-surface-variant"> Modèle académique Llama-3-Academic actif. En cas de coupure réseau, la planification manuelle reste toujours disponible.</span>
-</div>
-<span class="font-data-metric text-label-sm text-on-surface-variant shrink-0">Latence: 140ms</span>
-</div>
-<!-- Form Inputs for AI parameters -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md bg-surface-container-low p-space-md rounded">
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="ai-priority-select">Objectif prioritaire de la semaine</label>
-<select class="w-full px-3.5 py-2.5 bg-surface-container-lowest text-on-surface font-body-md text-body-md rounded focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" id="ai-priority-select">
-<option value="exam-prep">Réviser l'examen mi-parcours en Systèmes Distribués (Priorité haute)</option>
-<option value="tp-ia">Finaliser le TP3 Réseaux de Neurones Convolutionnels</option>
-<option value="algo-td">Résoudre le DM Arbres B &amp; Équilibrage</option>
-<option value="balance">Équilibrer l'ensemble des modules équitablement</option>
-</select>
-</div>
-<div class="flex flex-col gap-1.5">
-<label class="font-label-md text-label-md text-on-surface" for="ai-hours-input">Heures de travail personnel disponibles cette semaine</label>
-<div class="flex items-center gap-space-sm">
-<input class="w-28 px-3.5 py-2.5 bg-surface-container-lowest text-on-surface font-data-metric text-[16px] rounded focus:outline-none focus:ring-2 focus:ring-primary shadow-xs text-center" id="ai-hours-input" max="40" min="4" type="number" value="16"/>
-<span class="font-body-sm text-body-sm text-on-surface-variant">heures réparties du 22 au 27 Octobre</span>
-</div>
-</div>
-</div>
-<!-- Loading State Indicator & Realtime status -->
-<div class="flex items-center gap-space-sm text-on-surface-variant font-label-md text-label-md px-space-xs">
-<span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
-<span class="material-symbols-outlined text-secondary text-[18px]">psychology</span>
-<span>Analyse de vos <strong>4 devoirs</strong> et <strong>2 examens</strong> en cours... Proposition calculée :</span>
-</div>
-<!-- AI Suggestion Preview Card -->
-<div class="bg-surface-container-low rounded p-space-md flex flex-col gap-space-md">
-<div class="flex flex-wrap items-center justify-between gap-2">
-<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider">
-<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-          Suggestion IA Optimale
-        </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Score de viabilité estimé: 94%</span>
-</div>
-<p class="font-body-md text-body-md text-on-surface">
-        Pour absorber l'échéance du TP Réseaux Convolutionnels (J-2) sans compromettre les révisions du partiel de Systèmes Distribués (J-8), nous recommandons un bloc d'immersion de <strong>3h30</strong> mercredi après-midi et un créneau d'entraînement mémoire vendredi matin.
-      </p>
-<!-- Visual mini timetable block -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm font-body-sm text-body-sm">
-<div class="p-space-sm bg-surface-container-lowest rounded flex flex-col gap-1">
-<span class="font-label-sm text-label-sm text-primary font-bold">Mercredi 23 Oct • 14:00 - 17:30</span>
-<span class="font-semibold text-on-surface">Bloc Focus IA &amp; CNN</span>
-<span class="text-on-surface-variant text-body-sm">Implémentation PyTorch + rédaction des métriques d'accuracy</span>
-</div>
-<div class="p-space-sm bg-surface-container-lowest rounded flex flex-col gap-1">
-<span class="font-label-sm text-label-sm text-secondary font-bold">Jeudi 24 Oct • 16:00 - 18:00</span>
-<span class="font-semibold text-on-surface">Préparation Tutorat</span>
-<span class="text-on-surface-variant text-body-sm">Synthèse de projet à présenter au Dr. Hélène Vasseur</span>
-</div>
-<div class="p-space-sm bg-surface-container-lowest rounded flex flex-col gap-1">
-<span class="font-label-sm text-label-sm text-tertiary font-bold">Vendredi 25 Oct • 09:30 - 12:00</span>
-<span class="font-semibold text-on-surface">Révision Systèmes Distribués</span>
-<span class="text-on-surface-variant text-body-sm">Algorithmes de consensus Raft et Paxos (exercices types)</span>
-</div>
-</div>
-<!-- Action buttons -->
-<div class="flex flex-wrap items-center gap-space-sm pt-space-xs">
-<button class="inline-flex items-center justify-center gap-2 px-space-md py-2.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md hover:bg-secondary-fixed-dim transition-colors min-h-[44px]" type="button">
-<span class="material-symbols-outlined text-[18px]">done</span>
-<span>Garder ce planning</span>
-</button>
-<button class="inline-flex items-center justify-center gap-2 px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors min-h-[44px]" type="button">
-<span class="material-symbols-outlined text-[18px]">edit_calendar</span>
-<span>Modifier les créneaux</span>
-</button>
-<button class="inline-flex items-center justify-center gap-2 px-space-md py-2.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/40 font-label-md text-label-md transition-colors min-h-[44px]" type="button">
-<span class="material-symbols-outlined text-[18px]">close</span>
-<span>Refuser la proposition</span>
-</button>
-</div>
-</div>
-</aside>
-<!-- 4. CORE TWO-COLUMN CONTENT GRID (8 cols + 4 cols) -->
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-<!-- ==================== LEFT MAIN COLUMN (8 COLS) ==================== -->
+
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
 <div class="flex min-w-0 flex-col gap-5 xl:col-span-8">
-<!-- SECTION: MES DEVOIRS À FAIRE -->
-<section aria-labelledby="homework-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">assignment</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="homework-heading">Mes devoirs à faire</h2>
-</div>
-<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1 min-h-[44px] px-2" data-path="mes-devoirs" href="{% url 'exercises:student_assignments' %}">
-<span>Tous mes devoirs (4)</span>
-<span class="material-symbols-outlined text-[18px]">chevron_right</span>
-</a>
-</div>
-<!-- Priority list with icons + text badges (never color alone) -->
-<div class="flex flex-col gap-space-sm">
-<!-- Devoir 1 -->
-<article class="p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-<div class="flex items-start gap-space-md">
-<div class="p-3 rounded bg-primary-fixed text-primary shrink-0 flex items-center justify-center">
-<span class="material-symbols-outlined text-[24px]">terminal</span>
-</div>
-<div class="flex flex-col gap-1 min-w-0">
-<div class="flex flex-wrap items-center gap-2">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-primary font-bold">Intelligence Artificielle</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-error bg-error-container/60 px-2.5 py-0.5 rounded-full font-bold">
-<span class="material-symbols-outlined text-sm">schedule</span>
-                    Échéance : dans 2 jours (24 Octobre, 23h59)
-                  </span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">TP 3 : Classification d'images par ConvNets (PyTorch)</h3>
-<div class="flex items-center gap-space-md text-on-surface-variant font-body-sm text-body-sm">
-<span class="inline-flex items-center gap-1 text-secondary font-medium">
-<span class="material-symbols-outlined text-[16px]">edit</span>
-                    En cours (60% complété)
-                  </span>
-<span>•</span>
-<span>Coeff: 2.0</span>
-</div>
-</div>
-</div>
-<div class="flex items-center shrink-0">
-<a class="inline-flex items-center justify-center gap-1.5 px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors shadow-xs min-h-[44px]" href="{% url 'exercises:student_assignments' %}">
-<span>Accéder au devoir</span>
-<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-</a>
-</div>
-</article>
-<!-- Devoir 2 -->
-<article class="p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-<div class="flex items-start gap-space-md">
-<div class="p-3 rounded bg-secondary-fixed text-on-secondary-fixed shrink-0 flex items-center justify-center">
-<span class="material-symbols-outlined text-[24px]">account_tree</span>
-</div>
-<div class="flex flex-col gap-1 min-w-0">
-<div class="flex flex-wrap items-center gap-2">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary font-bold">Algorithmique Avancée</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full font-semibold">
-<span class="material-symbols-outlined text-sm">event</span>
-                    Échéance : dans 6 jours (28 Octobre, 18h00)
-                  </span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Devoir Maison : Équilibrage des Arbres Rouge-Noir</h3>
-<div class="flex items-center gap-space-md text-on-surface-variant font-body-sm text-body-sm">
-<span class="inline-flex items-center gap-1 text-on-surface-variant font-medium">
-<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
-                    À commencer
-                  </span>
-<span>•</span>
-<span>Coeff: 1.5</span>
-</div>
-</div>
-</div>
-<div class="flex items-center shrink-0">
-<a class="inline-flex items-center justify-center gap-1.5 px-space-md py-2.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors min-h-[44px]" href="#">
-<span>Ouvrir l'énoncé</span>
-<span class="material-symbols-outlined text-[18px]">open_in_new</span>
-</a>
-</div>
-</article>
-<!-- Devoir 3 -->
-<article class="p-space-md rounded bg-surface-container-low hover:bg-surface-container transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-<div class="flex items-start gap-space-md">
-<div class="p-3 rounded bg-surface-container-high text-tertiary shrink-0 flex items-center justify-center">
-<span class="material-symbols-outlined text-[24px]">article</span>
-</div>
-<div class="flex flex-col gap-1 min-w-0">
-<div class="flex flex-wrap items-center gap-2">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-tertiary font-bold">Éthique du Numérique</span>
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full font-semibold">
-<span class="material-symbols-outlined text-sm">event</span>
-                    Échéance : dans 12 jours (3 Novembre)
-                  </span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Essai critique : Biais algorithmiques dans les LLM génératifs</h3>
-<div class="flex items-center gap-space-md text-on-surface-variant font-body-sm text-body-sm">
-<span class="inline-flex items-center gap-1 text-secondary font-medium">
-<span class="material-symbols-outlined text-[16px]">edit_note</span>
-                    Brouillon enregistré
-                  </span>
-<span>•</span>
-<span>Coeff: 1.0</span>
-</div>
-</div>
-</div>
-<div class="flex items-center shrink-0">
-<a class="inline-flex items-center justify-center gap-1.5 px-space-md py-2.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors min-h-[44px]" href="#">
-<span>Reprendre</span>
-<span class="material-symbols-outlined text-[18px]">edit</span>
-</a>
-</div>
-</article>
-</div>
-</section>
-<!-- SECTION: MES EXAMENS À VENIR -->
-<section aria-labelledby="exams-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">history_edu</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="exams-heading">Mes examens à venir</h2>
-</div>
-<span class="font-data-metric text-data-metric text-on-surface-variant">2 épreuves planifiées</span>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left font-body-sm text-body-sm text-on-surface-variant">
-<caption class="sr-only">Liste des épreuves d'examens programmées pour le semestre</caption>
-<thead>
-<tr class="text-on-surface font-label-sm text-label-sm uppercase bg-surface-container">
-<th class="py-3 px-4 rounded-l" scope="col">Épreuve / Discipline</th>
-<th class="py-3 px-4" scope="col">Date &amp; Horaire</th>
-<th class="py-3 px-4" scope="col">Salle &amp; Modalité</th>
-<th class="py-3 px-4" scope="col">Coeff.</th>
-<th class="py-3 px-4" scope="col">Statut</th>
-<th class="py-3 px-4 rounded-r text-right" scope="col">Détails</th>
-</tr>
-</thead>
-<tbody>
-<!-- Exam 1 -->
-<tr class="hover:bg-surface-container-low transition-colors">
-<th class="py-2.5 px-4 font-semibold text-on-surface" scope="row">
-<div class="flex flex-col">
-<span class="text-on-surface font-title-md text-title-md">Partiel Mi-Parcours : Systèmes Distribués</span>
-<span class="text-on-surface-variant text-body-sm font-normal">UE Systèmes Distribués &amp; Cloud</span>
-</div>
-</th>
-<td class="py-2.5 px-4 whitespace-nowrap">
-<div class="flex flex-col font-data-metric">
-<span class="text-on-surface font-bold">Mercredi 30 Octobre</span>
-<span class="text-on-surface-variant">08:30 - 10:30 (2h00)</span>
-</div>
-</td>
-<td class="py-2.5 px-4">
-<div class="flex items-center gap-1.5 text-on-surface">
-<span class="material-symbols-outlined text-[16px] text-primary">location_on</span>
-<span class="font-medium">Présentiel • Amphi Turing</span>
-</div>
-</td>
-<td class="py-2.5 px-4 font-data-metric text-on-surface font-semibold">3.0</td>
-<td class="py-2.5 px-4">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">calendar_today</span>
-                    Programmé
-                  </span>
-</td>
-<td class="py-2.5 px-4 text-right">
-<button aria-label="Consulter les consignes du Partiel Mi-Parcours Systèmes Distribués" class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-container text-primary transition-colors min-h-[44px] min-w-[44px]" type="button">
-<span class="material-symbols-outlined text-[20px]">info</span>
-</button>
-</td>
-</tr>
-<!-- Exam 2 -->
-<tr class="hover:bg-surface-container-low transition-colors">
-<th class="py-2.5 px-4 font-semibold text-on-surface" scope="row">
-<div class="flex flex-col">
-<span class="text-on-surface font-title-md text-title-md">QCM Chronométré : Fondements de l'IA</span>
-<span class="text-on-surface-variant text-body-sm font-normal">UE Intelligence Artificielle</span>
-</div>
-</th>
-<td class="py-2.5 px-4 whitespace-nowrap">
-<div class="flex flex-col font-data-metric">
-<span class="text-on-surface font-bold">Lundi 4 Novembre</span>
-<span class="text-on-surface-variant">14:00 - 15:00 (1h00)</span>
-</div>
-</td>
-<td class="py-2.5 px-4">
-<div class="flex items-center gap-1.5 text-on-surface">
-<span class="material-symbols-outlined text-[16px] text-secondary">laptop_chromebook</span>
-<span class="font-medium">En ligne • Minuteur Hub</span>
-</div>
-</td>
-<td class="py-2.5 px-4 font-data-metric text-on-surface font-semibold">1.5</td>
-<td class="py-2.5 px-4">
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">
-<span class="material-symbols-outlined text-sm">timer</span>
-                    À distance
-                  </span>
-</td>
-<td class="py-2.5 px-4 text-right">
-<button aria-label="Tester l'environnement pour le QCM Chronométré IA" class="inline-flex items-center justify-center p-2 rounded-full hover:bg-surface-container text-primary transition-colors min-h-[44px] min-w-[44px]" type="button">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
-<!-- SECTION: JOURNAL DE PROGRESSION & DERNIÈRES RÉFLEXIONS -->
-<section aria-labelledby="journal-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">monitoring</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="journal-heading">Journal de progression &amp; Réflexions</h2>
-</div>
-<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1 min-h-[44px] px-2" data-path="journal-de-progression" href="{% url 'coaching:student_journal' %}">
-<span>Consulter le journal complet</span>
-<span class="material-symbols-outlined text-[18px]">chevron_right</span>
-</a>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-<!-- Entry 1 -->
-<article class="p-space-md rounded bg-surface-container-low flex flex-col justify-between gap-space-sm">
-<div class="flex flex-col gap-2">
-<div class="flex items-center justify-between">
-<span class="font-data-metric text-label-sm text-on-surface-variant">Lundi 21 Octobre 2024</span>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm font-bold">
-<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
-                  Auto-évaluation : 4/5
-                </span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Compréhension des couches de convolution (CNN)</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                « Les mécanismes de stride et padding sont désormais clairs après avoir visualisé les cartes d'activation sur TensorBoard. Le calcul des dimensions de sortie est assimilé. »
-              </p>
-</div>
-<div class="flex items-center gap-2 pt-2 border-t-0 bg-surface-container p-2.5 rounded">
-<span class="material-symbols-outlined text-primary text-[18px]">mark_chat_read</span>
-<span class="font-label-sm text-label-sm text-on-surface">Retour du Dr. Vasseur : <em class="text-on-surface-variant font-normal">« Bonne maîtrise, prêtez attention à l'effet de bord sur les petits filtres. »</em></span>
-</div>
-</article>
-<!-- Entry 2 -->
-<article class="p-space-md rounded bg-surface-container-low flex flex-col justify-between gap-space-sm">
-<div class="flex flex-col gap-2">
-<div class="flex items-center justify-between">
-<span class="font-data-metric text-label-sm text-on-surface-variant">Vendredi 18 Octobre 2024</span>
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-highest text-tertiary font-label-sm text-label-sm font-bold">
-<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star_half</span>
-                  Auto-évaluation : 3/5
-                </span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Séance TP Systèmes Distribués : Consensus Raft</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                « Difficultés résolues lors de l'élection de leader avec split votes. Il reste à consolider la gestion de la réplication de log en présence de partitions réseau. »
-              </p>
-</div>
-<div class="flex items-center gap-2 pt-2 bg-surface-container p-2.5 rounded">
-<span class="material-symbols-outlined text-outline text-[18px]">pending</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">En attente de relecture par l'enseignant de TP</span>
-</div>
-</article>
-</div>
-</section>
-</div>
-<!-- ==================== RIGHT SIDEBAR COLUMN (4 COLS) ==================== -->
-<div class="flex min-w-0 flex-col gap-5 xl:col-span-4">
-<!-- WIDGET 1: PROCHAIN RENDEZ-VOUS -->
-<section aria-labelledby="appointment-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">event_available</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="appointment-heading">Prochain rendez-vous</h2>
-</div>
-<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">
-            J-2
-          </span>
-</div>
-<!-- Appointment Card -->
-<div class="p-space-md rounded bg-surface-container-low flex flex-col gap-space-sm">
-<div class="flex items-start gap-space-sm">
-<div class="w-12 h-12 rounded-full bg-primary-fixed text-primary flex items-center justify-center shrink-0 font-bold font-headline-sm text-[16px]">
-              HV
-            </div>
-<div class="flex flex-col min-w-0">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-bold">Entretien de tutorat individuel</span>
-<h3 class="font-title-md text-title-md text-on-surface truncate">Dr. Hélène Vasseur</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Professeure référente Master IA</p>
-</div>
-</div>
-<div class="flex flex-col gap-2 pt-2 border-t-0 font-body-sm text-body-sm text-on-surface">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
-<span class="font-medium">Jeudi 24 Octobre 2024 à 14h30</span>
-</div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-secondary text-[18px]">meeting_room</span>
-<span>Bureau B402 (Bâtiment Sophie Germain)</span>
-</div>
-<div class="flex items-center gap-2 text-on-surface-variant">
-<span class="material-symbols-outlined text-outline text-[18px]">videocam</span>
-<span>Option Visioconférence activable</span>
-</div>
-</div>
-<div class="grid grid-cols-2 gap-2 pt-2">
-<button class="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors min-h-[44px]" type="button">
-<span class="material-symbols-outlined text-[18px]">info</span>
-<span>Voir détails</span>
-</button>
-<button class="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors min-h-[44px]" type="button">
-<span class="material-symbols-outlined text-[18px]">event_repeat</span>
-<span>Reprogrammer</span>
-</button>
-</div>
-</div>
-</section>
-<!-- WIDGET 2: STATUT DE MES OBJECTIFS D'ÉTUDE -->
-<section aria-labelledby="goals-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">flag</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="goals-heading">Objectifs d'étude</h2>
-</div>
-<a aria-label="Gérer tous mes objectifs d'étude" class="p-1 rounded-full text-primary hover:bg-surface-container flex items-center justify-center min-h-[44px] min-w-[44px]" data-path="mes-objectifs-et-plans" href="{% url 'coaching:student_progress' %}">
-<span class="material-symbols-outlined text-[20px]">add_circle</span>
-</a>
-</div>
-<div class="flex flex-col gap-space-md">
-<!-- Goal 1 -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center">
-<span class="font-label-md text-label-md text-on-surface font-semibold">Maîtriser les réseaux de neurones (CNN)</span>
-<span class="font-data-metric text-data-metric font-bold text-primary">75%</span>
-</div>
-<div aria-label="Progression de l'objectif Réseaux convolutionnels" aria-valuemax="100" aria-valuemin="0" aria-valuenow="75" class="w-full h-2 rounded-full bg-surface-container overflow-hidden" role="progressbar">
-<div class="h-full bg-primary rounded-full" style="width: 75%;"></div>
-</div>
-<span class="font-body-sm text-body-sm text-on-surface-variant text-xs">Échéance : 15 Novembre 2024</span>
-</div>
-<!-- Goal 2 -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center">
-<span class="font-label-md text-label-md text-on-surface font-semibold">Rédiger le rapport bibliographique de stage</span>
-<span class="font-data-metric text-data-metric font-bold text-secondary">40%</span>
-</div>
-<div aria-label="Progression du rapport bibliographique" aria-valuemax="100" aria-valuemin="0" aria-valuenow="40" class="w-full h-2 rounded-full bg-surface-container overflow-hidden" role="progressbar">
-<div class="h-full bg-secondary rounded-full" style="width: 40%;"></div>
-</div>
-<span class="font-body-sm text-body-sm text-on-surface-variant text-xs">Échéance : 1 Décembre 2024</span>
-</div>
-<!-- Goal 3 -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center">
-<span class="font-label-md text-label-md text-on-surface font-semibold">Réviser les théorèmes de consensus distribué</span>
-<span class="font-data-metric text-data-metric font-bold text-tertiary">90%</span>
-</div>
-<div aria-label="Progression Consensus distribué" aria-valuemax="100" aria-valuemin="0" aria-valuenow="90" class="w-full h-2 rounded-full bg-surface-container overflow-hidden" role="progressbar">
-<div class="h-full bg-tertiary rounded-full" style="width: 90%;"></div>
-</div>
-<span class="font-body-sm text-body-sm text-on-surface-variant text-xs">Échéance : 29 Octobre 2024</span>
-</div>
-</div>
-</section>
-<!-- WIDGET 3: MES TÂCHES IMMINENTES (INTERACTIVE CHECKLIST) -->
-<section aria-labelledby="tasks-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">check_circle</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="tasks-heading">Tâches imminentes</h2>
-</div>
-<span class="font-data-metric text-data-metric text-on-surface-variant">2/4 faites</span>
-</div>
-<form class="flex flex-col gap-space-xs" onsubmit="event.preventDefault();">
-<!-- Task 1 (urgent) -->
-<label class="flex items-start gap-3 p-2.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer min-h-[44px]">
-<input aria-label="Marquer comme fait : Télécharger le dataset CIFAR-10 pour le TP3" class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary accent-primary" type="checkbox"/>
-<div class="flex flex-col">
-<span class="font-body-md text-body-md text-on-surface font-medium leading-tight">Télécharger le dataset CIFAR-10 pour le TP3</span>
-<div class="flex items-center gap-2 mt-1">
-<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-[11px] font-bold">
-<span class="material-symbols-outlined text-xs">priority_high</span> Urgent
-                </span>
-<span class="font-body-sm text-xs text-on-surface-variant">Aujourd'hui</span>
-</div>
-</div>
-</label>
-<!-- Task 2 -->
-<label class="flex items-start gap-3 p-2.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer min-h-[44px]">
-<input aria-label="Marquer comme fait : Poser une question sur le forum TP Raft" class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary accent-primary" type="checkbox"/>
-<div class="flex flex-col">
-<span class="font-body-md text-body-md text-on-surface font-medium leading-tight">Poser une question sur le forum TP Raft</span>
-<div class="flex items-center gap-2 mt-1">
-<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] font-bold">
-                  Forum
-                </span>
-<span class="font-body-sm text-xs text-on-surface-variant">Demain</span>
-</div>
-</div>
-</label>
-<!-- Task 3 (Completed) -->
-<label class="flex items-start gap-3 p-2.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer min-h-[44px] opacity-75">
-<input aria-label="Marquer comme non fait : Valider le choix du sujet d'éthique" checked="" class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary accent-primary" type="checkbox"/>
-<div class="flex flex-col">
-<span class="font-body-md text-body-md text-on-surface line-through font-medium leading-tight">Valider le sujet d'essai éthique</span>
-<span class="font-body-sm text-xs text-primary font-semibold mt-1">Fait hier</span>
-</div>
-</label>
-<!-- Task 4 (Completed) -->
-<label class="flex items-start gap-3 p-2.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer min-h-[44px] opacity-75">
-<input aria-label="Marquer comme non fait : Signer la convention de tutorat" checked="" class="mt-1 w-5 h-5 rounded text-primary focus:ring-primary accent-primary" type="checkbox"/>
-<div class="flex flex-col">
-<span class="font-body-md text-body-md text-on-surface line-through font-medium leading-tight">Signer la charte de tutorat M1</span>
-<span class="font-body-sm text-xs text-primary font-semibold mt-1">Fait le 19 Octobre</span>
-</div>
-</label>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Ma semaine</h2>
+<span class="text-xs text-on-surface-variant">{{ week_label }}</span>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for item in upcoming_sessions %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ item.session.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ item.when_label }}{% if item.session.location %} · {{ item.session.location }}{% endif %}</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+{% include "portal/_badge.html" with label=item.meta.label tone_class=item.meta.variant %}
+<form method="post" action="{% url 'coaching:student_session_toggle' item.session.pk %}">{% csrf_token %}
+<button class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-on-primary" type="submit">Marquer terminée</button>
 </form>
-</section>
-<!-- WIDGET 4: DERNIÈRES ANNONCES INSTITUTIONNELLES & DE COURS -->
-<section aria-labelledby="announcements-heading" class="bg-surface-container-lowest rounded p-space-lg shadow-sm flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-xs">
-<span class="w-8 h-8 rounded-full bg-surface-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[20px]">campaign</span>
-</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="announcements-heading">Dernières annonces</h2>
 </div>
-<a class="font-label-md text-label-md text-primary hover:underline min-h-[44px] flex items-center px-1" data-path="annonces" href="{% url 'community:student_announcements' %}">
-<span>Toutes (12)</span>
-</a>
 </div>
-<div class="flex flex-col gap-space-sm">
-<!-- Announcement 1 -->
-<article class="p-space-sm rounded bg-surface-container-low flex flex-col gap-1.5">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-bold">Systèmes Distribués</span>
-<span class="font-data-metric text-xs text-on-surface-variant">Il y a 3h</span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Précision sur le barème du Partiel du 30 Octobre</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-              Prof. Marc Danjou : La documentation officielle des RFC Raft sera fournie en annexe imprimée.
-            </p>
-</article>
-<!-- Announcement 2 -->
-<article class="p-space-sm rounded bg-surface-container-low flex flex-col gap-1.5">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">Département IA</span>
-<span class="font-data-metric text-xs text-on-surface-variant">Hier</span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Séminaire invité : IA Générative et Raisonnement</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-              Accueil du chercheur invité Dr. Alain R. ce vendredi à 16h en Amphi Turing. Présence fortement conseillée.
-            </p>
-</article>
-<!-- Announcement 3 -->
-<article class="p-space-sm rounded bg-surface-container-low flex flex-col gap-1.5">
-<div class="flex items-center justify-between">
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-bold">{{ portal_university.name }}</span>
-<span class="font-data-metric text-xs text-on-surface-variant">18 Oct</span>
-</div>
-<h3 class="font-title-md text-title-md text-on-surface">Maintenance programmée des serveurs de GPU de calcul</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-              Coupure brève des clusters Slurm samedi 26 Octobre entre 02h00 et 06h00.
-            </p>
-</article>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune session planifiée cette semaine. <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Planifier une session</a> ou demander un plan à l'IA.</p>
+{% endfor %}
 </div>
 </section>
-</div>
-</div>
-</div>
-<!-- Inline script for micro-interactions (Toggling AI panel & accessibility focus) -->
-<script>
-  (function() {
-    const toggleBtn = document.getElementById('btn-toggle-ai-planner');
-    const closeBtn = document.getElementById('btn-close-ai-panel');
-    const panel = document.getElementById('ai-planner-panel');
 
-    if (toggleBtn && panel) {
-      toggleBtn.addEventListener('click', function() {
-        const isHidden = panel.classList.contains('hidden');
-        if (isHidden) {
-          panel.classList.remove('hidden');
-          toggleBtn.setAttribute('aria-expanded', 'true');
-          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-          panel.classList.add('hidden');
-          toggleBtn.setAttribute('aria-expanded', 'false');
-        }
-      });
-    }
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes priorités</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_tasks' %}">Toutes mes tâches ({{ task_counts.total }})</a>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for item in task_rows %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ item.task.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ item.task.context_label|default:"Tâche personnelle" }} · {{ item.due_label }}</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+<span class="rounded-full px-2 py-0.5 text-[11px] font-bold {{ item.class }}">{{ item.task.get_priority_display }}</span>
+<form method="post" action="{% url 'coaching:student_task_toggle' item.task.pk %}">{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.path }}"/>
+<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Terminer</button>
+</form>
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune tâche en attente. Ajoutez-en depuis <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_tasks' %}">Mes tâches</a>.</p>
+{% endfor %}
+</div>
+</section>
 
-    if (closeBtn && panel && toggleBtn) {
-      closeBtn.addEventListener('click', function() {
-        panel.classList.add('hidden');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        toggleBtn.focus();
-      });
-    }
-  })();
-</script></main>
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes objectifs</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Gérer mes objectifs</a>
+</div>
+<div class="mt-3 grid gap-3 md:grid-cols-2">
+{% for goal in stats.goals|slice:":4" %}
+<article class="flex flex-col gap-2 rounded bg-surface-container-low p-3">
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ goal.title }}</p>
+<p class="text-xs text-on-surface-variant">{% if goal.course_code %}{{ goal.course_code }} · {% endif %}{{ goal.get_status_display }}</p>
+</div>
+<span class="font-data-metric text-sm font-bold text-primary">{{ goal.progress }}%</span>
+</div>
+<div class="h-2 w-full overflow-hidden rounded-full bg-surface-container">
+<div class="h-2 rounded-full {% if goal.status == 'at_risk' %}bg-error{% else %}bg-primary{% endif %}" style="width: {{ goal.progress }}%;"></div>
+</div>
+</article>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant md:col-span-2">Aucun objectif. <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Créer mon premier objectif</a>.</p>
+{% endfor %}
+</div>
+</section>
+
+</div>
+
+<aside class="flex min-w-0 flex-col gap-5 xl:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed font-bold text-primary">{{ tutor_initials }}</span>
+<div class="min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">{{ tutor_name }}</h2>
+<p class="text-xs text-on-surface-variant">Référent pédagogique</p>
+</div>
+</div>
+<div class="mt-3 flex flex-col gap-2 text-sm">
+<p class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">event_upcoming</span>{{ next_tutoring_label }}</p>
+<p class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-secondary">notifications</span>{{ unread_notifications }} notification(s) non lue(s)</p>
+{% if risk_meta %}
+<span class="inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ risk_meta.badge }}">{{ risk_meta.label }}</span>
+{% endif %}
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:student_notifications' %}">Notifications</a>
+<a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:student_appointments' %}">Mes rendez-vous</a>
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Prochain jalon</h2>
+{% if exam %}
+<div class="mt-3 rounded bg-tertiary-fixed/40 p-3">
+<p class="text-sm font-bold text-on-surface">{{ exam.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ exam.course_code }}{% if exam.location %} · {{ exam.location }}{% endif %}</p>
+<p class="mt-2 text-xs font-bold text-tertiary">{{ exam_label }}{% if exam_days != None %} · dans {{ exam_days }} jour(s){% endif %}</p>
+</div>
+{% else %}
+<p class="mt-2 text-sm text-on-surface-variant">Aucun examen planifié. Ajoutez un jalon de type « Examen » dans votre plan d'étude.</p>
+{% endif %}
+<a class="mt-3 inline-flex text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Ouvrir mon planning</a>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Journal</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_journal' %}">Écrire</a>
+</div>
+{% if latest_journal %}
+<div class="mt-3">
+<p class="text-sm font-bold text-on-surface">{{ latest_journal.title }}</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ latest_journal.get_sentiment_display }} · confiance {{ latest_journal.confidence }}/10</p>
+<p class="mt-2 line-clamp-3 text-sm text-on-surface-variant">{{ latest_journal.reflection }}</p>
+</div>
+{% else %}
+<p class="mt-2 text-sm text-on-surface-variant">Aucune entrée. Rédigez votre première réflexion pour partager votre progression.</p>
+{% endif %}
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Test de langue</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_language_tests' %}">Mes tests</a>
+</div>
+{% for result in language_results %}
+<p class="mt-2 text-sm text-on-surface">Niveau {{ result.overall_level }} · {{ result.get_overall_verdict_display }}</p>
+{% empty %}
+<p class="mt-2 text-sm text-on-surface-variant">Passez un examen blanc IELTS / Cambridge pour évaluer votre oral.</p>
+{% endfor %}
+</section>
+</aside>
+</div>
+</div>
+</main>
 {% endblock %}

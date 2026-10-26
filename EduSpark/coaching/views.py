@@ -1,10 +1,13 @@
 import csv
+import json
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.db import IntegrityError, transaction
-from django.http import HttpResponse
+from django.db.models import Count, Q
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -12,27 +15,46 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from accounts.decorators import role_required
-from accounts.models import Profil
+from accounts.models import (
+    Invitation,
+    ProfessorProfile,
+    Profil,
+    SchoolClass,
+    StudentProfile,
+)
 from accounts.tenancy import Role
 
+from .ai_planner import AIPlanError, ai_planner_available, generate_study_plan
 from .forms import (
+    AlertCloseForm,
     AlertHandleForm,
+    AlertReportForm,
     AppointmentForm,
+    AttendanceSessionForm,
     DeclineRequestForm,
     DifficultyNoteForm,
     DifficultyPlanForm,
     DifficultySheetForm,
+    GoalProgressForm,
     JournalEntryForm,
     JournalFeedbackForm,
+    NotificationReplyForm,
+    RelanceForm,
     SessionSummaryForm,
     SlotForm,
+    StudentGoalForm,
+    StudySessionForm,
     TaskForm,
     TutorAllocationForm,
 )
+from .mailer import send_templated_email
 from .models import (
+    AttendanceRecord,
+    AttendanceSession,
     DifficultyNote,
     DifficultySheet,
     JournalEntry,
+    LanguageTestFeedback,
     PerseveranceAlert,
     StudentGoal,
     StudentTask,
@@ -52,17 +74,25 @@ from .services import (
     SESSION_STATE_META,
     SESSION_STATUS_META,
     SEVERITY_META,
+    TUTORING_SATURDAY_TIMES,
+    TUTORING_TIME_CHOICES,
+    TUTORING_WEEKDAY_TIMES,
+    TUTORING_WINDOW_HINT,
     academic_year_for,
     active_assignment,
     allocation_rows,
-    assign_students,
+    assign_class_referent,
     assignment_meta,
+    attendance_metrics,
+    attendance_session_students,
     auto_assign_class,
     caseload,
     category_distribution,
     class_label,
     display_name,
     enrolled_count,
+    enrolled_students,
+    ensure_attendance_alert,
     get_professor,
     get_student,
     latest_notification_view,
@@ -86,8 +116,8 @@ from .services import (
     student_task_counts,
     student_tutors,
     student_week_hours,
+    tutoring_window_error,
     upcoming_slots_for_students,
-    waiting_students,
     week_slot_groups,
     admin_monitoring_summary,
 )
@@ -115,6 +145,12 @@ from .utils import (
 )
 
 PRIORITY_ORDER = {"high": 0, "normal": 1, "low": 2}
+
+ALERT_STATUS_CLASS = {
+    PerseveranceAlert.STATUS_OPEN: "bg-error-container text-on-error-container",
+    PerseveranceAlert.STATUS_TAKEN: "bg-tertiary-fixed text-on-tertiary-fixed",
+    PerseveranceAlert.STATUS_CLOSED: "bg-surface-container text-on-surface-variant",
+}
 
 
 def _csv_response(filename, rows):
@@ -144,16 +180,64 @@ def _form_error_message(form, fallback):
     return fallback
 
 
-def _overlapping_session(sessions, start, minutes, exclude_pk=None):
+def _overlapping_session(sessions, start, minutes, exclude_pk=None, include_preferred=False):
     if exclude_pk:
         sessions = sessions.exclude(pk=exclude_pk)
     end = start + timedelta(minutes=minutes or 30)
-    for other in sessions.filter(scheduled_at__isnull=False):
+    for other in sessions:
         other_start = other.scheduled_at
+        if other_start is None and include_preferred:
+            other_start = other.preferred_at
+        if other_start is None:
+            continue
         other_end = other_start + timedelta(minutes=other.duration_minutes or 30)
         if other_start < end and other_end > start:
             return other
     return None
+
+
+def _study_session_clash(student, start, minutes, exclude_pk=None):
+    """Retourne une session de travail qui chevauche le créneau demandé."""
+    end = start + timedelta(minutes=minutes or 60)
+    sessions = student.study_sessions.filter(
+        starts_at__date=timezone.localtime(start).date(),
+        status__in=(
+            StudySession.STATUS_SCHEDULED,
+            StudySession.STATUS_POSTPONED,
+            StudySession.STATUS_COMPLETED,
+        ),
+    )
+    if exclude_pk:
+        sessions = sessions.exclude(pk=exclude_pk)
+    for other in sessions:
+        other_start = other.starts_at
+        other_end = other_start + timedelta(minutes=other.duration_minutes or 60)
+        if other_start < end and other_end > start:
+            return other
+    return None
+
+
+def _goal_status(goal, progress):
+    """Statut cohérent d'un objectif après mise à jour de son avancement."""
+    if progress >= 100:
+        return StudentGoal.STATUS_ACHIEVED
+    if goal.target_date and goal.target_date < timezone.localdate():
+        return StudentGoal.STATUS_AT_RISK
+    return StudentGoal.STATUS_IN_PROGRESS
+
+
+def _next_tutoring_start(now):
+    local = timezone.localtime(now)
+    for offset in range(8):
+        day = local.date() + timedelta(days=offset)
+        if day.weekday() == 6:
+            continue
+        clocks = TUTORING_SATURDAY_TIMES if day.weekday() == 5 else TUTORING_WEEKDAY_TIMES
+        for clock in clocks:
+            candidate = combine(day, parse_clock(clock))
+            if candidate > now + timedelta(minutes=15):
+                return day, clock
+    return local.date(), TUTORING_WEEKDAY_TIMES[0]
 
 
 def _safe_student_redirect(request, fallback):
@@ -177,7 +261,100 @@ def _safe_student_redirect(request, fallback):
 
 @role_required(Profil.ROLE_ETUDIANT)
 def student_dashboard(request):
-    return render(request, "coaching/student_dashboard.html")
+    student = get_student(request)
+    if student is None:
+        return redirect("accounts:login")
+    stats = student_goal_stats(student)
+    completed_minutes, planned_minutes, week_sessions = student_week_hours(student)
+    task_counts = student_task_counts(student)
+    tasks = list(
+        student.tasks.filter(is_done=False).order_by("due_at", "-priority")[:5]
+    )
+    next_tutoring = next_accepted_session(student)
+    exam = next_exam(student)
+    assignment = active_assignment(student)
+    attendance = attendance_metrics(student)
+    unread_notifications = student.tutor_notifications.filter(read_at__isnull=True).count()
+    latest_journal = student.journal_entries.first()
+    language_results = student.language_test_results.select_related("session")[:3]
+    upcoming_sessions = [
+        item for item in week_sessions
+        if item.status in (StudySession.STATUS_SCHEDULED, StudySession.STATUS_POSTPONED)
+        and item.starts_at >= timezone.now()
+    ][:5]
+    subscription_rows = [
+        {
+            "session": item,
+            "when_label": "%s · %s - %s" % (
+                fr_day_short(item.starts_at),
+                fr_time(item.starts_at),
+                fr_time(item.starts_at + timedelta(minutes=item.duration_minutes)),
+            ),
+            "meta": SESSION_STATUS_META.get(item.status),
+        }
+        for item in upcoming_sessions
+    ]
+    task_rows = [
+        {
+            "task": task,
+            "due_label": fr_day_short(task.due_at) if task.due_at else "Sans échéance",
+            "class": (
+                "bg-error-container text-on-error-container"
+                if task.priority == StudentTask.PRIORITY_HIGH
+                else "bg-surface-container text-on-surface-variant"
+            ),
+        }
+        for task in tasks
+    ]
+    exam_label = ""
+    exam_days = None
+    if exam:
+        exam_days = (timezone.localtime(exam.starts_at).date() - timezone.localdate()).days
+        exam_label = "%s · %s" % (fr_day_short(exam.starts_at), fr_time(exam.starts_at))
+    tutor = assignment.professor if assignment else None
+    context = {
+        "student": student,
+        "assignment": assignment,
+        "tutor": tutor,
+        "tutor_name": professor_name(tutor) if tutor else "Référent non affecté",
+        "tutor_initials": person_initials(tutor) if tutor else "?",
+        "next_tutoring": next_tutoring,
+        "next_tutoring_label": (
+            "%s · %s" % (fr_day_short(next_tutoring.scheduled_at), fr_time(next_tutoring.scheduled_at))
+            if next_tutoring else "Aucun rendez-vous planifié"
+        ),
+        "exam": exam,
+        "exam_label": exam_label,
+        "exam_days": exam_days,
+        "stats": stats,
+        "goal_progress": stats["average_progress"],
+        "completed_hours": hours_label(completed_minutes),
+        "planned_hours": hours_label(planned_minutes),
+        "planned_hint": "Planifié : %s · %d session(s)" % (
+            hours_label(planned_minutes), len(week_sessions),
+        ),
+        "week_session_count": len(week_sessions),
+        "task_counts": task_counts,
+        "tasks_hint": "%d %% du travail personnel" % task_counts["progress"],
+        "attendance_hint": "Absences : %d · Justifiées : %d" % (
+            attendance["absent"], attendance["excused"],
+        ),
+        "task_rows": task_rows,
+        "upcoming_sessions": subscription_rows,
+        "unread_notifications": unread_notifications,
+        "latest_journal": latest_journal,
+        "language_results": language_results,
+        "attendance_rate": attendance["rate"],
+        "attendance_absent": attendance["absent"],
+        "attendance_excused": attendance["excused"],
+        "risk_meta": RISK_META.get(assignment.risk_level) if assignment else None,
+        "today_label": fr_date_cap(timezone.localdate(), year=True),
+        "week_label": "%s au %s" % (
+            fr_day_short(week_bounds()[0]), fr_day_short(week_bounds()[1]),
+        ),
+        "academic_year": academic_year_for(request.university),
+    }
+    return render(request, "coaching/student_dashboard.html", context)
 
 
 @role_required(Profil.ROLE_ETUDIANT)
@@ -201,29 +378,78 @@ def student_progress(request):
     completed_minutes, planned_minutes, sessions = student_week_hours(student)
     target_minutes = 20 * 60
     session_items = []
-    for session in sessions[:3]:
+    for session in sessions:
+        starts_at = session.starts_at
+        ends_at = (
+            starts_at + timedelta(minutes=session.duration_minutes)
+            if starts_at else None
+        )
+        session_day = None
+        if starts_at:
+            session_day = (
+                timezone.localtime(starts_at)
+                if timezone.is_aware(starts_at) else starts_at
+            ).date()
         session_items.append({
             "session": session,
             "meta": SESSION_STATUS_META.get(session.status, SESSION_STATUS_META[StudySession.STATUS_SCHEDULED]),
             "when_label": "%s • %s - %s (%s)" % (
-                fr_date_cap(session.starts_at) if session.starts_at else "—",
-                fr_time(session.starts_at),
-                fr_time(session.starts_at + timedelta(minutes=session.duration_minutes)),
+                fr_date_cap(starts_at) if starts_at else "—",
+                fr_time(starts_at),
+                fr_time(ends_at),
                 minutes_label(session.duration_minutes),
             ),
+            "time_label": "%s - %s" % (fr_time(starts_at), fr_time(ends_at)),
+            "day": session_day,
         })
-    tasks = list(
-        student.tasks.filter(is_done=False).order_by("horizon", "-priority", "due_at")[:3]
+    pending_tasks = list(
+        student.tasks.filter(is_done=False).order_by("horizon", "-priority", "due_at")
     )
-    task_items = []
-    for task in tasks:
-        task_items.append({
+    all_task_items = []
+    for task in pending_tasks:
+        all_task_items.append({
             "task": task,
             "detail": "%s%s" % (
                 task.context_label or "Tâche personnelle",
                 " • %s" % fr_day_short(task.due_at) if task.due_at else "",
             ),
+            "due_label": (
+                "Échéance %s" % fr_day_short(task.due_at) if task.due_at else "Sans échéance"
+            ),
         })
+    task_items = all_task_items[:3]
+    week_start_day = week_bounds()[0]
+    today = timezone.localdate()
+    weekday_labels = (
+        "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche",
+    )
+    calendar_days = []
+    for offset, weekday_label in enumerate(weekday_labels):
+        day = week_start_day + timedelta(days=offset)
+        day_sessions = [item for item in session_items if item["day"] == day]
+        day_tasks = [item for item in all_task_items if item["task"].due_at == day]
+        calendar_days.append({
+            "date": day,
+            "weekday": weekday_label,
+            "day_number": day.day,
+            "month_label": fr_day_short(day).split()[-1].rstrip("."),
+            "full_label": fr_date_cap(day, year=True),
+            "is_today": day == today,
+            "is_weekend": offset >= 5,
+            "sessions": day_sessions,
+            "tasks": day_tasks,
+            "session_count": len(day_sessions),
+            "task_count": len(day_tasks),
+            "session_minutes": sum(
+                item["session"].duration_minutes for item in day_sessions
+            ),
+        })
+    calendar_minutes = sum(
+        item["session"].duration_minutes for item in session_items
+    )
+    unscheduled_task_items = [
+        item for item in all_task_items if item["task"].due_at is None
+    ]
     latest_entry = (
         student.journal_entries.select_related("feedback_by__membership__user").first()
     )
@@ -280,6 +506,33 @@ def student_progress(request):
             ) if achieved_recent else "Aucun objectif validé récemment"
         ),
         "session_items": session_items,
+        "calendar_days": calendar_days,
+        "calendar_minutes_label": hours_label(calendar_minutes),
+        "calendar_session_count": len(session_items),
+        "calendar_task_count": sum(
+            day["task_count"] for day in calendar_days
+        ),
+        "unscheduled_task_items": unscheduled_task_items,
+        "ai_goal_options": [
+            {
+                "id": item["goal"].pk,
+                "title": item["goal"].title,
+                "target": item["target_label"],
+            }
+            for item in goal_items
+            if item["goal"].status != StudentGoal.STATUS_ACHIEVED
+        ],
+        "ai_available": ai_planner_available(),
+        "ai_model": getattr(settings, "GROQ_MODEL", "llama-3.3-70b-versatile"),
+        "goal_semester_default": (stats["goals"][0].semester if stats["goals"] else "Semestre 1"),
+        "session_today_value": timezone.localdate().isoformat(),
+        "session_max_date_value": (timezone.localdate() + timedelta(days=120)).isoformat(),
+        "session_time_choices": [
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+            "11:00", "11:30", "13:30", "14:00", "14:30", "15:00",
+            "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
+            "18:30", "19:00", "19:30", "20:00", "20:30",
+        ],
         "sessions_total": len(sessions),
         "sessions_remaining": sessions_remaining_value,
         "sessions_hint": "%d session%s restante%s cette semaine" % (
@@ -318,6 +571,78 @@ def student_progress(request):
     return render(request, "coaching/student_progress.html", context)
 
 
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_ai_plan(request):
+    student = get_student(request)
+    if student is None:
+        return JsonResponse({"error": "Profil étudiant introuvable."}, status=403)
+    try:
+        goal_id = int(request.POST.get("goal_id") or 0) or None
+        weekly_hours = max(5, min(30, int(request.POST.get("hours") or 15)))
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "Paramètres de planification invalides."}, status=400)
+    priority = request.POST.get("priority")
+    if priority not in {"deadlines", "balance"}:
+        priority = "deadlines"
+    try:
+        plan = generate_study_plan(
+            student, goal_id=goal_id, weekly_hours=weekly_hours, priority=priority,
+        )
+    except AIPlanError as exc:
+        return JsonResponse({"error": str(exc)}, status=502)
+    return JsonResponse({"plan": plan})
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_ai_plan_apply(request):
+    student = get_student(request)
+    if student is None:
+        return JsonResponse({"error": "Profil étudiant introuvable."}, status=403)
+    try:
+        payload = json.loads(request.body or "{}")
+        blocks = payload.get("blocs") or []
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "Proposition IA invalide."}, status=400)
+    if not isinstance(blocks, list):
+        return JsonResponse({"error": "Proposition IA invalide."}, status=400)
+    week_start, week_end = week_bounds()
+    created = 0
+    for block in blocks[:8]:
+        if not isinstance(block, dict):
+            continue
+        try:
+            day = datetime.strptime(str(block.get("jour", "")), "%Y-%m-%d").date()
+            clock = datetime.strptime(str(block.get("debut", "")), "%H:%M").time()
+            duration = max(30, min(180, int(block.get("duree_minutes", 60))))
+        except (TypeError, ValueError):
+            continue
+        if day < week_start or day > week_end:
+            continue
+        starts_at = combine(day, clock)
+        if starts_at < timezone.now():
+            continue
+        if _study_session_clash(student, starts_at, duration) is not None:
+            continue
+        StudySession.objects.create(
+            student=student,
+            title=str(block.get("titre") or "Session de révision")[:200],
+            course_code=str(block.get("code_ue") or "")[:20],
+            kind=StudySession.KIND_REVISION,
+            starts_at=starts_at,
+            duration_minutes=duration,
+            status=StudySession.STATUS_SCHEDULED,
+            notes="Bloc validé depuis l'assistant Plan d'Étude IA.",
+        )
+        created += 1
+    if not created:
+        return JsonResponse(
+            {"error": "Aucun bloc futur n'a pu être ajouté au planning."}, status=400,
+        )
+    return JsonResponse({"created": created})
+
+
 @role_required(Profil.ROLE_ETUDIANT)
 def student_tasks(request):
     student = get_student(request)
@@ -348,6 +673,14 @@ def student_tasks(request):
                 else "bg-secondary-fixed text-on-secondary-fixed"
             ),
         })
+    pending_tasks = [item["task"] for item in task_items if not item["task"].is_done]
+    pending_tasks.sort(key=lambda task: (
+        PRIORITY_ORDER.get(task.priority, 1),
+        0 if task.horizon == StudentTask.HORIZON_TODAY else 1,
+        task.due_at or timezone.localdate() + timedelta(days=3650),
+    ))
+    guide_priority_task = pending_tasks[0] if pending_tasks else None
+    guide_exam = next_exam(student)
     today_urgent = student.tasks.filter(
         is_done=False, horizon=StudentTask.HORIZON_TODAY, priority=StudentTask.PRIORITY_HIGH,
     ).count()
@@ -355,6 +688,14 @@ def student_tasks(request):
     context = {
         "task_items": task_items,
         "counts": counts,
+        "guide_priority_task": guide_priority_task,
+        "guide_exam": guide_exam,
+        "guide_exam_label": (
+            "%s à %s" % (
+                fr_date_cap(guide_exam.starts_at), fr_time(guide_exam.starts_at),
+            )
+            if guide_exam else ""
+        ),
         "today_urgent": today_urgent,
         "today_hint": "Dont %d prioritaire%s" % (
             today_urgent, "" if today_urgent == 1 else "s",
@@ -372,6 +713,41 @@ def student_tasks(request):
 def student_appointments(request):
     student = get_student(request)
     tutors = student_tutors(student)
+    referent_ids = set(
+        student.tutor_assignments.filter(
+            status=TutorAssignment.STATUS_ACTIVE,
+        ).values_list("professor_id", flat=True)
+    )
+    classes = student_classes(student)
+    teacher_ids = set()
+    for school_class in classes:
+        teacher_ids.update(
+            school_class.professors.values_list("pk", flat=True)
+        )
+
+    def tutor_scope(tutor):
+        is_referent = tutor.pk in referent_ids
+        is_teacher = tutor.pk in teacher_ids
+        discipline = tutor.speciality or tutor.department or ""
+        if is_referent and is_teacher:
+            role_label = "Référent pédagogique · Enseignant de la classe"
+        elif is_referent:
+            role_label = "Référent pédagogique"
+        elif is_teacher:
+            role_label = "Enseignant de la classe"
+        else:
+            role_label = "Interlocuteur"
+        if is_referent:
+            scope_label = "Suivi global · toutes matières"
+        elif is_teacher and discipline:
+            scope_label = "Discipline : %s" % discipline
+        elif is_teacher:
+            scope_label = "Aide disciplinaire"
+        else:
+            scope_label = "Accompagnement"
+        detail = " · %s" % discipline if discipline and is_teacher else ""
+        return role_label, scope_label, detail
+
     now = timezone.now()
     slots = (
         TutoringSlot.objects.filter(
@@ -379,6 +755,7 @@ def student_appointments(request):
             status=TutoringSlot.STATUS_OPEN,
             starts_at__gte=now,
         )
+        .exclude(sessions__status=TutoringSession.STATUS_PENDING)
         .select_related("professor__membership__user")
         .order_by("starts_at")
     )
@@ -400,25 +777,32 @@ def student_appointments(request):
         tutor_slots = slots_by_tutor.get(tutor.pk, [])
         if not tutor_slots:
             continue
+        role_label, scope_label, _ = tutor_scope(tutor)
         tutor_cards.append({
             "professor": tutor,
             "name": professor_name(tutor),
             "initials": person_initials(tutor),
-            "speciality": tutor.speciality or tutor.department or "Tuteur référent",
+            "role_label": role_label,
+            "scope_label": scope_label,
+            "is_referent": tutor.pk in referent_ids,
+            "speciality": tutor.speciality or tutor.department or "",
             "slots": tutor_slots,
         })
+
     time_choices = sorted(time_values | {"09:00", "10:00", "14:30", "15:00", "16:00", "17:00"})
     next_session = next_accepted_session(student)
     next_view = None
     if next_session:
+        next_role, next_scope, _ = tutor_scope(next_session.professor)
         next_view = {
             "session": next_session,
             "tutor_name": professor_name(next_session.professor),
             "tutor_initials": person_initials(next_session.professor),
-            "speciality": next_session.professor.speciality or next_session.professor.department or "Tuteur référent",
+            "role_label": next_role,
+            "scope_label": next_scope,
             "date_label": fr_date_cap(next_session.scheduled_at),
             "short_date": fr_day_short(next_session.scheduled_at),
-            "time_label": "%s – %s" % (
+            "time_label": "%s — %s" % (
                 fr_time(next_session.scheduled_at),
                 fr_time(next_session.scheduled_at + timedelta(minutes=next_session.duration_minutes)),
             ),
@@ -426,7 +810,7 @@ def student_appointments(request):
             "topic": next_session.topic,
             "meeting_url": next_session.slot.meeting_url if next_session.slot_id else "",
         }
-        next_view["hint"] = "%s · %s" % (next_view["time_label"], next_view["mode_label"])
+        next_view["hint"] = "%s — %s" % (next_view["time_label"], next_view["mode_label"])
     sessions = list(
         student.tutoring_sessions.select_related("professor__membership__user").order_by("-created_at")[:12]
     )
@@ -435,14 +819,18 @@ def student_appointments(request):
         status = session.status
         if status == TutoringSession.STATUS_ACCEPTED and session.scheduled_at and session.scheduled_at < now:
             status = TutoringSession.STATUS_COMPLETED
+        role_label, scope_label, _ = tutor_scope(session.professor)
         history.append({
             "session": session,
             "when_label": fr_date_time(session.scheduled_at or session.preferred_at or session.created_at),
             "tutor_name": professor_name(session.professor),
+            "role_label": role_label,
+            "scope_label": scope_label,
             "mode_label": session.get_mode_display(),
             "place": session.location or ("Visioconférence" if session.mode == TutoringSlot.MODE_VIDEO else "À définir"),
             "status_meta": SESSION_STATE_META.get(status, SESSION_STATE_META[TutoringSession.STATUS_PENDING]),
         })
+
     completed = student.tutoring_sessions.filter(status=TutoringSession.STATUS_COMPLETED).count()
     total_decided = student.tutoring_sessions.filter(
         status__in=(
@@ -459,12 +847,17 @@ def student_appointments(request):
         scheduled_at__date__range=week_bounds(),
     ).count()
     attendance_rate = percent(completed, total_decided) if total_decided else 100
+    tutor_options = []
+    for tutor in tutors:
+        role_label, _, detail = tutor_scope(tutor)
+        tutor_options.append({
+            "id": tutor.pk,
+            "name": "%s — %s%s" % (professor_name(tutor), role_label, detail),
+        })
     context = {
         "student": student,
         "tutor_cards": tutor_cards,
-        "tutor_options": [
-            {"id": tutor.pk, "name": professor_name(tutor)} for tutor in tutors
-        ],
+        "tutor_options": tutor_options,
         "time_choices": time_choices,
         "next_view": next_view,
         "history": history,
@@ -584,7 +977,82 @@ def student_journal(request):
 
 @role_required(Profil.ROLE_PROF)
 def prof_dashboard(request):
-    return render(request, "coaching/prof_dashboard.html")
+    professor = get_professor(request)
+    if professor is None:
+        return redirect("accounts:login")
+    assignments = list(caseload(professor))
+    student_ids = [item.student_id for item in assignments]
+    risk_counts = risk_breakdown(assignments)
+    pending = list(professor_pending_requests(professor)[:4])
+    now = timezone.now()
+    upcoming = list(
+        TutoringSession.objects.filter(
+            professor=professor,
+            university=request.university,
+            status=TutoringSession.STATUS_ACCEPTED,
+            scheduled_at__gte=now,
+        )
+        .select_related("student__membership__user", "school_class")
+        .order_by("scheduled_at")[:6]
+    )
+    alert_rows = list(
+        open_alerts_for_students(student_ids)
+        .select_related("student__membership__user", "school_class")
+        .order_by("priority", "-detected_at")[:5]
+    )
+    sheets = list(
+        DifficultySheet.objects.filter(
+            professor=professor, university=request.university,
+        )
+        .exclude(status=DifficultySheet.STATUS_CLOSED)
+        .select_related("student__membership__user", "school_class")
+        .order_by("severity", "-opened_at")[:5]
+    )
+    pending_attendance = (
+        AttendanceSession.objects.filter(professor=professor, university=request.university)
+        .exclude(status=AttendanceSession.STATUS_CANCELLED)
+        .annotate(record_count=Count("records"))
+        .filter(record_count=0)
+        .count()
+    )
+    week_start, week_end = week_bounds()
+    journal_week = JournalEntry.objects.filter(
+        student_id__in=student_ids, entry_date__range=(week_start, week_end),
+    ).count()
+    language_tested = LanguageTestFeedback.objects.filter(
+        student_id__in=student_ids, university=request.university,
+    ).values("student_id").distinct().count()
+    slots = list(professor_week_slots(professor))
+    context = {
+        "professor": professor,
+        "caseload_count": len(assignments),
+        "risk_counts": risk_counts,
+        "vigilance_count": risk_counts.get(TutorAssignment.RISK_HIGH, 0) + risk_counts.get(TutorAssignment.RISK_WATCH, 0),
+        "high_risk_count": risk_counts.get(TutorAssignment.RISK_HIGH, 0),
+        "vigilance_hint": "Dont %d en vigilance haute" % risk_counts.get(TutorAssignment.RISK_HIGH, 0),
+        "pending_requests": pending,
+        "pending_count": len(pending),
+        "upcoming_sessions": upcoming,
+        "upcoming_count": len(upcoming),
+        "alert_rows": alert_rows,
+        "alert_count": len(alert_rows),
+        "high_alerts": sum(1 for item in alert_rows if item.priority == PerseveranceAlert.PRIORITY_HIGH),
+        "alerts_hint": "Dont %d priorité haute" % sum(
+            1 for item in alert_rows if item.priority == PerseveranceAlert.PRIORITY_HIGH
+        ),
+        "sheet_rows": sheets,
+        "sheet_count": len(sheets),
+        "pending_attendance": pending_attendance,
+        "journal_week": journal_week,
+        "language_tested": language_tested,
+        "week_slot_count": len(slots),
+        "open_slot_count": sum(1 for item in slots if item.status == TutoringSlot.STATUS_OPEN),
+        "next_slot": next_professor_slot(professor),
+        "today_label": fr_date_cap(timezone.localdate(), year=True),
+        "week_label": "%s au %s" % (fr_day_short(week_start), fr_day_short(week_end)),
+        "academic_year": academic_year_for(request.university),
+    }
+    return render(request, "coaching/prof_dashboard.html", context)
 
 
 @role_required(Profil.ROLE_PROF)
@@ -597,6 +1065,21 @@ def prof_followup(request):
     alerts_by_student = defaultdict(list)
     for alert in open_alerts:
         alerts_by_student[alert.student_id].append(alert)
+    latest_notifications = {}
+    if student_ids:
+        for notification in (
+            TutorNotification.objects.filter(student_id__in=student_ids)
+            .select_related("professor__membership__user")
+            .order_by("-created_at")
+        ):
+            latest_notifications.setdefault(notification.student_id, notification)
+    latest_engagement_alerts = {}
+    if student_ids:
+        for alert in PerseveranceAlert.objects.filter(
+            student_id__in=student_ids,
+            alert_type=PerseveranceAlert.TYPE_ENGAGEMENT,
+        ).order_by("-detected_at"):
+            latest_engagement_alerts.setdefault(alert.student_id, alert)
     upcoming_ids = set(
         TutoringSession.objects.filter(
             student_id__in=student_ids,
@@ -645,6 +1128,54 @@ def prof_followup(request):
         meta["assignments_label"] = assignment.assignments_ratio
         meta["program"] = assignment.student.program or "Filière non renseignée"
         meta["risk_reason"] = assignment.risk_reason or "Aucun signalement actif."
+        notification = latest_notifications.get(assignment.student_id)
+        meta["relance"] = notification
+        meta["relance_when"] = (
+            relative_since(notification.created_at) if notification else ""
+        )
+        meta["relance_read"] = bool(notification and notification.read_at)
+        meta["relance_read_label"] = (
+            fr_date_time(notification.read_at)
+            if notification and notification.read_at else ""
+        )
+        meta["relance_reply"] = (notification.reply or "") if notification else ""
+        meta["relance_reply_when"] = (
+            fr_date_time(notification.replied_at)
+            if notification and notification.replied_at else ""
+        )
+        first_name = (
+            assignment.student.membership.user.first_name
+            or display_name(assignment.student)
+        )
+        reason = assignment.risk_reason or (
+            "J'aimerais que l'on fasse le point sur tes derniers rendus."
+        )
+        meta["relance_prefill_subject"] = "Faire le point sur ta progression"
+        meta["relance_prefill_message"] = (
+            "Bonjour %s, je souhaite que l'on fasse le point sur ta progression. "
+            "%s Peux-tu me répondre ici et, si besoin, réserver un créneau de tutorat ?"
+            % (first_name, reason)
+        )
+        meta["alert_prefill_detail"] = assignment.risk_reason or ""
+        engagement_alert = latest_engagement_alerts.get(assignment.student_id)
+        meta["engagement_alert"] = engagement_alert
+        if engagement_alert:
+            meta["alert_status_label"] = engagement_alert.get_status_display()
+            meta["alert_status_class"] = ALERT_STATUS_CLASS.get(
+                engagement_alert.status, ALERT_STATUS_CLASS[PerseveranceAlert.STATUS_OPEN]
+            )
+            meta["alert_priority_label"] = engagement_alert.get_priority_display()
+            meta["alert_when"] = relative_day(engagement_alert.detected_at)
+            meta["alert_reported_by"] = (
+                professor_name(engagement_alert.reported_by)
+                if engagement_alert.reported_by_id else ""
+            )
+        else:
+            meta["alert_status_label"] = ""
+            meta["alert_status_class"] = ""
+            meta["alert_priority_label"] = ""
+            meta["alert_when"] = ""
+            meta["alert_reported_by"] = ""
         rows.append({"assignment": assignment, "meta": meta})
     classes = {}
     for assignment in assignments:
@@ -802,6 +1333,7 @@ def prof_tutoring(request):
             "student_email": item.student.membership.user.email,
             "class_name": item.school_class.name if item.school_class_id else class_label(item.student) or "—",
             "preferred_label": fr_day_time(item.preferred_at) if item.preferred_at else "À définir",
+            "comment": item.student_comment,
             "priority_meta": meta,
         })
     groups = []
@@ -891,6 +1423,220 @@ def prof_tutoring(request):
         "mode_choices": TutoringSlot.MODE_CHOICES,
     }
     return render(request, "coaching/prof_tutoring.html", context)
+
+
+@role_required(Profil.ROLE_PROF)
+def prof_attendance(request):
+    professor = get_professor(request)
+    classes = (
+        SchoolClass.objects.filter(university=request.university)
+        .filter(Q(professors=professor) | Q(tutor_assignments__professor=professor))
+        .distinct()
+        .order_by("name")
+    )
+    sessions = (
+        AttendanceSession.objects.filter(
+            professor=professor, university=request.university,
+        )
+        .select_related("school_class")
+        .prefetch_related("records")
+        .order_by("-starts_at")[:80]
+    )
+    session_rows = []
+    for session in sessions:
+        recorded = session.recorded_count
+        session_rows.append({
+            "session": session,
+            "date_label": fr_day_time(session.starts_at),
+            "class_name": session.school_class.name,
+            "kind_label": session.get_kind_display(),
+            "attended": session.attended_count,
+            "recorded": recorded,
+            "is_recorded": recorded > 0,
+            "status_label": session.get_status_display(),
+            "url": reverse("coaching:prof_attendance_session", args=[session.pk]),
+        })
+    assignments = list(caseload(professor).filter(university=request.university))
+    student_rows = []
+    for assignment in assignments:
+        metrics = attendance_metrics(assignment.student)
+        student_rows.append({
+            "student": assignment.student,
+            "name": student_name(assignment.student),
+            "class_name": assignment.school_class.name if assignment.school_class_id else class_label(assignment.student),
+            "rate": metrics["rate"],
+            "attended": metrics["attended"],
+            "counted": metrics["counted"],
+            "excused": metrics["excused"],
+        })
+    rates = [row["rate"] for row in student_rows if row["rate"] is not None]
+    context = {
+        "session_rows": session_rows,
+        "student_rows": student_rows,
+        "classes": classes,
+        "today_value": timezone.localdate().isoformat(),
+        "min_date_value": (timezone.localdate() - timedelta(days=180)).isoformat(),
+        "default_time": "09:00",
+        "slot_times": [
+            "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+            "11:00", "11:30", "13:30", "14:00", "14:30", "15:00",
+            "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
+        ],
+        "kind_choices": AttendanceSession.KIND_CHOICES,
+        "session_count": len(session_rows),
+        "recorded_count": sum(1 for row in session_rows if row["is_recorded"]),
+        "to_record_count": sum(1 for row in session_rows if not row["is_recorded"]),
+        "average_rate": percent(sum(rates), len(rates)) if rates else None,
+    }
+    return render(request, "coaching/prof_attendance.html", context)
+
+
+@require_POST
+@role_required(Profil.ROLE_PROF)
+def prof_attendance_create(request):
+    professor = get_professor(request)
+    form = AttendanceSessionForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(
+                form, "Complétez la classe, le module, la date et l'heure de la séance.",
+            ),
+        )
+        return redirect("coaching:prof_attendance")
+    school_class = get_object_or_404(
+        SchoolClass, pk=form.cleaned_data["school_class"], university=request.university,
+    )
+    allowed = (
+        school_class.professors.filter(pk=professor.pk).exists()
+        or TutorAssignment.objects.filter(
+            professor=professor, school_class=school_class,
+            status=TutorAssignment.STATUS_ACTIVE,
+        ).exists()
+    )
+    if not allowed:
+        messages.error(request, "Vous n'enseignez pas dans cette classe.")
+        return redirect("coaching:prof_attendance")
+    starts_at = combine(form.cleaned_data["date"], parse_clock(form.cleaned_data["time"]))
+    session, created = AttendanceSession.objects.get_or_create(
+        professor=professor,
+        school_class=school_class,
+        starts_at=starts_at,
+        title=form.cleaned_data["title"],
+        defaults={
+            "university": request.university,
+            "kind": form.cleaned_data["kind"],
+            "duration_minutes": form.cleaned_data["duration_minutes"],
+            "created_by": request.user,
+        },
+    )
+    if created:
+        messages.success(request, "Séance créée. Saisissez maintenant les présences.")
+    else:
+        messages.info(request, "Cette séance existe déjà. Complétez son relevé.")
+    return redirect("coaching:prof_attendance_session", pk=session.pk)
+
+
+@role_required(Profil.ROLE_PROF)
+def prof_attendance_session(request, pk):
+    professor = get_professor(request)
+    session = get_object_or_404(
+        AttendanceSession,
+        pk=pk,
+        professor=professor,
+        university=request.university,
+    )
+    students = attendance_session_students(session)
+    existing = {record.student_id: record for record in session.records.all()}
+    rows = []
+    for student in students:
+        record = existing.get(student.pk)
+        metrics = attendance_metrics(student)
+        rows.append({
+            "student": student,
+            "name": student_name(student),
+            "number": student.student_number or "—",
+            "status": record.status if record else AttendanceRecord.STATUS_PRESENT,
+            "note": record.note if record else "",
+            "rate": metrics["rate"],
+            "attended": metrics["attended"],
+            "counted": metrics["counted"],
+        })
+    context = {
+        "session": session,
+        "rows": rows,
+        "status_choices": AttendanceRecord.STATUS_CHOICES,
+        "date_label": fr_day_time(session.starts_at),
+        "has_records": bool(existing),
+        "present_count": sum(
+            1 for row in rows if row["status"] in AttendanceRecord.ATTENDED_STATUSES
+        ),
+        "absent_count": sum(
+            1 for row in rows if row["status"] == AttendanceRecord.STATUS_ABSENT
+        ),
+        "excused_count": sum(
+            1 for row in rows if row["status"] == AttendanceRecord.STATUS_EXCUSED
+        ),
+    }
+    return render(request, "coaching/prof_attendance_session.html", context)
+
+
+@require_POST
+@role_required(Profil.ROLE_PROF)
+def prof_attendance_save(request, pk):
+    professor = get_professor(request)
+    session = get_object_or_404(
+        AttendanceSession,
+        pk=pk,
+        professor=professor,
+        university=request.university,
+    )
+    students = list(attendance_session_students(session))
+    allowed = {value for value, _label in AttendanceRecord.STATUS_CHOICES}
+    entries = []
+    missing = []
+    for student in students:
+        status = request.POST.get("status_%d" % student.pk)
+        if status not in allowed:
+            missing.append(student_name(student))
+            continue
+        entries.append((student, status, request.POST.get("note_%d" % student.pk, "").strip()[:200]))
+    if missing:
+        messages.error(
+            request,
+            "Indiquez la présence de chaque étudiant : %s." % ", ".join(missing[:3]),
+        )
+        return redirect("coaching:prof_attendance_session", pk=session.pk)
+    if not entries:
+        messages.error(request, "Aucun étudiant à enregistrer pour cette séance.")
+        return redirect("coaching:prof_attendance_session", pk=session.pk)
+    with transaction.atomic():
+        for student, status, note in entries:
+            AttendanceRecord.objects.update_or_create(
+                session=session,
+                student=student,
+                defaults={
+                    "status": status,
+                    "note": note,
+                    "recorded_by": request.user,
+                },
+            )
+        if session.status != AttendanceSession.STATUS_COMPLETED:
+            session.status = AttendanceSession.STATUS_COMPLETED
+            session.save(update_fields=["status"])
+    triggered_alerts = 0
+    for student, _status, _note in entries:
+        if ensure_attendance_alert(student) is not None:
+            triggered_alerts += 1
+    message = "Présences enregistrées. L'assiduité des étudiants a été recalculée."
+    if triggered_alerts:
+        message += " %d alerte%s de persévérance ouverte%s pour assiduité faible." % (
+            triggered_alerts,
+            "" if triggered_alerts == 1 else "s",
+            "e" if triggered_alerts == 1 else "s",
+        )
+    messages.success(request, message)
+    return redirect("coaching:prof_attendance")
 
 
 @role_required(Profil.ROLE_PROF)
@@ -1105,7 +1851,59 @@ def prof_journal_feedback(request, pk):
 
 @role_required(Profil.ROLE_ADMIN)
 def admin_dashboard(request):
-    return render(request, "coaching/admin_dashboard.html")
+    university = request.university
+    summary = admin_monitoring_summary(university)
+    allocation, year = allocation_rows(university)
+    students_total = sum(row["students"] for row in allocation)
+    assigned_total = sum(row["assigned"] for row in allocation)
+    waiting_total = sum(row["waiting"] for row in allocation)
+    alerts = []
+    for alert in summary["alerts"]:
+        alerts.append({
+            "alert": alert,
+            "student_label": student_name(alert.student) if alert.student_id else "Classe",
+            "class_label": (
+                alert.school_class.name if alert.school_class_id
+                else (class_label(alert.student) if alert.student_id else "—")
+            ),
+            "priority_label": alert.get_priority_display(),
+            "status_label": alert.get_status_display(),
+            "is_open": alert.status == PerseveranceAlert.STATUS_OPEN,
+        })
+    activities = []
+    for activity in summary["activities"]:
+        activities.append({
+            **activity,
+            "when": relative_day(activity["at"]) if activity["at"] else "—",
+        })
+    context = {
+        "university": university,
+        "summary": summary,
+        "allocation": allocation,
+        "academic_year": year,
+        "students_total": students_total,
+        "assigned_total": assigned_total,
+        "waiting_total": waiting_total,
+        "allocation_rate": percent(assigned_total, students_total) if students_total else 0,
+        "student_profiles": StudentProfile.objects.filter(university=university).count(),
+        "professor_profiles": ProfessorProfile.objects.filter(university=university).count(),
+        "class_count": SchoolClass.objects.filter(university=university).count(),
+        "students_hint": "%d classe(s) dans l'établissement" % SchoolClass.objects.filter(
+            university=university,
+        ).count(),
+        "allocation_hint": "%d/%d étudiants affectés · %d en attente" % (
+            assigned_total, students_total, waiting_total,
+        ),
+        "active_alerts_hint": "Dont %d priorité haute" % summary["high_alerts"],
+        "perseverance_hint": "Étudiants hors vigilance haute",
+        "pending_invitations": Invitation.objects.filter(
+            university=university, status=Invitation.STATUS_PENDING,
+        ).count(),
+        "alert_rows": alerts,
+        "activities": activities,
+        "today_label": fr_date_cap(timezone.localdate(), year=True),
+    }
+    return render(request, "coaching/admin_dashboard.html", context)
 
 
 @role_required(Profil.ROLE_ADMIN)
@@ -1128,9 +1926,10 @@ def admin_perseverance(request):
         {
             "id": profile.pk,
             "name": professor_name(profile),
-            "label": "%s · %s" % (
+            "label": "%s — Référent pédagogique%s" % (
                 professor_name(profile),
-                profile.speciality or profile.department or "Enseignant référent",
+                " · %s" % (profile.speciality or profile.department)
+                if (profile.speciality or profile.department) else "",
             ),
         }
         for profile in request.university.professor_profiles.select_related("membership__user").order_by(
@@ -1144,9 +1943,10 @@ def admin_perseverance(request):
             {
                 "id": profile.pk,
                 "name": professor_name(profile),
-                "label": "%s · %s" % (
+                "label": "%s — Référent pédagogique%s" % (
                     professor_name(profile),
-                    profile.speciality or profile.department or "Enseignant référent",
+                    " · %s" % (profile.speciality or profile.department)
+                    if (profile.speciality or profile.department) else "",
                 ),
             }
             for profile in ProfessorProfile.objects.filter(
@@ -1189,8 +1989,17 @@ def admin_monitoring(request):
             ),
             "priority_label": alert.get_priority_display(),
             "is_open": alert.status == PerseveranceAlert.STATUS_OPEN,
+            "is_taken": alert.status == PerseveranceAlert.STATUS_TAKEN,
+            "is_closed": alert.status == PerseveranceAlert.STATUS_CLOSED,
             "status_label": alert.get_status_display(),
             "detected_label": fr_date_cap(alert.detected_at),
+            "reported_by_name": (
+                professor_name(alert.reported_by) if alert.reported_by_id else ""
+            ),
+            "taken_label": fr_date_cap(alert.taken_at) if alert.taken_at else "",
+            "closed_label": fr_date_cap(alert.closed_at) if alert.closed_at else "",
+            "handling_note": alert.handling_note or "",
+            "resolution_note": alert.resolution_note or "",
         })
     cohorts = []
     for cohort in summary["cohorts"]:
@@ -1284,6 +2093,131 @@ def student_task_toggle(request, pk):
 
 @require_POST
 @role_required(Profil.ROLE_ETUDIANT)
+def student_goal_add(request):
+    student = get_student(request)
+    if student is None:
+        messages.error(request, "Profil étudiant introuvable.")
+        return redirect("coaching:student_progress")
+    form = StudentGoalForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Complétez l'intitulé et l'échéance de l'objectif."),
+        )
+        return redirect("coaching:student_progress")
+    target_date = form.cleaned_data.get("target_date")
+    try:
+        with transaction.atomic():
+            StudentGoal.objects.create(
+                university=request.university,
+                student=student,
+                title=form.cleaned_data["title"],
+                description=form.cleaned_data.get("description") or "",
+                course_code=form.cleaned_data.get("course_code") or "",
+                semester=form.cleaned_data["semester"],
+                target_date=target_date,
+                skills_total=form.cleaned_data.get("skills_total") or 0,
+                status=(
+                    StudentGoal.STATUS_AT_RISK
+                    if target_date and target_date < timezone.localdate()
+                    else StudentGoal.STATUS_IN_PROGRESS
+                ),
+            )
+    except IntegrityError:
+        messages.error(request, "Un objectif portant ce titre existe déjà pour ce semestre.")
+        return redirect("coaching:student_progress")
+    messages.success(request, "Objectif ajouté à votre suivi.")
+    return redirect("coaching:student_progress")
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_goal_progress(request, pk):
+    student = get_student(request)
+    goal = get_object_or_404(
+        StudentGoal, pk=pk, student=student, university=request.university,
+    )
+    form = GoalProgressForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Indiquez un avancement entre 0 et 100 %."),
+        )
+        return redirect("coaching:student_progress")
+    progress = form.cleaned_data["progress"]
+    goal.progress = progress
+    goal.status = _goal_status(goal, progress)
+    skills_acquired = form.cleaned_data.get("skills_acquired")
+    if skills_acquired is not None and goal.skills_total:
+        goal.skills_acquired = min(skills_acquired, goal.skills_total)
+    goal.save(update_fields=[
+        "progress", "status", "skills_acquired", "updated_at",
+    ])
+    if goal.status == StudentGoal.STATUS_ACHIEVED:
+        messages.success(request, "Objectif atteint : bravo, il est archivé dans votre relevé.")
+    else:
+        messages.success(request, "Avancement de l'objectif mis à jour.")
+    return redirect("coaching:student_progress")
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_session_add(request):
+    student = get_student(request)
+    form = StudySessionForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Complétez la date, l'heure et la durée de la session."),
+        )
+        return redirect("coaching:student_progress")
+    starts_at = combine(form.cleaned_data["date"], parse_clock(form.cleaned_data["time"]))
+    duration = form.cleaned_data["duration_minutes"]
+    clash = _study_session_clash(student, starts_at, duration)
+    if clash is not None:
+        messages.error(
+            request,
+            "Une session « %s » occupe déjà ce créneau." % clash.title,
+        )
+        return redirect("coaching:student_progress")
+    StudySession.objects.create(
+        university=request.university,
+        student=student,
+        title=form.cleaned_data["title"],
+        course_code=form.cleaned_data.get("course_code") or "",
+        kind=form.cleaned_data["kind"],
+        starts_at=starts_at,
+        duration_minutes=duration,
+        status=StudySession.STATUS_SCHEDULED,
+        location=form.cleaned_data.get("location") or "",
+        notes="Session ajoutée manuellement depuis le plan d'étude.",
+    )
+    messages.success(request, "Session ajoutée à votre planning de la semaine.")
+    return redirect("coaching:student_progress")
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_session_toggle(request, pk):
+    student = get_student(request)
+    session = get_object_or_404(
+        StudySession, pk=pk, student=student, university=request.university,
+    )
+    if session.status == StudySession.STATUS_COMPLETED:
+        session.status = StudySession.STATUS_SCHEDULED
+        messages.info(request, "Session rouverte : elle redevient programmée.")
+    elif session.status == StudySession.STATUS_CANCELLED:
+        session.status = StudySession.STATUS_SCHEDULED
+        messages.info(request, "Session réactivée dans votre planning.")
+    else:
+        session.status = StudySession.STATUS_COMPLETED
+        messages.success(request, "Session terminée : vos heures de révision sont à jour.")
+    session.save(update_fields=["status"])
+    return redirect("coaching:student_progress")
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
 def student_appointment_request(request):
     student = get_student(request)
     form = AppointmentForm(request.POST)
@@ -1291,31 +2225,97 @@ def student_appointment_request(request):
         messages.error(
             request,
             _form_error_message(
-                form, "Complétez le tuteur, la date, l'heure et le motif de la demande.",
+                form, "Complétez l'interlocuteur, la date, l'heure et le motif de la demande.",
             ),
         )
         return redirect("coaching:student_appointments")
     tutors = {tutor.pk: tutor for tutor in student_tutors(student)}
     professor = tutors.get(form.cleaned_data["professor"])
     if professor is None:
-        messages.error(request, "Ce tuteur ne fait pas partie de votre encadrement.")
+        messages.error(request, "Cet interlocuteur ne fait pas partie de votre encadrement.")
         return redirect("coaching:student_appointments")
     preferred_at = combine(form.cleaned_data["date"], parse_clock(form.cleaned_data["time"]))
+    duration = 30
+    slot = None
+    slot_id = form.cleaned_data.get("slot")
+    if slot_id:
+        slot = TutoringSlot.objects.filter(
+            pk=slot_id,
+            university=request.university,
+            professor=professor,
+            status=TutoringSlot.STATUS_OPEN,
+            starts_at__gte=timezone.now(),
+        ).first()
+        if slot is None:
+            messages.error(
+                request,
+                "Ce créneau n'est plus disponible. Choisissez-en un autre.",
+            )
+            return redirect("coaching:student_appointments")
+        preferred_at = slot.starts_at
+        duration = max(int((slot.ends_at - slot.starts_at).total_seconds() // 60), 15)
+        if TutoringSession.objects.filter(
+            slot=slot, status=TutoringSession.STATUS_PENDING,
+        ).exists():
+            messages.error(
+                request,
+                "Ce créneau a déjà été demandé par un autre étudiant. Choisissez-en un autre.",
+            )
+            return redirect("coaching:student_appointments")
+    else:
+        end = preferred_at + timedelta(minutes=duration)
+        matching_slot = TutoringSlot.objects.filter(
+            professor=professor,
+            university=request.university,
+            status=TutoringSlot.STATUS_OPEN,
+            starts_at=preferred_at,
+        ).first()
+        if matching_slot is not None:
+            slot = matching_slot
+            duration = max(int((slot.ends_at - slot.starts_at).total_seconds() // 60), 15)
+        else:
+            clash = TutoringSlot.objects.filter(
+                professor=professor,
+                university=request.university,
+                status__in=(TutoringSlot.STATUS_OPEN, TutoringSlot.STATUS_BOOKED),
+                starts_at__lt=end,
+                ends_at__gt=preferred_at,
+            ).first()
+            if clash is not None:
+                if clash.status == TutoringSlot.STATUS_BOOKED:
+                    messages.error(request, "Cet interlocuteur est déjà occupé sur ce créneau.")
+                else:
+                    messages.error(
+                        request,
+                        "Un créneau de disponibilité existe à cet horaire : sélectionnez-le.",
+                    )
+                return redirect("coaching:student_appointments")
     if _overlapping_session(
-        student.tutoring_sessions.filter(status=TutoringSession.STATUS_ACCEPTED),
+        student.tutoring_sessions.filter(
+            status__in=(TutoringSession.STATUS_ACCEPTED, TutoringSession.STATUS_PENDING),
+        ),
         preferred_at,
-        30,
+        duration,
+        include_preferred=True,
     ):
-        messages.error(request, "Vous avez déjà un rendez-vous confirmé sur ce créneau.")
+        messages.error(
+            request,
+            "Vous avez déjà un rendez-vous ou une demande en attente sur ce créneau.",
+        )
         return redirect("coaching:student_appointments")
     if _overlapping_session(
         TutoringSession.objects.filter(
-            professor=professor, status=TutoringSession.STATUS_ACCEPTED,
+            professor=professor,
+            status__in=(TutoringSession.STATUS_ACCEPTED, TutoringSession.STATUS_PENDING),
         ),
         preferred_at,
-        30,
+        duration,
+        include_preferred=True,
     ):
-        messages.error(request, "Ce tuteur a déjà un rendez-vous confirmé sur ce créneau.")
+        messages.error(
+            request,
+            "Cet interlocuteur est déjà occupé ou sollicité sur ce créneau.",
+        )
         return redirect("coaching:student_appointments")
     try:
         with transaction.atomic():
@@ -1323,16 +2323,77 @@ def student_appointment_request(request):
                 university=request.university,
                 student=student,
                 professor=professor,
-                school_class=next(iter(student_classes(student)), None),
+                school_class=(
+                    slot.school_class if slot is not None and slot.school_class_id
+                    else next(iter(student_classes(student)), None)
+                ),
+                slot=slot,
                 preferred_at=preferred_at,
+                duration_minutes=duration,
                 topic=form.cleaned_data["topic"],
-                mode=TutoringSlot.MODE_VIDEO,
+                student_comment=form.cleaned_data.get("comment", ""),
+                mode=slot.mode if slot is not None else TutoringSlot.MODE_VIDEO,
+                location=slot.location if slot is not None else "",
                 created_by=request.user,
             )
     except IntegrityError:
-        messages.error(request, "Vous avez déjà une demande en attente avec ce tuteur.")
+        messages.error(request, "Vous avez déjà une demande en attente avec cet interlocuteur.")
         return redirect("coaching:student_appointments")
-    messages.success(request, "Votre demande de rendez-vous a bien été envoyée.")
+    student_user = student.membership.user
+    professor_user = professor.membership.user
+    preferred_label = fr_date_time(preferred_at)
+    base_context = {
+        "university_name": request.university.name,
+        "preferred_label": preferred_label,
+        "topic": form.cleaned_data["topic"],
+        "comment": form.cleaned_data.get("comment", ""),
+    }
+    send_templated_email(
+        subject="Nouvelle demande de rendez-vous · %s" % student_name(student),
+        recipients=[professor_user.email],
+        template_name="coaching/emails/appointment_prof.html",
+        context={
+            **base_context,
+            "subject": "Nouvelle demande de rendez-vous",
+            "preheader": "%s · %s" % (student_name(student), preferred_label),
+            "professor_first_name": (
+                professor_user.first_name or professor_name(professor)
+            ),
+            "student_name": student_name(student),
+            "student_email": student_user.email,
+            "student_program": student.program or "",
+            "cta_url": request.build_absolute_uri(
+                reverse("coaching:prof_tutoring"),
+            ),
+            "cta_label": "Voir la demande",
+            "footer_note": "Vous recevez cet e-mail car un étudiant vous a demandé un rendez-vous.",
+        },
+        reply_to=[student_user.email],
+    )
+    send_templated_email(
+        subject="Votre demande de rendez-vous est envoyée · EduSpark",
+        recipients=[student_user.email],
+        template_name="coaching/emails/appointment_student.html",
+        context={
+            **base_context,
+            "subject": "Demande de rendez-vous envoyée",
+            "preheader": "%s · %s" % (professor_name(professor), preferred_label),
+            "student_first_name": (
+                student_user.first_name or student_name(student)
+            ),
+            "professor_name": professor_name(professor),
+            "cta_url": request.build_absolute_uri(
+                reverse("coaching:student_appointments"),
+            ),
+            "cta_label": "Voir mes rendez-vous",
+            "footer_note": "Vous recevez cet e-mail car vous avez demandé un rendez-vous de tutorat.",
+        },
+        reply_to=[professor_user.email],
+    )
+    messages.success(
+        request,
+        "Votre demande a bien été envoyée. Votre interlocuteur doit confirmer sa disponibilité ; vous recevrez un e-mail dès sa confirmation.",
+    )
     return redirect("coaching:student_appointments")
 
 
@@ -1344,7 +2405,7 @@ def student_appointment_reschedule(request, pk):
         TutoringSession, pk=pk, student=student, university=request.university,
     )
     if session.status == TutoringSession.STATUS_PENDING:
-        messages.info(request, "Une demande est déjà en attente avec ce tuteur.")
+        messages.info(request, "Une demande est déjà en attente avec cet interlocuteur.")
         return redirect("coaching:student_appointments")
     if session.status not in (
         TutoringSession.STATUS_ACCEPTED,
@@ -1361,21 +2422,47 @@ def student_appointment_reschedule(request, pk):
         return redirect("coaching:student_appointments")
     try:
         with transaction.atomic():
-            TutoringSession.objects.create(
+            new_session = TutoringSession.objects.create(
                 university=request.university,
                 student=student,
                 professor=session.professor,
                 school_class=session.school_class,
                 preferred_at=preferred_at,
                 topic=("Report · %s" % session.topic)[:200],
+                student_comment=session.student_comment,
                 priority=session.priority,
                 mode=session.mode,
                 created_by=request.user,
             )
     except IntegrityError:
-        messages.error(request, "Une demande est déjà en attente avec ce tuteur.")
+        messages.error(request, "Une demande est déjà en attente avec cet interlocuteur.")
         return redirect("coaching:student_appointments")
-    messages.success(request, "Demande de report envoyée à votre tuteur.")
+    professor_user = session.professor.membership.user
+    student_user = student.membership.user
+    send_templated_email(
+        subject="Demande de report de rendez-vous · %s" % student_name(student),
+        recipients=[professor_user.email],
+        template_name="coaching/emails/appointment_prof.html",
+        context={
+            "university_name": request.university.name,
+            "subject": "Demande de report de rendez-vous",
+            "preheader": "%s · nouveau créneau souhaité : %s" % (
+                student_name(student), fr_date_time(preferred_at),
+            ),
+            "professor_first_name": professor_user.first_name or professor_name(session.professor),
+            "student_name": student_name(student),
+            "student_email": student_user.email,
+            "student_program": student.program or "",
+            "preferred_label": fr_date_time(preferred_at),
+            "topic": new_session.topic,
+            "comment": new_session.student_comment,
+            "cta_url": request.build_absolute_uri(reverse("coaching:prof_tutoring")),
+            "cta_label": "Voir la demande de report",
+            "footer_note": "Vous recevez cet e-mail car un étudiant souhaite reporter son rendez-vous.",
+        },
+        reply_to=[student_user.email],
+    )
+    messages.success(request, "Demande de report envoyée à votre interlocuteur.")
     return redirect("coaching:student_appointments")
 
 
@@ -1466,6 +2553,111 @@ def student_progress_export(request):
     return _csv_response("progression-%s.csv" % student.pk, rows)
 
 
+@role_required(Profil.ROLE_ETUDIANT)
+def student_notifications(request):
+    student = get_student(request)
+    if student is None:
+        return redirect("accounts:login")
+    notifications = student.tutor_notifications.select_related(
+        "professor__membership__user",
+    )[:50]
+    items = []
+    for notification in notifications:
+        tutor_label = (
+            professor_name(notification.professor)
+            if notification.professor_id else "Tuteur référent"
+        )
+        items.append({
+            "notification": notification,
+            "tutor_name": tutor_label,
+            "tutor_initials": (
+                person_initials(notification.professor)
+                if notification.professor_id else "?"
+            ),
+            "when_label": fr_day_time(notification.created_at),
+            "read_label": fr_day_time(notification.read_at) if notification.read_at else "",
+            "replied_label": (
+                fr_day_time(notification.replied_at) if notification.replied_at else ""
+            ),
+        })
+    unread_count = sum(1 for item in items if item["notification"].is_unread)
+    replied_count = sum(1 for item in items if item["notification"].reply)
+    context = {
+        "items": items,
+        "unread_count": unread_count,
+        "replied_count": replied_count,
+        "total_count": len(items),
+        "unread_hint": "Relances de votre tuteur à consulter",
+        "read_hint": "Depuis le début du semestre",
+        "reply_hint": "Messages envoyés à votre tuteur",
+    }
+    return render(request, "coaching/student_notifications.html", context)
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_notification_read(request, pk):
+    student = get_student(request)
+    notification = get_object_or_404(
+        TutorNotification, pk=pk, university=request.university, student=student,
+    )
+    if notification.read_at is None:
+        notification.read_at = timezone.now()
+        notification.save(update_fields=["read_at"])
+        messages.success(request, "Notification marquée comme lue.")
+    return redirect("coaching:student_notifications")
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_notification_reply(request, pk):
+    student = get_student(request)
+    notification = get_object_or_404(
+        TutorNotification, pk=pk, university=request.university, student=student,
+    )
+    form = NotificationReplyForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Rédigez une réponse avant de l'envoyer."),
+        )
+        return redirect("coaching:student_notifications")
+    now = timezone.now()
+    notification.reply = form.cleaned_data["reply"]
+    notification.replied_at = now
+    if notification.read_at is None:
+        notification.read_at = now
+    notification.save(update_fields=["reply", "replied_at", "read_at"])
+    tutor_label = (
+        professor_name(notification.professor)
+        if notification.professor_id else "votre tuteur"
+    )
+    if notification.professor_id:
+        professor_user = notification.professor.membership.user
+        student_user = student.membership.user
+        send_templated_email(
+            subject="Réponse de %s à votre relance · EduSpark" % student_name(student),
+            recipients=[professor_user.email],
+            template_name="coaching/emails/notification_reply.html",
+            context={
+                "university_name": request.university.name,
+                "subject": "Réponse à votre relance",
+                "preheader": "%s · %s" % (student_name(student), notification.title),
+                "professor_first_name": professor_user.first_name or tutor_label,
+                "student_name": student_name(student),
+                "notification_title": notification.title,
+                "original_message": notification.message,
+                "reply": notification.reply,
+                "cta_url": request.build_absolute_uri(reverse("coaching:prof_followup")),
+                "cta_label": "Voir le suivi étudiant",
+                "footer_note": "Vous recevez cet e-mail car votre étudiant a répondu à votre relance.",
+            },
+            reply_to=[student_user.email],
+        )
+    messages.success(request, "Réponse envoyée à %s." % tutor_label)
+    return redirect("coaching:student_notifications")
+
+
 # ---------------------------------------------------------------------------
 # Actions professeur
 # ---------------------------------------------------------------------------
@@ -1553,6 +2745,32 @@ def prof_request_accept(request, pk):
             "Ce créneau est déjà passé. Refusez la demande et proposez une nouvelle date.",
         )
         return redirect("coaching:prof_tutoring")
+    if slot is None:
+        matching_slot = TutoringSlot.objects.filter(
+            professor=professor,
+            university=request.university,
+            status=TutoringSlot.STATUS_OPEN,
+            starts_at=scheduled_at,
+        ).first()
+        if matching_slot is not None:
+            slot = matching_slot
+            duration = max(
+                int((slot.ends_at - slot.starts_at).total_seconds() // 60), 15,
+            )
+        else:
+            clash = TutoringSlot.objects.filter(
+                professor=professor,
+                university=request.university,
+                status__in=(TutoringSlot.STATUS_OPEN, TutoringSlot.STATUS_BOOKED),
+                starts_at__lt=scheduled_at + timedelta(minutes=duration),
+                ends_at__gt=scheduled_at,
+            ).exists()
+            if clash:
+                messages.error(
+                    request,
+                    "Un créneau de votre permanence chevauche cet horaire. Refusez la demande et proposez un créneau disponible.",
+                )
+                return redirect("coaching:prof_tutoring")
     if _overlapping_session(
         TutoringSession.objects.filter(
             professor=professor, status=TutoringSession.STATUS_ACCEPTED,
@@ -1565,6 +2783,7 @@ def prof_request_accept(request, pk):
         return redirect("coaching:prof_tutoring")
     with transaction.atomic():
         if slot is not None:
+            session.slot = slot
             session.scheduled_at = scheduled_at
             session.duration_minutes = duration
             session.mode = slot.mode
@@ -1577,9 +2796,48 @@ def prof_request_accept(request, pk):
         session.decided_by = request.user
         session.decided_at = timezone.now()
         session.save()
+        TutorNotification.objects.create(
+            university=request.university,
+            student=session.student,
+            professor=professor,
+            kind=TutorNotification.KIND_SUIVI,
+            title="Rendez-vous confirmé",
+            message="%s a confirmé votre rendez-vous du %s. Motif : %s"
+            % (
+                professor_name(professor),
+                fr_day_time(session.scheduled_at),
+                session.topic,
+            ),
+        )
+    student_user = session.student.membership.user
+    send_templated_email(
+        subject="Votre rendez-vous est confirmé · EduSpark",
+        recipients=[student_user.email],
+        template_name="coaching/emails/appointment_confirmed.html",
+        context={
+            "university_name": request.university.name,
+            "subject": "Rendez-vous confirmé",
+            "preheader": "%s · %s" % (
+                professor_name(professor), fr_day_time(session.scheduled_at),
+            ),
+            "student_first_name": student_user.first_name or student_name(session.student),
+            "professor_name": professor_name(professor),
+            "confirmed_label": fr_day_time(session.scheduled_at),
+            "mode_label": session.get_mode_display(),
+            "place": session.location or "À définir",
+            "topic": session.topic,
+            "comment": session.student_comment,
+            "cta_url": request.build_absolute_uri(
+                reverse("coaching:student_appointments"),
+            ),
+            "cta_label": "Voir mes rendez-vous",
+            "footer_note": "Vous recevez cet e-mail car votre interlocuteur a confirmé votre rendez-vous.",
+        },
+        reply_to=[professor.membership.user.email],
+    )
     messages.success(
         request,
-        "Rendez-vous accepté pour %s. L'étudiant a été notifié."
+        "Disponibilité confirmée pour %s. L'étudiant a été notifié par e-mail."
         % fr_day_time(session.scheduled_at),
     )
     return redirect("coaching:prof_tutoring")
@@ -1609,7 +2867,49 @@ def prof_request_decline(request, pk):
         session.decided_by = request.user
         session.decided_at = timezone.now()
         session.save()
-    messages.info(request, "Demande refusée, une proposition alternative sera suggérée.")
+        TutorNotification.objects.create(
+            university=request.university,
+            student=session.student,
+            professor=professor,
+            kind=TutorNotification.KIND_SUIVI,
+            title="Demande de rendez-vous non retenue",
+            message=(
+                "%s n'a pas pu retenir votre demande du %s. Motif : %s "
+                "Vous pouvez proposer un autre créneau depuis vos rendez-vous."
+            ) % (
+                professor_name(professor),
+                fr_day_time(session.preferred_at) if session.preferred_at else "créneau demandé",
+                session.decision_note or "indisponibilité du référent.",
+            ),
+        )
+    student_user = session.student.membership.user
+    send_templated_email(
+        subject="Votre demande de rendez-vous n'a pas été retenue · EduSpark",
+        recipients=[student_user.email],
+        template_name="coaching/emails/appointment_declined.html",
+        context={
+            "university_name": request.university.name,
+            "subject": "Demande de rendez-vous non retenue",
+            "preheader": "%s · %s" % (
+                professor_name(professor),
+                session.decision_note or "Proposition d'un autre créneau",
+            ),
+            "student_first_name": student_user.first_name or student_name(session.student),
+            "professor_name": professor_name(professor),
+            "preferred_label": (
+                fr_day_time(session.preferred_at) if session.preferred_at else "créneau demandé"
+            ),
+            "topic": session.topic,
+            "reason": session.decision_note or "Le référent n'est pas disponible sur ce créneau.",
+            "cta_url": request.build_absolute_uri(
+                reverse("coaching:student_appointments"),
+            ),
+            "cta_label": "Choisir un autre créneau",
+            "footer_note": "Vous recevez cet e-mail car votre demande de tutorat a reçu une réponse.",
+        },
+        reply_to=[professor.membership.user.email],
+    )
+    messages.info(request, "Demande refusée : l'étudiant a été notifié et peut proposer un autre créneau.")
     return redirect("coaching:prof_tutoring")
 
 
@@ -1681,7 +2981,7 @@ def prof_sheet_create(request):
         return redirect("coaching:prof_followup_cards")
     try:
         with transaction.atomic():
-            DifficultySheet.objects.create(
+            sheet = DifficultySheet.objects.create(
                 university=request.university,
                 student=assignment.student,
                 professor=professor,
@@ -1699,7 +2999,38 @@ def prof_sheet_create(request):
     except IntegrityError:
         messages.error(request, "Une fiche ouverte existe déjà pour ce type de difficulté.")
         return redirect("coaching:prof_followup_cards")
-    messages.success(request, "Fiche de difficulté créée. L'étudiant sera notifié de l'ouverture du suivi.")
+    student_user = assignment.student.membership.user
+    TutorNotification.objects.create(
+        university=request.university,
+        student=assignment.student,
+        professor=professor,
+        kind=TutorNotification.KIND_SUIVI,
+        title="Un accompagnement a été ouvert",
+        message=(
+            "%s a ouvert un suivi « %s » pour vous accompagner. "
+            "Consultez votre journal et vos rendez-vous pour avancer sur ce point."
+        ) % (professor_name(professor), sheet.get_category_display()),
+    )
+    send_templated_email(
+        subject="Un accompagnement pédagogique a été ouvert · EduSpark",
+        recipients=[student_user.email],
+        template_name="coaching/emails/sheet_opened.html",
+        context={
+            "university_name": request.university.name,
+            "subject": "Un accompagnement a été ouvert",
+            "preheader": "%s · %s" % (professor_name(professor), sheet.get_category_display()),
+            "student_first_name": student_user.first_name or student_name(assignment.student),
+            "professor_name": professor_name(professor),
+            "category_label": sheet.get_category_display(),
+            "observation": sheet.observation,
+            "action_plan": sheet.action_plan,
+            "cta_url": request.build_absolute_uri(reverse("coaching:student_notifications")),
+            "cta_label": "Voir mon accompagnement",
+            "footer_note": "Vous recevez cet e-mail car votre référent a ouvert un suivi vous concernant.",
+        },
+        reply_to=[professor.membership.user.email],
+    )
+    messages.success(request, "Fiche de difficulté créée. L'étudiant a été notifié de l'ouverture du suivi.")
     return redirect("coaching:prof_followup_cards")
 
 
@@ -1782,27 +3113,48 @@ def prof_student_relance(request, student_id):
             % student_name(assignment.student),
         )
         return redirect("coaching:prof_followup")
-    assignment.last_contact_at = timezone.now()
+    form = RelanceForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Vérifiez l'objet et le message de la relance."),
+        )
+        return redirect("coaching:prof_followup")
     with transaction.atomic():
-        assignment.save(update_fields=["last_contact_at", "updated_at"])
         TutorNotification.objects.create(
             university=request.university,
             student=assignment.student,
             professor=professor,
             kind=TutorNotification.KIND_RELANCE,
-            title="Relance de votre tuteur référent",
-            message=(
-                "%s vous invite à faire le point sur votre progression. %s"
-                % (
-                    professor_name(professor),
-                    assignment.risk_reason
-                    or "Consultez votre journal et reprenez contact avec votre tuteur.",
-                )
-            ),
+            title=form.cleaned_data["subject"],
+            message=form.cleaned_data["message"],
         )
+        assignment.last_contact_at = timezone.now()
+        assignment.save(update_fields=["last_contact_at", "updated_at"])
+    student_user = assignment.student.membership.user
+    professor_user = professor.membership.user
+    send_templated_email(
+        subject="Relance de %s · EduSpark" % professor_name(professor),
+        recipients=[student_user.email],
+        template_name="coaching/emails/relance.html",
+        context={
+            "subject": "Relance de %s" % professor_name(professor),
+            "preheader": form.cleaned_data["subject"],
+            "university_name": request.university.name,
+            "student_first_name": student_user.first_name or student_name(assignment.student),
+            "professor_name": professor_name(professor),
+            "notification_subject": form.cleaned_data["subject"],
+            "notification_message": form.cleaned_data["message"],
+            "cta_url": request.build_absolute_uri(reverse("coaching:student_notifications")),
+            "cta_label": "Ouvrir mon espace",
+            "footer_note": "Vous recevez cet e-mail car votre référent vous a adressé une relance.",
+        },
+        reply_to=[professor_user.email],
+    )
     messages.success(
         request,
-        "Notification ENT envoyée à %s." % student_name(assignment.student),
+        "Relance envoyée à %s. Un e-mail lui a été adressé."
+        % student_name(assignment.student),
     )
     return redirect("coaching:prof_followup")
 
@@ -1818,19 +3170,23 @@ def prof_student_alert(request, student_id):
         university=request.university,
         status=TutorAssignment.STATUS_ACTIVE,
     )
-    priority = (
-        PerseveranceAlert.PRIORITY_HIGH
-        if assignment.risk_level == TutorAssignment.RISK_HIGH
-        else PerseveranceAlert.PRIORITY_NORMAL
-    )
-    detail = assignment.risk_reason or "Signalement du professeur référent."
+    form = AlertReportForm(request.POST)
+    if not form.is_valid():
+        messages.error(
+            request,
+            _form_error_message(form, "Vérifiez le signalement et la priorité."),
+        )
+        return redirect("coaching:prof_followup")
+    detail = form.cleaned_data["detail"]
+    priority = form.cleaned_data["priority"]
     alert = PerseveranceAlert.objects.filter(
         student=assignment.student,
         alert_type=PerseveranceAlert.TYPE_ENGAGEMENT,
         status=PerseveranceAlert.STATUS_OPEN,
     ).first()
+    notify_referents = False
     if alert is None:
-        PerseveranceAlert.objects.create(
+        alert = PerseveranceAlert.objects.create(
             university=request.university,
             student=assignment.student,
             school_class=assignment.school_class,
@@ -1838,35 +3194,82 @@ def prof_student_alert(request, student_id):
             title="Signalement pédagogique · %s" % student_name(assignment.student),
             detail=detail,
             priority=priority,
+            reported_by=professor,
             detected_at=timezone.now(),
         )
+        notify_referents = True
         messages.success(
             request,
-            "Alerte transmise au référent scolarité pour %s." % student_name(assignment.student),
-        )
-        return redirect("coaching:prof_followup")
-    updates = []
-    if alert.priority != PerseveranceAlert.PRIORITY_HIGH:
-        alert.priority = PerseveranceAlert.PRIORITY_HIGH
-        updates.append("priority")
-    if detail and alert.detail != detail:
-        alert.detail = detail
-        updates.append("detail")
-    if alert.school_class_id is None and assignment.school_class_id:
-        alert.school_class = assignment.school_class
-        updates.append("school_class")
-    if updates:
-        alert.save(update_fields=updates + ["updated_at"])
-        messages.success(
-            request,
-            "Alerte existante renforcée en priorité haute pour %s."
+            "Signalement transmis au référent scolarité pour %s."
             % student_name(assignment.student),
         )
     else:
-        messages.info(
-            request,
-            "Une alerte prioritaire est déjà ouverte pour %s."
-            % student_name(assignment.student),
+        updates = []
+        if alert.detail != detail:
+            alert.detail = detail
+            updates.append("detail")
+        if alert.priority != priority:
+            alert.priority = priority
+            updates.append("priority")
+        if alert.reported_by_id != professor.pk:
+            alert.reported_by = professor
+            updates.append("reported_by")
+        if alert.school_class_id is None and assignment.school_class_id:
+            alert.school_class = assignment.school_class
+            updates.append("school_class")
+        if updates:
+            alert.save(update_fields=updates + ["updated_at"])
+            notify_referents = True
+            messages.success(
+                request,
+                "Signalement existant mis à jour pour %s."
+                % student_name(assignment.student),
+            )
+        else:
+            messages.info(
+                request,
+                "Un signalement identique est déjà ouvert pour %s."
+                % student_name(assignment.student),
+            )
+    if notify_referents:
+        admin_emails = list(
+            request.university.memberships.filter(
+                role=Role.UNIVERSITY_ADMIN, is_active=True,
+            ).values_list("user__email", flat=True)
+        )
+        priority_label = dict(PerseveranceAlert.PRIORITY_CHOICES).get(
+            priority, "Normale",
+        )
+        send_templated_email(
+            subject="Signalement pédagogique · %s" % student_name(assignment.student),
+            recipients=admin_emails,
+            template_name="coaching/emails/alert.html",
+            context={
+                "subject": "Signalement pédagogique",
+                "preheader": "%s · priorité %s" % (
+                    student_name(assignment.student), priority_label.lower(),
+                ),
+                "university_name": request.university.name,
+                "student_name": student_name(assignment.student),
+                "class_name": (
+                    assignment.school_class.name if assignment.school_class_id else ""
+                ),
+                "program": assignment.student.program or "",
+                "priority_label": priority_label,
+                "priority_tone": {
+                    PerseveranceAlert.PRIORITY_HIGH: "#c0362c",
+                    PerseveranceAlert.PRIORITY_NORMAL: "#b26a00",
+                    PerseveranceAlert.PRIORITY_LOW: "#3d6b3d",
+                }.get(priority, "#2457d6"),
+                "detail": detail,
+                "professor_name": professor_name(professor),
+                "cta_url": request.build_absolute_uri(
+                    reverse("coaching:admin_monitoring"),
+                ),
+                "cta_label": "Ouvrir le suivi",
+                "footer_note": "Vous recevez cet e-mail en tant que référent scolarité.",
+            },
+            reply_to=[professor.membership.user.email],
         )
     return redirect("coaching:prof_followup")
 
@@ -1933,7 +3336,7 @@ def admin_assign_tutor(request):
         messages.error(
             request,
             _form_error_message(
-                form, "Sélectionnez une classe, un tuteur et un nombre d'étudiants valide.",
+                form, "Sélectionnez une classe et un référent pédagogique.",
             ),
         )
         return redirect("coaching:admin_perseverance")
@@ -1946,29 +3349,38 @@ def admin_assign_tutor(request):
         ProfessorProfile, pk=form.cleaned_data["professor"], university=request.university,
     )
     if not professor.membership.is_active:
-        messages.error(request, "Ce tuteur est inactif et ne peut pas recevoir d'étudiants.")
+        messages.error(request, "Ce référent est inactif et ne peut pas recevoir d'étudiants.")
         return redirect("coaching:admin_perseverance")
     year = school_class.academic_year or academic_year_for(request.university)
-    waiting_count = waiting_students(school_class, year).count()
-    if waiting_count == 0:
-        messages.info(request, "Aucun étudiant en attente dans cette classe.")
+    student_count = enrolled_students(school_class).count()
+    if student_count == 0:
+        messages.info(request, "Cette classe ne compte aucun étudiant à suivre.")
         return redirect("coaching:admin_perseverance")
-    if form.cleaned_data["count"] > waiting_count:
-        messages.error(
-            request,
-            "Cette classe ne compte que %d étudiant%s en attente : ajustez le nombre."
-            % (waiting_count, "" if waiting_count == 1 else "s"),
-        )
-        return redirect("coaching:admin_perseverance")
-    created = assign_students(
-        school_class, professor, form.cleaned_data["count"], year, request.user,
+    created = assign_class_referent(
+        school_class, professor, year, request.user,
     )
-    remaining = waiting_students(school_class, year).count()
+    if created:
+        TutorNotification.objects.bulk_create([
+            TutorNotification(
+                university=request.university,
+                student=student,
+                professor=professor,
+                kind=TutorNotification.KIND_SUIVI,
+                title="Votre référent pédagogique est désigné",
+                message=(
+                    "%s est votre référent pédagogique pour l'année %s. "
+                    "Il suit votre méthodologie, votre assiduité et votre orientation. "
+                    "Vous pouvez lui écrire depuis vos rendez-vous de tutorat."
+                ) % (professor_name(professor), year),
+            )
+            for student in enrolled_students(school_class)
+        ])
     messages.success(
         request,
-        "%d étudiant%s affecté%s à %s. %d encore en attente."
-        % (created, "" if created == 1 else "s", "" if created == 1 else "s",
-           professor_name(professor), remaining),
+        "%d étudiant%s de %s suivi%s par %s. Un référent unique est désigné pour la classe "
+        "et chaque étudiant a été notifié."
+        % (created, "" if created == 1 else "s", school_class.name,
+           "" if created == 1 else "s", professor_name(professor)),
     )
     return redirect("coaching:admin_perseverance")
 
@@ -1989,11 +3401,11 @@ def admin_auto_assign(request):
     if created:
         messages.success(
             request,
-            "Attribution automatique : %d étudiant%s réparti%s sur les tuteurs des classes."
+            "Attribution automatique : %d étudiant%s affecté%s à un référent unique par classe."
             % (created, "" if created == 1 else "s", "" if created == 1 else "s"),
         )
     elif skipped:
-        messages.warning(request, "Aucun tuteur n'est rattaché aux classes en attente.")
+        messages.warning(request, "Aucun référent n'est rattaché aux classes en attente.")
     else:
         messages.info(request, "Aucun étudiant en attente d'affectation.")
     return redirect("coaching:admin_perseverance")
@@ -2003,19 +3415,19 @@ def admin_auto_assign(request):
 def admin_perseverance_export(request):
     rows, year = allocation_rows(request.university)
     output = [["Année universitaire", year], []]
-    output.append(["Classe", "Niveau", "Étudiants", "Tuteurs", "Affectés", "En attente", "Taux (%)", "Statut"])
+    output.append(["Classe", "Niveau", "Étudiants", "Référents", "Affectés", "En attente", "Taux (%)", "Statut"])
     for row in rows:
         output.append([
             row["school_class"].name,
             row["school_class"].level,
             row["students"],
-            row["tutors"],
+            ", ".join(row["referent_names"]),
             row["assigned"],
             row["waiting"],
             row["rate"],
             row["status"],
         ])
-    return _csv_response("attribution-tuteurs-%s.csv" % year, output)
+    return _csv_response("attribution-referents-%s.csv" % year, output)
 
 
 @require_POST
@@ -2027,14 +3439,64 @@ def admin_alert_take(request, pk):
         return redirect("coaching:admin_monitoring")
     form = AlertHandleForm(request.POST)
     if not form.is_valid():
-        messages.error(request, _form_error_message(form, "Vérifiez la note de résolution."))
+        messages.error(request, _form_error_message(form, "Vérifiez la note de prise en charge."))
         return redirect("coaching:admin_monitoring")
     alert.status = PerseveranceAlert.STATUS_TAKEN
     alert.taken_by = request.user
     alert.taken_at = timezone.now()
-    alert.resolution_note = form.cleaned_data.get("resolution_note") or ""
-    alert.save(update_fields=["status", "taken_by", "taken_at", "resolution_note", "updated_at"])
-    messages.success(request, "Alerte assignée à un référent pédagogique.")
+    alert.handling_note = form.cleaned_data.get("handling_note") or ""
+    alert.save(update_fields=["status", "taken_by", "taken_at", "handling_note", "updated_at"])
+    messages.success(request, "Alerte prise en charge : %s." % alert.title)
+    return redirect("coaching:admin_monitoring")
+
+
+@require_POST
+@role_required(Profil.ROLE_ADMIN)
+def admin_alert_close(request, pk):
+    alert = get_object_or_404(PerseveranceAlert, pk=pk, university=request.university)
+    if alert.status != PerseveranceAlert.STATUS_TAKEN:
+        messages.info(request, "Une alerte doit être prise en charge avant d'être clôturée.")
+        return redirect("coaching:admin_monitoring")
+    form = AlertCloseForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, _form_error_message(form, "Rédigez une note de résolution."))
+        return redirect("coaching:admin_monitoring")
+    alert.status = PerseveranceAlert.STATUS_CLOSED
+    alert.closed_at = timezone.now()
+    alert.resolution_note = form.cleaned_data["resolution_note"]
+    alert.save(update_fields=["status", "closed_at", "resolution_note", "updated_at"])
+    if alert.student_id:
+        TutorNotification.objects.create(
+            university=request.university,
+            student=alert.student,
+            professor=alert.reported_by,
+            kind=TutorNotification.KIND_SUIVI,
+            title="Suivi clôturé",
+            message=(
+                "Le suivi « %s » a été clôturé par l'administration. %s"
+            ) % (alert.title, alert.resolution_note),
+        )
+        student_user = alert.student.membership.user
+        send_templated_email(
+            subject="Votre suivi a été clôturé · EduSpark",
+            recipients=[student_user.email],
+            template_name="coaching/emails/alert_resolution.html",
+            context={
+                "university_name": request.university.name,
+                "subject": "Suivi clôturé",
+                "preheader": alert.title,
+                "student_first_name": student_user.first_name or student_name(alert.student),
+                "alert_title": alert.title,
+                "resolution_note": alert.resolution_note,
+                "professor_name": (
+                    professor_name(alert.reported_by) if alert.reported_by_id else "l'équipe pédagogique"
+                ),
+                "cta_url": request.build_absolute_uri(reverse("coaching:student_notifications")),
+                "cta_label": "Consulter mon espace",
+                "footer_note": "Vous recevez cet e-mail car votre suivi de persévérance vient d'être clôturé.",
+            },
+        )
+    messages.success(request, "Alerte clôturée : %s." % alert.title)
     return redirect("coaching:admin_monitoring")
 
 

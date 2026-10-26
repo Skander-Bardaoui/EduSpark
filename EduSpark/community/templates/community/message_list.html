@@ -1,0 +1,46 @@
+{% extends portal_base_template %}
+{% block title %}Messagerie — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1000px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<div class="flex flex-wrap items-end justify-between gap-3">
+{% include "portal/_page_header.html" with eyebrow="Classe virtuelle" title="Messagerie" subtitle="Échangez en privé avec les membres de votre université." %}
+<a class="mb-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'community:message_create' %}">
+<span class="material-symbols-outlined text-[18px]">edit</span>Nouveau message</a>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+<a class="rounded-full px-4 py-2 text-xs font-bold {% if folder == 'recus' %}bg-primary text-on-primary{% else %}border border-outline-variant/70 text-on-surface-variant hover:bg-surface-container{% endif %}" href="?dossier=recus">Reçus{% if unread %} ({{ unread }}){% endif %}</a>
+<a class="rounded-full px-4 py-2 text-xs font-bold {% if folder == 'envoyes' %}bg-primary text-on-primary{% else %}border border-outline-variant/70 text-on-surface-variant hover:bg-surface-container{% endif %}" href="?dossier=envoyes">Envoyés</a>
+<form class="ml-auto flex flex-wrap items-center gap-2" method="get" role="search">
+<input name="dossier" type="hidden" value="{{ folder }}"/>
+<input class="min-w-[12rem] rounded-full bg-surface-container-low px-4 py-2 text-sm outline-none focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]" name="q" placeholder="Rechercher…" type="search" value="{{ q }}"/>
+{% if folder == 'recus' %}<label class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant"><input class="accent-primary" name="etat" onchange="this.form.submit()" type="checkbox" value="non_lus" {% if only_unread %}checked{% endif %}/>Non lus</label>{% endif %}
+<button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary" type="submit">Rechercher</button>
+</form>
+</div>
+
+{% if page %}
+<ul class="overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+{% for m in page %}
+<li class="border-b border-outline-variant/30 last:border-b-0">
+<a class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-surface-container-low" href="{% url 'community:message_detail' m.pk %}">
+<span class="h-2 w-2 shrink-0 rounded-full {% if folder == 'recus' and not m.read_at %}bg-primary{% else %}bg-transparent{% endif %}" aria-hidden="true"></span>
+<div class="min-w-0 flex-1">
+<p class="truncate text-sm {% if folder == 'recus' and not m.read_at %}font-bold text-on-surface{% else %}text-on-surface-variant{% endif %}">
+{% if folder == 'recus' %}{% firstof m.sender.get_full_name m.sender.email %}{% else %}À : {% firstof m.recipient.get_full_name m.recipient.email %}{% endif %}
+<span class="font-normal text-outline"> — {{ m.subject }}</span></p>
+<p class="truncate text-xs text-outline">{{ m.body|truncatechars:110 }}</p>
+</div>
+<span class="shrink-0 text-xs text-outline">{{ m.created_at|date:"d/m/Y H:i" }}</span>
+</a>
+</li>
+{% endfor %}
+</ul>
+{% include "portal/_pagination.html" with is_paginated=page.has_other_pages page_obj=page %}
+{% else %}
+{% include "portal/_empty_state.html" with icon="mail" title="Aucun message" hint="Vos conversations privées apparaîtront ici." %}
+{% endif %}
+</div>
+</main>
+{% endblock %}

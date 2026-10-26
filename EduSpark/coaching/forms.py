@@ -8,9 +8,13 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from .models import (
+    AttendanceSession,
     DifficultySheet,
     JournalEntry,
+    PerseveranceAlert,
+    StudentGoal,
     StudentTask,
+    StudySession,
     TutoringSlot,
 )
 
@@ -149,16 +153,17 @@ class JournalEntryForm(forms.Form):
 
 class AppointmentForm(forms.Form):
     professor = forms.IntegerField(
-        label="Tuteur",
+        label="Interlocuteur",
         min_value=1,
         error_messages={
-            "required": "Sélectionnez un tuteur.",
-            "invalid": "Sélectionnez un tuteur valide.",
-            "min_value": "Sélectionnez un tuteur valide.",
+            "required": "Sélectionnez un interlocuteur.",
+            "invalid": "Sélectionnez un interlocuteur valide.",
+            "min_value": "Sélectionnez un interlocuteur valide.",
         },
     )
     date = BookingDateField(label="Date")
     time = ClockField(label="Créneau")
+    slot = forms.IntegerField(required=False, min_value=1)
     topic = forms.CharField(
         label="Motif",
         min_length=5,
@@ -168,6 +173,15 @@ class AppointmentForm(forms.Form):
             "required": REQUIRED,
             "min_length": "5 caractères minimum.",
             "max_length": "200 caractères maximum.",
+        },
+    )
+    comment = forms.CharField(
+        label="Commentaire",
+        required=False,
+        max_length=1000,
+        strip=True,
+        error_messages={
+            "max_length": "1000 caractères maximum.",
         },
     )
 
@@ -210,6 +224,78 @@ class SlotForm(forms.Form):
                     % MIN_LEAD_MINUTES
                 )
         return data
+
+
+class AttendanceDateField(forms.DateField):
+    """Date de séance : aujourd'hui ou dans les 180 derniers jours."""
+
+    def __init__(self, window_days=180, **kwargs):
+        self.window_days = window_days
+        kwargs.setdefault("error_messages", {
+            "required": REQUIRED,
+            "invalid": "Saisissez une date valide (format AAAA-MM-JJ).",
+        })
+        super().__init__(**kwargs)
+
+    def clean(self, value):
+        value = super().clean(value)
+        if value is None:
+            return value
+        today = timezone.localdate()
+        if value > today:
+            raise ValidationError("La séance ne peut pas être dans le futur.")
+        if value < today - timedelta(days=self.window_days):
+            raise ValidationError(
+                "La date doit être comprise dans les %d derniers jours."
+                % self.window_days
+            )
+        return value
+
+
+class AttendanceSessionForm(forms.Form):
+    school_class = forms.IntegerField(
+        label="Classe",
+        min_value=1,
+        error_messages={
+            "required": "Sélectionnez une classe.",
+            "invalid": "Sélectionnez une classe valide.",
+            "min_value": "Sélectionnez une classe valide.",
+        },
+    )
+    title = forms.CharField(
+        label="Module",
+        min_length=3,
+        max_length=160,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "3 caractères minimum.",
+            "max_length": "160 caractères maximum.",
+        },
+    )
+    kind = forms.ChoiceField(
+        label="Type de séance",
+        choices=AttendanceSession.KIND_CHOICES,
+        initial=AttendanceSession.KIND_TD,
+        error_messages={
+            "required": REQUIRED,
+            "invalid_choice": INVALID_CHOICE,
+        },
+    )
+    date = AttendanceDateField(label="Date")
+    time = ClockField(label="Heure")
+    duration_minutes = forms.IntegerField(
+        label="Durée (min)",
+        min_value=15,
+        max_value=480,
+        initial=90,
+        error_messages={
+            "required": REQUIRED,
+            "invalid": INVALID_INTEGER,
+            "min_value": "La durée doit être au moins 15 minutes.",
+            "max_value": "La durée ne peut pas dépasser 480 minutes.",
+        },
+    )
 
 
 class DifficultySheetForm(forms.Form):
@@ -263,6 +349,178 @@ class DifficultySheetForm(forms.Form):
         return observation
 
 
+class GoalDateField(forms.DateField):
+    """Échéance d'objectif : aujourd'hui ou dans les 365 prochains jours."""
+
+    def __init__(self, window_days=365, **kwargs):
+        self.window_days = window_days
+        kwargs.setdefault("error_messages", {
+            "required": REQUIRED,
+            "invalid": "Saisissez une date valide (format AAAA-MM-JJ).",
+        })
+        super().__init__(**kwargs)
+
+    def clean(self, value):
+        value = super().clean(value)
+        if value is None:
+            return value
+        today = timezone.localdate()
+        if value < today:
+            raise ValidationError("L'échéance ne peut pas être dans le passé.")
+        if value > today + timedelta(days=self.window_days):
+            raise ValidationError(
+                "L'échéance doit être comprise dans les %d prochains jours."
+                % self.window_days
+            )
+        return value
+
+
+class StudentGoalForm(forms.Form):
+    title = forms.CharField(
+        label="Intitulé",
+        min_length=3,
+        max_length=200,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "3 caractères minimum.",
+            "max_length": "200 caractères maximum.",
+        },
+    )
+    description = forms.CharField(
+        label="Description",
+        required=False,
+        max_length=2000,
+        strip=True,
+        error_messages={"max_length": "2000 caractères maximum."},
+    )
+    course_code = forms.CharField(
+        label="Code UE",
+        required=False,
+        max_length=20,
+        strip=True,
+        error_messages={"max_length": "20 caractères maximum."},
+    )
+    semester = forms.CharField(
+        label="Semestre",
+        max_length=30,
+        initial="Semestre 1",
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "max_length": "30 caractères maximum.",
+        },
+    )
+    target_date = GoalDateField(label="Échéance", required=False)
+    skills_total = forms.IntegerField(
+        label="Compétences visées",
+        required=False,
+        min_value=0,
+        max_value=50,
+        initial=0,
+        error_messages={
+            "invalid": INVALID_INTEGER,
+            "min_value": "Indiquez un nombre positif.",
+            "max_value": "50 compétences maximum.",
+        },
+    )
+
+    def clean_title(self):
+        title = self.cleaned_data["title"]
+        if not any(character.isalnum() for character in title):
+            raise ValidationError("Indiquez au moins une lettre ou un chiffre.")
+        return title
+
+
+class GoalProgressForm(forms.Form):
+    progress = forms.IntegerField(
+        label="Avancement (%)",
+        min_value=0,
+        max_value=100,
+        error_messages={
+            "required": REQUIRED,
+            "invalid": INVALID_INTEGER,
+            "min_value": "L'avancement doit être compris entre 0 et 100.",
+            "max_value": "L'avancement doit être compris entre 0 et 100.",
+        },
+    )
+    skills_acquired = forms.IntegerField(
+        label="Compétences acquises",
+        required=False,
+        min_value=0,
+        max_value=50,
+        error_messages={
+            "invalid": INVALID_INTEGER,
+            "min_value": "Indiquez un nombre positif.",
+            "max_value": "50 compétences maximum.",
+        },
+    )
+
+
+class StudySessionForm(forms.Form):
+    title = forms.CharField(
+        label="Intitulé",
+        min_length=3,
+        max_length=200,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "3 caractères minimum.",
+            "max_length": "200 caractères maximum.",
+        },
+    )
+    course_code = forms.CharField(
+        label="Code UE",
+        required=False,
+        max_length=20,
+        strip=True,
+        error_messages={"max_length": "20 caractères maximum."},
+    )
+    kind = forms.ChoiceField(
+        label="Type",
+        choices=StudySession.KIND_CHOICES,
+        initial=StudySession.KIND_REVISION,
+        error_messages={
+            "required": REQUIRED,
+            "invalid_choice": INVALID_CHOICE,
+        },
+    )
+    date = BookingDateField(window_days=120, label="Date")
+    time = ClockField(label="Heure")
+    duration_minutes = forms.IntegerField(
+        label="Durée (min)",
+        min_value=15,
+        max_value=240,
+        initial=60,
+        error_messages={
+            "required": REQUIRED,
+            "invalid": INVALID_INTEGER,
+            "min_value": "La durée doit être au moins 15 minutes.",
+            "max_value": "La durée ne peut pas dépasser 240 minutes.",
+        },
+    )
+    location = forms.CharField(
+        label="Lieu",
+        required=False,
+        max_length=120,
+        strip=True,
+        error_messages={"max_length": "120 caractères maximum."},
+    )
+
+    def clean(self):
+        data = super().clean()
+        day = data.get("date")
+        clock = data.get("time")
+        if day and clock:
+            start = combine_clock(day, clock)
+            if start <= timezone.now() + timedelta(minutes=MIN_LEAD_MINUTES):
+                raise ValidationError(
+                    "Choisissez un créneau au moins %d minutes après l'heure actuelle."
+                    % MIN_LEAD_MINUTES
+                )
+        return data
+
+
 class DifficultyNoteForm(forms.Form):
     note = forms.CharField(
         label="Note de suivi",
@@ -288,23 +546,12 @@ class TutorAllocationForm(forms.Form):
         },
     )
     professor = forms.IntegerField(
-        label="Tuteur",
+        label="Référent pédagogique",
         min_value=1,
         error_messages={
-            "required": "Sélectionnez un tuteur.",
-            "invalid": "Sélectionnez un tuteur valide.",
-            "min_value": "Sélectionnez un tuteur valide.",
-        },
-    )
-    count = forms.IntegerField(
-        label="Nombre d'étudiants",
-        min_value=1,
-        max_value=60,
-        error_messages={
-            "required": REQUIRED,
-            "invalid": INVALID_INTEGER,
-            "min_value": "Le nombre doit être au moins 1.",
-            "max_value": "Le nombre ne peut pas dépasser 60.",
+            "required": "Sélectionnez un référent.",
+            "invalid": "Sélectionnez un référent valide.",
+            "min_value": "Sélectionnez un référent valide.",
         },
     )
 
@@ -321,13 +568,113 @@ class AutoAllocationForm(forms.Form):
     )
 
 
+class RelanceForm(forms.Form):
+    subject = forms.CharField(
+        label="Objet",
+        min_length=5,
+        max_length=200,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "5 caractères minimum.",
+            "max_length": "200 caractères maximum.",
+        },
+    )
+    message = forms.CharField(
+        label="Message",
+        min_length=20,
+        max_length=2000,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "20 caractères minimum.",
+            "max_length": "2000 caractères maximum.",
+        },
+    )
+
+    def clean_subject(self):
+        subject = self.cleaned_data["subject"]
+        if not any(character.isalnum() for character in subject):
+            raise ValidationError("Indiquez un objet avec au moins une lettre ou un chiffre.")
+        return subject
+
+    def clean_message(self):
+        message = self.cleaned_data["message"]
+        if len(message.split()) < 3:
+            raise ValidationError("Détaillez le message en au moins trois mots.")
+        return message
+
+
+class NotificationReplyForm(forms.Form):
+    reply = forms.CharField(
+        label="Réponse",
+        min_length=5,
+        max_length=500,
+        strip=True,
+        error_messages={
+            "required": "Rédigez une réponse pour votre tuteur.",
+            "min_length": "5 caractères minimum.",
+            "max_length": "500 caractères maximum.",
+        },
+    )
+
+    def clean_reply(self):
+        reply = self.cleaned_data["reply"]
+        if len(reply.split()) < 2:
+            raise ValidationError("Écrivez une réponse d'au moins deux mots.")
+        return reply
+
+
+class AlertReportForm(forms.Form):
+    detail = forms.CharField(
+        label="Signalement",
+        min_length=20,
+        max_length=2000,
+        strip=True,
+        error_messages={
+            "required": REQUIRED,
+            "min_length": "20 caractères minimum.",
+            "max_length": "2000 caractères maximum.",
+        },
+    )
+    priority = forms.ChoiceField(
+        label="Priorité",
+        choices=PerseveranceAlert.PRIORITY_CHOICES,
+        initial=PerseveranceAlert.PRIORITY_NORMAL,
+        error_messages={
+            "required": REQUIRED,
+            "invalid_choice": INVALID_CHOICE,
+        },
+    )
+
+    def clean_detail(self):
+        detail = self.cleaned_data["detail"]
+        if len(detail.split()) < 2:
+            raise ValidationError("Décrivez le signalement en au moins deux mots.")
+        return detail
+
+
 class AlertHandleForm(forms.Form):
-    resolution_note = forms.CharField(
-        label="Note de résolution",
+    handling_note = forms.CharField(
+        label="Note de prise en charge",
         required=False,
         max_length=2000,
         strip=True,
         error_messages={"max_length": "2000 caractères maximum."},
+    )
+
+
+class AlertCloseForm(forms.Form):
+    resolution_note = forms.CharField(
+        label="Note de résolution",
+        min_length=5,
+        max_length=2000,
+        strip=True,
+        error_messages={
+            "required": "Rédigez une note de résolution pour clôturer l'alerte.",
+            "min_length": "5 caractères minimum.",
+            "max_length": "2000 caractères maximum.",
+        },
     )
 
 

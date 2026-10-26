@@ -130,11 +130,12 @@
 <div class="flex flex-col">
 <span class="font-semibold text-on-surface">{{ profile.program|default:"Filière non renseignée" }}</span>
 <span class="font-body-sm text-xs text-on-surface-variant">{{ profile.promotion|default:"Promotion non renseignée" }}</span>
+{% if profile.level %}<span class="text-xs text-on-surface-variant">Niveau : {{ profile.level }}{% if profile.section %} · Section {{ profile.section }}{% endif %}</span>{% endif %}
 </div>
 </td>
 <td class="py-4 px-3">
 <div class="flex flex-wrap items-center gap-1.5">
-{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary">{{ group.name }}</span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
+{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary">{{ group.school_class.name }}<span class="font-normal text-on-surface-variant">· {{ group.name }}</span></span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
 </div>
 </td>
 <td class="py-4 px-3">
@@ -163,27 +164,35 @@
 <div class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-tertiary shadow-sm"><span class="material-symbols-outlined text-[20px]">how_to_reg</span></div>
 <div>
 <h2 class="font-title-md text-title-md text-on-surface">Inscriptions en attente</h2>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Validation des accès étudiants</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Validation des accès étudiants, regroupés par niveau</span>
 </div>
 </div>
 <span class="rounded-full bg-tertiary-fixed px-2 py-0.5 font-label-sm text-[11px] font-bold uppercase tracking-wider text-on-tertiary-fixed">{{ stats.pending }}</span>
 </div>
-<div class="flex flex-col gap-2 p-5">
-{% for membership in pending_memberships %}
+<div class="flex flex-col gap-3 p-5">
+{% for group in pending_groups %}
 <div class="rounded bg-surface-container-low p-3">
+<p class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">{{ group.level }}</p>
+<div class="mt-2 flex flex-col gap-2">
+{% for row in group.students %}
+<div class="rounded bg-surface-container-lowest p-3">
 <div class="flex items-start justify-between gap-2">
 <div class="min-w-0">
-<p class="truncate font-body-sm text-body-sm font-semibold text-on-surface">{{ membership.user.get_full_name|default:membership.user.email }}</p>
-<p class="truncate text-[11px] text-on-surface-variant">{{ membership.user.email }} · {{ membership.created_at|date:"d/m/Y" }}</p>
+<p class="truncate font-body-sm text-body-sm font-semibold text-on-surface">{{ row.membership.user.get_full_name|default:row.membership.user.email }}</p>
+<p class="truncate text-[11px] text-on-surface-variant">{{ row.membership.user.email }} · {{ row.membership.created_at|date:"d/m/Y" }}</p>
+<p class="text-[11px] font-semibold text-on-surface-variant">Section : {{ row.section|default:"non renseignée" }}</p>
 </div>
 </div>
 <div class="mt-2 flex gap-2">
-<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"/><button class="w-full rounded-full bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-surface-variant transition-colors hover:text-error" type="submit">Refuser</button></form>
-<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="approve"/><button class="w-full rounded-full bg-primary px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Valider</button></form>
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' row.membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"/><button class="w-full rounded-full bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-surface-variant transition-colors hover:text-error" type="submit">Refuser</button></form>
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' row.membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="approve"/><button class="w-full rounded-full bg-primary px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Valider</button></form>
+</div>
+</div>
+{% endfor %}
 </div>
 </div>
 {% empty %}
-<p class="rounded bg-surface-container-low p-4 text-center font-body-sm text-body-sm text-on-surface-variant">Aucune inscription en attente. Les nouveaux comptes apparaîtront ici.</p>
+<p class="rounded bg-surface-container-low p-4 text-center font-body-sm text-body-sm text-on-surface-variant">Aucune inscription en attente. Les nouveaux comptes apparaîtront ici, regroupés par niveau.</p>
 {% endfor %}
 </div>
 </section>

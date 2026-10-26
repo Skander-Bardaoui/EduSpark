@@ -1,0 +1,96 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Présences — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Présences</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Relevez les présences par séance : l'assiduité des tutorats, le niveau de vigilance et les fiches sont recalculés automatiquement.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#attendance-session-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Nouvelle séance</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Séances" value=session_count icon="calendar_month" hint="80 dernières séances" %}
+{% include "portal/_stat_card.html" with label="À relever" value=to_record_count icon="pending_actions" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Séances sans présences" %}
+{% include "portal/_stat_card.html" with label="Relevés" value=recorded_count icon="fact_check" icon_class="bg-primary-fixed text-primary" hint="Séances déjà pointées" %}
+{% include "portal/_stat_card.html" with label="Assiduité moyenne" value=average_rate|default:"—" suffix=" %" icon="monitoring" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Calculée sur vos étudiants" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Séances récentes</h2>
+<span class="text-xs text-on-surface-variant">{{ session_count }} séance{{ session_count|pluralize }}</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[900px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Module</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Présents</th><th class="px-5 py-3 font-bold">Statut</th><th class="px-5 py-3 text-right font-bold">Action</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in session_rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3 text-on-surface-variant">{{ row.date_label }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td>
+<td class="px-5 py-3 font-semibold text-on-surface">{{ row.session.title }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.kind_label }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% if row.is_recorded %}{{ row.attended }}/{{ row.recorded }}{% else %}—{% endif %}</td>
+<td class="px-5 py-3">{% if row.is_recorded %}<span class="inline-flex rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">Relevé</span>{% else %}<span class="inline-flex rounded-full bg-tertiary-fixed px-2.5 py-1 text-[11px] font-bold text-on-tertiary-fixed">À saisir</span>{% endif %}</td>
+<td class="px-5 py-3 text-right"><a class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface transition-colors hover:bg-surface-dim" href="{{ row.url }}"><span class="material-symbols-outlined text-[16px]">edit_calendar</span>{% if row.is_recorded %}Modifier{% else %}Saisir{% endif %}</a></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="7">Aucune séance. Créez-en une avec « Nouvelle séance ».</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Assiduité de mes étudiants</h2>
+<span class="text-xs text-on-surface-variant">Calcul : présences et retards / séances comptabilisées</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Présences</th><th class="px-5 py-3 font-bold">Justifiées</th><th class="px-5 py-3 font-bold">Taux</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in student_rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3 font-semibold text-on-surface">{{ row.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.attended }}/{{ row.counted }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.excused }}</td>
+<td class="px-5 py-3 font-bold {% if row.rate is not None and row.rate < 75 %}text-error{% elif row.rate is not None and row.rate < 85 %}text-tertiary{% else %}text-primary{% endif %}">{% if row.rate is not None %}{{ row.rate }} %{% else %}—{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun étudiant suivi.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="attendance-session-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvelle séance</h2><p class="text-xs text-on-surface-variant">Créez la séance puis saisissez les présences.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="grid gap-3 p-5" data-validate-form method="post" action="{% url 'coaching:prof_attendance_create' %}" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Classe</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Sélectionnez une classe." name="school_class" required>{% for school_class in classes %}<option value="{{ school_class.pk }}">{{ school_class.name }}</option>{% empty %}<option value="">Aucune classe</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Module</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="160" minlength="3" name="title" placeholder="ex. Algorithmique avancée" required type="text"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Type de séance</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="kind" required>{% for value, label in kind_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+<div class="grid gap-3 sm:grid-cols-2">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Date</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="{{ today_value }}" min="{{ min_date_value }}" name="date" required type="date" value="{{ today_value }}"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Heure</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="time" required>{% for clock in slot_times %}<option value="{{ clock }}"{% if clock == default_time %} selected{% endif %}>{{ clock }}</option>{% empty %}<option value="09:00">09:00</option>{% endfor %}</select></label>
+</div>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Durée (minutes)</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="480" min="15" name="duration_minutes" required step="15" type="number" value="90"/></label>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">event</span>Créer la séance</button>
+</div>
+</form>
+</div>
+</div>
+{% endblock %}
+{% block page_scripts %}{% include "coaching/_form_validation.html" %}{% endblock %}

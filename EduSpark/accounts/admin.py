@@ -50,16 +50,19 @@ class ProfessorProfileAdmin(admin.ModelAdmin):
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ("membership", "student_number", "program", "promotion")
-    list_filter = ("university",)
-    search_fields = ("membership__user__email", "membership__user__last_name", "student_number", "program")
+    list_display = ("membership", "student_number", "program", "level", "section", "promotion")
+    list_filter = ("university", "level", "section")
+    search_fields = (
+        "membership__user__email", "membership__user__last_name",
+        "student_number", "program", "level", "section",
+    )
 
 
 @admin.register(SchoolClass)
 class SchoolClassAdmin(admin.ModelAdmin):
-    list_display = ("name", "university", "level", "program", "academic_year")
+    list_display = ("name", "university", "level", "section", "program", "academic_year")
     list_filter = ("university", "academic_year")
-    search_fields = ("name", "program", "level")
+    search_fields = ("name", "program", "level", "section")
     filter_horizontal = ("professors",)
 
 

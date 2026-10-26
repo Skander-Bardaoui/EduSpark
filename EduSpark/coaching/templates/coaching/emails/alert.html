@@ -1,0 +1,19 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Signalement pédagogique{% endblock %}
+{% block body %}
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Bonjour,</p>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#33415c;">Un enseignant référent a signalé une situation préoccupante concernant un étudiant de votre université.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9ff;border:1px solid #e2eafc;border-radius:14px;">
+<tr>
+<td style="padding:20px 22px;">
+<p style="margin:0 0 14px;font-size:16px;font-weight:700;color:#14213d;">{{ student_name }}{% if class_name %} · {{ class_name }}{% endif %}</p>
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Priorité</p>
+<p style="margin:0 0 14px;font-size:14px;color:#14213d;"><span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:{{ priority_tone }};color:#ffffff;font-size:12px;font-weight:700;">{{ priority_label }}</span></p>
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Constat</p>
+<p style="margin:0 0 14px;font-size:14px;line-height:1.75;color:#33415c;">{{ detail|linebreaksbr }}</p>
+<p style="margin:0;font-size:12px;color:#5b6b8c;">Signalé par {{ professor_name }}{% if program %} · Filière {{ program }}{% endif %}</p>
+</td>
+</tr>
+</table>
+<p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#5b6b8c;">Le signalement est disponible dans le suivi de l'université pour prise en charge.</p>
+{% endblock %}

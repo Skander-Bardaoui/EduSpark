@@ -99,7 +99,7 @@ class AdminExamModuleTests(TestCase):
 
     def test_create_session(self):
         response = self.client.post(reverse("exams:admin_exam_session_create"), {
-            "create-school_class": self.school_class.pk,
+            "create-school_classes": [self.school_class.pk],
             "create-title": "MAT301 · Probabilités",
             "create-exam_type": ExamSession.TYPE_ECRIT,
             "create-date": "2025-11-06",
@@ -110,9 +110,52 @@ class AdminExamModuleTests(TestCase):
         self.assertRedirects(response, reverse("exams:admin_exam_sessions"))
         self.assertTrue(ExamSession.objects.filter(title="MAT301 · Probabilités").exists())
 
+    def test_create_session_for_multiple_classes(self):
+        second_class = SchoolClass.objects.create(
+            university=self.university, name="Licence 3 Génie Logiciel",
+            level="3e année", program="Génie logiciel", academic_year="2025-2026",
+        )
+        response = self.client.post(reverse("exams:admin_exam_session_create"), {
+            "create-school_classes": [self.school_class.pk, second_class.pk],
+            "create-title": "INF502 · Bases de données",
+            "create-exam_type": ExamSession.TYPE_ECRIT,
+            "create-date": "2025-11-07",
+            "create-start_time": "08:30",
+            "create-end_time": "10:30",
+            "create-room": "Amphi B",
+        })
+        self.assertRedirects(response, reverse("exams:admin_exam_sessions"))
+        sessions = ExamSession.objects.filter(title="INF502 · Bases de données")
+        self.assertEqual(sessions.count(), 2)
+        self.assertEqual(
+            len({session.plan_group for session in sessions}), 1,
+        )
+        self.assertEqual(
+            set(sessions.values_list("school_class_id", flat=True)),
+            {self.school_class.pk, second_class.pk},
+        )
+
+    def test_multiclass_plan_sharing_room_is_not_a_conflict(self):
+        second_class = SchoolClass.objects.create(
+            university=self.university, name="Licence 3 Génie Logiciel",
+            level="3e année", program="Génie logiciel", academic_year="2025-2026",
+        )
+        response = self.client.post(reverse("exams:admin_exam_session_create"), {
+            "create-school_classes": [self.school_class.pk, second_class.pk],
+            "create-title": "INF503 · Réseaux",
+            "create-exam_type": ExamSession.TYPE_ECRIT,
+            "create-date": "2025-11-07",
+            "create-start_time": "08:30",
+            "create-end_time": "10:30",
+            "create-room": "Amphi B",
+        })
+        self.assertRedirects(response, reverse("exams:admin_exam_sessions"))
+        page = self.client.get(reverse("exams:admin_exam_sessions"))
+        self.assertContains(page, "Aucun chevauchement détecté")
+
     def test_create_session_rejects_room_conflict(self):
         response = self.client.post(reverse("exams:admin_exam_session_create"), {
-            "create-school_class": self.school_class.pk,
+            "create-school_classes": [self.school_class.pk],
             "create-title": "Épreuve en conflit",
             "create-exam_type": ExamSession.TYPE_ECRIT,
             "create-date": "2025-11-03",
@@ -126,7 +169,7 @@ class AdminExamModuleTests(TestCase):
 
     def test_create_session_rejects_inverted_time(self):
         response = self.client.post(reverse("exams:admin_exam_session_create"), {
-            "create-school_class": self.school_class.pk,
+            "create-school_classes": [self.school_class.pk],
             "create-title": "Épreuve à horaire invalide",
             "create-exam_type": ExamSession.TYPE_ECRIT,
             "create-date": "2025-11-06",
@@ -138,10 +181,10 @@ class AdminExamModuleTests(TestCase):
         self.assertContains(response, "L&#x27;heure de fin doit être postérieure")
         self.assertFalse(ExamSession.objects.filter(title="Épreuve à horaire invalide").exists())
 
-    def test_create_session_notifies_class_professors(self):
+    def test_create_session_notifies_professors_and_students(self):
         mail.outbox = []
         response = self.client.post(reverse("exams:admin_exam_session_create"), {
-            "create-school_class": self.school_class.pk,
+            "create-school_classes": [self.school_class.pk],
             "create-title": "MAT301 · Probabilités",
             "create-exam_type": ExamSession.TYPE_ECRIT,
             "create-date": "2025-11-06",
@@ -150,10 +193,13 @@ class AdminExamModuleTests(TestCase):
             "create-room": "Salle 204",
         })
         self.assertRedirects(response, reverse("exams:admin_exam_sessions"))
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ["prof@test.local"])
-        self.assertIn("MAT301 · Probabilités", mail.outbox[0].body)
-        self.assertIn("Salle 204", mail.outbox[0].body)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(
+            sorted(email.to[0] for email in mail.outbox),
+            ["etu@test.local", "prof@test.local"],
+        )
+        self.assertTrue(all("MAT301 · Probabilités" in email.body for email in mail.outbox))
+        self.assertTrue(all("Salle 204" in email.body for email in mail.outbox))
 
     def test_toggle_convocation_notifies_students_and_professors(self):
         mail.outbox = []
@@ -169,7 +215,7 @@ class AdminExamModuleTests(TestCase):
         self.session.refresh_from_db()
         self.assertEqual(self.session.status, ExamSession.STATUS_PLANNED)
 
-    def test_revoke_convocation_deletes_copies(self):
+    def test_revoke_convocation_keeps_copies(self):
         self.session.status = ExamSession.STATUS_CONVOKED
         self.session.convoked_at = timezone.now()
         self.session.save(update_fields=["status", "convoked_at"])
@@ -186,8 +232,8 @@ class AdminExamModuleTests(TestCase):
         self.client.post(url)
         self.session.refresh_from_db()
         self.assertEqual(self.session.status, ExamSession.STATUS_PLANNED)
-        self.assertFalse(ExamCopy.objects.filter(session=self.session).exists())
-        self.assertFalse(page.file.storage.exists(page.file.name))
+        self.assertTrue(ExamCopy.objects.filter(session=self.session).exists())
+        self.assertTrue(page.file.storage.exists(page.file.name))
 
     def test_sessions_page_shows_subject_status(self):
         subject = ExamSubject.objects.create(
@@ -467,6 +513,61 @@ class ProfExamModuleTests(_ExamFlowMixin, TestCase):
         )
         self.assertEqual(grade.status, StudentGrade.STATUS_PUBLISHED)
 
+    def test_prof_class_cards_lists_students_and_copies(self):
+        copy = ExamCopy.objects.create(
+            university=self.university, session=self.session,
+            student=self.student_profile, original_name="copie.pdf",
+            file=_pdf_upload("copie.pdf"),
+            submitted_at=timezone.now(),
+        )
+        response = self.client.get(reverse("exams:prof_corrections"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Licence 3 Informatique")
+        self.assertContains(response, "Camille Martin")
+        self.assertContains(response, "copie.pdf")
+        self.assertContains(response, "Soumise et verrouillée")
+        self.assertContains(response, "N°")
+
+    def test_prof_publishes_one_validated_grade(self):
+        grade = StudentGrade.objects.create(
+            university=self.university, session=self.session,
+            student=self.student_profile, score=Decimal("14.00"),
+            status=StudentGrade.STATUS_VALIDATED, graded_by=self.prof_user,
+        )
+        response = self.client.post(
+            reverse("exams:prof_correction_publish_one"),
+            {"session": self.session.pk, "student": self.student_profile.pk},
+        )
+        self.assertRedirects(
+            response,
+            "%s?session=%s&student=%s" % (
+                reverse("exams:prof_corrections"),
+                self.session.pk, self.student_profile.pk,
+            ),
+        )
+        grade.refresh_from_db()
+        self.assertEqual(grade.status, StudentGrade.STATUS_PUBLISHED)
+
+    def test_prof_cannot_publish_draft_grade(self):
+        grade = StudentGrade.objects.create(
+            university=self.university, session=self.session,
+            student=self.student_profile, score=Decimal("12.00"),
+            status=StudentGrade.STATUS_DRAFT, graded_by=self.prof_user,
+        )
+        response = self.client.post(
+            reverse("exams:prof_correction_publish_one"),
+            {"session": self.session.pk, "student": self.student_profile.pk},
+        )
+        self.assertRedirects(
+            response,
+            "%s?session=%s&student=%s" % (
+                reverse("exams:prof_corrections"),
+                self.session.pk, self.student_profile.pk,
+            ),
+        )
+        grade.refresh_from_db()
+        self.assertEqual(grade.status, StudentGrade.STATUS_DRAFT)
+
     def test_prof_grade_sheets_page_and_sign(self):
         response = self.client.get(reverse("exams:prof_grade_sheets"))
         self.assertEqual(response.status_code, 200)
@@ -557,19 +658,52 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
         self.assertContains(response, "INF501 · Algorithmique avancée")
         self.assertNotContains(response, "PAST · Ancienne épreuve")
 
-    def test_student_exams_shows_subject_only_once_published(self):
+    def test_student_exams_shows_subject_only_during_exam_window(self):
         response = self.client.get(reverse("exams:student_exams"))
-        self.assertContains(response, "Sujet non encore publié")
-        self.assertNotContains(response, "Sujet d'épreuve (PDF)")
+        self.assertContains(response, "Aucun sujet déposé")
+        self.assertNotContains(response, "Télécharger le sujet")
 
         subject = ExamSubject.objects.create(
             session=self.session, file=_pdf_upload(), created_by=self.prof_user,
         )
         subject.published_at = timezone.now()
         subject.save(update_fields=["published_at"])
+
         response = self.client.get(reverse("exams:student_exams"))
-        self.assertContains(response, "Sujet d'épreuve (PDF)")
-        self.assertNotContains(response, "Sujet non encore publié")
+        self.assertContains(response, "Sujet disponible au début")
+        self.assertNotContains(response, "Télécharger le sujet")
+
+        with self._deposit_now():
+            response = self.client.get(reverse("exams:student_exams"))
+            self.assertContains(response, "Télécharger le sujet")
+            self.assertNotContains(response, "Sujet disponible au début")
+
+        end = timezone.make_aware(
+            datetime.combine(self.session.date, self.session.end_time),
+        )
+        with mock.patch(
+            "django.utils.timezone.now",
+            return_value=end + timedelta(minutes=5),
+        ):
+            response = self.client.get(reverse("exams:student_exams"))
+            self.assertContains(response, "Sujet fermé")
+            self.assertNotContains(response, "Télécharger le sujet")
+
+    def test_student_subject_download_is_gated_by_exam_window(self):
+        subject = ExamSubject.objects.create(
+            session=self.session, file=_pdf_upload(), created_by=self.prof_user,
+        )
+        subject.published_at = timezone.now()
+        subject.save(update_fields=["published_at"])
+        url = reverse("exams:student_subject_download", args=[self.session.pk])
+
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse("exams:student_exams"))
+
+        with self._deposit_now():
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response["Content-Type"], "application/pdf")
 
     def test_student_convocation_pdf(self):
         response = self.client.get(
@@ -588,25 +722,38 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
         )
         self.assertRedirects(response, reverse("exams:student_exams"))
 
-    def test_student_copy_upload_requires_convocation(self):
+    def test_student_copy_upload_works_without_convocation_during_window(self):
         self.session.status = ExamSession.STATUS_PLANNED
         self.session.convoked_at = None
         self.session.save()
-        response = self.client.post(
-            reverse("exams:student_copy_upload", args=[self.session.pk]),
-            {"file": SimpleUploadedFile(
-                "page1.png", _png_bytes(), content_type="image/png",
-            )},
-        )
+        with self._deposit_now():
+            response = self.client.post(
+                reverse("exams:student_copy_upload", args=[self.session.pk]),
+                {"file": _pdf_upload("copie.pdf")},
+            )
         self.assertRedirects(
             response, reverse("exams:student_exams"), fetch_redirect_response=False,
         )
-        self.assertFalse(ExamCopy.objects.filter(
+        copy = ExamCopy.objects.get(
             session=self.session, student=self.student_profile,
-        ).exists())
-        page = self.client.get(reverse("exams:student_exams"))
-        self.assertContains(page, "la convocation n'a pas été envoyée", html=True)
-        self.assertContains(page, "s'ouvrira au début de l'épreuve", html=True)
+        )
+        self.assertTrue(copy.has_file)
+        self.assertEqual(copy.original_name, "copie.pdf")
+
+    def test_student_copy_upload_accepts_zip(self):
+        with self._deposit_now():
+            response = self.client.post(
+                reverse("exams:student_copy_upload", args=[self.session.pk]),
+                {"file": SimpleUploadedFile(
+                    "copie.zip", b"PK\x03\x04archive", content_type="application/zip",
+                )},
+            )
+        self.assertRedirects(response, reverse("exams:student_exams"))
+        copy = ExamCopy.objects.get(
+            session=self.session, student=self.student_profile,
+        )
+        self.assertTrue(copy.is_zip)
+        self.assertEqual(copy.original_name, "copie.zip")
 
     def test_student_copy_upload_locked_before_exam_starts(self):
         response = self.client.post(
@@ -671,13 +818,11 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
             response = self.client.get(reverse("exams:student_exams"))
             self.assertContains(response, "Copie soumise")
 
-    def test_student_exams_hides_copy_without_convocation(self):
+    def test_student_exams_keeps_copy_visible_without_convocation(self):
         with self._deposit_now():
             self.client.post(
                 reverse("exams:student_copy_upload", args=[self.session.pk]),
-                {"file": SimpleUploadedFile(
-                    "page1.png", _png_bytes(), content_type="image/png",
-                )},
+                {"file": _pdf_upload("copie.pdf")},
                 follow=True,
             )
             self.client.post(
@@ -689,8 +834,8 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
         self.session.save(update_fields=["status", "convoked_at"])
         response = self.client.get(reverse("exams:student_exams"))
         self.assertContains(response, "Convocation en attente d'envoi")
-        self.assertNotContains(response, "Copie soumise")
-        self.assertNotContains(response, "Pages numérisées")
+        self.assertContains(response, "copie.pdf")
+        self.assertContains(response, "Copie soumise et verrouillée")
 
     def test_student_copy_submit_requires_pages(self):
         with self._deposit_now():

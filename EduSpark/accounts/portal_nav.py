@@ -36,7 +36,7 @@ ROLE_META = {
             {
                 "icon": "draw",
                 "title": "14 copies urgentes à corriger",
-                "detail": "Jury INF501 dans 3 jours.",
+                "detail": "Épreuve INF501 dans 3 jours.",
                 "url_name": "exams:prof_corrections",
             },
             {
@@ -122,6 +122,7 @@ NAV_SECTIONS = {
         {
             "label": "Suivi & Progression",
             "items": (
+                {"label": "Mes notifications", "icon": "notifications", "url_name": "coaching:student_notifications"},
                 {"label": "Mes Objectifs & Plans", "icon": "flag", "url_name": "coaching:student_progress"},
                 {"label": "Mes Tâches", "icon": "check_circle_outline", "url_name": "coaching:student_tasks"},
                 {"label": "Mes Rendez-vous", "icon": "event_available", "url_name": "coaching:student_appointments"},
@@ -164,7 +165,6 @@ NAV_SECTIONS = {
             "items": (
                 {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:prof_exam_sessions"},
                 {"label": "Copies à corriger", "icon": "draw", "url_name": "exams:prof_corrections"},
-                {"label": "Relevés & Jurys", "icon": "fact_check", "url_name": "exams:prof_grade_sheets"},
             ),
         },
         {
@@ -180,6 +180,7 @@ NAV_SECTIONS = {
             "label": "Suivi Référent",
             "items": (
                 {"label": "Tableau de bord étudiants", "icon": "monitoring", "url_name": "coaching:prof_followup"},
+                {"label": "Présences", "icon": "fact_check", "url_name": "coaching:prof_attendance"},
                 {"label": "Fiches & Difficultés", "icon": "person_search", "url_name": "coaching:prof_followup_cards"},
                 {"label": "Rendez-vous de tutorat", "icon": "support_agent", "url_name": "coaching:prof_tutoring"},
                 {"label": "Journal de progression", "icon": "trending_up", "url_name": "coaching:prof_student_journal"},

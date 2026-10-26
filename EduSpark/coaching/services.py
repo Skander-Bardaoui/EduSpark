@@ -3,13 +3,15 @@
 from collections import defaultdict
 from datetime import timedelta
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from accounts.models import ProfessorProfile, SchoolClass, StudentProfile
 from accounts.tenancy import Role
 
 from .models import (
+    AttendanceRecord,
+    AttendanceSession,
     DifficultySheet,
     PerseveranceAlert,
     StudentGoal,
@@ -22,6 +24,42 @@ from .models import (
 from .utils import fr_day_time, initials, percent, week_bounds
 
 ACADEMIC_YEAR_FALLBACK = "2025-2026"
+
+TUTORING_WEEKDAY_TIMES = (
+    "18:00", "18:30", "19:00", "19:30", "20:00", "20:30",
+)
+TUTORING_SATURDAY_TIMES = (
+    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
+)
+TUTORING_TIME_CHOICES = TUTORING_WEEKDAY_TIMES + TUTORING_SATURDAY_TIMES
+TUTORING_WINDOW_HINT = (
+    "En semaine de 18:00 à 21:00, le samedi de 09:00 à 13:00. "
+    "Le dimanche est fermé."
+)
+
+
+def tutoring_window_error(start, end):
+    """Vérifie que le rendez-vous a lieu hors des heures de cours."""
+    local_start = timezone.localtime(start)
+    local_end = timezone.localtime(end)
+    if local_start.weekday() == 6:
+        return "Le tutorat n'est pas proposé le dimanche."
+    if local_end.date() != local_start.date():
+        return "Le rendez-vous doit se terminer le même jour."
+    if local_start.weekday() == 5:
+        open_minutes, close_minutes = 9 * 60, 13 * 60
+    else:
+        open_minutes, close_minutes = 18 * 60, 21 * 60
+    start_minutes = local_start.hour * 60 + local_start.minute
+    end_minutes = local_end.hour * 60 + local_end.minute
+    if start_minutes < open_minutes or end_minutes > close_minutes:
+        return (
+            "Les rendez-vous de tutorat ont lieu en dehors des heures de cours : "
+            "en semaine de 18:00 à 21:00, le samedi de 09:00 à 13:00. "
+            "Le dimanche est fermé."
+        )
+    return None
+
 
 RISK_META = {
     TutorAssignment.RISK_HIGH: {
@@ -323,13 +361,20 @@ def student_tutors(student):
     return sorted(tutors.values(), key=lambda item: display_name(item))
 
 
-def waiting_students(school_class, academic_year):
-    enrolled = StudentProfile.objects.filter(groups__school_class=school_class).distinct()
-    if not enrolled.exists():
-        enrolled = StudentProfile.objects.filter(
+def enrolled_students(school_class):
+    students = StudentProfile.objects.filter(
+        groups__school_class=school_class,
+    ).distinct()
+    if not students.exists():
+        students = StudentProfile.objects.filter(
             tutor_assignments__school_class=school_class,
             tutor_assignments__status=TutorAssignment.STATUS_ACTIVE,
         ).distinct()
+    return students
+
+
+def waiting_students(school_class, academic_year):
+    enrolled = enrolled_students(school_class)
     assigned = TutorAssignment.objects.filter(
         student__in=enrolled,
         academic_year=academic_year,
@@ -352,11 +397,108 @@ def enrolled_count(school_class):
     )
 
 
+def attendance_metrics(student):
+    """Taux d'assiduité calculé à partir des présences réellement saisies.
+
+    Les retards comptent comme une présence. Les absences justifiées sont
+    exclues du calcul (elles ne pénalisent pas l'étudiant). Les séances
+    annulées ne sont jamais comptabilisées; une séance sans relevé non plus.
+    """
+    records = AttendanceRecord.objects.filter(student=student).exclude(
+        session__status=AttendanceSession.STATUS_CANCELLED,
+    )
+    stats = records.aggregate(
+        attended=Count(
+            "pk", filter=Q(status__in=AttendanceRecord.ATTENDED_STATUSES),
+        ),
+        counted=Count(
+            "pk", filter=Q(status__in=AttendanceRecord.COUNTED_STATUSES),
+        ),
+        absent=Count(
+            "pk", filter=Q(status=AttendanceRecord.STATUS_ABSENT),
+        ),
+        excused=Count(
+            "pk", filter=Q(status=AttendanceRecord.STATUS_EXCUSED),
+        ),
+        total=Count("pk"),
+    )
+    stats["rate"] = percent(stats["attended"], stats["counted"]) if stats["counted"] else None
+    return stats
+
+
+def sync_student_attendance(student):
+    """Propage le taux calculé vers les tutorats et fiches encore ouverts."""
+    rate = attendance_metrics(student)["rate"] or 0
+    for assignment in TutorAssignment.objects.filter(
+        student=student, status=TutorAssignment.STATUS_ACTIVE,
+    ):
+        if assignment.attendance_rate != rate:
+            assignment.attendance_rate = rate
+            assignment.save(update_fields=["attendance_rate", "updated_at"])
+    for sheet in DifficultySheet.objects.filter(student=student).exclude(
+        status=DifficultySheet.STATUS_CLOSED,
+    ):
+        if sheet.attendance_rate != rate:
+            sheet.attendance_rate = rate
+            sheet.save(update_fields=["attendance_rate", "updated_at"])
+    return rate
+
+
+def ensure_attendance_alert(student):
+    """Ouvre une alerte de persévérance quand l'assiduité passe sous 75 %.
+
+    Idempotent : une seule alerte ouverte par étudiant et par type. Retourne
+    l'alerte créée, ou ``None`` si aucune alerte n'était nécessaire.
+    """
+    rate = attendance_metrics(student)["rate"]
+    if rate is None or rate >= 75:
+        return None
+    assignment = active_assignment(student)
+    alert, created = PerseveranceAlert.objects.get_or_create(
+        student=student,
+        alert_type=PerseveranceAlert.TYPE_ATTENDANCE,
+        status=PerseveranceAlert.STATUS_OPEN,
+        defaults={
+            "university": student.university,
+            "school_class": assignment.school_class if assignment else None,
+            "title": "Assiduité faible · %s" % student_name(student),
+            "detail": (
+                "Le taux de présence est descendu à %d %% après le dernier relevé. "
+                "Un contact avec le référent pédagogique est recommandé." % rate
+            ),
+            "priority": (
+                PerseveranceAlert.PRIORITY_HIGH if rate < 60
+                else PerseveranceAlert.PRIORITY_NORMAL
+            ),
+            "detected_at": timezone.now(),
+        },
+    )
+    return alert if created else None
+
+
+def attendance_session_students(session):
+    """Étudiants concernés par une séance (groupe si défini, sinon classe)."""
+    qs = StudentProfile.objects.filter(groups__school_class=session.school_class)
+    if session.student_group_id:
+        qs = qs.filter(groups=session.student_group)
+    qs = qs.distinct().select_related("membership__user")
+    if qs.exists():
+        return qs.order_by(
+            "membership__user__last_name", "membership__user__first_name",
+        )
+    return StudentProfile.objects.filter(
+        tutor_assignments__school_class=session.school_class,
+        tutor_assignments__status=TutorAssignment.STATUS_ACTIVE,
+    ).distinct().select_related("membership__user").order_by(
+        "membership__user__last_name", "membership__user__first_name",
+    )
+
+
 def create_assignment(student, professor, school_class, academic_year, assigned_by=None):
     metrics = {
         "average_grade": None,
         "previous_average": None,
-        "attendance_rate": 0,
+        "attendance_rate": attendance_metrics(student)["rate"] or 0,
         "assignments_submitted": 0,
         "assignments_total": 0,
     }
@@ -369,7 +511,7 @@ def create_assignment(student, professor, school_class, academic_year, assigned_
     if sheet is not None:
         metrics.update({
             "average_grade": sheet.average_grade,
-            "attendance_rate": sheet.attendance_rate,
+            "attendance_rate": metrics["attendance_rate"] or sheet.attendance_rate,
             "assignments_submitted": sheet.assignments_submitted,
             "assignments_total": sheet.assignments_total,
         })
@@ -387,34 +529,40 @@ def create_assignment(student, professor, school_class, academic_year, assigned_
     )
 
 
-def assign_students(school_class, professor, limit, academic_year, assigned_by=None):
-    created = 0
-    for student in waiting_students(school_class, academic_year)[:max(int(limit or 1), 1)]:
+def assign_class_referent(school_class, professor, academic_year, assigned_by=None):
+    """Affecte un référent unique à tous les étudiants de la classe."""
+    students = list(enrolled_students(school_class))
+    for student in students:
         create_assignment(student, professor, school_class, academic_year, assigned_by)
-        created += 1
-    return created
+    return len(students)
 
 
 def auto_assign_class(school_class, academic_year, assigned_by=None):
     professors = list(school_class.professors.all())
     if not professors:
         return 0
-    loads = {professor.pk: 0 for professor in professors}
     existing = TutorAssignment.objects.filter(
         school_class=school_class,
         academic_year=academic_year,
         status=TutorAssignment.STATUS_ACTIVE,
     ).values_list("professor_id", flat=True)
-    for professor_id in existing:
-        if professor_id in loads:
-            loads[professor_id] += 1
-    created = 0
-    for student in waiting_students(school_class, academic_year):
-        professor = min(professors, key=lambda item: (loads[item.pk], display_name(item)))
-        create_assignment(student, professor, school_class, academic_year, assigned_by)
-        loads[professor.pk] += 1
-        created += 1
-    return created
+    referent_id = next(iter(existing), None)
+    professor = next(
+        (item for item in professors if item.pk == referent_id),
+        None,
+    )
+    if professor is None:
+        professor = min(
+            professors,
+            key=lambda item: (
+                TutorAssignment.objects.filter(
+                    professor=item,
+                    status=TutorAssignment.STATUS_ACTIVE,
+                ).count(),
+                display_name(item),
+            ),
+        )
+    return assign_class_referent(school_class, professor, academic_year, assigned_by)
 
 
 def allocation_rows(university, academic_year=None):
@@ -431,7 +579,7 @@ def allocation_rows(university, academic_year=None):
             academic_year=year,
             status=TutorAssignment.STATUS_ACTIVE,
         )
-        .select_related("student", "professor")
+        .select_related("student", "professor__membership__user")
     )
     by_class = defaultdict(list)
     for assignment in assignments:
@@ -445,6 +593,9 @@ def allocation_rows(university, academic_year=None):
         if not students:
             students = assigned
         tutors = len({item.professor_id for item in class_assignments})
+        referent_names = sorted({
+            display_name(item.professor) for item in class_assignments
+        })
         waiting = max(students - assigned, 0)
         rate = percent(assigned, students) if students else 0
         if not students:
@@ -459,6 +610,7 @@ def allocation_rows(university, academic_year=None):
             "school_class": school_class,
             "students": students,
             "tutors": tutors,
+            "referent_names": referent_names,
             "assigned": assigned,
             "waiting": waiting,
             "rate": rate,
@@ -787,7 +939,11 @@ def admin_monitoring_summary(university, academic_year=None):
             )
         )
         grades = [float(item.average_grade) for item in class_assignments_all if item.average_grade is not None]
-        attendance = [item.attendance_rate for item in class_assignments_all if item.attendance_rate]
+        attendance = []
+        for item in class_assignments_all:
+            rate = attendance_metrics(item.student)["rate"]
+            if rate is not None:
+                attendance.append(rate)
         high = sum(1 for item in class_assignments_all if item.risk_level == TutorAssignment.RISK_HIGH)
         cohorts.append({
             "school_class": school_class,

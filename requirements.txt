@@ -20,3 +20,5 @@ Pillow==13.0.0
 anthropic==2.3.0
 pypdf==6.17.0
 python-pptx==1.0.2
+# Extraction du texte des supports PDF pour la génération de QCM par IA.
+pypdf==5.1.0

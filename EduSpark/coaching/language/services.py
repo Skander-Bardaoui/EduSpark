@@ -5,6 +5,7 @@ import logging
 import os
 
 import requests
+from django.conf import settings
 
 from .config import (
     EXAMS,
@@ -54,11 +55,18 @@ class ProviderError(Exception):
 
 
 def _env(name, default=""):
-    return os.environ.get(name, default).strip()
+    """Lit la configuration Django (.env) avec repli sur l'environnement."""
+    value = getattr(settings, name, "") or os.environ.get(name, default)
+    return str(value or "").strip()
 
 
 def _groq_model():
-    return _env("GROQ_MODEL", "qwen/qwen3.8-27b")
+    return _env("GROQ_MODEL", "") or "openai/gpt-oss-120b"
+
+
+def provider_available(name):
+    """Vrai si le provider demandé a une clé configurée."""
+    return bool(_env("%s_API_KEY" % name))
 
 
 def _require_key(value, name):

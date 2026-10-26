@@ -35,7 +35,7 @@
 {% if school_class.academic_year %}{% include "portal/_badge.html" with label=school_class.academic_year tone_class="bg-primary-fixed text-primary" %}{% endif %}
 </div>
 <h3 class="mt-3 font-title-md text-title-md text-on-surface">{{ school_class.name }}</h3>
-<p class="text-xs text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }}{% if school_class.level %} · {{ school_class.level }}{% endif %}</p>
+<p class="text-xs text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }}{% if school_class.level %} · {{ school_class.level }}{% endif %}{% if school_class.section %} · Section {{ school_class.section }}{% endif %}</p>
 <div class="mt-4 grid grid-cols-3 gap-2 text-center">
 <div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">{{ school_class.groups.all|length }}</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Groupes</p></div>
 <div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">{{ school_class.student_total }}</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Étudiants</p></div>
