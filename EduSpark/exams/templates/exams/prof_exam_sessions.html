@@ -34,23 +34,24 @@
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[1120px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Horaire</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">Jury</th><th class="px-5 py-3 font-bold">Sujet d'épreuve</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Horaire</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">Sujet d'épreuve</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for session in sessions %}
 <tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.exam_type }}">
 <td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{% if session.code %}{{ session.code }} · {% endif %}{{ session.school_class.name }} · {{ session.school_class.level }}</p></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.get_exam_type_display }} · {{ session.semester }}</td>
+<td class="px-5 py-3">{% if session.course_subject %}<p class="font-semibold text-on-surface">{{ session.course_subject.code }} · {{ session.course_subject.name }}</p>{% else %}<p class="text-on-surface-variant">Matière non rattachée</p>{% endif %}<p class="text-xs text-on-surface-variant">{{ session.get_exam_type_display }} · {{ session.semester }}</p></td>
 <td class="px-5 py-3 text-on-surface-variant">{{ session.date_label }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ session.time_label }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ session.room }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{% for professor in session.school_class.professors.all %}{% if not forloop.first %} · {% endif %}{{ professor.membership.user.get_full_name|default:professor.membership.user.email }}{% empty %}Jury à compléter{% endfor %}</td>
 <td class="px-5 py-3">
 {% if session.subject %}
 <div class="flex flex-col items-start gap-1.5">
 {% if session.subject.is_published %}
 {% include "portal/_badge.html" with label="Publié" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+<p class="text-[10px] text-on-surface-variant">Accessible aux étudiants : {{ session.date_label }} · {{ session.time_label }}</p>
 {% else %}
 {% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}
+<p class="text-[10px] text-on-surface-variant">Non visible des étudiants tant qu'il n'est pas publié.</p>
 {% endif %}
 <div class="flex flex-wrap items-center gap-1">
 <form action="{% url 'exams:prof_subject_publish' session.pk %}" method="post">
@@ -78,7 +79,7 @@
 <td class="px-5 py-3 text-right">{% if session.is_convoked %}{% include "portal/_badge.html" with label="Convocation envoyée" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Planifiée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
 </tr>
 {% empty %}
-<tr><td class="px-5 py-10 text-center text-on-surface-variant" colspan="8">Aucune session pour vos enseignements. Les sessions sont planifiées par l'administration de votre établissement.</td></tr>
+<tr><td class="px-5 py-10 text-center text-on-surface-variant" colspan="7">Aucune session pour vos enseignements. Les sessions sont planifiées par l'administration de votre établissement.</td></tr>
 {% endfor %}
 </tbody>
 </table>
