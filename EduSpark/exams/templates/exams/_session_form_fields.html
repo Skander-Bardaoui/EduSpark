@@ -3,12 +3,65 @@
 {% endfor %}
 <div class="grid gap-3 sm:grid-cols-2">
   {% for field in form %}
-  <label class="flex flex-col gap-1.5 {% if field.name == 'title' or field.name == 'room' %}sm:col-span-2{% endif %}">
+  <div class="flex flex-col gap-1.5 {% if field.name == 'title' or field.name == 'room' or field.name == 'school_classes' or field.name == 'course_subject' %}sm:col-span-2{% endif %}">
+    {% if field.name == 'school_classes' and form.is_multi %}
     <span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}{% if field.field.required %} *{% endif %}</span>
+    <div class="flex flex-col gap-2 sm:flex-row">
+      <label class="relative min-w-0 flex-1">
+        <span class="material-symbols-outlined pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+        <input type="search" data-class-search placeholder="Rechercher une classe…" class="w-full rounded-lg border border-outline-variant/70 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary">
+      </label>
+      <select data-class-level-filter class="cursor-pointer rounded-lg border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary">
+        <option value="">Tous les niveaux</option>
+        {% for level in form.class_levels %}<option value="{{ level }}">{{ level }}</option>{% endfor %}
+      </select>
+      <select data-class-section-filter class="cursor-pointer rounded-lg border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary">
+        <option value="">Toutes les sections</option>
+        {% for section in form.class_sections %}<option value="{{ section }}">{{ section }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="grid max-h-64 gap-2 overflow-y-auto rounded-lg border border-outline-variant/50 bg-surface-container-low p-2 sm:grid-cols-2">
+      {% for checkbox in field %}
+      <label class="class-option flex cursor-pointer items-center gap-2 rounded-md border border-outline-variant/60 bg-surface px-3 py-2 text-sm text-on-surface transition-colors hover:border-primary/50">
+        {{ checkbox.tag }}
+        <span class="font-semibold">{{ checkbox.choice_label }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <p class="hidden text-[11px] text-on-surface-variant" data-class-empty>Aucune classe ne correspond à votre recherche.</p>
+    {% else %}
+    <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
     {{ field }}
+    {% endif %}
+    {% if field.help_text %}
+    <span class="text-[11px] text-on-surface-variant">{{ field.help_text }}</span>
+    {% endif %}
+    {% if field.name == 'course_subject' and form.is_multi %}
+    <span class="text-[11px] font-semibold text-primary" id="subject-class-hint"></span>
+    {% endif %}
     {% for error in field.errors %}
     <span class="text-[11px] font-semibold text-error">{{ error }}</span>
     {% endfor %}
-  </label>
+  </div>
   {% endfor %}
 </div>
+{% if form.is_multi %}
+<div class="mt-3 rounded-lg border border-outline-variant/60 bg-surface-container-low p-3">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Salles par classe</p>
+      <p class="text-[11px] text-on-surface-variant">Chaque classe sélectionnée peut avoir sa propre salle.</p>
+    </div>
+    <span id="selected-class-count" class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-on-primary-fixed">0 classe(s)</span>
+  </div>
+  <p id="class-room-empty" class="mt-3 text-[12px] text-on-surface-variant">Cochez au moins une classe pour définir sa salle.</p>
+  <div id="class-room-fields" class="mt-3 grid max-h-64 gap-2 overflow-y-auto sm:grid-cols-2">
+    {% for item in form.room_fields %}
+    <label class="class-room-field flex flex-col gap-1 rounded-md border border-outline-variant/60 bg-surface px-3 py-2 {% if not item.selected %}hidden{% endif %}" data-class-id="{{ item.school_class.pk }}">
+      <span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{{ item.label }}</span>
+      <input type="text" name="{{ item.name }}" value="{{ item.value }}" placeholder="Ex. Amphi A" class="w-full rounded-md border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" {% if not item.selected %}disabled{% endif %}>
+    </label>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

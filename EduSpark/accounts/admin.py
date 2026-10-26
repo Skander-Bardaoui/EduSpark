@@ -57,9 +57,9 @@ class StudentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(SchoolClass)
 class SchoolClassAdmin(admin.ModelAdmin):
-    list_display = ("name", "university", "level", "program", "academic_year")
+    list_display = ("name", "university", "level", "section", "program", "academic_year")
     list_filter = ("university", "academic_year")
-    search_fields = ("name", "program", "level")
+    search_fields = ("name", "program", "level", "section")
     filter_horizontal = ("professors",)
 
 

@@ -10,6 +10,7 @@
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ school_class.name }}</h1>
 {% if school_class.academic_year %}{% include "portal/_badge.html" with label=school_class.academic_year tone_class="bg-primary-fixed text-primary" %}{% endif %}
 {% if school_class.level %}{% include "portal/_badge.html" with label=school_class.level tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+{% if school_class.section %}{% include "portal/_badge.html" with label="Section "|add:school_class.section tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
 </div>
 <p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }} · {{ school_class.university.name }}</p>
 </div>
@@ -106,6 +107,7 @@
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Informations</h2>
 <dl class="mt-3 space-y-3 text-sm">
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt><dd class="font-semibold text-on-surface">{{ school_class.level|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Section</dt><dd class="font-semibold text-on-surface">{{ school_class.section|default:"—" }}</dd></div>
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ school_class.program|default:"—" }}</dd></div>
 {% if school_class.study_program %}<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Département</dt><dd class="font-semibold text-on-surface">{{ school_class.study_program.department.name }}</dd></div>{% endif %}
 <div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Année universitaire</dt><dd class="font-semibold text-on-surface">{{ school_class.academic_year|default:"—" }}</dd></div>

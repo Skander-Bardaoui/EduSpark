@@ -65,6 +65,11 @@ class _UniversityForm(StyledFormMixin, forms.ModelForm):
 # ---------------------------------------------------------------------------
 
 class DepartmentForm(_UniversityForm):
+    placeholders = {
+        "name": "ex. Informatique",
+        "description": "ex. Département des sciences informatiques…",
+    }
+
     class Meta:
         model = Department
         fields = ("name", "code", "head", "description")
@@ -85,6 +90,11 @@ class DepartmentForm(_UniversityForm):
 
 
 class ProgramForm(_UniversityForm):
+    placeholders = {
+        "name": "ex. Licence Informatique",
+        "description": "ex. Formation généraliste en informatique…",
+    }
+
     class Meta:
         model = Program
         fields = ("name", "code", "department", "degree", "duration_years", "coordinator", "description")
@@ -107,6 +117,16 @@ class ProgramForm(_UniversityForm):
 
 
 class SubjectForm(_UniversityForm):
+    placeholders = {
+        "name": "ex. Algorithmique avancée",
+        "coefficient": "ex. 3",
+        "credits": "ex. 6",
+        "hours_cm": "ex. 20",
+        "hours_td": "ex. 20",
+        "hours_tp": "ex. 12",
+        "description": "ex. Structures de données, complexité, algorithmes de graphes…",
+    }
+
     semester = forms.TypedChoiceField(
         label="Semestre", coerce=int,
         choices=[(number, "Semestre %d (S%d)" % (number, number)) for number in range(1, 11)],
@@ -177,6 +197,8 @@ class TeachingAssignmentForm(_UniversityForm):
 
 
 class ScheduleSlotForm(_UniversityForm):
+    placeholders = {"room": "ex. Amphi A"}
+
     class Meta:
         model = ScheduleSlot
         fields = ("assignment", "session_type", "group", "weekday", "start_time", "end_time", "room")
@@ -215,6 +237,11 @@ class ScheduleSlotForm(_UniversityForm):
 # ---------------------------------------------------------------------------
 
 class CourseForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. Cours magistral 1",
+        "description": "ex. Introduction au module, objectifs et plan…",
+    }
+
     class Meta:
         model = Course
         fields = ("subject", "title", "description")
@@ -246,6 +273,11 @@ class CourseForm(StyledFormMixin, forms.ModelForm):
 
 
 class ChapterForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. Chapitre 1 — Introduction",
+        "summary": "ex. Présentation des objectifs et des notions clés…",
+    }
+
     class Meta:
         model = Chapter
         fields = ("title", "summary")
@@ -259,6 +291,11 @@ class ChapterForm(StyledFormMixin, forms.ModelForm):
 
 
 class MaterialForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. TD n°1",
+        "description": "ex. Énoncé et corrigé du premier TD…",
+    }
+
     class Meta:
         model = CourseMaterial
         fields = ("course", "chapter", "title", "description", "file")

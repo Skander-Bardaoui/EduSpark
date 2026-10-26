@@ -1,0 +1,8 @@
+<div class="grid gap-2 sm:grid-cols-2">
+{% for group, options, index in widget.optgroups %}
+{% if group %}<div class="col-span-full pt-1 text-xs font-bold uppercase tracking-wider text-on-surface-variant">{{ group }}</div>{% endif %}
+{% for option in options %}
+{% include option.template_name with widget=option %}
+{% endfor %}
+{% endfor %}
+</div>

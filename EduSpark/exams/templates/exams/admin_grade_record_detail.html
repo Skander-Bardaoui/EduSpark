@@ -87,6 +87,68 @@
 </table>
 </div>
 </section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Délibération par étudiant</h2>
+<p class="text-xs text-on-surface-variant">Moyennes calculées à partir des notes publiées par les enseignants, matière par matière.</p>
+</div>
+<form action="{% url 'exams:admin_grade_record_detail' record.pk %}" class="flex flex-wrap items-center gap-2" method="post">
+{% csrf_token %}
+<input name="action" type="hidden" value="recalculate"/>
+<span class="text-xs font-semibold text-on-surface-variant">{{ deliberation_admitted }}/{{ deliberation_count }} admis · {{ deliberation_pending }} en attente</span>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">calculate</span>Recalculer le PV</button>
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[900px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Matières passées</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Décision</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in deliberation_rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ row.student.membership.user.get_full_name|default:row.student.membership.user.email }}</p><p class="text-xs text-on-surface-variant">N° {{ row.student.student_number|default:"—" }}</p></td>
+<td class="px-5 py-3">
+{% if row.has_grades %}
+<div class="flex flex-wrap gap-1.5">
+{% for item in row.subjects %}
+{% if item.grade %}
+<span class="inline-flex items-center gap-1 rounded-full border border-outline-variant/50 bg-surface-container px-2.5 py-1 text-[11px] text-on-surface-variant">
+{{ item.session.title }} :
+{% if item.is_absent %}<span class="font-bold text-error">Absent (0)</span>{% elif item.grade.score is not None %}<span class="font-bold text-on-surface">{{ item.grade.score_label }}/20</span>{% else %}<span>{{ item.grade.get_status_display }}</span>{% endif %}
+</span>
+{% endif %}
+{% endfor %}
+</div>
+{% else %}
+<span class="text-xs text-on-surface-variant">Aucune matière composée</span>
+{% endif %}
+</td>
+<td class="px-5 py-3">
+{% if row.graded_total %}
+<span class="font-data-metric font-bold text-on-surface">{{ row.average_label }}</span><span class="text-xs text-on-surface-variant"> /20</span>
+{% else %}
+<span class="text-xs text-on-surface-variant">-</span>
+{% endif %}
+</td>
+<td class="px-5 py-3">
+{% if row.decision == "Admis" %}
+{% include "portal/_badge.html" with label="Admis" tone_class="bg-primary-fixed text-primary" dot=True %}
+{% elif row.decision == "Ajourné" %}
+{% include "portal/_badge.html" with label="Ajourné" tone_class="bg-error-container text-on-error-container" %}
+{% else %}
+{% include "portal/_badge.html" with label="En attente" tone_class="bg-surface-container text-on-surface-variant" %}
+{% endif %}
+{% if row.is_absent %}<span class="ml-1 text-[11px] font-bold text-error">Absent</span>{% endif %}
+</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="4">Aucun étudiant rattaché à cette classe.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
 </div>
 
 <aside class="flex flex-col gap-5">

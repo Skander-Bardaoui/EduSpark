@@ -36,7 +36,7 @@ ROLE_META = {
             {
                 "icon": "draw",
                 "title": "14 copies urgentes à corriger",
-                "detail": "Jury INF501 dans 3 jours.",
+                "detail": "Épreuve INF501 dans 3 jours.",
                 "url_name": "exams:prof_corrections",
             },
             {
@@ -164,7 +164,6 @@ NAV_SECTIONS = {
             "items": (
                 {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:prof_exam_sessions"},
                 {"label": "Copies à corriger", "icon": "draw", "url_name": "exams:prof_corrections"},
-                {"label": "Relevés & Jurys", "icon": "fact_check", "url_name": "exams:prof_grade_sheets"},
             ),
         },
         {

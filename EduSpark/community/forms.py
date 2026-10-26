@@ -22,6 +22,12 @@ class RequestFormMixin:
 
 
 class AnnouncementForm(RequestFormMixin, StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. Rentrée universitaire 2026",
+        "course_ref": "ex. INF501",
+        "body": "ex. Les inscriptions ouvrent le…",
+    }
+
     class Meta:
         model = Announcement
         fields = ("title", "body", "audience", "school_class", "course_ref", "priority", "is_pinned")
@@ -29,6 +35,12 @@ class AnnouncementForm(RequestFormMixin, StyledFormMixin, forms.ModelForm):
 
 
 class ForumForm(RequestFormMixin, StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. Forum d'entraide",
+        "course_ref": "ex. INF501",
+        "description": "ex. Posez vos questions sur le module…",
+    }
+
     class Meta:
         model = Forum
         fields = ("title", "description", "school_class", "course_ref", "is_locked")
@@ -36,6 +48,11 @@ class ForumForm(RequestFormMixin, StyledFormMixin, forms.ModelForm):
 
 
 class ThreadForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "title": "ex. Question sur le TD 3",
+        "body": "ex. Je ne comprends pas la question 2…",
+    }
+
     class Meta:
         model = Thread
         fields = ("title", "body")
@@ -43,6 +60,8 @@ class ThreadForm(StyledFormMixin, forms.ModelForm):
 
 
 class ReplyForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {"body": "ex. Voici une piste pour répondre…"}
+
     class Meta:
         model = Reply
         fields = ("body", "ai_assisted")
@@ -50,6 +69,8 @@ class ReplyForm(StyledFormMixin, forms.ModelForm):
 
 
 class ReportForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {"details": "ex. Décrivez le contenu signalé…"}
+
     class Meta:
         model = Report
         fields = ("reason", "details")
@@ -57,6 +78,11 @@ class ReportForm(StyledFormMixin, forms.ModelForm):
 
 
 class MessageForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "subject": "ex. Question sur le cours",
+        "body": "ex. Bonjour, …",
+    }
+
     recipient = forms.ModelChoiceField(label="Destinataire", queryset=User.objects.none())
 
     class Meta:

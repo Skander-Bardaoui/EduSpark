@@ -7,7 +7,7 @@
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Sessions d'examen</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves de chaque classe de {{ portal_university.name }} pour le semestre 1.</p>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Planifiez une épreuve pour une ou plusieurs classes de {{ portal_university.name }} (même niveau ou même filière). Les enseignants et les étudiants concernés reçoivent la planification.</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:admin_exam_sessions_export' %}"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</a>
@@ -34,14 +34,15 @@
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[1024px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-4 py-3 font-bold">Date &amp; horaire</th><th class="px-4 py-3 font-bold">Classe</th><th class="px-4 py-3 font-bold">Épreuve</th><th class="px-4 py-3 font-bold">Salle</th><th class="px-4 py-3 font-bold">Statut</th><th class="px-4 py-3 text-right font-bold">Actions</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-4 py-3 font-bold">Date &amp; horaire</th><th class="px-4 py-3 font-bold">Classe</th><th class="px-4 py-3 font-bold">Matière</th><th class="px-4 py-3 font-bold">Épreuve</th><th class="px-4 py-3 font-bold">Salle</th><th class="px-4 py-3 font-bold">Statut</th><th class="px-4 py-3 text-right font-bold">Actions</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for session in sessions %}
 <tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.status }}">
 <td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ session.date_label }}</p><p class="text-xs text-on-surface-variant">{{ session.time_label }}</p></td>
 <td class="px-4 py-3"><p class="text-on-surface-variant">{{ session.school_class.name }}</p><p class="text-xs text-on-surface-variant">{{ session.school_class.level }}</p></td>
+<td class="px-4 py-3">{% if session.course_subject %}<p class="font-semibold text-on-surface">{{ session.course_subject.code }}</p><p class="text-xs text-on-surface-variant">{{ session.course_subject.name }}</p>{% else %}<span class="text-xs text-on-surface-variant">Non rattachée</span>{% endif %}</td>
 <td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{{ session.get_exam_type_display }}</p>{% if session.subject %}{% if session.subject.is_published %}<p class="mt-1"><span class="inline-flex items-center gap-1 rounded-full bg-secondary-fixed px-2 py-0.5 text-[10px] font-bold uppercase text-on-secondary-fixed"><span class="material-symbols-outlined text-[12px]">description</span>Sujet publié</span></p>{% else %}<p class="mt-1"><span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant"><span class="material-symbols-outlined text-[12px]">description</span>Sujet en brouillon</span></p>{% endif %}{% else %}<p class="mt-1 text-[11px] text-on-surface-variant">Sujet non déposé</p>{% endif %}</td>
-<td class="px-4 py-3 text-on-surface-variant">{{ session.room }}</td>
+<td class="px-4 py-3 text-on-surface-variant">{{ session.room|default:"À définir" }}</td>
 <td class="px-4 py-3">{% if session.is_convoked %}{% include "portal/_badge.html" with label="Convocation envoyée" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Planifiée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
 <td class="px-4 py-3">
 <div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
@@ -62,7 +63,7 @@
 </td>
 </tr>
 {% empty %}
-<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="6">Aucune session planifiée. Utilisez « Planifier une session » pour commencer.</td></tr>
+<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="7">Aucune session planifiée. Utilisez « Planifier une session » pour commencer.</td></tr>
 {% endfor %}
 </tbody>
 </table>
@@ -75,10 +76,10 @@
 <button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
 <div class="relative z-10 w-full max-w-2xl rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
 <div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
-<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Planifier une session d'examen</h2><p class="text-xs text-on-surface-variant">Les conflits de salle et de classe sont vérifiés automatiquement. Les enseignants de la classe sont notifiés par e-mail pour préparer le sujet.</p></div>
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Planifier une session d'examen</h2><p class="text-xs text-on-surface-variant">Choisissez la matière, cochez une ou plusieurs classes, puis indiquez la salle de chacune. Une session est créée par classe ; les enseignants et étudiants reçoivent la planification. Les conflits de salle et de classe sont vérifiés automatiquement.</p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<form action="{% url 'exams:admin_exam_session_create' %}" class="flex flex-col gap-4 p-5" method="post">
+<form action="{% url 'exams:admin_exam_session_create' %}" class="flex flex-col gap-4 p-5" id="session-create-form" method="post">
 {% csrf_token %}
 {% include "exams/_session_form_fields.html" with form=create_form %}
 <div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
@@ -121,6 +122,104 @@
 (function () {
   var trigger = document.getElementById('auto-open-session-modal');
   if (trigger) trigger.click();
+
+  var form = document.getElementById('session-create-form');
+  if (!form) return;
+
+  var checkboxes = form.querySelectorAll('input[type="checkbox"]');
+  var roomFields = form.querySelectorAll('.class-room-field');
+  var countEl = document.getElementById('selected-class-count');
+  var emptyEl = document.getElementById('class-room-empty');
+  var subjectSelect = form.querySelector('[name$="-course_subject"]');
+  var subjectHint = document.getElementById('subject-class-hint');
+  var subjectOptions = subjectSelect ? Array.prototype.slice.call(subjectSelect.options) : [];
+
+  function syncSubjectOptions() {
+    if (!subjectSelect) return;
+    var programs = {};
+    checkboxes.forEach(function (checkbox) {
+      if (!checkbox.checked) return;
+      var program = checkbox.getAttribute('data-program') || '';
+      if (program) programs[program] = true;
+    });
+    var selectedPrograms = Object.keys(programs);
+    var filterProgram = selectedPrograms.length === 1 ? selectedPrograms[0] : '';
+    var hideAll = selectedPrograms.length > 1;
+    subjectOptions.forEach(function (option) {
+      if (!option.value) return;
+      var program = option.getAttribute('data-program') || '';
+      var visible = !hideAll && (!filterProgram || program === filterProgram);
+      option.hidden = !visible;
+      option.disabled = !visible;
+    });
+    if (subjectSelect.value) {
+      var current = subjectOptions.find(function (option) {
+        return option.value === subjectSelect.value;
+      });
+      if (current && current.disabled) subjectSelect.value = '';
+    }
+    if (subjectHint) {
+      subjectHint.textContent = hideAll
+        ? "Plusieurs filières sont sélectionnées : la matière ne peut pas être rattachée à une seule filière. Laissez-la vide ou choisissez des classes d'une même filière."
+        : "";
+    }
+  }
+
+  function syncRoomFields() {
+    var checked = {};
+    checkboxes.forEach(function (checkbox) {
+      if (checkbox.checked) checked[checkbox.value] = true;
+    });
+    var count = 0;
+    roomFields.forEach(function (field) {
+      var selected = !!checked[field.getAttribute('data-class-id')];
+      field.classList.toggle('hidden', !selected);
+      var input = field.querySelector('input');
+      if (input) input.disabled = !selected;
+      if (selected) count += 1;
+    });
+    if (countEl) countEl.textContent = count + ' classe(s)';
+    if (emptyEl) emptyEl.classList.toggle('hidden', count > 0);
+    syncSubjectOptions();
+  }
+
+  checkboxes.forEach(function (checkbox) {
+    checkbox.addEventListener('change', syncRoomFields);
+  });
+  syncRoomFields();
+
+  var searchInput = form.querySelector('[data-class-search]');
+  var levelFilter = form.querySelector('[data-class-level-filter]');
+  var sectionFilter = form.querySelector('[data-class-section-filter]');
+  var classOptions = form.querySelectorAll('.class-option');
+  var classEmpty = form.querySelector('[data-class-empty]');
+
+  function applyClassFilter() {
+    var query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+    var level = levelFilter ? levelFilter.value : '';
+    var section = sectionFilter ? sectionFilter.value : '';
+    var visible = 0;
+    classOptions.forEach(function (label) {
+      var input = label.querySelector('input');
+      var text = (label.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+      var matchesQuery = !query || text.indexOf(query) !== -1;
+      var matchesLevel = !level || (input && (input.getAttribute('data-level') || '') === level);
+      var matchesSection = !section || (input && (input.getAttribute('data-section') || '') === section);
+      var show = matchesQuery && matchesLevel && matchesSection;
+      label.classList.toggle('hidden', !show);
+      if (show) visible += 1;
+    });
+    if (classEmpty) classEmpty.classList.toggle('hidden', visible > 0);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', applyClassFilter);
+    searchInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') event.preventDefault();
+    });
+  }
+  if (levelFilter) levelFilter.addEventListener('change', applyClassFilter);
+  if (sectionFilter) sectionFilter.addEventListener('change', applyClassFilter);
 })();
 </script>
 {% endblock %}

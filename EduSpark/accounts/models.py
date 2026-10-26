@@ -280,6 +280,10 @@ class SchoolClass(models.Model):
     )
     name = models.CharField("Nom", max_length=120)
     level = models.CharField("Niveau", max_length=60, blank=True, help_text="ex. 3e année, Master 1")
+    section = models.CharField(
+        "Section", max_length=60, blank=True,
+        help_text="ex. A, B, Sciences, Littérature",
+    )
     program = models.CharField("Filière", max_length=120, blank=True)
     study_program = models.ForeignKey(
         "courses.Program", on_delete=models.SET_NULL, null=True, blank=True,
@@ -301,7 +305,8 @@ class SchoolClass(models.Model):
         verbose_name_plural = "Classes"
         constraints = [
             models.UniqueConstraint(
-                fields=("university", "name", "academic_year"), name="unique_class_per_year",
+                fields=("university", "name", "section", "academic_year"),
+                name="unique_class_per_year",
             ),
         ]
 

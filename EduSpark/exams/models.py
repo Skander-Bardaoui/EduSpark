@@ -50,6 +50,10 @@ class ExamSession(models.Model):
         SchoolClass, on_delete=models.CASCADE,
         related_name="exam_sessions", verbose_name="Classe",
     )
+    course_subject = models.ForeignKey(
+        "courses.Subject", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="exam_sessions", verbose_name="Matière",
+    )
     title = models.CharField("Épreuve", max_length=160)
     code = models.CharField(
         "Code UE", max_length=20, blank=True, help_text="ex. INF501",
@@ -72,6 +76,11 @@ class ExamSession(models.Model):
         "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_PLANNED,
     )
     convoked_at = models.DateTimeField("Convoquée le", null=True, blank=True)
+    plan_group = models.UUIDField(
+        "Groupe de planification", null=True, blank=True, editable=False,
+        db_index=True,
+        help_text="Identifiant commun aux épreuves planifiées ensemble pour plusieurs classes.",
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="created_exam_sessions", verbose_name="Créée par",
@@ -95,6 +104,24 @@ class ExamSession(models.Model):
             raise ValidationError("La classe et la session doivent appartenir à la même université.")
         if self.start_time and self.end_time and self.end_time <= self.start_time:
             raise ValidationError({"end_time": "L'heure de fin doit être postérieure à l'heure de début."})
+        if (
+            self.course_subject_id and self.university_id
+            and self.course_subject.university_id != self.university_id
+        ):
+            raise ValidationError({
+                "course_subject": "La matière et la session doivent appartenir à la même université.",
+            })
+        if (
+            self.course_subject_id and self.school_class_id
+            and self.school_class.study_program_id
+            and self.course_subject.program_id != self.school_class.study_program_id
+        ):
+            raise ValidationError({
+                "course_subject": (
+                    "La matière « %s » ne correspond pas à la filière de la classe « %s »."
+                    % (self.course_subject, self.school_class.name)
+                ),
+            })
 
     def save(self, *args, **kwargs):
         if self.school_class_id:
@@ -131,10 +158,12 @@ class ExamSession(models.Model):
         )
 
     @property
-    def deposit_status(self):
-        """'convocation' | 'before' | 'open' | 'after' — état du dépôt de copie."""
-        if not self.is_convoked:
-            return "convocation"
+    def access_status(self):
+        """'before' | 'open' | 'after' — accès au sujet et au dépôt.
+
+        L'accès est strictement limité à la durée officielle de l'épreuve :
+        ni avant l'heure de début, ni après l'heure de fin.
+        """
         start, end = self.deposit_window()
         now = timezone.now()
         if now < start:
@@ -144,9 +173,18 @@ class ExamSession(models.Model):
         return "open"
 
     @property
+    def deposit_status(self):
+        """Alias d'accès au dépôt de copie (rétro-compatibilité)."""
+        return self.access_status
+
+    @property
     def deposit_open(self):
         """Le dépôt de copie est ouvert uniquement pendant la durée de l'épreuve."""
-        return self.deposit_status == "open"
+        return self.access_status == "open"
+
+    @property
+    def subject_window_label(self):
+        return "%s, %s" % (self.date_label, self.time_label)
 
 
 def subject_upload_path(instance, filename):
@@ -159,8 +197,8 @@ def subject_upload_path(instance, filename):
 class ExamSubject(models.Model):
     """Sujet d'épreuve déposé puis publié par l'enseignant.
 
-    Le sujet n'est visible des étudiants qu'une fois publié, et reste
-    remplaçable tant que la session n'est pas convoquée.
+    Le sujet n'est visible des étudiants qu'une fois publié, et uniquement
+    pendant la durée officielle de l'épreuve.
     """
 
     university = models.ForeignKey(
@@ -195,6 +233,22 @@ class ExamSubject(models.Model):
     @property
     def is_published(self):
         return self.published_at is not None
+
+    @property
+    def availability_status(self):
+        """'draft' | 'before' | 'open' | 'after' — visibilité du sujet."""
+        if not self.is_published:
+            return "draft"
+        return self.session.access_status
+
+    @property
+    def is_available(self):
+        """Le sujet n'est téléchargeable que pendant la durée de l'épreuve."""
+        return self.availability_status == "open"
+
+    @property
+    def file_name(self):
+        return self.file.name.rsplit("/", 1)[-1] if self.file else ""
 
 
 class GradeRecord(models.Model):
@@ -385,8 +439,15 @@ class StudentGrade(models.Model):
         return self.status == self.STATUS_PUBLISHED
 
 
+def copy_file_upload_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() or "pdf"
+    return "exam_copies/%s/%s.%s" % (
+        instance.session_id, uuid.uuid4().hex, ext,
+    )
+
+
 class ExamCopy(models.Model):
-    """Copie numérisée déposée par un étudiant pour une épreuve."""
+    """Copie déposée par un étudiant pour une épreuve (PDF ou archive ZIP)."""
 
     university = models.ForeignKey(
         University, on_delete=models.CASCADE,
@@ -400,6 +461,11 @@ class ExamCopy(models.Model):
         StudentProfile, on_delete=models.CASCADE,
         related_name="exam_copies", verbose_name="Étudiant",
     )
+    file = models.FileField(
+        "Copie (PDF/ZIP)", upload_to=copy_file_upload_path, blank=True,
+    )
+    original_name = models.CharField("Nom d'origine", max_length=255, blank=True)
+    file_size = models.PositiveBigIntegerField("Taille (octets)", default=0)
     submitted_at = models.DateTimeField("Soumise le", null=True, blank=True)
     created_at = models.DateTimeField("Créée le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifiée le", auto_now=True)
@@ -429,6 +495,28 @@ class ExamCopy(models.Model):
     @property
     def page_count(self):
         return self.pages.count()
+
+    @property
+    def has_file(self):
+        return bool(self.file)
+
+    @property
+    def has_content(self):
+        """Une copie contient soit un fichier PDF/ZIP, soit des pages scannées."""
+        return self.has_file or self.page_count > 0
+
+    @property
+    def file_extension(self):
+        name = (self.original_name or self.file.name or "").lower()
+        return name.rsplit(".", 1)[-1] if "." in name else ""
+
+    @property
+    def is_pdf(self):
+        return self.file_extension == "pdf"
+
+    @property
+    def is_zip(self):
+        return self.file_extension == "zip"
 
 
 def copy_upload_path(instance, filename):
