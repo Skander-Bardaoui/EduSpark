@@ -1,0 +1,176 @@
+{% extends "portal/base_student.html" %}
+{% block title %}{{ assignment.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-space-lg">
+
+<!-- Header -->
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <div class="flex flex-wrap items-center gap-space-xs mb-space-xs">
+      {% if assignment.subject %}<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">{{ assignment.subject }}</span>{% endif %}
+      <span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Coeff. {{ assignment.coefficient }}</span>
+      {% if assignment.deadline %}<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Échéance : {{ assignment.deadline|date:"j F Y H\hi" }}</span>{% endif %}
+    </div>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ assignment.title }}</h1>
+    {% if assignment.school_class %}<p class="mt-1 font-body-md text-body-md text-on-surface-variant">Classe : {{ assignment.school_class }}</p>{% endif %}
+  </div>
+  <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exercises:student_assignments' %}">
+    <span class="material-symbols-outlined text-[18px]">arrow_back</span>Mes devoirs
+  </a>
+  <a href="{% url 'exercises:student_assignment_pdf' assignment.pk %}" target="_blank" class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container">
+    <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>Télécharger PDF
+  </a>
+</header>
+
+<!-- Statut actuel -->
+{% if submission %}
+<div class="rounded border {% if submission.status == 'corrige' %}border-primary/40 bg-primary-fixed/20{% elif submission.status == 'rendu' %}border-secondary/40 bg-secondary-fixed/10{% else %}border-outline-variant/40 bg-surface-container-low{% endif %} px-5 py-4 flex items-center gap-3">
+  {% if submission.status == 'corrige' %}
+  <span class="material-symbols-outlined text-primary text-[24px]" style="font-variation-settings:'FILL' 1">grade</span>
+  <div>
+    <p class="font-semibold text-on-surface">Devoir corrigé{% if submission.grade is not None %} — Note : <strong class="text-primary">{{ submission.grade }}/20</strong>{% endif %}</p>
+    {% if submission.feedback %}<p class="text-sm text-on-surface-variant mt-0.5">{{ submission.feedback }}</p>{% endif %}
+  </div>
+  {% elif submission.status == 'rendu' %}
+  <span class="material-symbols-outlined text-secondary text-[24px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+  <p class="font-semibold text-on-surface">Devoir soumis le {{ submission.submitted_at|date:"j F Y à H\hi" }} — En attente de correction.</p>
+  {% else %}
+  <span class="material-symbols-outlined text-outline text-[24px]">timelapse</span>
+  <p class="font-semibold text-on-surface">Brouillon enregistré ({{ submission.progress_pct }}% complété)</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Énoncé -->
+{% if assignment.instructions %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-3">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Énoncé / Consignes</h2>
+  </div>
+  <div class="p-5 text-body-md text-on-surface whitespace-pre-wrap leading-relaxed">{{ assignment.instructions }}</div>
+</section>
+{% endif %}
+
+<!-- Barème -->
+{% if assignment.rubric %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-3">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Barème : {{ assignment.rubric.name }}</h2>
+  </div>
+  <ul class="divide-y divide-outline-variant/30 text-sm">
+    {% for criterion in assignment.rubric.criteria.all %}
+    <li class="flex items-center justify-between px-5 py-3">
+      <span class="text-on-surface-variant">{{ criterion.name }}</span>
+      <span class="font-bold text-on-surface">{{ criterion.points }} pts</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<!-- Formulaire de rendu -->
+{% if assignment.status == 'ouvert' and not submission or submission.status == 'brouillon' %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-3">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Votre réponse</h2>
+    <p class="text-xs text-on-surface-variant mt-0.5">Rédigez votre réponse ci-dessous. Vous pouvez sauvegarder un brouillon avant de soumettre définitivement.</p>
+  </div>
+  <div class="p-5">
+    <textarea id="answer-content" class="w-full rounded border border-outline-variant/70 bg-surface px-4 py-3 text-sm text-on-surface outline-none focus:border-primary min-h-[200px] resize-y" placeholder="Rédigez votre réponse ici…">{% if submission %}{{ submission.content }}{% endif %}</textarea>
+
+    <!-- Barre de progression -->
+    <div class="mt-4">
+      <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1 block">Progression de la rédaction</label>
+      <input type="range" id="progress-range" min="0" max="100" value="{% if submission %}{{ submission.progress_pct }}{% else %}0{% endif %}"
+        class="w-full accent-primary">
+      <span class="text-xs text-on-surface-variant" id="progress-label">{% if submission %}{{ submission.progress_pct }}{% else %}0{% endif %}%</span>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-3">
+      <!-- Sauvegarder brouillon -->
+      <form method="post" id="draft-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_draft">
+        <input type="hidden" name="content" id="draft-content">
+        <input type="hidden" name="progress_pct" id="draft-progress">
+        <button class="rounded-full border border-outline-variant/70 px-5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit">
+          <span class="material-symbols-outlined text-[16px] align-middle">save</span> Sauvegarder le brouillon
+        </button>
+      </form>
+
+      <!-- Soumettre définitivement -->
+      <form method="post" id="submit-form" onsubmit="return confirm('Soumettre définitivement ce devoir ? Vous ne pourrez plus le modifier.')">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="submit">
+        <input type="hidden" name="content" id="submit-content">
+        <button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">
+          <span class="material-symbols-outlined text-[16px] align-middle">send</span> Soumettre le devoir
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+{% elif submission and submission.status == 'rendu' %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-3">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Votre copie soumise</h2>
+  </div>
+  <div class="p-5 text-body-md text-on-surface whitespace-pre-wrap leading-relaxed bg-surface-container-low rounded">{{ submission.content|default:"(Pas de contenu texte soumis)" }}</div>
+</section>
+{% elif submission and submission.status == 'corrige' %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-3">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Votre copie</h2>
+  </div>
+  <div class="p-5 text-body-md text-on-surface whitespace-pre-wrap leading-relaxed">{{ submission.content|default:"(Pas de contenu texte soumis)" }}</div>
+  {% if submission.feedback %}
+  <div class="border-t border-outline-variant/40 px-5 py-4">
+    <p class="text-xs font-bold uppercase tracking-wide text-on-surface-variant mb-1">Commentaire du correcteur</p>
+    <p class="text-sm text-on-surface italic">{{ submission.feedback }}</p>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function() {
+  var textarea = document.getElementById('answer-content');
+  var range = document.getElementById('progress-range');
+  var label = document.getElementById('progress-label');
+
+  if (range && label) {
+    range.addEventListener('input', function() {
+      label.textContent = range.value + '%';
+    });
+  }
+
+  /* Sync textarea content into hidden inputs before submit */
+  var draftForm = document.getElementById('draft-form');
+  var submitForm = document.getElementById('submit-form');
+
+  function syncContent(form, contentId, progressId) {
+    if (!form) return;
+    form.addEventListener('submit', function() {
+      var c = document.getElementById(contentId);
+      var p = document.getElementById(progressId);
+      if (c && textarea) c.value = textarea.value;
+      if (p && range) p.value = range.value;
+    });
+  }
+
+  syncContent(draftForm, 'draft-content', 'draft-progress');
+  syncContent(submitForm, 'submit-content', null);
+  if (submitForm) {
+    submitForm.addEventListener('submit', function() {
+      var c = document.getElementById('submit-content');
+      if (c && textarea) c.value = textarea.value;
+    });
+  }
+})();
+</script>
+{% endblock %}
