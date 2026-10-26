@@ -1,0 +1,34 @@
+{% extends portal_base_template %}
+{% block title %}{{ page_title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+{% include "portal/_page_header.html" with eyebrow="Classe virtuelle" title=page_title subtitle=page_subtitle %}
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<form class="flex flex-col gap-5 p-5 sm:p-6" method="post" novalidate>
+{% csrf_token %}
+{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+{% if form.non_field_errors %}
+<div class="rounded-lg bg-error-container px-4 py-3 text-sm text-on-error-container">
+{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
+<div class="grid gap-4">
+{% for field in form.visible_fields %}
+{% include "portal/_form_field.html" with field=field %}
+{% endfor %}
+</div>
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+<p class="text-xs text-on-surface-variant">Les champs marqués d'un astérisque sont obligatoires.</p>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{{ cancel_url }}">Annuler</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">
+<span class="material-symbols-outlined text-[18px]">{{ page_icon|default:"check" }}</span>{{ submit_label|default:"Enregistrer" }}
+</button>
+</div>
+</div>
+</form>
+</section>
+</div>
+</main>
+{% endblock %}

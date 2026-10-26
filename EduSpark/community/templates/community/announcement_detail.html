@@ -1,0 +1,26 @@
+{% extends portal_base_template %}
+{% block title %}{{ announcement.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<a class="inline-flex w-fit items-center gap-1 text-xs font-bold text-on-surface-variant hover:text-primary" href="{{ back_url }}"><span class="material-symbols-outlined text-[16px]">arrow_back</span>Toutes les annonces</a>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-sm">
+<div class="mb-3 flex flex-wrap items-center gap-1.5">
+{% if announcement.is_pinned %}{% include "portal/_badge.html" with label="Épinglée" tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if announcement.priority == 'importante' %}{% include "portal/_badge.html" with label="Importante" tone_class="bg-error-container text-on-error-container" dot=True %}{% endif %}
+{% if announcement.school_class %}{% include "portal/_badge.html" with label=announcement.school_class.name %}{% else %}{% include "portal/_badge.html" with label="Toute l'université" %}{% endif %}
+{% if announcement.course_ref %}{% include "portal/_badge.html" with label=announcement.course_ref %}{% endif %}
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ announcement.title }}</h1>
+<p class="mt-1 text-xs text-outline">Par {% firstof announcement.author.get_full_name announcement.author.email "un compte supprimé" %} · {{ announcement.published_at|date:"d/m/Y à H:i" }}{% if announcement.updated_at|date:"U" != announcement.published_at|date:"U" %} · modifiée le {{ announcement.updated_at|date:"d/m/Y" }}{% endif %}</p>
+<div class="mt-5 whitespace-pre-line text-body-md leading-relaxed text-on-surface">{{ announcement.body }}</div>
+{% if can_edit %}
+<div class="mt-6 flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<a class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container" href="{% url 'community:announcement_edit' announcement.pk %}">Modifier</a>
+<a class="rounded-full bg-error px-4 py-2.5 text-xs font-bold text-on-error hover:opacity-90" href="{% url 'community:announcement_delete' announcement.pk %}">Supprimer</a>
+</div>
+{% endif %}
+</article>
+</div>
+</main>
+{% endblock %}
