@@ -73,7 +73,26 @@ class ProtectedMediaMixin:
         shutil.rmtree(cls._protected_dir, ignore_errors=True)
 
 
-class CoursesTestCase(ProtectedMediaMixin, TestCase):
+class InlineJobsMixin:
+    """Tâches de fond exécutées dans le thread du test (même connexion à la base)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from courses.services import jobs
+
+        cls._jobs_inline = jobs.RUN_INLINE
+        jobs.RUN_INLINE = True
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        from courses.services import jobs
+
+        super().tearDownClass()
+        jobs.RUN_INLINE = cls._jobs_inline
+
+
+class CoursesTestCase(InlineJobsMixin, ProtectedMediaMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.univ = University.objects.create(name="Université Test", code="UT")

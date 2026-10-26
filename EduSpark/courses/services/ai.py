@@ -730,15 +730,24 @@ def generate_syllabus(title, level, course_id=None, options=None, user_id=None):
 
     fake = settings.AI_PROVIDER == PROVIDER_FAKE
     language = _clean_options(options)["language"]
+    started = time.monotonic()
     topics, local_status = _read_topics(course_id, use_local=not fake, language=language)
+    local_done = time.monotonic()
     chapters = [dict(item) for item in FAKE_CHAPTERS] if fake else api_write_syllabus(
         title, level, topics, options,
     )
+    finished = time.monotonic()
     result = {
         "chapters": chapters,
         "topics": topics,
         "mode": MODE_LOCAL_API if topics else MODE_API_ONLY,
         "local_status": local_status,
+        # Temps de réponse de chaque étape, en secondes (affichés et mesurés).
+        "timings": {
+            "local": round(local_done - started, 2),
+            "api": round(finished - local_done, 2),
+            "total": round(finished - started, 2),
+        },
     }
     cache.set(key, result, CACHE_TTL)
     return result
