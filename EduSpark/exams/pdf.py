@@ -1,4 +1,4 @@
-"""Génération des documents officiels PDF (convocation, relevé, attestation).
+"""Génération des documents officiels PDF (relevé, attestation).
 
 reportlab (polices Helvetica, encodage latin-1) : les caractères hors
 latin-1 (·, —, « »…) sont remplacés par des équivalents sûrs.
@@ -45,78 +45,6 @@ def _header(pdf, university_name, title):
     pdf.drawString(48, A4[1] - 50, "Gestion des examens et des notes")
     pdf.setFont("Helvetica-Bold", 16)
     pdf.drawString(48, A4[1] - 106, _safe(title))
-
-
-def convocation_pdf(session, student):
-    buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=A4)
-    pdf.setTitle("Convocation - %s" % _safe(session.title))
-    _header(pdf, session.university.name, "Convocation officielle d'examen")
-
-    pdf.setFont("Helvetica", 10.5)
-    pdf.setFillColor(colors.black)
-    pdf.drawString(48, A4[1] - 150, _safe(
-        "Convoquee le : %s" % timezone.localtime(session.convoked_at).strftime("%d/%m/%Y %H:%M")
-        if session.convoked_at else ""
-    ))
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(48, A4[1] - 185, _safe(session.title))
-    pdf.setFont("Helvetica", 10.5)
-    pdf.drawString(48, A4[1] - 205, _safe(
-        "Epreuve : %s%s" % (
-            session.get_exam_type_display(),
-            "  -  Code : %s" % session.code if session.code else "",
-        )
-    ))
-    pdf.drawString(48, A4[1] - 225, _safe(
-        "Classe : %s (%s)" % (session.school_class.name, session.school_class.academic_year)
-    ))
-
-    pdf.setStrokeColor(_LINE)
-    pdf.setLineWidth(0.6)
-    pdf.line(48, A4[1] - 240, A4[0] - 48, A4[1] - 240)
-
-    rows = (
-        ("Date", _safe(session.date_label)),
-        ("Horaire", _safe("%s a %s" % (session.time_label, session.start_time.strftime("%H:%M")))),
-        ("Salle", _safe(session.room)),
-    )
-    y = A4[1] - 265
-    pdf.setFont("Helvetica-Bold", 10.5)
-    for label, value in rows:
-        pdf.drawString(48, y, label)
-        pdf.setFont("Helvetica", 10.5)
-        pdf.drawString(160, y, value)
-        pdf.setFont("Helvetica-Bold", 10.5)
-        y -= 20
-
-    pdf.setStrokeColor(_LINE)
-    pdf.line(48, y - 4, A4[0] - 48, y - 4)
-
-    pdf.setFont("Helvetica-Bold", 10.5)
-    pdf.drawString(48, y - 26, "Etudiant(e) convoque(e)")
-    pdf.setFont("Helvetica", 10.5)
-    name = student.membership.user.get_full_name() or student.membership.user.email
-    pdf.drawString(48, y - 46, _safe(name))
-    pdf.drawString(48, y - 64, _safe(
-        "Matricule : %s%s" % (
-            student.student_number or "-",
-            "  -  Filiere : %s" % student.program if student.program else "",
-        )
-    ))
-
-    pdf.setFont("Helvetica-Oblique", 9)
-    pdf.setFillColor(_MUTED)
-    pdf.drawString(48, y - 110, _safe(
-        "Se presenter 15 minutes avant le debut de l'epreuve avec une piece d'identite. "
-        "Cette convocation vaut justificatif officiel de presence."
-    ))
-
-    _footer(pdf)
-    pdf.showPage()
-    pdf.save()
-    buffer.seek(0)
-    return buffer
 
 
 def _draw_grade_table(pdf, semester_rows, start_y):

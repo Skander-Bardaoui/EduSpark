@@ -1,12 +1,13 @@
 {% extends "portal/base_admin.html" %}
-{% block title %}Relevés officiels &amp; Jurys — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Relevés officiels — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
-<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevés officiels &amp; Jurys</h1>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevés officiels</h1>
 <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Délibérations et relevés de notes des classes de {{ portal_university.name }}.</p>
 </div>
 <div class="flex flex-wrap gap-2">
@@ -18,7 +19,7 @@
 {% include "portal/_stat_card.html" with label="Relevés de classe" value=record_count icon="gavel" hint="Une délibération par classe" %}
 {% include "portal/_stat_card.html" with label="Relevés publiés" value=published_count icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Consultables par les étudiants" %}
 {% include "portal/_stat_card.html" with label="PV à signer" value=pending_count icon="draw" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Après clôture des notes" %}
-{% include "portal/_stat_card.html" with label="Litiges ouverts" value="0" icon="check_circle" hint="Aucune réclamation en cours" %}
+{% include "portal/_stat_card.html" with label="Relevés à vérifier" value=incomplete_count icon="fact_check" icon_class="bg-error-container text-error" hint="Notes en attente ou manquantes" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
 <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
@@ -34,12 +35,13 @@
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[960px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-4 py-3 font-bold">Classe</th><th class="px-4 py-3 font-bold">Effectif</th><th class="px-4 py-3 font-bold">Moyenne</th><th class="px-4 py-3 font-bold">PV du jury</th><th class="px-4 py-3 font-bold">Relevé</th><th class="px-4 py-3 text-right font-bold">Action</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-4 py-3 font-bold">Classe</th><th class="px-4 py-3 font-bold">Effectif</th><th class="px-4 py-3 font-bold">Notes</th><th class="px-4 py-3 font-bold">Moyenne</th><th class="px-4 py-3 font-bold">PV du jury</th><th class="px-4 py-3 font-bold">Relevé</th><th class="px-4 py-3 text-right font-bold">Action</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for record in records %}
 <tr class="hover:bg-surface-container/40" data-filter-item data-tags="{% if record.transcript_published %}publie{% else %}attente{% endif %}">
-<td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ record.school_class.name }}</p><p class="text-xs text-on-surface-variant">{{ record.semester }}</p></td>
+<td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ record.school_class.name }}</p><p class="text-xs text-on-surface-variant">{{ record.semester }}</p>{% if record.overview.published == 0 %}{% include "portal/_badge.html" with label="Aucune note publiée" tone_class="bg-error-container text-on-error-container" %}{% elif record.overview.incomplete %}{% include "portal/_badge.html" with label="À vérifier" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% else %}{% include "portal/_badge.html" with label="Notes vérifiées" tone_class="bg-primary-fixed text-primary" %}{% endif %}</td>
 <td class="px-4 py-3 text-on-surface-variant">{{ record.students_count }}<p class="text-xs text-on-surface-variant">{{ record.admitted_count }} admis</p></td>
+<td class="px-4 py-3"><p class="font-data-metric font-bold text-on-surface">{{ record.overview.notes_label }}</p><p class="text-xs text-on-surface-variant">{{ record.overview.pending_label }}</p></td>
 <td class="px-4 py-3 text-on-surface-variant">{{ record.average_label }}</td>
 <td class="px-4 py-3">{% if record.pv_signed %}{% include "portal/_badge.html" with label="PV signé" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="PV en attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}</td>
 <td class="px-4 py-3">{% if record.transcript_published %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
@@ -50,11 +52,13 @@
 {% csrf_token %}
 <button class="rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Signer le PV</button>
 </form>
-{% elif not record.transcript_published %}
+{% elif not record.transcript_published and record.overview.can_publish %}
 <form action="{% url 'exams:admin_grade_record_publish' record.pk %}" class="inline" method="post">
 {% csrf_token %}
 <button class="rounded-full bg-secondary-container px-3 py-1.5 text-[11px] font-bold text-on-secondary-container transition-colors hover:bg-secondary" type="submit">Publier le relevé</button>
 </form>
+{% elif not record.transcript_published %}
+<button class="cursor-not-allowed rounded-full bg-surface-container px-3 py-1.5 text-[11px] font-bold text-on-surface-variant" disabled title="Aucune note publiée par les enseignants" type="button">Aucune note publiée</button>
 {% else %}
 <a class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:admin_grade_record_detail' record.pk %}"><span class="material-symbols-outlined text-[15px]">visibility</span>Consulter</a>
 {% endif %}
@@ -63,10 +67,14 @@
 </td>
 </tr>
 {% empty %}
-<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="6">Aucune classe dans cet établissement.</td></tr>
+<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="7">Aucune classe dans cet établissement.</td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
+<div class="flex flex-wrap items-center gap-2 border-t border-outline-variant/40 bg-surface-container/40 px-5 py-3 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">info</span>
+<span>La publication est bloquée tant qu'aucune note n'a été publiée par les enseignants. Les notes validées ou en brouillon sont signalées mais ne bloquent pas la publication.</span>
 </div>
 <p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun relevé ne correspond à ce filtre.</p>
 </section>

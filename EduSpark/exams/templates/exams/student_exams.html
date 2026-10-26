@@ -1,571 +1,230 @@
 {% extends "portal/base_student.html" %}
-{% block title %}Mes Examens — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Mes examens — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col" data-tabs>
-<!-- Top Context Header & Actions -->
-<header class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-background px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col gap-6">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
 <div class="max-w-3xl">
-<div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm uppercase tracking-wider mb-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-body-md">school</span>
+<div class="mb-2 inline-flex items-center gap-2 rounded-full bg-surface-container-high px-3 py-1 font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">
+<span class="material-symbols-outlined text-[16px]">school</span>
 <span>{{ semester_label }}</span>
 </div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
-        Mes Examens, QCM &amp; Relevés de Notes
-      </h1>
-<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
-        Consultez vos épreuves à venir, passez vos QCM en ligne et retrouvez le détail de vos corrections.
-      </p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes examens &amp; résultats</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">Passez vos QCM, déposez vos projets ZIP et tirez votre sujet d’oral pendant la fenêtre prévue. Retrouvez ensuite vos notes publiées.</p>
 </div>
-<!-- AI Toggle Button -->
-<div class="flex items-center gap-space-md shrink-0">
-<button aria-controls="ai-simulation-panel" aria-expanded="false" class="group relative inline-flex items-center gap-space-sm px-space-lg py-3 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="toggle-ai-panel-btn" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-secondary transition-transform group-hover:rotate-12" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-<span class="font-label-md text-label-md">Simulateur de Notes &amp; Mention IA</span>
-<span class="px-2 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-[11px] uppercase font-bold tracking-wider">Actif</span>
-</button>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:exam_dashboard' %}">
+<span class="material-symbols-outlined text-[18px]">space_dashboard</span>
+<span>Tableau de bord examens</span>
+</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:student_transcript' %}">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Mes relevés de notes</span>
+</a>
 </div>
 </header>
-<!-- Segmented Tabs / Navigation -->
-<nav aria-label="Sections des examens et résultats" class="flex items-center gap-space-xs p-1.5 rounded bg-surface-container-low max-w-fit mb-space-xl overflow-x-auto shadow-xs" role="tablist">
-<button aria-controls="panel-sessions" aria-selected="true" class="tab-btn is-active inline-flex items-center gap-space-sm px-space-md py-2.5 rounded bg-surface-container-lowest text-primary font-label-md text-label-md shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary" data-tab="sessions" id="tab-sessions" role="tab">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">event_upcoming</span>
-<span>Sessions d'examen</span>
-<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-data-metric text-data-metric font-semibold">{{ session_rows|length }}</span>
-</button>
-<button aria-controls="panel-evaluations" aria-selected="false" class="tab-btn inline-flex items-center gap-space-sm px-space-md py-2.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-primary" data-tab="evaluations" id="tab-evaluations" role="tab">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">task_alt</span>
-<span>Copies corrigées &amp; Évaluations</span>
-<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-data-metric text-data-metric">{{ published_grades|length }}</span>
-</button>
-<a aria-controls="panel-transcripts" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-primary" href="{% url 'exams:student_transcript' %}" role="tab">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">verified</span>
-<span>Relevés officiels &amp; Attestations</span>
-</a>
-</nav>
-<!-- Main Content & Resilient AI Panel Layout -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
-<!-- Left / Center Main Stream (Exam Workflow) -->
-<div class="flex flex-col gap-space-xl lg:col-span-8 transition-all duration-300" id="main-content-column">
-<!-- Tab panel : sessions & dépôt de copies -->
-<div data-tab-panel="sessions">
-<!-- Section 1: Sessions d'examen actives & à venir (QCM en ligne intégré à chaque carte) -->
-<section aria-labelledby="heading-active-sessions" class="flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-space-sm">
-<span aria-hidden="true" class="flex h-3 w-3 rounded-full bg-secondary animate-pulse"></span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="heading-active-sessions">
-              Sessions d'examen actives &amp; à venir
-            </h2>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Épreuves" value=session_rows|length icon="event_available" hint=semester_label %}
+{% include "portal/_stat_card.html" with label="QCM soumis" value=quiz_submitted_count icon="task_alt" hint="Résultats disponibles" %}
+{% include "portal/_stat_card.html" with label="Projets déposés" value=project_submitted_count icon="upload_file" hint="Dépôts ZIP" %}
+{% include "portal/_stat_card.html" with label="Sujets d’oral tirés" value=oral_drawn_count icon="record_voice_over" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Préparation en cours" %}
 </div>
-<span class="font-body-sm text-body-sm text-on-surface-variant">{{ semester_label }}</span>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Épreuves planifiées</h2>
+<p class="text-xs text-on-surface-variant">Une session par classe et par matière, tous formats confondus.</p>
 </div>
-<div class="grid grid-cols-1 gap-space-md">
+</div>
+<div class="divide-y divide-outline-variant/30">
 {% for row in session_rows %}
-{% with session=row.session %}
-<article class="relative flex flex-col p-space-lg rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-all overflow-hidden group">
-<div class="absolute left-0 top-0 bottom-0 w-1.5 {% cycle 'bg-primary' 'bg-secondary' %} rounded-l"></div>
-<div class="flex flex-col xl:flex-row xl:items-start justify-between gap-space-md">
-<div class="flex flex-col max-w-xl">
-<div class="flex flex-wrap items-center gap-space-sm mb-space-xs">
-<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-bold uppercase">
-                    {{ session.title }}
-                  </span>
-<span class="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">balance</span>
-                    Coeff. <span class="font-data-metric font-semibold text-on-surface">{{ session.coefficient }}</span>
-</span>
+{% with session=row.session quiz=row.quiz attempt=row.quiz_attempt %}
+<article class="flex flex-col gap-4 px-5 py-5">
+<div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+<div class="min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">{{ session.get_exam_type_display }}</span>
+<span class="text-xs text-on-surface-variant">{{ session.school_class.name }}{% if session.school_class.level %} · {{ session.school_class.level }}{% endif %}</span>
 </div>
-<h3 class="font-title-md text-title-md text-on-surface group-hover:text-primary transition-colors">
-                  {{ session.code }} · {{ session.school_class.name }} — {{ session.get_exam_type_display }}
-                </h3>
+<h3 class="mt-2 font-title-md text-title-md font-semibold text-on-surface">{{ session.title }}</h3>
+<p class="mt-1 text-sm text-on-surface-variant">
+{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% else %}Matière non rattachée{% endif %}
+</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ session.date_label }} · {{ session.time_label }}</p>
 </div>
-<!-- Icon + Text Accessible Status -->
-{% if session.is_convoked %}
-<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed self-start font-label-md text-label-md" role="status">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-<span class="font-semibold">Convoqué / Présentiel validé</span>
-</div>
+<div class="flex flex-wrap items-center gap-2">
+{% if session.is_project %}
+{% if row.project_graded %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>Projet noté</span>
+{% elif row.project_submitted %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">upload_file</span>Projet déposé</span>
+{% elif session.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">upload</span>Dépôt ouvert</span>
+{% elif session.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
 {% else %}
-<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md" role="status">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-secondary">lock_clock</span>
-<span class="font-semibold">Convocation en attente d'envoi</span>
-</div>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Dépôt fermé</span>
+{% endif %}
+{% elif session.is_oral %}
+{% if row.oral_graded %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>Oral noté</span>
+{% elif row.oral_drawn %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-tertiary-fixed px-3 py-1.5 text-xs font-bold text-on-tertiary-fixed"><span class="material-symbols-outlined text-[16px]">casino</span>Sujet tiré</span>
+{% elif session.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">casino</span>Tirage ouvert</span>
+{% elif session.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Tirage fermé</span>
+{% endif %}
+{% elif row.quiz_absent %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-error-container px-3 py-1.5 text-xs font-bold text-error"><span class="material-symbols-outlined text-[16px]">person_off</span>Absent</span>
+{% elif row.quiz_submitted %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>QCM soumis</span>
+{% elif quiz and quiz.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">play_circle</span>QCM ouvert</span>
+{% elif quiz and quiz.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
+{% elif quiz and quiz.access_status == "after" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Terminé</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">pending_actions</span>QCM en préparation</span>
 {% endif %}
 </div>
-<!-- Details metadata grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md my-space-md p-space-md rounded bg-surface-container-low">
-<div class="flex items-start gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5">calendar_clock</span>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Horaire de début</span>
-<span class="font-body-md text-body-md font-semibold text-on-surface">{{ session.date_label }} — {{ session.start_time|time:"H\hi" }}</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Durée : {{ row.duration_label }} · {{ session.get_exam_type_display }}</span>
 </div>
+
+{% if session.is_project %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">upload_file</span>Dépôt d’une archive ZIP</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ session.opens_at|date:"d/m/Y H:i" }} au {{ session.closes_at|date:"d/m/Y H:i" }}</span>
+{% if row.project_submission %}
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">schedule</span>Déposé le {{ row.project_submission.submitted_at|date:"d/m/Y H:i" }}</span>
+{% endif %}
 </div>
-<div class="flex items-start gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5">location_on</span>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Emplacement certifié</span>
-<span class="font-body-md text-body-md font-semibold text-on-surface">{{ session.room }} (Présentiel)</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">{{ session.school_class.name }} · {{ session.school_class.university.name }}</span>
-</div>
-</div>
-</div>
-<!-- Accessibility Notice -->
-<div aria-label="Consignes d'examen" class="flex items-center gap-space-sm p-3 rounded bg-tertiary-fixed text-on-tertiary-fixed mb-space-md" role="note">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-tertiary shrink-0">accessibility_new</span>
-<p class="font-body-sm text-body-sm text-on-tertiary-fixed-variant leading-snug">
-<strong>Consignes officielles.</strong> Présentez votre carte étudiante et une pièce d'identité à l'entrée de la salle. Tout document non autorisé est interdit pendant l'épreuve.
-              </p>
-</div>
-<!-- Card Actions -->
-{% if row.quiz %}
-<div class="border-t border-surface-container-high pt-space-md mt-space-xs flex flex-col gap-space-md">
-<div class="flex flex-wrap items-center justify-between gap-space-sm">
-<div class="flex items-center gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary">quiz</span>
-<span class="font-label-md text-label-md text-on-surface">QCM en ligne</span>
-</div>
-<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">timer</span>
-<span>{{ row.quiz.question_total }} question(s) · {{ row.quiz.duration_minutes }} min · validation {{ row.quiz.pass_score }}/20</span>
-</div>
-</div>
-{% if row.quiz_submitted %}
-<a class="inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant transition-all font-label-md text-label-md" href="{% url 'exams:student_quiz_result' row.quiz_attempt.pk %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">task_alt</span>
-<span>QCM soumis le {{ row.quiz_attempt.submitted_at|date:"d/m/Y à H\hi" }} — voir mon corrigé</span>
+{% if session.instructions %}<p class="text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>{% endif %}
+<div class="flex flex-wrap items-center gap-2">
+{% if row.project_graded %}
+<span class="text-sm font-semibold text-primary">Note du projet : {{ row.project_score }}/20</span>
+{% endif %}
+{% if row.project_submission %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_project_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Voir mon dépôt</span>
 </a>
-{% elif row.quiz.is_open %}
-<a class="inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs" href="{% url 'exams:student_quiz_start' session.pk %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">{% if row.quiz_attempt %}play_circle{% else %}play_arrow{% endif %}</span>
-<span>{% if row.quiz_attempt %}Reprendre le QCM{% else %}Commencer le QCM{% endif %}</span>
+{% elif row.project_can_submit %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_project_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+<span>Déposer mon projet</span>
 </a>
-{% elif row.quiz.access_status == "before" %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock_clock</span>
-<span>QCM accessible à partir du {{ row.quiz.starts_at|date:"d/m/Y à H:i" }}</span>
-</span>
-{% elif row.quiz.access_status == "after" %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock</span>
-<span>QCM terminé — épreuve clôturée</span>
-</span>
+{% elif session.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le dépôt ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.</span>
 {% else %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">pending_actions</span>
-<span>QCM en préparation par l'enseignant</span>
-</span>
+<span class="text-sm text-on-surface-variant">Le dépôt est fermé.</span>
 {% endif %}
 </div>
+{% elif session.is_oral %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">casino</span>Tirage au sort d’un sujet</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ session.opens_at|date:"d/m/Y H:i" }} au {{ session.closes_at|date:"d/m/Y H:i" }}</span>
+{% if row.oral_attempt %}
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">timer</span>Préparation jusqu’à {{ row.oral_attempt.preparation_deadline|date:"d/m/Y H:i" }}</span>
 {% endif %}
-<div class="flex flex-wrap items-center justify-between gap-space-md pt-space-xs">
-<div class="flex flex-wrap items-center gap-space-sm">
-{% if session.is_convoked %}
-<a aria-label="Télécharger la convocation officielle au format PDF accessible" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="{% url 'exams:student_convocation_pdf' session.pk %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">download</span>
-<span class="font-label-md text-label-md">Télécharger la convocation (PDF/UA)</span>
+</div>
+{% if session.instructions %}<p class="text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>{% endif %}
+{% if row.oral_attempt %}
+<p class="text-sm text-on-surface"><span class="font-semibold">Sujet :</span> {{ row.oral_attempt.topic.title|default:"Sujet non disponible" }}</p>
+{% if row.oral_graded %}<p class="text-sm font-semibold text-primary">Note de l’oral : {{ row.oral_score }}/20</p>{% endif %}
+{% endif %}
+<div class="flex flex-wrap items-center gap-2">
+{% if row.oral_attempt %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_oral_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Voir mon sujet</span>
 </a>
-{% if row.convocation_hash %}
-<span class="inline-flex items-center gap-space-sm text-on-surface-variant font-data-metric text-data-metric">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-secondary">shield</span>
-<span>SHA-256 : {{ row.convocation_hash|slice:":4" }}...{{ row.convocation_hash|slice:"-4:" }}</span>
-</span>
-{% endif %}
-{% else %}
-<button aria-label="Convocation en attente d'envoi par l'administration" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant transition-all shadow-xs cursor-not-allowed" disabled type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">hourglass_top</span>
-<span class="font-label-md text-label-md">Convocation en attente d'envoi par l'administration</span>
-</button>
-{% endif %}
-{% if row.subject_available %}
-<a aria-label="Télécharger le sujet d'épreuve au format PDF" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary" href="{% url 'exams:student_subject_download' session.pk %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-<span class="font-label-md text-label-md">Télécharger le sujet (PDF)</span>
+{% elif row.oral_can_draw %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_oral_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">casino</span>
+<span>Tirer mon sujet</span>
 </a>
-{% elif row.subject_status == "before" %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock_clock</span>
-<span>Sujet disponible au début de l'épreuve ({{ session.start_time|time:"H\hi" }})</span>
-</span>
-{% elif row.subject_status == "after" %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">lock</span>
-<span>Sujet fermé — épreuve terminée</span>
-</span>
-{% elif row.subject_status == "draft" %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">pending_actions</span>
-<span>Sujet en préparation par l'enseignant</span>
-</span>
+{% elif session.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le tirage ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.</span>
 {% else %}
-<span class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">description</span>
-<span>Aucun sujet déposé par l'enseignant</span>
-</span>
+<span class="text-sm text-on-surface-variant">Le tirage est fermé.</span>
 {% endif %}
 </div>
+{% elif quiz %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">quiz</span>{{ row.question_total }} question(s)</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">timer</span>{{ row.duration_minutes }} min</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ quiz.starts_at|date:"d/m/Y H:i" }} au {{ quiz.ends_at|date:"d/m/Y H:i" }}</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">target</span>Validation {{ quiz.pass_score }}/20</span>
 </div>
-{% if not row.quiz %}
-<!-- Dépôt de copie (PDF ou ZIP) -->
-<div class="border-t border-surface-container-high pt-space-md mt-space-xs flex flex-col gap-space-md">
-<div class="flex flex-wrap items-center justify-between gap-space-sm">
-<div class="flex items-center gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary">upload_file</span>
-<span class="font-label-md text-label-md text-on-surface">Dépôt de copie (PDF ou ZIP)</span>
-</div>
-<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-primary">timer</span>
-{% if row.submitted %}
-<span>Copie soumise le <strong class="font-data-metric text-on-surface">{{ row.copy.submitted_at|date:"d/m/Y à H\hi" }}</strong></span>
-{% elif row.deposit_status == "open" %}
-<span>Dépôt ouvert jusqu'à <strong class="font-data-metric text-on-surface">{{ session.end_time|time:"H\hi" }}</strong> (fin de l'épreuve)</span>
-{% elif row.deposit_status == "before" %}
-<span>Ouverture du dépôt le <strong class="font-data-metric text-on-surface">{{ session.date_label }} à {{ session.start_time|time:"H\hi" }}</strong></span>
+<div class="flex flex-wrap items-center gap-2">
+{% if row.quiz_absent %}
+<span class="text-sm font-semibold text-error">Aucune participation dans le délai : 0/20 enregistré.</span>
+{% elif row.quiz_submitted %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_quiz_result' attempt.pk %}">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>Voir mon corrigé et mon feedback</span>
+</a>
+{% elif row.can_start %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_quiz_start' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">{% if attempt %}play_circle{% else %}play_arrow{% endif %}</span>
+<span>{% if attempt %}Reprendre le QCM{% else %}Commencer le QCM{% endif %}</span>
+</a>
+{% elif quiz.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le QCM sera accessible le {{ quiz.starts_at|date:"d/m/Y à H:i" }}.</span>
+{% elif quiz.access_status == "after" %}
+<span class="text-sm text-on-surface-variant">Le QCM est terminé.</span>
 {% else %}
-<span>Dépôt fermé — épreuve terminée le <strong class="font-data-metric text-on-surface">{{ session.date_label }} à {{ session.end_time|time:"H\hi" }}</strong></span>
+<span class="text-sm text-on-surface-variant">Le QCM n’est pas encore publié par l’enseignant.</span>
 {% endif %}
-</div>
-</div>
-{% if row.copy and row.copy.has_file %}
-<div class="flex flex-wrap items-center justify-between gap-3 rounded bg-surface-container-low p-4">
-<div class="flex items-center gap-3">
-<span aria-hidden="true" class="material-symbols-outlined text-[26px] text-primary">{% if row.copy.is_zip %}folder_zip{% else %}picture_as_pdf{% endif %}</span>
-<div class="flex flex-col">
-<span class="font-label-md text-label-md text-on-surface">{{ row.copy.original_name|default:"Copie déposée" }}</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">{{ row.copy.file.size|filesizeformat }} · déposée le {{ row.copy.updated_at|date:"d/m/Y à H\hi" }}</span>
-</div>
-</div>
-{% if row.deposit_open and not row.submitted %}
-<form action="{% url 'exams:student_copy_upload' session.pk %}" enctype="multipart/form-data" method="post">
-{% csrf_token %}
-<label class="cursor-pointer inline-flex items-center gap-1.5 rounded-full border border-outline-variant/70 px-3 py-1.5 font-label-sm text-label-sm text-on-surface-variant transition-colors hover:bg-surface-container" for="upload-input-{{ session.pk }}">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px]">swap_horiz</span>
-<span>Remplacer le fichier</span>
-</label>
-<input accept=".pdf,.zip,application/pdf,application/zip" class="sr-only" id="upload-input-{{ session.pk }}" name="file" onchange="this.form.submit()" type="file"/>
-</form>
-{% endif %}
-</div>
-{% elif row.pages %}
-<p class="font-body-sm text-body-sm text-on-surface-variant">{{ row.pages|length }} page(s) scannée(s) déjà déposée(s) pour cette épreuve.</p>
-{% endif %}
-{% if row.deposit_open and not row.submitted %}
-{% if not row.copy or not row.copy.has_file %}
-<form action="{% url 'exams:student_copy_upload' session.pk %}" enctype="multipart/form-data" method="post">
-{% csrf_token %}
-<div aria-label="Zone de dépôt de copie PDF ou ZIP" class="flex flex-col items-center justify-center p-space-lg rounded bg-surface-container text-center transition-all hover:bg-surface-variant/70 focus-within:ring-2 focus-within:ring-primary" role="region" tabindex="0">
-<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary mb-space-sm shadow-xs">
-<span aria-hidden="true" class="material-symbols-outlined text-[28px]">cloud_upload</span>
-</div>
-<p class="font-title-md text-title-md text-on-surface mb-1">Déposez votre copie ici</p>
-<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md mb-space-md">
-              Formats acceptés : un fichier PDF ou une archive ZIP. Le dépôt n'est possible que pendant la durée de l'épreuve.
-            </p>
-<label class="cursor-pointer inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-xs hover:bg-surface-container-high transition-all" for="upload-input-{{ session.pk }}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">upload_file</span>
-<span>Choisir un fichier PDF ou ZIP</span>
-</label>
-<input accept=".pdf,.zip,application/pdf,application/zip" aria-label="Sélectionner votre copie PDF ou ZIP" class="sr-only" id="upload-input-{{ session.pk }}" name="file" onchange="this.form.submit()" type="file"/>
-</div>
-</form>
-{% endif %}
-<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-xs mt-space-xs">
-<div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-tertiary">verified_user</span>
-<span>La soumission verrouille la copie et génère un horodatage officiel.</span>
-</div>
-<form action="{% url 'exams:student_copy_submit' session.pk %}" method="post">
-{% csrf_token %}
-<button class="w-full sm:w-auto inline-flex items-center justify-center gap-space-sm px-space-xl py-3 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="submit">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px]">send</span>
-<span class="font-label-md text-label-md">Soumettre la copie (Horodatage officiel)</span>
-</button>
-</form>
-</div>
-{% elif row.submitted %}
-<div class="inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-primary-fixed text-on-primary-fixed font-label-md text-label-md">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-primary" style="font-variation-settings: 'FILL' 1;">task_alt</span>
-<span class="font-semibold">Copie soumise et verrouillée — transmise au correcteur.</span>
-</div>
-{% elif row.deposit_status == "before" %}
-<div class="p-space-md rounded bg-surface-container-highest flex items-center gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-on-surface-variant">lock_clock</span>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Le dépôt de copie s'ouvre au début de l'épreuve, le {{ session.date_label }} à {{ session.start_time|time:"H\hi" }}.</p>
 </div>
 {% else %}
-<div class="p-space-md rounded bg-surface-container-highest flex items-center gap-space-sm">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px] text-on-surface-variant">lock_clock</span>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Le dépôt de copie est fermé : l'épreuve s'est terminée le {{ session.date_label }} à {{ session.end_time|time:"H\hi" }}.</p>
-</div>
-{% endif %}
-</div>
+<p class="text-sm text-on-surface-variant">Aucun QCM n’a encore été préparé pour cette session.</p>
 {% endif %}
 </article>
 {% endwith %}
 {% empty %}
-<div class="flex flex-col items-center justify-center gap-space-sm p-space-xl rounded bg-surface-container-lowest shadow-sm text-center">
-<span aria-hidden="true" class="material-symbols-outlined text-[40px] text-on-surface-variant">event_busy</span>
-<p class="font-title-md text-title-md text-on-surface">Aucune session à venir</p>
-<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Aucune épreuve n'est planifiée pour vos classes. Le QCM de chaque épreuve s'ouvrira dans sa carte pendant la durée prévue. Consultez vos relevés de notes pour retrouver vos résultats publiés.</p>
-<a class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all shadow-xs mt-space-xs" href="{% url 'exams:student_transcript' %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">grade</span>
-<span class="font-label-md text-label-md">Voir mes relevés de notes</span>
-</a>
+<div class="px-5 py-12 text-center">
+<span class="material-symbols-outlined text-[42px] text-outline">event_busy</span>
+<p class="mt-2 text-sm text-on-surface-variant">Aucune épreuve pour vos classes pour le moment.</p>
 </div>
 {% endfor %}
 </div>
 </section>
-</div>
-<!-- Tab panel : évaluations -->
-<div class="hidden" data-tab-panel="evaluations">
-<!-- Section 3: Dernières corrections détaillées (Grille & Barème) -->
-<section aria-labelledby="heading-graded-exams" class="flex flex-col gap-space-md">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="heading-graded-exams">
-              Dernières corrections détaillées
-            </h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-              Visualisez le détail critère par critère validé par le jury académique.
-            </p>
-</div>
-<!-- Download Semestrial Transcript -->
-<a aria-label="Exporter le relevé officiel signé numériquement au format PDF" class="inline-flex items-center gap-space-sm px-space-md py-2.5 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant transition-all font-label-md text-label-md focus:outline-none focus:ring-2 focus:ring-primary" href="{% url 'exams:student_transcript_pdf' %}">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-<span>Exporter le relevé officiel signé numériquement (PDF)</span>
-</a>
-</div>
-<div class="flex flex-col gap-space-md">
-{% for grade in published_grades %}
-<!-- Graded Item: With Expanded Criteria Grid -->
-<article class="flex flex-col p-space-lg rounded bg-surface-container-lowest shadow-sm">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-md border-b border-surface-container-high">
-<div class="flex items-start gap-space-md">
-<div class="w-14 h-14 rounded bg-primary-fixed flex flex-col items-center justify-center shrink-0">
-<span class="font-data-metric font-bold text-[18px] text-primary leading-none">{{ grade.score_label }}</span>
-<span class="font-data-metric text-[11px] text-on-primary-fixed-variant">/ {{ grade.max_total }}</span>
-</div>
-<div>
-<div class="flex items-center gap-space-sm">
-<span class="font-headline-sm text-headline-sm text-on-surface">{{ grade.session.title }}</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                    Module : {{ grade.session.code }} • Enseignant(e) : {{ grade.graded_by.get_full_name|default:"Jury académique" }} • Coeff. <span class="font-data-metric font-semibold text-on-surface">{{ grade.session.coefficient }}</span>
-</p>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes publiées</h2>
+<p class="text-xs text-on-surface-variant">Notes issues des QCM, projets et oraux, validées par l’administration.</p>
 </div>
 </div>
-<!-- Icon + Text Status -->
-<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md shrink-0">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
-<span class="font-semibold">Publié &amp; Validé</span>
-</div>
-</div>
-<!-- Detailed Rubric / Barème -->
-<div class="mt-space-md flex flex-col gap-space-md">
-<div class="flex items-center justify-between">
-<span class="font-label-md text-label-md text-on-surface flex items-center gap-space-xs">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-primary">table_chart</span>
-                  Grille d'évaluation critériée &amp; barème
-                </span>
-<span class="font-label-sm text-label-sm text-on-surface-variant">Corrigée par : <strong class="text-on-surface font-data-metric">{{ grade.graded_by.get_full_name|default:"Jury académique" }}</strong></span>
-</div>
-<!-- Accessible Table / Grid for Criteria -->
-<div class="overflow-x-auto rounded bg-surface-container-low">
-<table aria-label="Détail des points par critère pour {{ grade.session.title }}" class="w-full text-left border-collapse">
-<thead>
-<tr class="border-b border-surface-container-high bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-<th class="py-2.5 px-space-md font-semibold" scope="col">Critère évalué</th>
-<th class="py-2.5 px-space-md font-semibold" scope="col">Pondération</th>
-<th class="py-2.5 px-space-md font-semibold text-right" scope="col">Points obtenus</th>
-</tr>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[720px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Note</th><th class="px-5 py-3 font-bold">Statut</th></tr>
 </thead>
-<tbody class="divide-y divide-surface-container-high font-body-sm text-body-sm">
-{% for item in grade.criteria %}
-<tr>
-<th class="py-3 px-space-md font-normal text-on-surface" scope="row">{{ item.label }}</th>
-<td class="py-3 px-space-md text-on-surface-variant">{{ item.weight|floatformat:"-2" }} pts max</td>
-<td class="py-3 px-space-md text-right font-data-metric font-semibold text-primary">{{ item.points|floatformat:"-2" }} / {{ item.weight|floatformat:"-2" }}</td>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for grade in published_grades %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ grade.session.title }}</p><p class="text-xs text-on-surface-variant">{% if grade.session.course_subject %}{{ grade.session.course_subject.code }} · {{ grade.session.course_subject.name }}{% endif %}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ grade.session.school_class.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ grade.session.date_label }}</td>
+<td class="px-5 py-3 font-data-metric font-bold text-on-surface">{{ grade.score_label }} / 20</td>
+<td class="px-5 py-3">{% if grade.is_absent %}{% include "portal/_badge.html" with label="Absent" tone_class="bg-error-container text-on-error-container" %}{% elif grade.score >= 10 %}{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Non validé" tone_class="bg-error-container text-on-error-container" %}{% endif %}</td>
 </tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucune note publiée pour le moment.</td></tr>
 {% endfor %}
 </tbody>
 </table>
 </div>
-{% if grade.comment %}
-<!-- Teacher Note Callout -->
-<div class="flex items-start gap-space-sm p-space-md rounded bg-surface-container">
-<span aria-hidden="true" class="material-symbols-outlined text-[22px] text-primary mt-0.5 shrink-0">rate_review</span>
-<div class="flex flex-col">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-semibold">Remarques de l'enseignant</span>
-<blockquote class="font-body-md text-body-md text-on-surface italic mt-0.5">
-                    « {{ grade.comment }} »
-                  </blockquote>
-<span class="font-label-sm text-label-sm text-primary mt-1 font-semibold">— {{ grade.graded_by.get_full_name|default:"Jury académique" }}, le {{ grade.updated_at|date:"d/m/Y" }}</span>
-</div>
-</div>
-{% endif %}
-</div>
-</article>
-{% empty %}
-<div class="flex flex-col items-center justify-center gap-space-sm p-space-xl rounded bg-surface-container-lowest shadow-sm text-center">
-<span aria-hidden="true" class="material-symbols-outlined text-[40px] text-on-surface-variant">hourglass_empty</span>
-<p class="font-title-md text-title-md text-on-surface">Aucune note publiée pour le moment</p>
-<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">Vos notes apparaîtront ici dès leur publication par l'administration de votre université, après validation du jury.</p>
-</div>
-{% endfor %}
-</div>
 </section>
 </div>
-</div>
-<!-- Right Side: Persistent AI Simulator Panel (Standard Pattern) -->
-<aside aria-label="Simulateur et analyse prédictive IA des notes" class="lg:col-span-4 flex flex-col gap-space-md p-space-lg rounded bg-surface-container-lowest shadow-sm sticky top-28" id="ai-simulation-panel">
-<!-- Panel Header -->
-<div class="flex items-start justify-between gap-space-sm pb-space-sm border-b border-surface-container-high">
-<div class="flex items-center gap-space-sm">
-<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-</div>
-<div class="flex flex-col">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">
-              Simulateur &amp; Analyse IA
-            </h2>
-<span class="font-label-sm text-label-sm text-secondary font-bold uppercase tracking-wider">
-              Beta Multimodale
-            </span>
-</div>
-</div>
-<button aria-label="Fermer le simulateur IA" class="p-1 rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors focus:outline-none focus:ring-2 focus:ring-primary" id="close-ai-panel-btn" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<!-- WCAG Error Resilience Notice (Collapsible / Informational) -->
-<div class="flex items-start gap-space-xs p-2.5 rounded bg-surface-container text-on-surface-variant font-body-sm text-xs leading-snug" role="status">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px] text-outline shrink-0 mt-0.5">info</span>
-<span>
-          Module de démonstration. L'intelligence artificielle n'est pas connectée : les calculs affichés sont indicatifs et vos données restent locales.
-        </span>
-</div>
-<!-- Simulator Target Controls -->
-<div class="flex flex-col gap-space-sm">
-<label class="font-label-md text-label-md text-on-surface" for="simulation-target-select">
-          Objectif académique visé
-        </label>
-<div class="relative">
-<select class="w-full appearance-none px-space-md py-2.5 rounded bg-surface-container-low text-on-surface font-body-md text-body-md outline-none focus:ring-2 focus:ring-primary pr-10 cursor-pointer" id="simulation-target-select">
-<option value="tb">Mention Très Bien (Moyenne &gt;= 16.0)</option>
-<option value="b">Mention Bien (Moyenne &gt;= 14.0)</option>
-<option value="ab">Mention Assez Bien (Moyenne &gt;= 12.0)</option>
-<option value="pass">Validation simple du semestre (Moyenne &gt;= 10.0)</option>
-</select>
-<span aria-hidden="true" class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-on-surface-variant text-[20px]">expand_more</span>
-</div>
-</div>
-<!-- Simulation Metric Overview (SVG Chart Dial) -->
-<div class="flex flex-col items-center justify-center p-space-md rounded bg-surface-container-low">
-<div class="relative flex items-center justify-center">
-<!-- Circular Progress SVG Meter -->
-<svg aria-hidden="true" class="w-36 h-36 transform -rotate-90" viewbox="0 0 120 120">
-<circle class="stroke-surface-container-high" cx="60" cy="60" fill="none" r="50" stroke-width="10"></circle>
-<circle class="stroke-secondary" cx="60" cy="60" fill="none" r="50" stroke-dasharray="314.159" stroke-dashoffset="59.7" stroke-linecap="round" stroke-width="10"></circle>
-</svg>
-<div class="absolute flex flex-col items-center justify-center text-center">
-<span class="font-data-metric text-[20px] font-bold text-on-surface leading-none">16.2</span>
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1">Moyenne actuelle</span>
-</div>
-</div>
-<div class="w-full flex items-center justify-between text-on-surface-variant font-data-metric text-data-metric mt-space-sm pt-space-xs border-t border-surface-container-high">
-<span>ECTS acquis : <strong>24 / 30</strong></span>
-<span>Rang estimé : <strong>Top 5%</strong></span>
-</div>
-</div>
-<!-- Action Button to Trigger Calculations -->
-<button class="w-full inline-flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded-full bg-secondary text-on-secondary hover:bg-secondary-container transition-all shadow-xs focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="recalc-btn" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px]">calculate</span>
-<span class="font-label-md text-label-md">Calculer les projections</span>
-</button>
-<!-- AI Suggestion Card -->
-<div aria-label="Recommandation de l'intelligence artificielle" class="p-space-md rounded bg-surface-container text-on-surface flex flex-col gap-space-xs" role="region">
-<div class="flex items-center gap-1.5 text-secondary font-label-sm text-label-sm font-bold uppercase">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
-<span>Synthèse prédictive personnalisée</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
-          Avec vos notes actuelles (<strong class="font-data-metric text-primary">moyenne 16.2/20</strong>) et vos coefficients restants, une note minimale de <strong class="font-data-metric text-secondary font-bold">12.5/20</strong> au partiel de Systèmes Distribués vous assure la <strong class="text-on-surface">Mention Très Bien (≥ 16.0)</strong>.
-        </p>
-</div>
-<!-- 3 Standard AI Action Buttons -->
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-xs pt-space-xs">
-<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" title="Sauvegarder dans mes objectifs personnels" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px]">bookmark</span>
-<span>Garder</span>
-</button>
-<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-variant transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" title="Ajuster les hypothèses de notes" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px]">tune</span>
-<span>Modifier</span>
-</button>
-<button class="inline-flex items-center justify-center gap-1 py-2 px-2 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all font-label-md text-body-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary" id="dismiss-ai-suggestion" title="Fermer cette recommandation" type="button">
-<span aria-hidden="true" class="material-symbols-outlined text-[16px]">block</span>
-<span>Refuser</span>
-</button>
-</div>
-<!-- Fallback Error Alert Banner (Hidden by default, resilient toggle) -->
-<div class="hidden p-space-sm rounded bg-error-container text-on-error-container text-body-sm flex items-start gap-space-xs" id="ai-error-banner">
-<span aria-hidden="true" class="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">report_problem</span>
-<p class="font-body-sm text-xs leading-snug">
-          L'IA est momentanément indisponible. Le calcul automatique standard reste accessible.
-        </p>
-</div>
-</aside>
-</div>
-</div>
-<script>
-  // Micro-interaction handlers for AI panel toggle and resilience actions
-  (function initExamScreen() {
-    const toggleBtn = document.getElementById('toggle-ai-panel-btn');
-    const closeBtn = document.getElementById('close-ai-panel-btn');
-    const dismissBtn = document.getElementById('dismiss-ai-suggestion');
-    const aiPanel = document.getElementById('ai-simulation-panel');
-    const contentCol = document.getElementById('main-content-column');
-    const recalcBtn = document.getElementById('recalc-btn');
-    const errorBanner = document.getElementById('ai-error-banner');
-
-    function togglePanel() {
-      const isHidden = aiPanel.classList.contains('hidden');
-      if (isHidden) {
-        aiPanel.classList.remove('hidden');
-        contentCol.classList.remove('lg:col-span-12');
-        contentCol.classList.add('lg:col-span-8');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-      } else {
-        aiPanel.classList.add('hidden');
-        contentCol.classList.remove('lg:col-span-8');
-        contentCol.classList.add('lg:col-span-12');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-      }
-    }
-
-    if (toggleBtn) toggleBtn.addEventListener('click', togglePanel);
-    if (closeBtn) closeBtn.addEventListener('click', togglePanel);
-    if (dismissBtn) {
-      dismissBtn.addEventListener('click', () => {
-        const suggestionCard = dismissBtn.closest('aside').querySelector('[role="region"]');
-        if (suggestionCard) {
-          suggestionCard.style.opacity = '0.5';
-          suggestionCard.setAttribute('aria-disabled', 'true');
-        }
-      });
-    }
-
-    if (recalcBtn) {
-      recalcBtn.addEventListener('click', () => {
-        recalcBtn.disabled = true;
-        recalcBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Projections en cours...';
-        setTimeout(() => {
-          recalcBtn.disabled = false;
-          recalcBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">calculate</span> Calculer les projections';
-        }, 600);
-      });
-    }
-  })();
-</script></main>
+</main>
 {% endblock %}

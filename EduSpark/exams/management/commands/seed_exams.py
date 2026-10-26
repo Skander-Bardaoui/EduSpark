@@ -11,30 +11,24 @@ from django.utils import timezone
 from reportlab.pdfgen import canvas as pdf_canvas
 
 from accounts.models import SchoolClass
+from courses.models import Subject
 from exams.models import ExamSession, ExamSubject, GradeRecord, semester_for
 
 SESSION_ROWS = (
     ("Université Paris Cité", "Licence 3 Informatique", "INF501 · Algorithmique avancée",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 3), time(8, 30), time(10, 30), "Amphi A",
-     ExamSession.STATUS_CONVOKED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 3), time(8, 30), time(10, 30), "Amphi A"),
     ("Université Paris Cité", "Licence 3 Informatique", "MAT301 · Probabilités",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 6), time(13, 30), time(15, 30), "Salle 204",
-     ExamSession.STATUS_PLANNED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 6), time(13, 30), time(15, 30), "Salle 204"),
     ("Université Paris Cité", "Master 1 Génie Logiciel", "INF502 · Systèmes distribués",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 4), time(8, 30), time(10, 30), "Amphi B",
-     ExamSession.STATUS_CONVOKED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 4), time(8, 30), time(10, 30), "Amphi B"),
     ("Université Paris Cité", "Master 1 Génie Logiciel", "GEN401 · Architecture applicative",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 7), time(10, 15), time(12, 15), "Salle 204",
-     ExamSession.STATUS_PLANNED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 7), time(10, 15), time(12, 15), "Salle 204"),
     ("Université de Lyon", "Master 1 Mathématiques", "MAT401 · Analyse fonctionnelle",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 3), time(10, 15), time(12, 15), "Amphi C",
-     ExamSession.STATUS_CONVOKED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 3), time(10, 15), time(12, 15), "Amphi C"),
     ("Université de Lyon", "Master 1 Mathématiques", "MAT402 · Probabilités avancées",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 6), time(8, 30), time(10, 30), "Salle 105",
-     ExamSession.STATUS_PLANNED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 6), time(8, 30), time(10, 30), "Salle 105"),
     ("Université de Lyon", "Master 1 Mathématiques", "MAT403 · Analyse numérique",
-     ExamSession.TYPE_ECRIT, date(2026, 11, 10), time(9, 0), time(11, 0), "Salle 108",
-     ExamSession.STATUS_PLANNED),
+     ExamSession.TYPE_ECRIT, date(2026, 11, 10), time(9, 0), time(11, 0), "Salle 108"),
 )
 
 RECORD_ROWS = (
@@ -72,7 +66,7 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             for (university_name, class_name, title, exam_type, exam_date,
-                 start, end, room, status) in SESSION_ROWS:
+                 start, end, room) in SESSION_ROWS:
                 school_class = SchoolClass.objects.filter(
                     university__name=university_name, name=class_name,
                 ).first()
@@ -84,20 +78,27 @@ class Command(BaseCommand):
                 admin = User.objects.filter(
                     email__iexact=ADMIN_EMAILS.get(university_name, ""),
                 ).first()
+                code = title.split("·", 1)[0].strip()
+                subject = Subject.objects.filter(
+                    university=school_class.university, code=code,
+                ).first()
+                defaults = {
+                    "university": school_class.university,
+                    "course_subject": subject,
+                    "exam_type": exam_type,
+                    "date": exam_date,
+                    "start_time": start,
+                    "end_time": end,
+                    "room": room,
+                    "created_by": admin,
+                }
+                if subject is not None:
+                    defaults["code"] = subject.code
+                    defaults["coefficient"] = subject.coefficient
                 _session, created = ExamSession.objects.update_or_create(
                     school_class=school_class,
                     title=title,
-                    defaults={
-                        "university": school_class.university,
-                        "exam_type": exam_type,
-                        "date": exam_date,
-                        "start_time": start,
-                        "end_time": end,
-                        "room": room,
-                        "status": status,
-                        "convoked_at": now if status == ExamSession.STATUS_CONVOKED else None,
-                        "created_by": admin,
-                    },
+                    defaults=defaults,
                 )
                 sessions_created += int(created)
 

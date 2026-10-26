@@ -1,16 +1,17 @@
 {% extends "portal/base_student.html" %}
 {% block title %}Résultat du QCM — {{ session.title }}{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[980px] flex-col gap-6 px-4 py-8 sm:px-6">
-  <header class="flex flex-col gap-2">
+  <header class="exam-page-header flex flex-col gap-2">
     <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
       <a class="hover:text-primary" href="{% url 'exams:student_exams' %}">Mes examens</a>
       <span class="material-symbols-outlined text-[16px]">chevron_right</span>
       <span class="text-primary">Résultat du QCM</span>
     </nav>
     <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ session.title }}</h1>
-    <p class="text-sm text-on-surface-variant">Soumis le {{ attempt.submitted_at|date:"d/m/Y à H:i" }} · {{ quiz.question_total }} question(s)</p>
+    <p class="text-sm text-on-surface-variant">{% if is_absent %}Absent — QCM non passé dans le délai{% else %}Soumis le {{ attempt.submitted_at|date:"d/m/Y à H:i" }}{% endif %} · {{ quiz.question_total }} question(s)</p>
   </header>
 
   <section class="grid gap-4 sm:grid-cols-3">
@@ -21,7 +22,12 @@
     </div>
     <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:col-span-2">
       <p class="text-xs uppercase tracking-wider text-on-surface-variant">Décision</p>
-      {% if passed %}
+      {% if is_absent %}
+      <p class="mt-2 inline-flex items-center gap-2 rounded-full bg-error-container px-3 py-1 text-sm font-bold text-error">
+        <span class="material-symbols-outlined text-[18px]">person_off</span>Absent au QCM
+      </p>
+      <p class="mt-3 text-sm text-on-surface-variant">Vous n'avez pas rejoint le QCM pendant sa durée d'ouverture. Une note de 0/20 a été enregistrée automatiquement.</p>
+      {% elif passed %}
       <p class="mt-2 inline-flex items-center gap-2 rounded-full bg-primary-fixed px-3 py-1 text-sm font-bold text-primary">
         <span class="material-symbols-outlined text-[18px]">verified</span>QCM validé
       </p>
@@ -36,6 +42,47 @@
       </a>
     </div>
   </section>
+
+  {% if feedback %}
+  <section class="rounded border border-secondary/30 bg-secondary-fixed/30 p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined text-[22px] text-secondary">auto_awesome</span>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Feedback personnalisé</p>
+          <p class="mt-1 text-sm text-on-surface">{{ feedback.summary }}</p>
+          <p class="mt-1 text-[11px] text-on-surface-variant">{% if feedback.source == "ia" %}Généré par IA{% else %}Analyse locale{% endif %}</p>
+        </div>
+      </div>
+      <form method="post" action="{% url 'exams:student_quiz_feedback' attempt.pk %}">
+        {% csrf_token %}
+        <button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container" type="submit">
+          <span class="material-symbols-outlined text-[16px]">refresh</span>Actualiser
+        </button>
+      </form>
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Points forts</p>
+        <ul class="mt-1 list-disc space-y-1 pl-4 text-sm text-on-surface">
+          {% for item in feedback.strengths %}<li>{{ item }}</li>{% empty %}<li>Participation enregistrée.</li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">À retravailler</p>
+        <ul class="mt-1 list-disc space-y-1 pl-4 text-sm text-on-surface">
+          {% for item in feedback.focus %}<li>{{ item }}</li>{% empty %}<li>Aucune difficulté majeure.</li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Prochaines étapes</p>
+        <ul class="mt-1 list-disc space-y-1 pl-4 text-sm text-on-surface">
+          {% for item in feedback.next_steps %}<li>{{ item }}</li>{% empty %}<li>Continuez vos révisions.</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
   <section class="flex flex-col gap-3">
     <h2 class="font-headline-sm text-headline-sm text-on-surface">Corrigé détaillé</h2>

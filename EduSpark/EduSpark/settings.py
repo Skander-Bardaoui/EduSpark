@@ -184,6 +184,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # courses:material_file, qui vérifie les droits de l'utilisateur.
 PROTECTED_MEDIA_ROOT = BASE_DIR / 'protected_media'
 
+# Dépôts de projets : limites de sécurité pour les archives ZIP.
+EXAM_PROJECT_MAX_ZIP_BYTES = 50 * 1024 * 1024
+EXAM_PROJECT_MAX_UNCOMPRESSED_BYTES = 150 * 1024 * 1024
+EXAM_PROJECT_MAX_FILES = 250
+EXAM_PROJECT_MAX_TEXT_CHARS = 40000
+
 # Authentification : pages du projet.
 LOGIN_URL = '/accounts/connexion/'
 LOGIN_REDIRECT_URL = '/'

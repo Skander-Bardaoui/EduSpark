@@ -1,0 +1,379 @@
+{% extends base_template %}
+{% block title %}Tableau de bord des examens — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<style>
+.exam-hero{background:radial-gradient(circle at 12% 8%,rgba(75,65,225,.55),transparent 34%),radial-gradient(circle at 92% 82%,rgba(0,163,163,.32),transparent 32%),linear-gradient(135deg,#06164b 0%,#0a2d78 52%,#06164b 100%);}
+.exam-grid{background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(135deg,#000 10%,transparent 78%);}
+.exam-orb{animation:examFloat 8s ease-in-out infinite;}
+.exam-orb-2{animation-delay:-3.5s;}
+.exam-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;}
+.exam-card:hover{transform:translateY(-3px);box-shadow:0 18px 45px -28px rgba(6,22,75,.55);border-color:rgba(0,65,145,.28);}
+.exam-shine{position:relative;overflow:hidden;}
+.exam-shine::after{content:"";position:absolute;inset:-80% auto auto -40%;height:240%;width:55%;transform:rotate(24deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);transition:left .55s ease;left:-70%;}
+.exam-shine:hover::after{left:130%;}
+@keyframes examFloat{0%,100%{transform:translate3d(0,0,0) scale(1);}50%{transform:translate3d(0,-14px,0) scale(1.03);}}
+@media (prefers-reduced-motion:reduce){.exam-orb,.exam-card{animation:none;transition:none;}.exam-card:hover{transform:none;}.exam-shine::after{display:none;}}
+</style>
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-5 px-4 py-6 sm:px-6 xl:px-8">
+
+<section class="exam-hero relative overflow-hidden rounded-[2rem] text-white shadow-[0_28px_90px_-42px_rgba(6,22,75,.95)]">
+<div class="exam-grid pointer-events-none absolute inset-0"></div>
+<div class="exam-orb pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-secondary/30 blur-3xl"></div>
+<div class="exam-orb exam-orb-2 pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-[#00a3a3]/20 blur-3xl"></div>
+<div class="relative grid gap-7 p-5 sm:p-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,.75fr)] xl:items-center">
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 backdrop-blur">
+<span class="material-symbols-outlined text-[14px]">school</span>Espace examens
+</span>
+<span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/65">
+{{ role_label }}
+</span>
+</div>
+<h1 class="mt-4 max-w-2xl font-headline-lg text-[30px] font-extrabold leading-[1.08] tracking-tight sm:text-[40px]">
+{% if is_student %}Votre parcours d’évaluation, sans angle mort.
+{% elif is_prof %}Pilotez vos épreuves, du dépôt à la note.
+{% else %}Une vue claire pour décider, pas seulement constater.
+{% endif %}
+</h1>
+<p class="mt-3 max-w-2xl text-sm leading-6 text-white/70 sm:text-[15px]">
+{% if is_student %}Repérez ce qu’il reste à faire, anticipez les ouvertures et suivez vos résultats publiés en un coup d’œil.
+{% elif is_prof %}Les dépôts et tirages qui attendent votre correction sont regroupés ici, avec l’agenda de vos prochaines épreuves.
+{% else %}Suivez la santé du calendrier, les corrections en attente et la répartition des formats sur votre établissement.
+{% endif %}
+</p>
+<div class="mt-6 flex flex-wrap gap-2.5">
+{% if is_student %}
+<a class="exam-shine inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-primary-fixed" href="{% url 'exams:student_exams' %}"><span class="material-symbols-outlined text-[18px]">history_edu</span>Mes examens</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-bold text-white/85 transition hover:bg-white/10" href="{% url 'exams:student_transcript' %}"><span class="material-symbols-outlined text-[18px]">receipt_long</span>Mon relevé</a>
+{% elif is_prof %}
+<a class="exam-shine inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-primary-fixed" href="{% url 'exams:prof_exam_sessions' %}"><span class="material-symbols-outlined text-[18px]">event_available</span>Sessions d’examen</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-bold text-white/85 transition hover:bg-white/10" href="{% url 'exams:prof_exam_history' %}"><span class="material-symbols-outlined text-[18px]">history</span>Historique</a>
+{% else %}
+<a class="exam-shine inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-primary shadow-lg shadow-black/10 transition hover:bg-primary-fixed" href="{% url 'exams:admin_exam_sessions' %}"><span class="material-symbols-outlined text-[18px]">event_available</span>Gérer les sessions</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-bold text-white/85 transition hover:bg-white/10" href="{% url 'exams:admin_statistics' %}"><span class="material-symbols-outlined text-[18px]">insights</span>Statistiques</a>
+{% endif %}
+</div>
+<div class="mt-7 grid grid-cols-3 gap-2 sm:max-w-md sm:gap-3">
+<div class="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur">
+<p class="font-headline-md text-2xl font-extrabold leading-none">{{ open_count }}</p>
+<p class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-white/55">Ouvertes</p>
+</div>
+<div class="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur">
+<p class="font-headline-md text-2xl font-extrabold leading-none">{{ upcoming_count }}</p>
+<p class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-white/55">À venir</p>
+</div>
+<div class="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur">
+<p class="font-headline-md text-2xl font-extrabold leading-none">{{ past_count }}</p>
+<p class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-white/55">Terminées</p>
+</div>
+</div>
+</div>
+
+{% if next_session %}
+<aside class="relative rounded-[1.6rem] border border-white/15 bg-white/[0.09] p-4 shadow-2xl shadow-black/20 backdrop-blur-md sm:p-5">
+<div class="flex items-center justify-between gap-3">
+<p class="text-[10px] font-bold uppercase tracking-[0.16em] text-white/60">{% if next_session.is_past %}Dernière épreuve{% elif next_session.is_live %}Épreuve en cours{% else %}Prochaine épreuve{% endif %}</p>
+{% if next_session.is_live %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-2.5 py-1 text-[10px] font-bold text-on-secondary-fixed"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-secondary"></span>LIVE</span>
+{% elif next_session.is_past %}
+<span class="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/70">Clôturée</span>
+{% else %}
+<span class="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white/70">Programmée</span>
+{% endif %}
+</div>
+<div class="mt-4 flex items-start gap-3">
+<div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-white">
+<span class="material-symbols-outlined text-[24px]">{% if next_session.is_project %}upload_file{% elif next_session.is_oral %}record_voice_over{% else %}quiz{% endif %}</span>
+</div>
+<div class="min-w-0">
+<p class="truncate font-headline-sm text-lg font-bold text-white">{{ next_session.title }}</p>
+<p class="mt-0.5 truncate text-xs text-white/60">{{ next_session.school_class.name }}{% if next_session.course_subject %} · {{ next_session.course_subject.code }}{% endif %}</p>
+</div>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-2.5">
+<div class="rounded-xl border border-white/10 bg-black/15 p-3">
+<p class="text-[9px] font-bold uppercase tracking-wider text-white/45">Date</p>
+<p class="mt-1 text-sm font-bold text-white">{{ next_session.date_label }}</p>
+</div>
+<div class="rounded-xl border border-white/10 bg-black/15 p-3">
+<p class="text-[9px] font-bold uppercase tracking-wider text-white/45">{% if next_session.is_live %}Clôture{% elif next_session.is_past %}Statut{% else %}Ouverture{% endif %}</p>
+<p class="mt-1 text-sm font-bold text-white">{% if next_session.is_live %}{{ next_session.closes_at|timeuntil }}{% elif next_session.is_past %}Terminée{% else %}{{ next_session.opens_at|timeuntil }}{% endif %}</p>
+</div>
+</div>
+<a class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-primary transition hover:bg-primary-fixed" href="{% if is_admin %}{% url 'exams:admin_exam_sessions' %}{% elif is_prof %}{% if next_session.is_project %}{% url 'exams:prof_project_exam' next_session.pk %}{% elif next_session.is_oral %}{% url 'exams:prof_oral_exam' next_session.pk %}{% elif next_session.quiz %}{% url 'exams:prof_quiz_results' next_session.quiz.pk %}{% else %}{% url 'exams:prof_exam_sessions' %}{% endif %}{% else %}{% if next_session.is_project %}{% url 'exams:student_project_exam' next_session.pk %}{% elif next_session.is_oral %}{% url 'exams:student_oral_exam' next_session.pk %}{% else %}{% url 'exams:student_quiz_start' next_session.pk %}{% endif %}{% endif %}">
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+{% if is_student %}Ouvrir l’épreuve{% elif is_prof %}Gérer l’épreuve{% else %}Administrer{% endif %}
+</a>
+</aside>
+{% else %}
+<aside class="relative rounded-[1.6rem] border border-white/15 bg-white/[0.09] p-6 text-center backdrop-blur-md">
+<span class="material-symbols-outlined text-[42px] text-white/45">event_note</span>
+<p class="mt-3 font-headline-sm text-lg font-bold text-white">Aucune épreuve programmée</p>
+<p class="mt-1 text-xs text-white/60">Le calendrier se remplira dès qu’une session sera créée.</p>
+</aside>
+{% endif %}
+</div>
+</section>
+
+<div class="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
+<section class="rounded-[1.5rem] border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Priorités</p>
+<h2 class="mt-1 font-headline-md text-headline-md font-bold text-on-surface">{% if is_student %}À faire maintenant{% elif is_prof %}À corriger{% else %}À surveiller{% endif %}</h2>
+<p class="mt-1 text-xs text-on-surface-variant">{% if is_student %}Les prochaines actions utiles, classées par échéance.{% elif is_prof %}Les dépôts et tirages qui attendent une note.{% else %}Les signaux qui méritent votre attention cette semaine.{% endif %}</p>
+</div>
+{% if is_student %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:student_exams' %}">Tout voir<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% elif is_prof %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:prof_exam_sessions' %}">Toutes les sessions<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% else %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:admin_exam_sessions' %}">Administrer<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% endif %}
+</div>
+
+{% if is_student %}
+<div class="mt-5 grid gap-2.5">
+{% for item in student_todo %}
+<a class="group flex items-start gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5 transition hover:border-primary/30 hover:bg-surface-container/60" href="{% if item.kind == 'project' %}{% url 'exams:student_project_exam' item.session.pk %}{% elif item.kind == 'oral' %}{% url 'exams:student_oral_exam' item.session.pk %}{% else %}{% url 'exams:student_quiz_start' item.session.pk %}{% endif %}">
+<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl {% if item.kind == 'project' %}bg-secondary-fixed/60 text-secondary{% elif item.kind == 'oral' %}bg-tertiary-fixed/70 text-tertiary-container{% else %}bg-primary-fixed/70 text-primary{% endif %}">
+<span class="material-symbols-outlined text-[20px]">{% if item.kind == 'project' %}upload_file{% elif item.kind == 'oral' %}casino{% else %}quiz{% endif %}</span>
+</span>
+<span class="min-w-0 flex-1">
+<span class="flex flex-wrap items-center gap-2">
+<span class="font-semibold text-on-surface">{{ item.title }}</span>
+{% if item.session.is_live %}<span class="rounded-full bg-secondary-fixed px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-secondary-fixed">Ouvert</span>{% endif %}
+</span>
+<span class="mt-0.5 block truncate text-xs text-on-surface-variant">{{ item.session.title }} · {{ item.session.school_class.name }}</span>
+<span class="mt-1 block text-[11px] font-semibold text-primary">{{ item.meta }}</span>
+</span>
+<span class="material-symbols-outlined mt-2 text-[18px] text-outline transition group-hover:translate-x-0.5 group-hover:text-primary">arrow_forward</span>
+</a>
+{% empty %}
+<div class="mt-5 rounded-2xl border border-dashed border-secondary/30 bg-secondary-fixed/20 p-6 text-center">
+<span class="material-symbols-outlined text-[34px] text-secondary">task_alt</span>
+<p class="mt-2 font-headline-sm text-headline-sm text-on-surface">Tout est à jour</p>
+<p class="mt-1 text-xs text-on-surface-variant">Aucune action en attente. Gardez un œil sur l’agenda pour les prochaines ouvertures.</p>
+</div>
+{% endfor %}
+</div>
+
+{% elif is_prof %}
+<div class="mt-5 grid gap-2.5">
+{% for item in prof_pending_items %}
+{% if item.kind == 'project' %}
+<a class="group flex items-start gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5 transition hover:border-secondary/30 hover:bg-secondary-fixed/10" href="{% url 'exams:prof_project_submission' item.submission.pk %}">
+<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary-fixed/60 text-secondary"><span class="material-symbols-outlined text-[20px]">upload_file</span></span>
+<span class="min-w-0 flex-1">
+<span class="flex flex-wrap items-center gap-2"><span class="font-semibold text-on-surface">{{ item.submission.student.membership.user.get_full_name|default:item.submission.student.membership.user.email }}</span><span class="rounded-full bg-secondary-fixed px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-secondary-fixed">Projet</span></span>
+<span class="mt-0.5 block truncate text-xs text-on-surface-variant">{{ item.submission.session.title }} · déposé le {{ item.submission.submitted_at|date:"d/m/Y H:i" }}</span>
+<span class="mt-1 block text-[11px] font-semibold text-secondary">Corriger le dépôt</span>
+</span>
+<span class="material-symbols-outlined mt-2 text-[18px] text-outline transition group-hover:translate-x-0.5 group-hover:text-secondary">arrow_forward</span>
+</a>
+{% else %}
+<a class="group flex items-start gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3.5 transition hover:border-tertiary/30 hover:bg-tertiary-fixed/10" href="{% url 'exams:prof_oral_exam' item.attempt.session.pk %}">
+<span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-tertiary-fixed/70 text-tertiary-container"><span class="material-symbols-outlined text-[20px]">record_voice_over</span></span>
+<span class="min-w-0 flex-1">
+<span class="flex flex-wrap items-center gap-2"><span class="font-semibold text-on-surface">{{ item.attempt.student.membership.user.get_full_name|default:item.attempt.student.membership.user.email }}</span><span class="rounded-full bg-tertiary-fixed px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-tertiary-container">Oral</span></span>
+<span class="mt-0.5 block truncate text-xs text-on-surface-variant">{{ item.attempt.session.title }} · sujet : {{ item.attempt.topic.title|default:"—" }}</span>
+<span class="mt-1 block text-[11px] font-semibold text-tertiary-container">Saisir la note</span>
+</span>
+<span class="material-symbols-outlined mt-2 text-[18px] text-outline transition group-hover:translate-x-0.5 group-hover:text-tertiary-container">arrow_forward</span>
+</a>
+{% endif %}
+{% empty %}
+<div class="mt-5 rounded-2xl border border-dashed border-secondary/30 bg-secondary-fixed/20 p-6 text-center">
+<span class="material-symbols-outlined text-[34px] text-secondary">task_alt</span>
+<p class="mt-2 font-headline-sm text-headline-sm text-on-surface">Rien à corriger</p>
+<p class="mt-1 text-xs text-on-surface-variant">Tous les dépôts et tirages de votre périmètre ont une note.</p>
+</div>
+{% endfor %}
+</div>
+
+{% else %}
+<div class="mt-5 grid gap-2.5 sm:grid-cols-3">
+<div class="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+<p class="font-headline-md text-3xl font-extrabold text-primary">{{ open_count }}</p>
+<p class="mt-1 text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Fenêtres ouvertes</p>
+<div class="mt-3 h-1.5 overflow-hidden rounded-full bg-primary/10"><div class="h-full rounded-full bg-primary" style="width: {{ open_pct }}%"></div></div>
+</div>
+<div class="rounded-2xl border border-secondary/10 bg-secondary-fixed/20 p-4">
+<p class="font-headline-md text-3xl font-extrabold text-secondary">{{ upcoming_count }}</p>
+<p class="mt-1 text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">À venir</p>
+<div class="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary/10"><div class="h-full rounded-full bg-secondary" style="width: {{ upcoming_pct }}%"></div></div>
+</div>
+<div class="rounded-2xl border border-outline-variant/40 bg-surface-container/60 p-4">
+<p class="font-headline-md text-3xl font-extrabold text-on-surface">{{ past_count }}</p>
+<p class="mt-1 text-[11px] font-semibold uppercase tracking-wide text-on-surface-variant">Terminées</p>
+<div class="mt-3 h-1.5 overflow-hidden rounded-full bg-outline-variant/30"><div class="h-full rounded-full bg-outline" style="width: {{ past_pct }}%"></div></div>
+</div>
+</div>
+<div class="mt-3 grid gap-2.5 sm:grid-cols-2">
+<div class="flex items-center justify-between gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+<div class="flex items-center gap-2.5"><span class="grid h-9 w-9 place-items-center rounded-xl bg-error-container/60 text-error"><span class="material-symbols-outlined text-[18px]">pending_actions</span></span><span class="text-sm font-semibold text-on-surface">Corrections en attente</span></div>
+<span class="font-headline-md text-xl font-extrabold text-error">{{ admin_pending_total }}</span>
+</div>
+<div class="flex items-center justify-between gap-3 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4">
+<div class="flex items-center gap-2.5"><span class="grid h-9 w-9 place-items-center rounded-xl bg-tertiary-fixed/60 text-tertiary-container"><span class="material-symbols-outlined text-[18px]">quiz</span></span><span class="text-sm font-semibold text-on-surface">QCM sans questionnaire</span></div>
+<span class="font-headline-md text-xl font-extrabold text-tertiary-container">{{ admin_qcm_missing }}</span>
+</div>
+</div>
+{% endif %}
+</section>
+
+<section class="rounded-[1.5rem] border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+<p class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Répartition</p>
+<h2 class="mt-1 font-headline-md text-headline-md font-bold text-on-surface">L’ADN des épreuves</h2>
+<p class="mt-1 text-xs text-on-surface-variant">{{ session_count }} session{{ session_count|pluralize }} dans votre périmètre.</p>
+<div class="mt-5 space-y-4">
+<div>
+<div class="flex items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-on-surface"><span class="material-symbols-outlined text-[18px] text-primary">quiz</span>QCM</span><span class="font-data-metric text-sm font-bold text-on-surface">{{ qcm_count }}</span></div>
+<div class="mt-2 h-2 overflow-hidden rounded-full bg-primary/10"><div class="h-full rounded-full bg-primary" style="width: {{ qcm_pct }}%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-on-surface"><span class="material-symbols-outlined text-[18px] text-secondary">upload_file</span>Projets</span><span class="font-data-metric text-sm font-bold text-on-surface">{{ project_count }}</span></div>
+<div class="mt-2 h-2 overflow-hidden rounded-full bg-secondary/10"><div class="h-full rounded-full bg-secondary" style="width: {{ project_pct }}%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-on-surface"><span class="material-symbols-outlined text-[18px] text-tertiary-container">record_voice_over</span>Oraux</span><span class="font-data-metric text-sm font-bold text-on-surface">{{ oral_count }}</span></div>
+<div class="mt-2 h-2 overflow-hidden rounded-full bg-tertiary-fixed/40"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width: {{ oral_pct }}%"></div></div>
+</div>
+</div>
+<div class="mt-6 border-t border-outline-variant/30 pt-5">
+{% if is_student %}
+<div class="flex items-center gap-4">
+<div class="grid h-20 w-20 shrink-0 place-items-center rounded-full" style="background: conic-gradient(#4b41e1 {{ student_progress }}%, rgba(75,65,225,.12) 0);"><div class="grid h-14 w-14 place-items-center rounded-full bg-surface-container-lowest"><span class="font-headline-sm text-lg font-extrabold text-on-surface">{{ student_progress }}%</span></div></div>
+<div><p class="text-sm font-bold text-on-surface">Participation</p><p class="mt-0.5 text-xs text-on-surface-variant">{{ student_done_count }} / {{ session_count }} épreuve{{ session_count|pluralize }} avec une action de votre part.</p></div>
+</div>
+{% elif is_prof %}
+<div class="flex items-center gap-4">
+<div class="grid h-20 w-20 shrink-0 place-items-center rounded-full" style="background: conic-gradient(#4b41e1 {{ prof_progress }}%, rgba(75,65,225,.12) 0);"><div class="grid h-14 w-14 place-items-center rounded-full bg-surface-container-lowest"><span class="font-headline-sm text-lg font-extrabold text-on-surface">{{ prof_progress }}%</span></div></div>
+<div><p class="text-sm font-bold text-on-surface">Corrections traitées</p><p class="mt-0.5 text-xs text-on-surface-variant">{{ prof_done_count }} / {{ prof_total_count }} dépôt{{ prof_total_count|pluralize }} et tirage{{ prof_total_count|pluralize }} notés.</p></div>
+</div>
+{% else %}
+<div class="flex items-start gap-3 rounded-2xl bg-primary/5 p-3.5">
+<span class="material-symbols-outlined text-[20px] text-primary">lightbulb</span>
+<p class="text-xs leading-5 text-on-surface-variant"><span class="font-bold text-on-surface">Le bon réflexe :</span> vérifiez les QCM sans questionnaire et les corrections en attente avant d’ouvrir une nouvelle fenêtre.</p>
+</div>
+{% endif %}
+</div>
+</section>
+</div>
+
+<section class="rounded-[1.5rem] border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Agenda</p>
+<h2 class="mt-1 font-headline-md text-headline-md font-bold text-on-surface">{% if is_student %}Vos prochaines épreuves{% elif is_prof %}Vos prochaines échéances{% else %}Le calendrier à piloter{% endif %}</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Ouvertes et à venir, dans l’ordre chronologique.</p>
+</div>
+{% if is_student %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:student_exams' %}">Tout voir<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% elif is_prof %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:prof_exam_history' %}">Historique<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% else %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:admin_exam_sessions' %}">Tout administrer<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+{% endif %}
+</div>
+<div class="mt-5 grid gap-3.5 lg:grid-cols-2">
+{% for session in agenda_sessions %}
+<article class="exam-card relative overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 sm:p-5">
+<div class="absolute inset-x-0 top-0 h-1 {% if session.is_project %}bg-secondary{% elif session.is_oral %}bg-tertiary-fixed-dim{% else %}bg-primary{% endif %}"></div>
+<div class="flex items-start gap-3.5">
+<div class="grid h-16 w-14 shrink-0 place-items-center rounded-xl {% if session.is_project %}bg-secondary-fixed/50 text-secondary{% elif session.is_oral %}bg-tertiary-fixed/60 text-tertiary-container{% else %}bg-primary-fixed/70 text-primary{% endif %}">
+<span class="text-[9px] font-bold uppercase tracking-wider">{{ session.date|date:"M" }}</span>
+<span class="font-headline-md text-2xl font-extrabold leading-none">{{ session.date|date:"d" }}</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="flex flex-wrap items-center gap-1.5">
+{% include "portal/_badge.html" with label=session.get_exam_type_display tone_class="bg-surface-container text-on-surface-variant" %}
+{% if session.is_live %}
+<span class="inline-flex items-center gap-1 rounded-full bg-secondary-fixed px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-secondary-fixed"><span class="h-1.5 w-1.5 animate-pulse rounded-full bg-secondary"></span>En cours</span>
+{% elif session.is_past %}
+<span class="rounded-full bg-surface-container px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">Terminée</span>
+{% else %}
+<span class="rounded-full bg-surface-container px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-on-surface-variant">Programmée</span>
+{% endif %}
+</div>
+<h3 class="mt-2 font-headline-sm text-[15px] font-bold leading-5 text-on-surface">{{ session.title }}</h3>
+<p class="mt-0.5 truncate text-xs text-on-surface-variant">{{ session.school_class.name }}{% if session.course_subject %} · {{ session.course_subject.code }}{% endif %}</p>
+<div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-on-surface-variant">
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>{{ session.time_label }}</span>
+<span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">timer</span>{% if session.is_live %}Clôture dans {{ session.closes_at|timeuntil }}{% elif session.is_past %}Clôturée{% else %}Ouvre dans {{ session.opens_at|timeuntil }}{% endif %}</span>
+</div>
+</div>
+</div>
+<div class="mt-3.5 flex items-center justify-between gap-3 border-t border-outline-variant/30 pt-3">
+<span class="truncate text-[10px] font-semibold text-on-surface-variant">{{ session.date_label }}</span>
+<a class="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold text-on-primary transition hover:bg-primary-container" href="{% if is_admin %}{% url 'exams:admin_exam_sessions' %}{% elif is_prof %}{% if session.is_project %}{% url 'exams:prof_project_exam' session.pk %}{% elif session.is_oral %}{% url 'exams:prof_oral_exam' session.pk %}{% elif session.quiz %}{% url 'exams:prof_quiz_results' session.quiz.pk %}{% else %}{% url 'exams:prof_exam_sessions' %}{% endif %}{% else %}{% if session.is_project %}{% url 'exams:student_project_exam' session.pk %}{% elif session.is_oral %}{% url 'exams:student_oral_exam' session.pk %}{% else %}{% url 'exams:student_quiz_start' session.pk %}{% endif %}{% endif %}">
+{% if is_student %}Ouvrir{% elif is_admin %}Administrer{% else %}Gérer{% endif %}<span class="material-symbols-outlined text-[13px]">arrow_forward</span>
+</a>
+</div>
+</article>
+{% empty %}
+<div class="col-span-full rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container/40 p-8 text-center">
+<span class="material-symbols-outlined text-[36px] text-outline">event_busy</span>
+<p class="mt-2 text-sm font-semibold text-on-surface">Aucune échéance à venir</p>
+<p class="mt-1 text-xs text-on-surface-variant">Les prochaines sessions apparaîtront ici automatiquement.</p>
+</div>
+{% endfor %}
+</div>
+</section>
+
+{% if is_student %}
+<section class="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(300px,.8fr)]">
+<div class="rounded-[1.5rem] border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Résultats</p><h2 class="mt-1 font-headline-md text-headline-md font-bold text-on-surface">Dernières notes publiées</h2></div>
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:student_transcript' %}">Mon relevé<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+</div>
+<div class="mt-4 divide-y divide-outline-variant/30">
+{% for grade in recent_grades %}
+<div class="flex items-center justify-between gap-3 py-3">
+<div class="min-w-0"><p class="truncate text-sm font-semibold text-on-surface">{{ grade.session.title }}</p><p class="text-[11px] text-on-surface-variant">{{ grade.session.get_exam_type_display }} · {{ grade.session.school_class.name }}</p></div>
+<div class="shrink-0 rounded-xl bg-primary/5 px-3 py-1.5 text-right"><p class="font-data-metric text-sm font-bold text-primary">{{ grade.score_label }}<span class="text-[10px] font-medium text-on-surface-variant">/{{ grade.max_score }}</span></p></div>
+</div>
+{% empty %}
+<p class="py-5 text-sm text-on-surface-variant">Aucune note publiée pour le moment.</p>
+{% endfor %}
+</div>
+</div>
+<div class="relative overflow-hidden rounded-[1.5rem] border border-primary/10 bg-gradient-to-br from-primary/5 via-surface-container-lowest to-secondary-fixed/20 p-5 shadow-sm sm:p-6">
+<div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-secondary/10 blur-2xl"></div>
+<div class="relative">
+<span class="grid h-11 w-11 place-items-center rounded-2xl bg-primary text-on-primary"><span class="material-symbols-outlined text-[22px]">auto_awesome</span></span>
+<h2 class="mt-3 font-headline-sm text-headline-sm font-bold text-on-surface">Votre cap</h2>
+<p class="mt-1 text-sm leading-6 text-on-surface-variant">{% if open_count %}Vous avez {{ open_count }} épreuve{{ open_count|pluralize }} ouverte{{ open_count|pluralize }}. Commencez par celle qui se clôture le plus tôt.{% else %}Aucune épreuve ouverte pour l’instant. Profitez-en pour préparer vos prochains dépôts.{% endif %}</p>
+<div class="mt-4 flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary hover:bg-primary-container" href="{% url 'exams:student_exams' %}">Voir mes examens<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+<a class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 px-3.5 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container" href="{% url 'exams:student_transcript' %}">Mon relevé</a>
+</div>
+</div>
+</div>
+</section>
+{% else %}
+<section class="rounded-[1.5rem] border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm sm:p-6">
+<div class="flex flex-wrap items-end justify-between gap-3">
+<div><p class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Activité</p><h2 class="mt-1 font-headline-md text-headline-md font-bold text-on-surface">Dernières épreuves clôturées</h2></div>
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'exams:prof_exam_history' %}">Historique complet<span class="material-symbols-outlined text-[15px]">arrow_forward</span></a>
+</div>
+<div class="mt-4 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+{% for session in past_sessions|slice:":4" %}
+<div class="rounded-2xl border border-outline-variant/40 bg-surface-container/30 p-3.5">
+<div class="flex items-center justify-between gap-2"><span class="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{{ session.date|date:"d/m/Y" }}</span><span class="material-symbols-outlined text-[16px] text-outline">{% if session.is_project %}upload_file{% elif session.is_oral %}record_voice_over{% else %}quiz{% endif %}</span></div>
+<p class="mt-2 line-clamp-2 text-sm font-semibold text-on-surface">{{ session.title }}</p>
+<p class="mt-0.5 truncate text-[11px] text-on-surface-variant">{{ session.school_class.name }} · {{ session.get_exam_type_display }}</p>
+</div>
+{% empty %}
+<p class="col-span-full py-4 text-sm text-on-surface-variant">Aucune épreuve clôturée pour le moment.</p>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+</div>
+</main>
+{% endblock %}

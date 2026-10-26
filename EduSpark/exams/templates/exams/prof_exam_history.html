@@ -1,0 +1,71 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Historique des examens — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div>
+<p class="mb-1 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Historique des examens</h1>
+<p class="mt-1 max-w-3xl text-sm text-on-surface-variant">{% if is_admin %}Retrouvez toutes les épreuves de l’université : QCM, projets et oraux, avec les participations et les notes déjà saisies.{% else %}Retrouvez toutes les épreuves de vos classes : QCM, projets et oraux, avec le nombre de participations et les notes déjà saisies.{% endif %}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm font-bold text-on-surface-variant shadow-sm hover:border-primary/40 hover:text-primary" href="{% url 'exams:exam_dashboard' %}">
+<span class="material-symbols-outlined text-[18px]">space_dashboard</span>Tableau de bord
+</a>
+{% if is_admin %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary shadow-sm hover:bg-primary-container" href="{% url 'exams:admin_exam_sessions' %}">
+<span class="material-symbols-outlined text-[18px]">event_available</span>Sessions d’examen
+</a>
+{% else %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary shadow-sm hover:bg-primary-container" href="{% url 'exams:prof_exam_sessions' %}">
+<span class="material-symbols-outlined text-[18px]">event_available</span>Sessions d’examen
+</a>
+{% endif %}
+</div>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Épreuves" value=session_count icon="event_available" hint="Tous formats" %}
+{% include "portal/_stat_card.html" with label="QCM" value=qcm_count icon="quiz" hint="Questionnaires en ligne" %}
+{% include "portal/_stat_card.html" with label="Projets" value=project_count icon="upload_file" hint="Dépôts ZIP" %}
+{% include "portal/_stat_card.html" with label="Oraux" value=oral_count icon="record_voice_over" hint="Tirages au sort" %}
+</div>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Toutes les épreuves</h2>
+<p class="text-xs text-on-surface-variant">{{ past_count }} épreuve(s) terminée(s) sur {{ session_count }}.</p>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[980px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr><th class="px-5 py-3 font-bold">Épreuve</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Participations</th><th class="px-5 py-3 font-bold">Notés</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 text-right font-bold">Accès</th></tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for session in sessions %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% endif %}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ session.school_class.name }}</td>
+<td class="px-5 py-3">{% include "portal/_badge.html" with label=session.get_exam_type_display tone_class="bg-surface-container text-on-surface-variant" %}</td>
+<td class="px-5 py-3 text-on-surface-variant"><p>{{ session.date_label }}</p><p class="text-xs">{{ session.time_label }}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ session.result_count }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ session.result_graded }}</td>
+<td class="px-5 py-3 font-semibold text-on-surface">{% if session.result_average_label != "—" %}{{ session.result_average_label }}/20{% else %}—{% endif %}</td>
+<td class="px-5 py-3 text-right">
+<a class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant hover:bg-surface-container" href="{% if session.result_arg %}{% url session.result_link session.result_arg %}{% else %}{% url session.result_link %}{% endif %}">
+<span class="material-symbols-outlined text-[15px]">visibility</span>Consulter
+</a>
+</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="8">Aucune épreuve pour vos classes.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

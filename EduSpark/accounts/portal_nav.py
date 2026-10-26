@@ -34,10 +34,10 @@ ROLE_META = {
         "profile_url_name": "portal:prof_profile",
         "notifications": (
             {
-                "icon": "draw",
-                "title": "14 copies urgentes à corriger",
-                "detail": "Épreuve INF501 dans 3 jours.",
-                "url_name": "exams:prof_corrections",
+                "icon": "quiz",
+                "title": "QCM à préparer",
+                "detail": "Des sessions attendent leur questionnaire.",
+                "url_name": "exams:prof_exam_sessions",
             },
             {
                 "icon": "forum",
@@ -107,6 +107,7 @@ NAV_SECTIONS = {
         {
             "label": "Examens & Notes",
             "items": (
+                {"label": "Tableau de bord examens", "icon": "space_dashboard", "url_name": "exams:exam_dashboard"},
                 {"label": "Mes Examens", "icon": "history_edu", "url_name": "exams:student_exams"},
                 {"label": "Mes Relevés de notes", "icon": "grade", "url_name": "exams:student_transcript"},
             ),
@@ -163,8 +164,9 @@ NAV_SECTIONS = {
         {
             "label": "Examens & Notes",
             "items": (
-                {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:prof_exam_sessions"},
-                {"label": "Copies à corriger", "icon": "draw", "url_name": "exams:prof_corrections"},
+                {"label": "Tableau de bord examens", "icon": "space_dashboard", "url_name": "exams:exam_dashboard"},
+                {"label": "Sessions d’examen", "icon": "event_available", "url_name": "exams:prof_exam_sessions"},
+                {"label": "Historique des examens", "icon": "history", "url_name": "exams:prof_exam_history"},
             ),
         },
         {
@@ -242,8 +244,10 @@ NAV_SECTIONS = {
         {
             "label": "Examens & Notes",
             "items": (
+                {"label": "Tableau de bord examens", "icon": "space_dashboard", "url_name": "exams:exam_dashboard"},
                 {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:admin_exam_sessions"},
-                {"label": "Relevés officiels & Jurys", "icon": "workspace_premium", "url_name": "exams:admin_official_records", "related_url_names": ("exams:admin_grade_record_detail",)},
+                {"label": "Historique des examens", "icon": "history", "url_name": "exams:prof_exam_history"},
+                {"label": "Relevés officiels", "icon": "workspace_premium", "url_name": "exams:admin_official_records", "related_url_names": ("exams:admin_grade_record_detail",)},
                 {"label": "Statistiques & réussite", "icon": "insights", "url_name": "exams:admin_statistics"},
             ),
         },

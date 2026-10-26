@@ -299,7 +299,10 @@ def membership_decide(request, pk):
             with transaction.atomic():
                 if membership.role == Role.STUDENT:
                     profile = membership.ensure_profile()
-                    school_class = assign_student_to_class(profile)
+                    if (profile.level or "").strip():
+                        school_class = assign_student_to_class(profile)
+                    else:
+                        school_class = None
                 else:
                     membership.ensure_profile()
                     school_class = None

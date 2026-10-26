@@ -11,12 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveConstraint(
-            model_name='teachingassignment',
-            name='unique_assignment_per_class_subject_professor',
-        ),
-        migrations.AddConstraint(
-            model_name='teachingassignment',
-            constraint=models.UniqueConstraint(fields=('school_class', 'subject'), name='unique_assignment_per_class_subject', violation_error_message='Cette matière a déjà un professeur dans cette classe.'),
-        ),
+        # L'affectation reste unique par (classe, matière, professeur) :
+        # plusieurs professeurs peuvent enseigner la même matière dans une classe.
     ]

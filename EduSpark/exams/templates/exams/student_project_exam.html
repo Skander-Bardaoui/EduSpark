@@ -1,0 +1,103 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Dépôt de projet — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-background px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+<header class="exam-page-header flex flex-col gap-3">
+<a class="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary hover:underline" href="{% url 'exams:student_exams' %}">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>Retour à mes examens
+</a>
+<div class="flex flex-wrap items-center gap-2">
+<span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">{{ session.get_exam_type_display }}</span>
+<span class="text-xs text-on-surface-variant">{{ session.school_class.name }} · {{ session.date_label }}</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ session.title }}</h1>
+<p class="text-sm text-on-surface-variant">{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% endif %}</p>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-3">
+{% include "portal/_stat_card.html" with label="Ouverture" value=session.opens_at|date:"d/m H:i" icon="lock_clock" hint=session.opens_at|date:"d/m/Y" %}
+{% include "portal/_stat_card.html" with label="Fermeture" value=session.closes_at|date:"d/m H:i" icon="event_busy" hint=session.closes_at|date:"d/m/Y" %}
+{% include "portal/_stat_card.html" with label="Statut" value=session.access_status|capfirst icon="info" hint="Fenêtre de dépôt" %}
+</div>
+
+{% if session.instructions %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Consignes</h2>
+<p class="mt-2 text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>
+</section>
+{% endif %}
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mon dépôt</h2>
+<p class="text-xs text-on-surface-variant">Une archive ZIP contenant votre projet. Vous pouvez remplacer votre dépôt tant que la fenêtre est ouverte.</p>
+</div>
+{% if submission %}
+{% include "portal/_badge.html" with label=submission.get_status_display tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+{% endif %}
+</div>
+
+{% if submission %}
+<div class="mt-4 rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">
+<p><span class="font-semibold text-on-surface">Fichier :</span> {{ submission.original_name|default:submission.file.name }}</p>
+<p><span class="font-semibold text-on-surface">Déposé le :</span> {{ submission.submitted_at|date:"d/m/Y à H:i" }}</p>
+{% if submission.is_graded %}
+<p class="mt-2 text-base font-bold text-primary">Note : {{ submission.score_label }}/20</p>
+{% if submission.feedback %}<p class="mt-1">{{ submission.feedback|linebreaksbr }}</p>{% endif %}
+{% elif submission.ai_score is not None %}
+<p class="mt-2">Proposition IA : {{ submission.score_label }}/20 — en attente de validation du professeur.</p>
+{% endif %}
+</div>
+{% endif %}
+
+{% if can_submit %}
+<form class="mt-5 flex flex-col gap-3" enctype="multipart/form-data" method="post">
+{% csrf_token %}
+{% for error in form.non_field_errors %}<p class="rounded bg-error-container px-3 py-2 text-sm font-semibold text-on-error-container">{{ error }}</p>{% endfor %}
+<label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant" for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+{{ form.file }}
+{% for error in form.file.errors %}<p class="text-sm font-semibold text-error">{{ error }}</p>{% endfor %}
+<p class="text-xs text-on-surface-variant">{{ form.file.help_text }}</p>
+<button class="inline-flex w-fit items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+{% if submission %}Remplacer mon projet{% else %}Déposer mon projet{% endif %}
+</button>
+</form>
+{% else %}
+<p class="mt-4 rounded bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant">
+{% if is_late %}La fenêtre de dépôt est fermée.{% else %}Le dépôt ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.{% endif %}
+</p>
+{% endif %}
+</section>
+
+{% if criteria %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Grille d’évaluation</h2>
+<p class="text-xs text-on-surface-variant">Les critères utilisés par votre enseignant et l’assistant IA.</p>
+<div class="mt-3 divide-y divide-outline-variant/30">
+{% for criterion in criteria %}
+<div class="flex items-start justify-between gap-3 py-3">
+<div>
+<p class="text-sm font-semibold text-on-surface">{{ criterion.label }}</p>
+{% if criterion.description %}<p class="text-xs text-on-surface-variant">{{ criterion.description }}</p>{% endif %}
+</div>
+<span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-bold text-on-surface-variant">Poids {{ criterion.weight }}</span>
+</div>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+
+{% if grade %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Note officielle</h2>
+<p class="mt-2 text-2xl font-bold text-primary">{{ grade.score_label }}/20</p>
+{% if grade.comment %}<p class="mt-1 text-sm text-on-surface-variant">{{ grade.comment|linebreaksbr }}</p>{% endif %}
+</section>
+{% endif %}
+</div>
+</main>
+{% endblock %}

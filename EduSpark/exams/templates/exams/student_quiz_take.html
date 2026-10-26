@@ -1,9 +1,10 @@
 {% extends "portal/base_student.html" %}
 {% block title %}QCM en cours — {{ quiz.session.title }}{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[980px] flex-col gap-5 px-4 py-6 sm:px-6">
-  <header class="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest/95 px-4 py-3 shadow-sm backdrop-blur">
+  <header class="exam-sticky-header sticky top-16 z-20 flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest/95 px-4 py-3 shadow-sm backdrop-blur">
     <div class="min-w-0">
       <p class="text-[11px] font-bold uppercase tracking-wider text-primary">QCM en cours</p>
       <h1 class="truncate font-headline-sm text-headline-sm text-on-surface">{{ quiz.session.title }}</h1>
