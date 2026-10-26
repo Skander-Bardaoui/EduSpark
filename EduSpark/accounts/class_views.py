@@ -6,7 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .forms import SchoolClassForm, StudentGroupForm
-from .models import SchoolClass, StudentGroup, StudentProfile
+from .models import MAX_STUDENTS_PER_CLASS, SchoolClass, StudentGroup, StudentProfile
 from .tenancy import Role, TenantRequiredMixin, TenantScopedMixin
 from .view_mixins import (
     GenericDeleteMixin, GenericFormMixin, SearchFilterMixin, SuccessMessageMixin, distinct_choices,
@@ -66,6 +66,7 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
                 ).distinct().count(),
                 "levels": len(levels),
             },
+            "max_students": MAX_STUDENTS_PER_CLASS,
             "level_breakdown": levels,
             "recent_groups": groups.select_related("school_class").annotate(
                 student_total=Count("students", distinct=True),
@@ -90,15 +91,23 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
         context = super().get_context_data(**kwargs)
         school_class = self.object
         groups = list(school_class.groups.all())
+        ungrouped_filters = {
+            "university": school_class.university,
+            "membership__is_active": True,
+            "level__iexact": school_class.level,
+            "groups__isnull": True,
+        }
+        if school_class.section:
+            ungrouped_filters["section__iexact"] = school_class.section
         context.update({
             "groups": groups,
             "professors": school_class.professors.all(),
-            "students": StudentProfile.objects.filter(
-                university=school_class.university, groups__school_class=school_class,
-            ).select_related("membership__user").distinct(),
+            "students": school_class.student_queryset().select_related("membership__user"),
             "ungrouped": StudentProfile.objects.filter(
-                university=school_class.university,
-            ).exclude(groups__school_class=school_class).select_related("membership__user").distinct(),
+                **ungrouped_filters,
+            ).select_related("membership__user").distinct(),
+            "max_students": MAX_STUDENTS_PER_CLASS,
+            "seats_left": school_class.seats_left,
         })
         return context
 

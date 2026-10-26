@@ -62,7 +62,7 @@
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.academic_year|default:"—" }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.level|default:"—" }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.section|default:"—" }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ school_class.student_count }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ school_class.student_count }} / {{ max_students }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.group_count }}</td>
 <td class="px-5 py-3 text-on-surface-variant">
 {% for professor in school_class.professors.all|slice:":1" %}{{ professor.user.get_full_name|default:professor.user.email }}{% if school_class.professor_count > 1 %} +{{ school_class.professor_count|add:"-1" }}{% endif %}{% empty %}—{% endfor %}

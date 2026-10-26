@@ -22,10 +22,15 @@
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-3">
-{% include "portal/_stat_card.html" with label="Étudiants" value=students|length icon="group" hint="Membres de la classe" %}
+{% include "portal/_stat_card.html" with label="Étudiants" value=students|length icon="group" hint="Effectif maximum : 30 étudiants" %}
 {% include "portal/_stat_card.html" with label="Groupes" value=groups|length icon="workspaces" icon_class="bg-surface-container text-secondary" hint="TD / TP de la classe" %}
-{% include "portal/_stat_card.html" with label="Professeurs" value=professors|length icon="school" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Enseignants rattachés" %}
+{% include "portal/_stat_card.html" with label="Professeurs" value=professors|length icon="school" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Un enseignant par matière" %}
 </div>
+{% if seats_left == 0 %}
+<div class="rounded-xl border border-error/30 bg-error-container px-4 py-3 text-sm font-semibold text-error">Classe complète : {{ students|length }} / {{ max_students }} étudiants. Aucune nouvelle affectation automatique ne sera possible.</div>
+{% else %}
+<div class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-4 py-3 text-sm text-on-surface-variant">Places restantes : <span class="font-bold text-on-surface">{{ seats_left }}</span> sur {{ max_students }}.</div>
+{% endif %}
 <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
 <div class="flex flex-col gap-5">
 <section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
