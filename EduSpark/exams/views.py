@@ -1,11 +1,12 @@
 import csv
+import os
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from hashlib import sha256
 
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -24,6 +25,12 @@ from .models import (
 from .pdf import attestation_pdf, convocation_pdf, transcript_pdf
 
 EXAM_SEMESTER = "Semestre 1 · 2025-2026"
+COPY_EXTENSIONS = (".pdf", ".zip")
+ABSENT_COMMENT = "Absent — aucune copie soumise."
+
+
+def _is_absent_grade(grade):
+    return bool(grade and (grade.comment or "").strip().startswith("Absent"))
 
 
 def _tenant_classes(request):
@@ -33,7 +40,7 @@ def _tenant_classes(request):
 def _tenant_sessions(request):
     return (
         ExamSession.objects.filter(university=request.university)
-        .select_related("school_class", "created_by", "subject")
+        .select_related("school_class", "created_by", "course_subject", "subject")
         .order_by("date", "start_time", "school_class__name")
     )
 
@@ -55,6 +62,13 @@ def _count_room_conflicts(sessions):
     conflicts = 0
     for index, first in enumerate(sessions):
         for second in sessions[index + 1:]:
+            if (
+                first.plan_group
+                and first.plan_group == second.plan_group
+            ):
+                # Une même planification multi-classes partage volontairement
+                # la salle : ce n'est pas un conflit.
+                continue
             if (
                 first.date == second.date
                 and first.room
@@ -88,11 +102,61 @@ def _next_or(request, fallback):
     return redirect(fallback)
 
 
+def _notify_planning(session, request):
+    """Envoie la planification aux enseignants et étudiants de la classe."""
+    sender = request.user.get_full_name() or request.user.email
+    common = (
+        "Épreuve : %s (%s)\n"
+        "Classe : %s\n"
+        "Date : %s, de %s à %s\n"
+        "Salle : %s\n\n"
+        % (
+            session.title, session.get_exam_type_display(),
+            session.school_class.name, session.date_label,
+            session.start_time.strftime("%H:%M"),
+            session.end_time.strftime("%H:%M"),
+            session.room or "à définir",
+        )
+    )
+    for professor in session.school_class.professors.select_related("membership__user"):
+        user = professor.membership.user
+        send_mail(
+            "Nouvelle épreuve à préparer — %s" % session.title,
+            "Bonjour %s,\n\n"
+            "Une session d'examen vous a été assignée par l'administration :\n\n"
+            "%s"
+            "Déposez puis publiez le sujet d'épreuve depuis votre portail "
+            "« Sessions d'examen ». Le sujet ne sera accessible aux étudiants "
+            "que pendant la durée de l'épreuve.\n\n"
+            "Cordialement,\n%s" % (
+                user.get_full_name() or user.email, common, sender,
+            ),
+            None, [user.email], fail_silently=True,
+        )
+    for student in _session_students(session).select_related("membership__user"):
+        user = student.membership.user
+        send_mail(
+            "Planification d'examen — %s" % session.title,
+            "Bonjour %s,\n\n"
+            "L'administration a planifié une épreuve pour votre classe :\n\n"
+            "%s"
+            "Retrouvez-la dans votre espace « Mes Examens ». Le sujet et le "
+            "dépôt de copie (PDF ou ZIP) seront accessibles uniquement pendant "
+            "la durée de l'épreuve.\n\n"
+            "Cordialement,\n%s" % (
+                user.get_full_name() or user.email, common, sender,
+            ),
+            None, [user.email], fail_silently=True,
+        )
+
+
 def _sessions_context(request, *, create_form=None, edit_form=None,
                       edit_session=None, open_modal=None):
     sessions = list(_tenant_sessions(request))
     if create_form is None:
-        create_form = ExamSessionForm(university=request.university, prefix="create")
+        create_form = ExamSessionForm(
+            university=request.university, prefix="create", multi=True,
+        )
     conflicts = _count_room_conflicts(sessions)
     return {
         "semester": EXAM_SEMESTER,
@@ -142,12 +206,13 @@ def student_exams(request):
     }
     session_rows = []
     for session in upcoming:
-        copy = copies.get(session.pk) if session.is_convoked else None
+        copy = copies.get(session.pk)
         pages = list(copy.pages.all()) if copy else []
         convocation_hash = None
         if session.is_convoked:
             buffer = convocation_pdf(session, student)
             convocation_hash = sha256(buffer.getvalue()).hexdigest()
+        subject = getattr(session, "subject", None)
         session_rows.append({
             "session": session,
             "copy": copy,
@@ -159,7 +224,9 @@ def student_exams(request):
             "copy_hash": _combined_hash(pages),
             "convocation_hash": convocation_hash,
             "duration_label": _duration_label(session.start_time, session.end_time),
-            "subject": getattr(session, "subject", None),
+            "subject": subject,
+            "subject_available": bool(subject and subject.is_available),
+            "subject_status": subject.availability_status if subject else "none",
             "deposit_open": session.deposit_open,
             "deposit_status": session.deposit_status,
         })
@@ -254,6 +321,38 @@ def student_convocation_pdf(request, pk):
 
 
 @role_required(Profil.ROLE_ETUDIANT)
+def student_subject_download(request, pk):
+    """Téléchargement du sujet, strictement limité à la durée de l'épreuve."""
+    session = _student_session(request, pk)
+    subject = getattr(session, "subject", None)
+    if subject is None or not subject.is_published:
+        messages.error(request, "Le sujet de cette épreuve n'est pas encore publié.")
+        return redirect("exams:student_exams")
+    status = subject.availability_status
+    if status == "before":
+        messages.error(
+            request,
+            "Le sujet sera accessible au début de l'épreuve, le %s."
+            % session.subject_window_label,
+        )
+        return redirect("exams:student_exams")
+    if status == "after":
+        messages.error(
+            request,
+            "Le sujet n'est plus accessible : l'épreuve s'est terminée le %s."
+            % session.subject_window_label,
+        )
+        return redirect("exams:student_exams")
+    filename = os.path.basename(subject.file.name)
+    return FileResponse(
+        subject.file.open("rb"),
+        as_attachment=True,
+        filename=filename or "sujet-epreuve.pdf",
+        content_type="application/pdf",
+    )
+
+
+@role_required(Profil.ROLE_ETUDIANT)
 def student_transcript_pdf(request):
     student = _student_profile(request)
     grades = (
@@ -313,14 +412,42 @@ def student_copy_upload(request, pk):
             "plus être modifiée.",
         )
         return redirect("exams:student_exams")
-    image = _validated_image(request.FILES.get("file"))
+    upload = request.FILES.get("file")
+    if upload is None:
+        messages.error(request, "Aucun fichier reçu.")
+        return redirect("exams:student_exams")
+
+    lower_name = upload.name.lower()
+    if lower_name.endswith(COPY_EXTENSIONS):
+        copy, _created = ExamCopy.objects.get_or_create(
+            session=session, student=student,
+            defaults={"university": request.university},
+        )
+        if copy.file:
+            copy.file.delete(save=False)
+        copy.file = upload
+        copy.original_name = upload.name
+        copy.file_size = upload.size
+        copy.save()
+        messages.success(
+            request,
+            "Copie « %s » déposée. Soumettez-la pour la verrouiller et la "
+            "transmettre au correcteur." % upload.name,
+        )
+        return redirect("exams:student_exams")
+
+    # Rétro-compatibilité : les anciennes copies scannées image restent acceptées.
+    image = _validated_image(upload)
     if image is None:
-        messages.error(request, "Format non reconnu : envoyez une image JPEG ou PNG.")
+        messages.error(
+            request,
+            "Format non reconnu : déposez un fichier PDF ou une archive ZIP.",
+        )
         return redirect("exams:student_exams")
     copy, _created = ExamCopy.objects.get_or_create(
         session=session, student=student, defaults={"university": request.university},
     )
-    page = ExamCopyPage.objects.create(copy=copy, file=request.FILES["file"])
+    ExamCopyPage.objects.create(copy=copy, file=upload)
     messages.success(request, "Page ajoutée à votre copie (%s page(s))." % copy.page_count)
     return redirect("exams:student_exams")
 
@@ -336,8 +463,11 @@ def student_copy_submit(request, pk):
     copy = ExamCopy.objects.filter(
         session=session, student=_student_profile(request),
     ).prefetch_related("pages").first()
-    if copy is None or copy.page_count == 0:
-        messages.error(request, "Ajoutez au moins une page scannée avant de soumettre.")
+    if copy is None or not copy.has_content:
+        messages.error(
+            request,
+            "Déposez d'abord votre copie (PDF ou archive ZIP) avant de soumettre.",
+        )
     elif copy.is_submitted:
         messages.info(request, "Cette copie a déjà été soumise.")
     else:
@@ -420,24 +550,21 @@ def prof_corrections(request):
     classes = _prof_classes(request)
     sessions = list(
         ExamSession.objects.filter(school_class__in=classes)
-        .select_related("school_class")
+        .select_related("school_class", "subject")
         .order_by("-date", "-start_time")
     )
-    base = {
-        "sessions": sessions,
-        "session": None,
-        "students": [],
-        "selected_student": None,
-        "grade": None,
-        "criteria": [],
-        "comment": "",
-        "counts": {"total": 0, "not_graded": 0, "draft": 0, "validated": 0, "published": 0},
-        "progress": 0,
-    }
-    if not sessions:
-        return render(request, "exams/prof_corrections.html", base)
+    requested_session = request.POST.get("session") or request.GET.get("session")
+    if not requested_session:
+        return render(
+            request, "exams/prof_corrections.html",
+            _class_cards_context(request, classes, sessions),
+        )
 
-    session = _pick_by_pk(sessions, request.POST.get("session") or request.GET.get("session")) or sessions[0]
+    session = _pick_by_pk(sessions, requested_session)
+    if session is None:
+        messages.error(request, "Cette session d'examen ne vous est pas accessible.")
+        return redirect("exams:prof_corrections")
+
     students = list(_session_students(session))
     selected = (
         _pick_by_pk(students, request.POST.get("student") or request.GET.get("student"))
@@ -448,11 +575,46 @@ def prof_corrections(request):
         if selected is not None else None
     )
 
+    action = request.POST.get("action")
     if (
         request.method == "POST"
         and selected is not None
-        and request.POST.get("action") in ("save", "validate")
+        and action in ("save", "validate", "publish", "absent")
     ):
+        if action == "absent":
+            submitted_copy = ExamCopy.objects.filter(
+                session=session, student=selected, submitted_at__isnull=False,
+            ).exists()
+            if submitted_copy:
+                messages.error(
+                    request,
+                    "%s a soumis une copie : impossible de le marquer absent."
+                    % _display_name(selected),
+                )
+                return redirect(
+                    "%s?session=%s&student=%s"
+                    % (reverse("exams:prof_corrections"), session.pk, selected.pk)
+                )
+            if grade is None:
+                grade = StudentGrade(
+                    session=session, student=selected, university=request.university,
+                )
+            grade.score = Decimal("0")
+            grade.criteria = []
+            grade.comment = ABSENT_COMMENT
+            grade.status = StudentGrade.STATUS_PUBLISHED
+            grade.graded_by = request.user
+            grade.save()
+            messages.success(
+                request,
+                "%s marqué absent : note 0/20 publiée." % _display_name(selected),
+            )
+            next_student = _next_ungraded_student(session, students, selected)
+            target = next_student or selected
+            return redirect(
+                "%s?session=%s&student=%s"
+                % (reverse("exams:prof_corrections"), session.pk, target.pk)
+            )
         criteria = _parse_criteria(request.POST)
         comment = request.POST.get("comment", "").strip()
         if grade is None:
@@ -462,7 +624,7 @@ def prof_corrections(request):
         grade.criteria = criteria
         grade.comment = comment
         grade.graded_by = request.user
-        if request.POST.get("action") == "validate":
+        if action in ("validate", "publish"):
             total = grade.criteria_total
             if total <= 0:
                 messages.error(request, "Saisissez les points avant de valider la note.")
@@ -470,15 +632,27 @@ def prof_corrections(request):
                     request, sessions, session, students, selected, grade, comment,
                 ))
             grade.score = min(total, grade.max_total)
-            if grade.status != StudentGrade.STATUS_PUBLISHED:
-                grade.status = StudentGrade.STATUS_VALIDATED
-            grade.save()
-            messages.success(
-                request,
-                "Note de %s validée (%s/20)." % (
-                    _display_name(selected), _format_decimal(grade.score),
-                ),
+            grade.status = (
+                StudentGrade.STATUS_PUBLISHED
+                if action == "publish"
+                else StudentGrade.STATUS_VALIDATED
             )
+            grade.save()
+            if action == "publish":
+                messages.success(
+                    request,
+                    "Note de %s validée et publiée (%s/20)." % (
+                        _display_name(selected), _format_decimal(grade.score),
+                    ),
+                )
+            else:
+                messages.success(
+                    request,
+                    "Note de %s validée (%s/20). Publiez-la pour la rendre "
+                    "visible à l'étudiant." % (
+                        _display_name(selected), _format_decimal(grade.score),
+                    ),
+                )
             next_student = _next_ungraded_student(session, students, selected)
             target = next_student or selected
             return redirect(
@@ -521,25 +695,59 @@ def prof_corrections_publish(request):
 
 
 @role_required(Profil.ROLE_PROF)
+@require_POST
+def prof_correction_publish_one(request):
+    """Publie la note déjà validée d'un étudiant (action individuelle)."""
+    session = get_object_or_404(
+        ExamSession, pk=request.POST.get("session"),
+        university=request.university, school_class__in=_prof_classes(request),
+    )
+    student = get_object_or_404(
+        StudentProfile, pk=request.POST.get("student"),
+        university=request.university,
+        groups__school_class=session.school_class,
+    )
+    grade = StudentGrade.objects.filter(session=session, student=student).first()
+    if grade is None or grade.score is None or grade.status == StudentGrade.STATUS_DRAFT:
+        messages.error(
+            request, "Aucune note validée à publier pour %s." % _display_name(student),
+        )
+    elif grade.status == StudentGrade.STATUS_PUBLISHED:
+        messages.info(
+            request, "La note de %s est déjà publiée." % _display_name(student),
+        )
+    else:
+        grade.status = StudentGrade.STATUS_PUBLISHED
+        grade.save(update_fields=["status", "updated_at"])
+        messages.success(
+            request,
+            "Note de %s publiée (%s/20)." % (
+                _display_name(student), _format_decimal(grade.score),
+            ),
+        )
+    target = request.POST.get("next")
+    if target and url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+    ):
+        return redirect(target)
+    return redirect("%s?session=%s&student=%s" % (
+        reverse("exams:prof_corrections"), session.pk, student.pk,
+    ))
+
+
+@role_required(Profil.ROLE_PROF)
 @require_GET
 def prof_exam_sessions(request):
     classes = _prof_classes(request)
     sessions = list(
         ExamSession.objects.filter(school_class__in=classes)
-        .select_related("school_class", "subject")
+        .select_related("school_class", "course_subject", "subject")
         .order_by("date", "start_time")
     )
     today = timezone.localdate()
     upcoming = [s for s in sessions if s.date >= today]
     convoked = [s for s in sessions if s.is_convoked]
     conflicts = _count_room_conflicts(sessions)
-    records = {
-        school_class.pk: GradeRecord.objects.get_or_create(
-            school_class=school_class, semester=semester_for(school_class),
-            defaults={"university": request.university},
-        )[0]
-        for school_class in classes
-    }
 
     return render(request, "exams/prof_exam_sessions.html", {
         "semester": _current_semester_label(classes),
@@ -566,7 +774,6 @@ def prof_exam_sessions(request):
             "bg-surface-container text-primary" if conflicts == 0
             else "bg-error-container text-error"
         ),
-        "jury_count": len(records),
     })
 
 
@@ -810,42 +1017,28 @@ def admin_exam_sessions(request):
 @role_required(Profil.ROLE_ADMIN)
 @require_POST
 def admin_exam_session_create(request):
-    form = ExamSessionForm(request.POST, university=request.university, prefix="create")
+    form = ExamSessionForm(
+        request.POST, university=request.university, prefix="create", multi=True,
+    )
     if form.is_valid():
-        session = form.save(commit=False)
-        session.university = request.university
-        session.created_by = request.user
-        session.save()
-        for professor in session.school_class.professors.select_related("membership__user"):
-            send_mail(
-                "Nouvelle épreuve à préparer — %s" % session.title,
-                "Bonjour %s,\n\n"
-                "Une session d'examen vous a été assignée par l'administration :\n\n"
-                "Épreuve : %s (%s)\n"
-                "Classe : %s\n"
-                "Date : %s, de %s à %s\n"
-                "Salle : %s\n\n"
-                "Déposez puis publiez le sujet d'épreuve depuis votre portail "
-                "« Sessions d'examen ».\n\n"
-                "Cordialement,\n%s"
-                % (
-                    professor.membership.user.get_full_name()
-                    or professor.membership.user.email,
-                    session.title, session.get_exam_type_display(),
-                    session.school_class.name, session.date_label,
-                    session.start_time.strftime("%H:%M"),
-                    session.end_time.strftime("%H:%M"), session.room,
-                    request.user.get_full_name() or request.user.email,
-                ),
-                None,
-                [professor.membership.user.email],
-                fail_silently=True,
-            )
-        messages.success(
-            request,
-            "Session « %s » planifiée pour %s — enseignants de la classe notifiés."
-            % (session.title, session.school_class.name),
+        sessions = form.save_sessions(
+            university=request.university, user=request.user,
         )
+        for session in sessions:
+            _notify_planning(session, request)
+        if len(sessions) == 1:
+            session = sessions[0]
+            messages.success(
+                request,
+                "Épreuve « %s » planifiée pour %s — enseignants et étudiants notifiés."
+                % (session.title, session.school_class.name),
+            )
+        else:
+            messages.success(
+                request,
+                "Épreuve « %s » planifiée pour %s classes — enseignants et "
+                "étudiants notifiés." % (sessions[0].title, len(sessions)),
+            )
         return redirect("exams:admin_exam_sessions")
     return render(request, "exams/admin_exam_sessions.html",
                   _sessions_context(request, create_form=form, open_modal="create"))
@@ -874,15 +1067,10 @@ def admin_exam_session_toggle_convocation(request, pk):
     if session.is_convoked:
         session.status = ExamSession.STATUS_PLANNED
         session.convoked_at = None
-        copies = session.copies.prefetch_related("pages")
-        copy_count = copies.count()
-        for copy in copies:
-            for page in copy.pages.all():
-                page.file.delete(save=False)
-        copies.delete()
+        copy_count = session.copies.count()
         message = "Convocation annulée pour « %s »." % session.title
         if copy_count:
-            message += " %s copie(s) déposée(s) supprimée(s)." % copy_count
+            message += " %s copie(s) déposée(s) conservée(s)." % copy_count
     else:
         session.status = ExamSession.STATUS_CONVOKED
         session.convoked_at = timezone.now()
@@ -953,6 +1141,10 @@ def admin_exam_sessions_export(request):
             session.start_time.strftime("%H:%M"),
             session.end_time.strftime("%H:%M"),
             session.school_class.name,
+            (
+                "%s · %s" % (session.course_subject.code, session.course_subject.name)
+                if session.course_subject else ""
+            ),
             session.title,
             session.get_exam_type_display(),
             session.room,
@@ -962,7 +1154,7 @@ def admin_exam_sessions_export(request):
     )
     return _csv_response(
         "sessions-examen.csv",
-        ("Date", "Début", "Fin", "Classe", "Épreuve", "Type", "Salle", "Statut"),
+        ("Date", "Début", "Fin", "Classe", "Matière", "Épreuve", "Type", "Salle", "Statut"),
         rows,
     )
 
@@ -1020,7 +1212,7 @@ def admin_official_records(request):
         "semester": EXAM_SEMESTER,
         "records": records,
         "pending_records": pending_records,
-        "jury_count": len(records),
+        "record_count": len(records),
         "published_count": sum(1 for record in records if record.transcript_published),
         "pending_count": len(pending_records),
     })
@@ -1051,6 +1243,15 @@ def admin_grade_record_detail(request, pk):
     record = get_object_or_404(
         GradeRecord.objects.select_related("school_class"), pk=pk, university=request.university,
     )
+    if request.method == "POST" and request.POST.get("action") == "recalculate":
+        rows, _sessions = _deliberation_rows(record)
+        _recalculate_grade_record(record, rows)
+        messages.success(
+            request,
+            "PV de %s recalculé depuis les notes publiées." % record.school_class.name,
+        )
+        return redirect("exams:admin_grade_record_detail", pk=record.pk)
+
     if request.method == "POST":
         form = GradeRecordForm(request.POST, instance=record)
         if form.is_valid():
@@ -1063,11 +1264,20 @@ def admin_grade_record_detail(request, pk):
     else:
         form = GradeRecordForm(instance=record)
 
+    deliberation_rows, sessions = _deliberation_rows(record)
     return render(request, "exams/admin_grade_record_detail.html", {
         "record": record,
         "form": form,
         "semester": record.semester,
-        "sessions": record.school_class.exam_sessions.order_by("date", "start_time"),
+        "sessions": sessions,
+        "deliberation_rows": deliberation_rows,
+        "deliberation_count": len(deliberation_rows),
+        "deliberation_admitted": sum(
+            1 for row in deliberation_rows if row["decision"] == "Admis"
+        ),
+        "deliberation_pending": sum(
+            1 for row in deliberation_rows if row["decision"] == "En attente"
+        ),
     })
 
 
@@ -1179,6 +1389,167 @@ def _session_students(session):
     )
 
 
+def _class_students(school_class):
+    return (
+        StudentProfile.objects.filter(groups__school_class=school_class)
+        .distinct()
+        .select_related("membership__user")
+        .order_by("membership__user__last_name", "membership__user__first_name")
+    )
+
+
+def _deliberation_rows(record):
+    students = list(_class_students(record.school_class))
+    sessions = list(
+        record.school_class.exam_sessions.select_related("subject")
+        .order_by("date", "start_time")
+    )
+    grades = (
+        StudentGrade.objects.filter(session__in=sessions, student__in=students)
+        .select_related("session")
+    )
+    by_key = {
+        (grade.student_id, grade.session_id): grade for grade in grades
+    }
+    rows = []
+    for student in students:
+        subjects = []
+        published_grades = []
+        for session in sessions:
+            grade = by_key.get((student.pk, session.pk))
+            subjects.append({
+                "session": session,
+                "grade": grade,
+                "is_absent": _is_absent_grade(grade),
+            })
+            if (
+                grade
+                and grade.status == StudentGrade.STATUS_PUBLISHED
+                and grade.score is not None
+            ):
+                published_grades.append(grade)
+        average, validated, graded_total = _weighted_summary(published_grades)
+        if average is None:
+            decision = "En attente"
+        elif average >= 10:
+            decision = "Admis"
+        else:
+            decision = "Ajourné"
+        rows.append({
+            "student": student,
+            "subjects": subjects,
+            "has_grades": any(item["grade"] is not None for item in subjects),
+            "average": average,
+            "average_label": _format_decimal(average),
+            "validated": validated,
+            "graded_total": graded_total,
+            "decision": decision,
+            "is_absent": any(item["is_absent"] for item in subjects),
+        })
+    return rows, sessions
+
+
+def _recalculate_grade_record(record, rows):
+    averages = [row["average"] for row in rows if row["average"] is not None]
+    record.students_count = len(rows)
+    record.admitted_count = sum(
+        1 for row in rows
+        if row["average"] is not None and row["average"] >= 10
+    )
+    record.average = (
+        sum(averages, Decimal("0")) / len(averages)
+        if averages else Decimal("0")
+    )
+    record.save(update_fields=[
+        "students_count", "admitted_count", "average", "updated_at",
+    ])
+
+
+def _class_cards_context(request, classes, sessions):
+    """Vue « cartes de classe » du correcteur.
+
+    Chaque classe regroupe ses épreuves, puis pour chaque épreuve la liste
+    des étudiants avec l'état de leur copie et de leur note.
+    """
+    sessions_by_class = {}
+    for session in sessions:
+        sessions_by_class.setdefault(session.school_class_id, []).append(session)
+
+    cards = []
+    for school_class in classes:
+        class_sessions = sessions_by_class.get(school_class.pk, [])
+        students = list(_class_students(school_class))
+        session_rows = []
+        for session in class_sessions:
+            copies = {
+                copy.student_id: copy
+                for copy in ExamCopy.objects.filter(session=session).prefetch_related("pages")
+            }
+            grades = {
+                grade.student_id: grade
+                for grade in StudentGrade.objects.filter(session=session)
+            }
+            rows = []
+            for student in students:
+                copy = copies.get(student.pk)
+                grade = grades.get(student.pk)
+                copy_name = ""
+                if copy and copy.has_file:
+                    copy_name = copy.original_name or os.path.basename(copy.file.name)
+                grade_is_absent = _is_absent_grade(grade)
+                rows.append({
+                    "student": student,
+                    "copy": copy,
+                    "grade": grade,
+                    "has_copy": bool(copy and copy.has_content),
+                    "copy_submitted": bool(copy and copy.is_submitted),
+                    "copy_name": copy_name,
+                    "grade_status": grade.get_status_display() if grade else "Non corrigée",
+                    "grade_is_absent": grade_is_absent,
+                    "can_mark_absent": not bool(copy and copy.is_submitted) and not grade_is_absent,
+                    "can_publish": bool(
+                        grade and grade.score is not None
+                        and grade.status == StudentGrade.STATUS_VALIDATED
+                    ),
+                    "correction_url": "%s?session=%s&student=%s" % (
+                        reverse("exams:prof_corrections"), session.pk, student.pk,
+                    ),
+                })
+            session_rows.append({
+                "session": session,
+                "students": rows,
+                "student_count": len(rows),
+                "copy_count": sum(1 for row in rows if row["has_copy"]),
+                "submitted_count": sum(1 for row in rows if row["copy_submitted"]),
+                "graded_count": sum(
+                    1 for row in rows if row["grade"] and row["grade"].score is not None
+                ),
+                "published_count": sum(
+                    1 for row in rows if row["grade"] and row["grade"].is_published
+                ),
+            })
+        cards.append({
+            "school_class": school_class,
+            "sessions": session_rows,
+            "student_count": len(students),
+            "session_count": len(session_rows),
+            "copy_count": sum(row["copy_count"] for row in session_rows),
+            "graded_count": sum(row["graded_count"] for row in session_rows),
+            "published_count": sum(row["published_count"] for row in session_rows),
+        })
+
+    return {
+        "sessions": sessions,
+        "session": None,
+        "class_cards": cards,
+        "class_count": len(cards),
+        "session_count": len(sessions),
+        "copy_count": sum(card["copy_count"] for card in cards),
+        "graded_count": sum(card["graded_count"] for card in cards),
+        "published_count": sum(card["published_count"] for card in cards),
+    }
+
+
 def _student_session(request, pk):
     return get_object_or_404(
         ExamSession, pk=pk, university=request.university,
@@ -1196,12 +1567,7 @@ def _student_copy_page(request, pk):
 
 def _deposit_locked_message(session):
     """Message d'erreur si le dépôt est fermé, sinon None."""
-    status = session.deposit_status
-    if status == "convocation":
-        return (
-            "Le dépôt de copie n'est pas encore ouvert : la convocation n'a pas "
-            "été envoyée par l'administration."
-        )
+    status = session.access_status
     if status == "before":
         return "Le dépôt de copie s'ouvre au début de l'épreuve, le %s à %s." % (
             session.date_label, session.start_time.strftime("%H:%M"),
@@ -1472,6 +1838,12 @@ def _corrections_context(request, sessions, session, students, selected,
         "first_validated": first_validated,
         "copy": copy,
         "copy_pages": list(copy.pages.all()) if copy else [],
+        "copy_has_file": bool(copy and copy.has_file),
+        "copy_is_pdf": bool(copy and copy.is_pdf),
+        "copy_is_zip": bool(copy and copy.is_zip),
+        "grade_is_absent": _is_absent_grade(grade),
+        "can_mark_absent": not bool(copy and copy.is_submitted) and not _is_absent_grade(grade),
+        "subject": getattr(session, "subject", None),
         "prev_student": prev_student,
         "next_student": next_student,
     }

@@ -36,7 +36,7 @@ ROLE_META = {
             {
                 "icon": "draw",
                 "title": "14 copies urgentes à corriger",
-                "detail": "Jury INF501 dans 3 jours.",
+                "detail": "Épreuve INF501 dans 3 jours.",
                 "url_name": "exams:prof_corrections",
             },
             {
@@ -92,8 +92,8 @@ NAV_SECTIONS = {
         {
             "label": "Cours",
             "items": (
-                {"label": "Catalogue des cours", "icon": "menu_book", "url_name": "courses:student_catalogue"},
-                {"label": "Supports de cours", "icon": "folder_shared", "url_name": "courses:student_course_materials"},
+                {"label": "Catalogue des cours", "icon": "menu_book", "url_name": "courses:student_catalogue", "related_url_names": ("courses:student_course_detail",)},
+                {"label": "Supports de cours", "icon": "folder_shared", "url_name": "courses:student_course_materials", "related_url_names": ("courses:material_view",)},
                 {"label": "Mon Emploi du temps", "icon": "calendar_month", "url_name": "courses:student_timetable"},
             ),
         },
@@ -141,10 +141,15 @@ NAV_SECTIONS = {
         {
             "label": "Cours",
             "items": (
-                {"label": "Mes Cours", "icon": "menu_book", "url_name": "courses:prof_course"},
-                {"label": "Supports de cours", "icon": "folder_shared", "url_name": "courses:prof_course_materials"},
+                {"label": "Mes Cours", "icon": "menu_book", "url_name": "courses:prof_course", "related_url_names": (
+                    "courses:prof_course_create", "courses:prof_course_detail", "courses:prof_course_update",
+                    "courses:prof_course_delete", "courses:prof_chapter_create", "courses:prof_chapter_update",
+                    "courses:prof_chapter_delete")},
+                {"label": "Supports de cours", "icon": "folder_shared", "url_name": "courses:prof_course_materials", "related_url_names": (
+                    "courses:prof_material_create", "courses:prof_material_update", "courses:prof_material_delete",
+                    "courses:material_view")},
                 {"label": "Emploi du temps", "icon": "calendar_month", "url_name": "courses:prof_timetable"},
-                {"label": "Gestion des matières", "icon": "auto_stories", "url_name": "courses:prof_subjects"},
+                {"label": "Mes matières", "icon": "auto_stories", "url_name": "courses:prof_subjects"},
             ),
         },
         {
@@ -160,7 +165,6 @@ NAV_SECTIONS = {
             "items": (
                 {"label": "Sessions d'examen", "icon": "event_available", "url_name": "exams:prof_exam_sessions"},
                 {"label": "Copies à corriger", "icon": "draw", "url_name": "exams:prof_corrections"},
-                {"label": "Relevés & Jurys", "icon": "fact_check", "url_name": "exams:prof_grade_sheets"},
             ),
         },
         {
@@ -215,9 +219,17 @@ NAV_SECTIONS = {
         {
             "label": "Cours & Catalogue",
             "items": (
-                {"label": "Départements & Filières", "icon": "account_tree", "url_name": "courses:admin_program_offer"},
-                {"label": "Tous les cours", "icon": "menu_book", "url_name": "courses:admin_courses"},
-                {"label": "Emploi du temps global", "icon": "calendar_today", "url_name": "courses:admin_timetable"},
+                {"label": "Départements & Filières", "icon": "account_tree", "url_name": "courses:admin_program_offer", "related_url_names": (
+                    "courses:admin_department_create", "courses:admin_department_update", "courses:admin_department_delete",
+                    "courses:admin_program_create", "courses:admin_program_update", "courses:admin_program_delete")},
+                {"label": "Matières", "icon": "auto_stories", "url_name": "courses:admin_subjects", "related_url_names": (
+                    "courses:admin_subject_create", "courses:admin_subject_update", "courses:admin_subject_delete")},
+                {"label": "Affectations enseignants", "icon": "how_to_reg", "url_name": "courses:admin_assignments", "related_url_names": (
+                    "courses:admin_assignment_create", "courses:admin_assignment_update", "courses:admin_assignment_delete")},
+                {"label": "Emploi du temps global", "icon": "calendar_today", "url_name": "courses:admin_timetable", "related_url_names": (
+                    "courses:admin_slot_create", "courses:admin_slot_update", "courses:admin_slot_delete")},
+                {"label": "Tous les cours", "icon": "menu_book", "url_name": "courses:admin_courses", "related_url_names": (
+                    "courses:admin_course_detail", "courses:material_view")},
             ),
         },
         {

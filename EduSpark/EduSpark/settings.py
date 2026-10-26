@@ -179,6 +179,11 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Supports de cours (PDF, présentations, vidéos, audios) : stockés hors de
+# MEDIA_ROOT, donc sans URL publique. Ils ne sont servis que par la vue
+# courses:material_file, qui vérifie les droits de l'utilisateur.
+PROTECTED_MEDIA_ROOT = BASE_DIR / 'protected_media'
+
 # Authentification : pages du projet.
 LOGIN_URL = '/accounts/connexion/'
 LOGIN_REDIRECT_URL = '/'

@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django import forms
+from django.apps import apps
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -42,7 +43,14 @@ CHECKBOX_CLASS = "w-4 h-4 rounded accent-primary cursor-pointer"
 
 
 class StyledFormMixin:
-    """Applique les classes Tailwind du design system à tous les widgets."""
+    """Applique les classes Tailwind du design system à tous les widgets.
+
+    ``placeholders`` (attribut de classe facultatif) associe un exemple
+    « ex. … » à chaque champ texte. Une aide de champ qui commence par « ex. »
+    (sans tiret d'explication) sert automatiquement de placeholder.
+    """
+
+    placeholders = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,6 +64,12 @@ class StyledFormMixin:
             widget.attrs.setdefault("class", FIELD_CLASS)
             if isinstance(widget, forms.Textarea):
                 widget.attrs.setdefault("rows", 4)
+            help_text = (field.help_text or "").strip()
+            if help_text.lower().startswith("ex.") and "—" not in help_text:
+                widget.attrs.setdefault("placeholder", help_text)
+        for name, placeholder in self.placeholders.items():
+            if name in self.fields:
+                self.fields[name].widget.attrs["placeholder"] = placeholder
 
 
 # ---------------------------------------------------------------------------
@@ -223,6 +237,16 @@ class SignInForm(AuthenticationForm):
 # ---------------------------------------------------------------------------
 
 class UniversityForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "name": "ex. Université Paris Cité",
+        "code": "ex. UPC",
+        "city": "ex. Paris",
+        "country": "ex. France",
+        "email_domain": "ex. u-paris.fr",
+        "website": "ex. https://u-paris.fr",
+        "description": "ex. Université pluridisciplinaire en sciences et santé…",
+    }
+
     class Meta:
         model = University
         fields = ("name", "code", "city", "country", "email_domain", "website", "description", "is_active")
@@ -231,12 +255,26 @@ class UniversityForm(StyledFormMixin, forms.ModelForm):
 class UniversityAdminEditForm(StyledFormMixin, forms.ModelForm):
     """Champs qu'un admin université peut modifier sur sa propre université."""
 
+    placeholders = {
+        "code": "ex. UPC",
+        "city": "ex. Paris",
+        "country": "ex. France",
+        "website": "ex. https://u-paris.fr",
+        "description": "ex. Université pluridisciplinaire en sciences et santé…",
+    }
+
     class Meta:
         model = University
         fields = ("code", "city", "country", "website", "description")
 
 
 class AccountForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "first_name": "ex. Marie",
+        "last_name": "ex. Dupont",
+        "email": "ex. marie.dupont@u-paris.fr",
+    }
+
     is_platform_admin = forms.BooleanField(
         label="Admin plateforme", required=False,
         help_text="Donne accès à toutes les universités et au back-office.",
@@ -270,6 +308,12 @@ class AccountForm(StyledFormMixin, forms.ModelForm):
 class ProfileForm(StyledFormMixin, forms.ModelForm):
     """Chacun édite son propre profil (informations de compte)."""
 
+    placeholders = {
+        "first_name": "ex. Marie",
+        "last_name": "ex. Dupont",
+        "email": "ex. marie.dupont@u-paris.fr",
+    }
+
     class Meta:
         model = User
         fields = ("first_name", "last_name", "email")
@@ -296,6 +340,12 @@ class ProfileForm(StyledFormMixin, forms.ModelForm):
 class _MemberCreateForm(StyledFormMixin, forms.Form):
     """Création d'un membre : réutilise le compte si l'e-mail existe déjà
     (un professeur peut enseigner dans plusieurs universités)."""
+
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+    }
 
     email = forms.EmailField(label="E-mail")
     first_name = forms.CharField(label="Prénom", max_length=150)
@@ -348,6 +398,14 @@ class ProfessorCreateForm(_MemberCreateForm):
     role = Role.PROFESSOR
     profile_fields = ("department", "speciality", "grade")
 
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+        "department": "ex. Informatique",
+        "speciality": "ex. Réseaux et systèmes",
+    }
+
     department = forms.CharField(label="Département", max_length=120, required=False)
     speciality = forms.CharField(label="Spécialité", max_length=120, required=False)
     grade = forms.ChoiceField(
@@ -358,6 +416,15 @@ class ProfessorCreateForm(_MemberCreateForm):
 class StudentCreateForm(_MemberCreateForm):
     role = Role.STUDENT
     profile_fields = ("student_number", "program", "promotion")
+
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+        "student_number": "ex. 2024-0123",
+        "program": "ex. Informatique",
+        "promotion": "ex. 2026",
+    }
 
     student_number = forms.CharField(label="Matricule", max_length=40, required=False)
     program = forms.CharField(label="Filière", max_length=120, required=False)
@@ -398,12 +465,23 @@ class _MemberProfileForm(StyledFormMixin, forms.ModelForm):
 
 
 class ProfessorProfileForm(_MemberProfileForm):
+    placeholders = {
+        "department": "ex. Informatique",
+        "speciality": "ex. Réseaux et systèmes",
+    }
+
     class Meta:
         model = ProfessorProfile
         fields = ("department", "speciality", "grade")
 
 
 class StudentProfileForm(_MemberProfileForm):
+    placeholders = {
+        "student_number": "ex. 2024-0123",
+        "program": "ex. Informatique",
+        "promotion": "ex. 2026",
+    }
+
     class Meta:
         model = StudentProfile
         fields = ("student_number", "program", "promotion")
@@ -420,29 +498,115 @@ class StudentProfileForm(_MemberProfileForm):
 # Classes et groupes
 # ---------------------------------------------------------------------------
 
+class ProfessorChipSelectMultiple(forms.CheckboxSelectMultiple):
+    """Cases à cocher en cartes (nom + département) pour choisir les professeurs."""
+
+    template_name = "portal/_chip_checkbox_select.html"
+    option_template_name = "portal/_chip_checkbox_option.html"
+
+
 class SchoolClassForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = SchoolClass
-        fields = ("name", "level", "program", "academic_year", "description", "professors")
-        widgets = {"professors": forms.CheckboxSelectMultiple}
+        fields = (
+            "name", "level", "section", "study_program", "program",
+            "academic_year", "description", "professors",
+        )
+        widgets = {"professors": ProfessorChipSelectMultiple}
 
     def __init__(self, *args, university=None, **kwargs):
         self.university = university
         super().__init__(*args, **kwargs)
+        placeholders = {
+            "name": "ex. Informatique",
+            "level": "ex. 3e année, Master 1",
+            "section": "ex. A, B, Sciences, Littérature",
+            "academic_year": "ex. 2025-2026",
+            "description": "ex. Classe orientée systèmes et réseaux…",
+            "program": "ex. Informatique",
+        }
+        for field_name, placeholder in placeholders.items():
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs["placeholder"] = placeholder
         self.fields["professors"].queryset = ProfessorProfile.objects.filter(
             university=university,
         ).select_related("membership__user")
+        self.fields["professors"].label_from_instance = self._professor_label
+
+        programs = apps.get_model("courses", "Program").objects.filter(
+            university=university,
+        ).select_related("department")
+        if programs.exists():
+            # Des filières existent dans le catalogue : on en choisit une dans la
+            # liste, et le libellé texte de la classe la suit automatiquement.
+            study_program = self.fields["study_program"]
+            study_program.queryset = programs
+            study_program.label = "Filière"
+            study_program.help_text = "Filières créées dans « Départements & Filières »."
+            study_program.label_from_instance = lambda program: "%s — %s" % (
+                program.name, program.department.name,
+            )
+            self.fields.pop("program")
+        else:
+            self.fields.pop("study_program")
+
+    @staticmethod
+    def _professor_label(profile):
+        name = profile.user.get_full_name() or profile.user.email
+        if profile.department:
+            return "%s — %s" % (name, profile.department)
+        return name
 
     def clean(self):
         cleaned = super().clean()
-        name, year = cleaned.get("name"), cleaned.get("academic_year", "")
-        clash = SchoolClass.objects.filter(university=self.university, name=name, academic_year=year)
+        name = cleaned.get("name")
+        section = (cleaned.get("section") or "").strip()
+        year = cleaned.get("academic_year", "")
+        clash = SchoolClass.objects.filter(
+            university=self.university, name=name, section=section, academic_year=year,
+        )
         if name and clash.exclude(pk=self.instance.pk).exists():
-            raise forms.ValidationError("Une classe porte déjà ce nom pour cette année universitaire.")
+            raise forms.ValidationError(
+                "Une classe porte déjà ce nom, cette section et cette année universitaire."
+            )
+        if self.instance.pk:
+            self._check_teaching_assignments(cleaned)
         return cleaned
+
+    def _check_teaching_assignments(self, cleaned):
+        """Les affectations du module cours doivent rester cohérentes avec la classe :
+        mêmes filière et mêmes enseignants que ceux qu'on s'apprête à enregistrer."""
+        assignments = list(
+            self.instance.teaching_assignments.select_related("subject", "professor__membership__user")
+        )
+        study_program = cleaned.get("study_program")
+        if study_program is not None:
+            foreign = sorted({a.subject.code for a in assignments if a.subject.program_id != study_program.pk})
+            if foreign:
+                self.add_error("study_program", (
+                    "Des matières affectées à cette classe n'appartiennent pas à la filière « %s » (%s) : "
+                    "retirez d'abord ces affectations."
+                ) % (study_program.name, ", ".join(foreign)))
+        professors = cleaned.get("professors")
+        if professors is not None:
+            kept = {professor.pk for professor in professors}
+            teaching = sorted({
+                a.professor.user.get_full_name() or a.professor.user.email
+                for a in assignments if a.professor_id not in kept
+            })
+            if teaching:
+                self.add_error("professors", (
+                    "Enseigne encore dans cette classe : %s. Retirez d'abord son affectation "
+                    "(Cours & Catalogue, Affectations enseignants)."
+                ) % ", ".join(teaching))
 
 
 class StudentGroupForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "name": "ex. Groupe A",
+        "capacity": "ex. 24",
+    }
+
     class Meta:
         model = StudentGroup
         fields = ("name", "capacity", "students")
@@ -478,6 +642,11 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
 # ---------------------------------------------------------------------------
 
 class InvitationForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "message": "ex. Bienvenue ! Voici votre accès à la plateforme.",
+    }
+
     class Meta:
         model = Invitation
         fields = ("email", "role", "message", "expires_at")
@@ -516,6 +685,11 @@ class InvitationForm(StyledFormMixin, forms.ModelForm):
 
 class InvitationSignupForm(StyledFormMixin, SetPasswordForm):
     """Création du compte depuis une invitation (e-mail imposé)."""
+
+    placeholders = {
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+    }
 
     first_name = forms.CharField(label="Prénom", max_length=150)
     last_name = forms.CharField(label="Nom", max_length=150)

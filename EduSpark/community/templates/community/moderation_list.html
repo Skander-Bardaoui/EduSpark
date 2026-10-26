@@ -1,0 +1,63 @@
+{% extends portal_base_template %}
+{% block title %}Modération — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1100px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+{% include "portal/_page_header.html" with eyebrow="Classe virtuelle" title="Signalements & modération" subtitle="Messages signalés dans les forums que vous gérez." %}
+
+<div class="flex flex-wrap items-center gap-2">
+{% for value, label, count in statuses %}
+<a class="rounded-full px-4 py-2 text-xs font-bold {% if status == value %}bg-primary text-on-primary{% else %}border border-outline-variant/70 text-on-surface-variant hover:bg-surface-container{% endif %}" href="?statut={{ value }}">{{ label }} ({{ count }})</a>
+{% endfor %}
+<form class="ml-auto flex flex-wrap items-center gap-2" method="get" role="search">
+<input name="statut" type="hidden" value="{{ status }}"/>
+<input class="min-w-[12rem] rounded-full bg-surface-container-low px-4 py-2 text-sm outline-none focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]" name="q" placeholder="Rechercher…" type="search" value="{{ q }}"/>
+<select class="rounded-full bg-surface-container-low px-3 py-2 text-sm outline-none" name="motif" onchange="this.form.submit()">
+<option value="">Tous les motifs</option>
+{% for value, label in reasons %}<option value="{{ value }}" {% if reason == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+</select>
+<button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary" type="submit">Filtrer</button>
+</form>
+</div>
+
+{% if page %}
+<ul class="flex flex-col gap-3">
+{% for r in page %}
+<li class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center gap-1.5">
+{% include "portal/_badge.html" with label=r.get_reason_display tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+{% include "portal/_badge.html" with label=r.forum.title %}
+{% if r.reply %}{% include "portal/_badge.html" with label="Réponse" %}{% else %}{% include "portal/_badge.html" with label="Question" %}{% endif %}
+<span class="text-xs text-outline">Signalé par {% firstof r.reporter.get_full_name r.reporter.email "un compte supprimé" %} · il y a {{ r.created_at|timesince }}</span>
+</div>
+<div class="mt-3 rounded-xl bg-surface-container-low p-3 text-sm text-on-surface">
+{% if r.reply %}
+<p class="whitespace-pre-line">{{ r.reply.body|truncatewords:60 }}</p>
+<p class="mt-1 text-xs text-outline">Réponse de {% firstof r.reply.author.get_full_name r.reply.author.email "compte supprimé" %} · <a class="font-bold text-primary hover:underline" href="{% url 'community:thread_detail' r.reply.thread_id %}#reponse-{{ r.reply_id }}">voir dans la discussion</a></p>
+{% else %}
+<p class="font-semibold">{{ r.thread.title }}</p>
+<p class="mt-1 whitespace-pre-line">{{ r.thread.body|truncatewords:60 }}</p>
+<p class="mt-1 text-xs text-outline">Question de {% firstof r.thread.author.get_full_name r.thread.author.email "compte supprimé" %} · <a class="font-bold text-primary hover:underline" href="{% url 'community:thread_detail' r.thread_id %}">voir la question</a></p>
+{% endif %}
+</div>
+{% if r.details %}<p class="mt-2 text-sm text-on-surface-variant">« {{ r.details }} »</p>{% endif %}
+{% if r.status == 'ouvert' %}
+<div class="mt-4 flex flex-wrap justify-end gap-2 text-xs font-bold">
+<form method="post" action="{% url 'community:report_resolve' r.pk %}">{% csrf_token %}<input name="action" type="hidden" value="ignorer"/>
+<button class="rounded-full border border-outline-variant/70 px-4 py-2 text-on-surface-variant hover:bg-surface-container" type="submit">Classer sans suite</button></form>
+<form method="post" action="{% url 'community:report_resolve' r.pk %}">{% csrf_token %}<input name="action" type="hidden" value="masquer"/>
+<button class="rounded-full bg-error px-4 py-2 text-on-error hover:opacity-90" type="submit">Masquer le contenu</button></form>
+</div>
+{% else %}
+<p class="mt-3 text-xs text-outline">Traité le {{ r.handled_at|date:"d/m/Y H:i" }} par {% firstof r.handled_by.get_full_name r.handled_by.email "—" %}.</p>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% include "portal/_pagination.html" with is_paginated=page.has_other_pages page_obj=page %}
+{% else %}
+{% include "portal/_empty_state.html" with icon="gavel" title="Aucun signalement" hint="Rien à modérer pour le moment." %}
+{% endif %}
+</div>
+</main>
+{% endblock %}

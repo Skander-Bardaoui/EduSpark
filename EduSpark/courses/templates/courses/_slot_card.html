@@ -1,0 +1,17 @@
+{# Carte d'une séance. Contexte : slot, mode (admin | prof | student), can_edit (admin). #}
+{% with assignment=slot.assignment %}
+<article class="rounded border-l-4 p-2.5 {% if slot.session_type == 'cm' %}border-primary bg-primary-fixed/50{% elif slot.session_type == 'tp' %}border-secondary bg-secondary-fixed/60{% else %}border-tertiary-fixed-dim bg-tertiary-fixed/40{% endif %}" data-filter-item data-tags="{{ slot.session_type }}">
+<div class="flex items-start justify-between gap-2">
+<p class="text-[11px] font-bold {% if slot.session_type == 'cm' %}text-primary{% elif slot.session_type == 'tp' %}text-secondary{% else %}text-tertiary{% endif %}">{{ slot.time_label }}</p>
+{% if can_edit %}
+<span class="flex shrink-0 items-center gap-0.5">
+<a class="icon-action rounded-full p-1 text-on-surface-variant transition-colors hover:bg-surface-container-lowest hover:text-primary" href="{% url 'courses:admin_slot_update' slot.pk %}" title="Modifier la séance" aria-label="Modifier la séance"><span class="material-symbols-outlined text-[16px]">edit</span></a>
+<a class="icon-action rounded-full p-1 text-on-surface-variant transition-colors hover:bg-surface-container-lowest hover:text-error" href="{% url 'courses:admin_slot_delete' slot.pk %}" title="Supprimer la séance" aria-label="Supprimer la séance"><span class="material-symbols-outlined text-[16px]">delete</span></a>
+</span>
+{% endif %}
+</div>
+<p class="mt-1 text-xs font-bold leading-tight text-on-surface">{{ assignment.subject.code }} · {{ assignment.subject.name }}</p>
+<p class="mt-1 text-[11px] text-on-surface-variant">{{ slot.type_label }}{% if slot.room %} · {{ slot.room }}{% endif %}{% if slot.group %} · {{ slot.group.name }}{% endif %}</p>
+<p class="mt-0.5 text-[11px] text-on-surface-variant">{% if mode == "prof" %}{{ assignment.school_class.name }}{% else %}{{ assignment.professor_name }}{% endif %}</p>
+</article>
+{% endwith %}

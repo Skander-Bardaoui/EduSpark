@@ -20,8 +20,8 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
     template_name = "accounts/admin_classes.html"
     context_object_name = "classes"
     allowed_roles = ADMIN
-    search_fields = ("name", "level", "program", "academic_year")
-    search_placeholder = "Nom, niveau, filière, année…"
+    search_fields = ("name", "level", "section", "program", "academic_year")
+    search_placeholder = "Nom, niveau, section, filière, année…"
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related(
@@ -37,6 +37,8 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
         return [
             {"param": "filiere", "lookup": "program", "label": "Filière",
              "choices": distinct_choices(base, "program")},
+            {"param": "section", "lookup": "section", "label": "Section",
+             "choices": distinct_choices(base, "section")},
             {"param": "annee", "lookup": "academic_year", "label": "Année",
              "choices": distinct_choices(base, "academic_year")},
         ]
@@ -79,8 +81,9 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
     allowed_roles = ADMIN
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related(
+        return super().get_queryset().select_related("study_program__department").prefetch_related(
             "professors__membership__user", "groups__students__membership__user",
+            "teaching_assignments__subject", "teaching_assignments__professor__membership__user",
         )
 
     def get_context_data(self, **kwargs):
@@ -103,6 +106,7 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
 class SchoolClassCreateView(TenantScopedMixin, GenericFormMixin, SuccessMessageMixin, CreateView):
     model = SchoolClass
     form_class = SchoolClassForm
+    template_name = "accounts/admin_class_form.html"
     allowed_roles = ADMIN
     page_title = "Nouvelle classe"
     page_icon = "layers"
@@ -122,6 +126,7 @@ class SchoolClassCreateView(TenantScopedMixin, GenericFormMixin, SuccessMessageM
 class SchoolClassUpdateView(TenantScopedMixin, GenericFormMixin, SuccessMessageMixin, UpdateView):
     model = SchoolClass
     form_class = SchoolClassForm
+    template_name = "accounts/admin_class_form.html"
     allowed_roles = ADMIN
     page_icon = "layers"
     success_message = "Classe mise à jour."

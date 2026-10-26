@@ -1,0 +1,24 @@
+{# Liste de supports. Contexte : items, perspective (prof | student | admin). #}
+{% load courses_extras %}
+<ul class="divide-y divide-outline-variant/30">
+{% for material in items %}
+<li class="flex flex-wrap items-center justify-between gap-3 py-2.5">
+<div class="flex min-w-0 items-center gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ material.tone_class }}"><span class="material-symbols-outlined text-[19px]">{{ material.icon }}</span></span>
+<div class="min-w-0">
+<a class="block truncate text-sm font-semibold text-on-surface hover:text-primary" href="{% url 'courses:material_view' material.pk %}">{{ material.title }}</a>
+<p class="text-xs text-on-surface-variant">{{ material.get_material_type_display }}{% if material.extension_label != material.get_material_type_display %} ({{ material.extension_label }}){% endif %} · {{ material.size|size_fr }} · {{ material.created_at|date:"d/m/Y" }}</p>
+{% if material.description %}<p class="mt-0.5 text-xs text-on-surface-variant">{{ material.description|truncatechars:140 }}</p>{% endif %}
+</div>
+</div>
+<div class="flex shrink-0 items-center gap-1">
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'courses:material_view' material.pk %}" title="Ouvrir" aria-label="Ouvrir {{ material.title }}"><span class="material-symbols-outlined text-[18px]">{% if material.can_preview %}visibility{% else %}open_in_new{% endif %}</span></a>
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'courses:material_file' material.pk %}?telecharger=1" title="Télécharger" aria-label="Télécharger {{ material.title }}"><span class="material-symbols-outlined text-[18px]">download</span></a>
+{% if perspective == "prof" %}
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'courses:prof_material_update' material.pk %}" title="Modifier" aria-label="Modifier {{ material.title }}"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" href="{% url 'courses:prof_material_delete' material.pk %}" title="Supprimer" aria-label="Supprimer {{ material.title }}"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+{% endif %}
+</div>
+</li>
+{% endfor %}
+</ul>
