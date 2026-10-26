@@ -1,0 +1,22 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Un accompagnement a été ouvert{% endblock %}
+{% block body %}
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Bonjour {{ student_first_name }},</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">
+  <strong>{{ professor_name }}</strong> a ouvert un accompagnement
+  <strong>{{ category_label }}</strong> pour vous aider à progresser.
+</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f2f6ff;border:1px solid #d7e2fb;border-radius:12px;margin:0 0 16px;">
+<tr><td style="padding:14px 16px;">
+<p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#5b6b8c;font-weight:700;">Constat</p>
+<p style="margin:0;font-size:14px;line-height:1.6;color:#14213d;">{{ observation }}</p>
+{% if action_plan %}
+<p style="margin:12px 0 0;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#5b6b8c;font-weight:700;">Plan d'accompagnement</p>
+<p style="margin:0;font-size:14px;line-height:1.6;color:#14213d;">{{ action_plan }}</p>
+{% endif %}
+</td></tr>
+</table>
+<p style="margin:0;font-size:14px;line-height:1.6;">
+  Ce suivi est partagé avec votre référent. Consultez vos notifications pour en suivre les étapes.
+</p>
+{% endblock %}

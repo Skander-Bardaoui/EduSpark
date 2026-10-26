@@ -16,6 +16,8 @@ from accounts.models import (
 from accounts.tenancy import Role
 
 from coaching.models import (
+    AttendanceRecord,
+    AttendanceSession,
     DifficultyNote,
     DifficultySheet,
     JournalEntry,
@@ -24,10 +26,11 @@ from coaching.models import (
     StudentTask,
     StudySession,
     TutorAssignment,
+    TutorNotification,
     TutoringSession,
     TutoringSlot,
 )
-from coaching.services import academic_year_for
+from coaching.services import academic_year_for, sync_student_attendance
 
 PARIS = "Université Paris Cité"
 LYON = "Université de Lyon"
@@ -35,6 +38,22 @@ PROFESSOR_EMAIL = "prof.test@eduspark.local"
 SEED_SLOT_PREFIX = "SEED-"
 PARIS_STUDENTS = ("test.ui@example.com", "ines.bernard@u-paris.fr", "yanis.leroy@u-paris.fr")
 LYON_STUDENTS = ("lucas.moreau@univ-lyon.fr", "sofia.benali@univ-lyon.fr")
+ATTENDANCE_WEEKS = 10
+ATTENDANCE_PER_WEEK = 5
+PARIS_MODULES = (
+    "INFO301 — Algorithmique avancée",
+    "INFO303 — Bases de données",
+    "INFO302 — Développement web",
+    "ANG201 — Anglais technique",
+    "INFO304 — Systèmes distribués",
+)
+LYON_MODULES = (
+    "MAT501 — Probabilités",
+    "MAT502 — Algèbre",
+    "MAT503 — Analyse fonctionnelle",
+    "MAT504 — Méthodologie de la recherche",
+    "MAT505 — Statistiques",
+)
 
 GOALS = {
     "test.ui@example.com": (
@@ -206,6 +225,8 @@ class Command(BaseCommand):
             "rendez-vous": TutoringSession.objects.count(),
             "fiches": DifficultySheet.objects.count(),
             "alertes": PerseveranceAlert.objects.count(),
+            "séances": AttendanceSession.objects.count(),
+            "présences": AttendanceRecord.objects.count(),
         }
         self.stdout.write(self.style.SUCCESS(
             "Seed coaching terminé : %s." % ", ".join(
@@ -381,6 +402,7 @@ class Command(BaseCommand):
                 "detail": "Quatre absences non justifiées et deux rendus manquants sur les trois dernières semaines.",
                 "priority": PerseveranceAlert.PRIORITY_HIGH,
                 "status": PerseveranceAlert.STATUS_OPEN,
+                "reported_by": professor,
                 "detected_at": _since(10),
             })
             self._alert(camille, school_class, "confidence", {
@@ -388,6 +410,7 @@ class Command(BaseCommand):
                 "detail": "Le journal de progression signale une fatigue en milieu de semaine et une baisse de confiance.",
                 "priority": PerseveranceAlert.PRIORITY_NORMAL,
                 "status": PerseveranceAlert.STATUS_OPEN,
+                "reported_by": professor,
                 "detected_at": _since(4),
             })
             self._alert(yanis, school_class, "grade", {
@@ -395,12 +418,46 @@ class Command(BaseCommand):
                 "detail": "Moyenne en recul de 1,3 point sur les deux dernières évaluations.",
                 "priority": PerseveranceAlert.PRIORITY_HIGH,
                 "status": PerseveranceAlert.STATUS_TAKEN,
+                "reported_by": professor,
                 "detected_at": _since(12),
                 "taken_by": admin,
                 "taken_at": _since(10),
-                "resolution_note": "Entretien organisé avec le référent et la scolarité.",
+                "handling_note": "Entretien programmé avec le référent et la scolarité ; emploi du temps allégé cette semaine.",
+                "resolution_note": "",
+            })
+            self._alert(ines, school_class, "engagement", {
+                "title": "Signalement pédagogique · Ines Bernard",
+                "detail": "Participation en baisse depuis la rentrée, l'étudiante traverse une période de doute sur son orientation.",
+                "priority": PerseveranceAlert.PRIORITY_NORMAL,
+                "status": PerseveranceAlert.STATUS_CLOSED,
+                "reported_by": professor,
+                "detected_at": _since(20),
+                "taken_by": admin,
+                "taken_at": _since(17),
+                "handling_note": "Rendez-vous avec le responsable de parcours et avis du service d'orientation.",
+                "closed_at": _since(14),
+                "resolution_note": "Entretien réalisé avec le responsable de parcours ; l'étudiante a validé son choix de master.",
+            })
+            self._relance(yanis, professor, {
+                "title": "Faire le point sur ta progression",
+                "message": "Bonjour Yanis, je souhaite que l'on fasse le point sur ta progression. Tes absences récentes et les rendus manquants m'inquiètent. Peux-tu me répondre ici et, si besoin, réserver un créneau de tutorat ?",
+                "read_at": _since(1, 20),
+                "reply": "Bonjour Monsieur, merci pour votre message. Je reprends les devoirs cette semaine et je réserve le créneau de jeudi.",
+                "replied_at": _since(1, 20),
+                "created_at": _since(2),
+            })
+            self._relance(camille, professor, {
+                "title": "Faire le point sur ta progression",
+                "message": "Bonjour Camille, je souhaite que l'on fasse le point sur ta progression. Ta baisse de régime sur les rendus du projet me questionne. Peux-tu me répondre ici et, si besoin, réserver un créneau de tutorat ?",
+                "read_at": None,
+                "reply": "",
+                "replied_at": None,
+                "created_at": _since(1),
             })
             self._touch_sheets(sheets, professor)
+            self._attendance(professor, school_class, {
+                camille: 92, ines: 98, yanis: 74,
+            }, PARIS_MODULES)
         else:
             university = universities[LYON]
             professor = self._professor(university)
@@ -514,6 +571,7 @@ class Command(BaseCommand):
                 "detail": "Deux absences en cours magistral et un retard répété en travaux dirigés.",
                 "priority": PerseveranceAlert.PRIORITY_NORMAL,
                 "status": PerseveranceAlert.STATUS_OPEN,
+                "reported_by": professor,
                 "detected_at": _since(5),
             })
             self._alert(sofia, school_class, "confidence", {
@@ -527,14 +585,88 @@ class Command(BaseCommand):
                 "title": "Moyenne en recul · Lucas Moreau",
                 "detail": "Résultats fragiles sur l'UE de probabilités.",
                 "priority": PerseveranceAlert.PRIORITY_NORMAL,
-                "status": PerseveranceAlert.STATUS_TAKEN,
+                "status": PerseveranceAlert.STATUS_CLOSED,
+                "reported_by": professor,
                 "detected_at": _since(9),
                 "taken_by": admin,
                 "taken_at": _since(7),
+                "handling_note": "Point avec le tuteur référent et mobilisation du dispositif de tutorat mathématiques.",
+                "closed_at": _since(4),
                 "resolution_note": "Séance de tutorat programmée.",
             })
+            self._attendance(professor, school_class, {
+                lucas: 88, sofia: 96,
+            }, LYON_MODULES)
 
     # -- fabriques ------------------------------------------------------------
+    def _attendance(self, professor, school_class, targets, modules):
+        """Crée 50 séances et les présences menant aux taux demandés."""
+        total_sessions = ATTENDANCE_WEEKS * ATTENDANCE_PER_WEEK
+        start = timezone.localdate() - timedelta(days=ATTENDANCE_WEEKS * 7 - 1)
+        start -= timedelta(days=start.weekday())
+        sessions = []
+        for week in range(ATTENDANCE_WEEKS):
+            for day in range(ATTENDANCE_PER_WEEK):
+                index = week * ATTENDANCE_PER_WEEK + day
+                day_date = start + timedelta(days=week * 7 + day)
+                hour = (8, 10, 14, 16, 9)[day]
+                starts_at = timezone.make_aware(datetime.combine(day_date, time(hour, 0)))
+                title = modules[index % len(modules)]
+                kind = AttendanceSession.KIND_CHOICES[index % len(AttendanceSession.KIND_CHOICES)][0]
+                session, _created = AttendanceSession.objects.get_or_create(
+                    professor=professor,
+                    school_class=school_class,
+                    starts_at=starts_at,
+                    title=title,
+                    defaults={
+                        "university": school_class.university,
+                        "kind": kind,
+                        "duration_minutes": 90,
+                        "status": AttendanceSession.STATUS_COMPLETED,
+                        "created_by": professor.membership.user,
+                    },
+                )
+                sessions.append(session)
+        existing = {
+            (record.session_id, record.student_id): record
+            for record in AttendanceRecord.objects.filter(
+                session__in=sessions, student__in=list(targets),
+            )
+        }
+        to_create = []
+        to_update = []
+        for student, target in targets.items():
+            attended_target = round(int(target) * total_sessions / 100)
+            absent_count = max(total_sessions - attended_target, 0)
+            absent_indices = {
+                round(position * total_sessions / absent_count)
+                for position in range(absent_count)
+            } if absent_count else set()
+            for index, session in enumerate(sessions):
+                status = (
+                    AttendanceRecord.STATUS_ABSENT
+                    if index in absent_indices
+                    else AttendanceRecord.STATUS_PRESENT
+                )
+                record = existing.get((session.pk, student.pk))
+                if record is None:
+                    to_create.append(AttendanceRecord(
+                        university=student.university,
+                        session=session,
+                        student=student,
+                        status=status,
+                        recorded_by=professor.membership.user,
+                    ))
+                elif record.status != status:
+                    record.status = status
+                    to_update.append(record)
+        if to_create:
+            AttendanceRecord.objects.bulk_create(to_create, ignore_conflicts=True)
+        if to_update:
+            AttendanceRecord.objects.bulk_update(to_update, ["status"])
+        for student in targets:
+            sync_student_attendance(student)
+
     def _assign(self, student, professor, school_class, year, admin, values):
         assignment = TutorAssignment.objects.filter(
             student=student, academic_year=year, status=TutorAssignment.STATUS_ACTIVE,
@@ -855,11 +987,34 @@ class Command(BaseCommand):
         if values.get("status") == PerseveranceAlert.STATUS_OPEN:
             alert.taken_by = None
             alert.taken_at = None
+            alert.handling_note = ""
+            alert.closed_at = None
+            alert.resolution_note = ""
+        elif values.get("status") == PerseveranceAlert.STATUS_TAKEN:
+            alert.closed_at = None
             alert.resolution_note = ""
         for field, value in values.items():
             setattr(alert, field, value)
         alert.save()
         return alert
+
+    def _relance(self, student, professor, values):
+        notification = TutorNotification.objects.filter(
+            student=student, kind=TutorNotification.KIND_RELANCE,
+        ).order_by("pk").first()
+        if notification is None:
+            notification = TutorNotification(
+                university=student.university, student=student,
+                professor=professor, kind=TutorNotification.KIND_RELANCE,
+            )
+        created_at = values.pop("created_at", None)
+        for field, value in values.items():
+            setattr(notification, field, value)
+        notification.save()
+        if created_at is not None:
+            type(notification).objects.filter(pk=notification.pk).update(created_at=created_at)
+            notification.refresh_from_db()
+        return notification
 
     def _touch_sheets(self, sheets, professor):
         for sheet in sheets:

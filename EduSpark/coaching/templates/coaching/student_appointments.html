@@ -7,7 +7,7 @@
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Accompagnement</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Rendez-vous</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Réservez un créneau avec votre tuteur référent ou un enseignant.</p>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Réservez un créneau avec votre référent pédagogique (suivi global, toutes matières) ou un enseignant de votre classe (aide disciplinaire).</p>
 </div>
 <button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#appointment-modal" type="button">
 <span class="material-symbols-outlined text-[18px]">add</span>Demander un rendez-vous
@@ -17,7 +17,7 @@
 {% include "portal/_stat_card.html" with label="Rendez-vous à venir" value=upcoming_count icon="event_available" hint=upcoming_hint %}
 {% include "portal/_stat_card.html" with label="Tutorat cette année" value=completed_count icon="support_agent" icon_class="bg-surface-container text-secondary" hint=attendance_hint %}
 {% include "portal/_stat_card.html" with label="Prochaine séance" value=next_view.short_date icon="schedule" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=next_view.hint|default:"Aucun rendez-vous confirmé" %}
-{% include "portal/_stat_card.html" with label="Créneaux disponibles" value=open_slots_count icon="calendar_month" hint="Proposés par vos tuteurs" %}
+{% include "portal/_stat_card.html" with label="Créneaux disponibles" value=open_slots_count icon="calendar_month" hint="Proposés par vos interlocuteurs" %}
 </div>
 {% if next_view %}
 <section class="grid gap-4 lg:grid-cols-[1fr_340px]">
@@ -26,7 +26,7 @@
 <div class="mt-3 flex flex-wrap items-center justify-between gap-4">
 <div class="flex items-center gap-3">
 <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-sm font-extrabold">{{ next_view.tutor_initials }}</span>
-<div><p class="font-headline-sm text-[17px] font-bold">{{ next_view.tutor_name }}</p><p class="text-xs text-white/70">Tuteur référent · {{ next_view.speciality }}</p></div>
+<div><p class="font-headline-sm text-[17px] font-bold">{{ next_view.tutor_name }}</p><p class="text-xs text-white/70">{{ next_view.role_label }} · {{ next_view.scope_label }}</p></div>
 </div>
 <div class="rounded bg-white/10 px-4 py-2 text-center ring-1 ring-white/15">
 <p class="text-[11px] font-bold uppercase tracking-wider text-white/60">{{ next_view.date_label }}</p>
@@ -39,7 +39,7 @@
 {% if next_view.meeting_url %}
 <a class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" href="{{ next_view.meeting_url }}" rel="noopener" target="_blank"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</a>
 {% else %}
-<button class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-toast="Le lien de visioconférence sera communiqué par votre tuteur." type="button"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-toast="Le lien de visioconférence sera communiqué par votre interlocuteur." type="button"><span class="material-symbols-outlined text-[16px]">videocam</span>Rejoindre la visio</button>
 {% endif %}
 {% endif %}
 <form action="{% url 'coaching:student_appointment_reschedule' next_view.session.pk %}" method="post">
@@ -53,25 +53,31 @@
 <div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
 <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Prochain rendez-vous</p>
 <p class="mt-3 font-headline-sm text-[17px] font-bold">Aucun rendez-vous confirmé</p>
-<p class="mt-2 text-sm text-white/70">Choisissez un créneau ci-contre ou envoyez une demande à votre tuteur référent.</p>
+<p class="mt-2 text-sm text-white/70">Choisissez un créneau ci-contre ou envoyez une demande à votre référent pédagogique.</p>
 <button class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-primary transition-transform hover:scale-[1.01]" data-modal-open="#appointment-modal" type="button"><span class="material-symbols-outlined text-[16px]">add</span>Demander un rendez-vous</button>
 </div>
 {% endif %}
 <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Disponibilités des tuteurs</h2>
-<p class="mt-1 text-xs text-on-surface-variant">Sélectionnez un créneau pour envoyer une demande.</p>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Disponibilités de vos interlocuteurs</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Choisissez un créneau avec votre référent (suivi global) ou un enseignant (matière précise).</p>
+<div class="mt-3 rounded bg-surface-container px-3.5 py-3 text-[11px] leading-relaxed text-on-surface-variant">
+<span class="material-symbols-outlined mr-1 align-[-3px] text-[15px] text-primary">info</span>
+<strong class="text-on-surface">Référent pédagogique :</strong> méthode, assiduité, organisation et orientation, toutes matières.
+<strong class="text-on-surface">Enseignant de la classe :</strong> aide disciplinaire dans sa spécialité.
+<span class="mt-1 block font-semibold text-primary">Un créneau n'est définitif qu'après confirmation de votre interlocuteur.</span>
+</div>
 <div class="mt-4 space-y-3">
 {% for card in tutor_cards %}
 <div class="rounded border border-outline-variant/40 p-3.5">
-<div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-full {% cycle 'bg-primary-fixed text-primary' 'bg-secondary-fixed text-on-secondary-fixed' 'bg-tertiary-fixed text-on-tertiary-fixed' %} text-[11px] font-extrabold">{{ card.initials }}</span><div class="min-w-0 flex-1"><p class="text-body-sm font-bold text-on-surface">{{ card.name }}</p><p class="text-[11px] text-on-surface-variant">{{ card.speciality }}</p></div></div>
+<div class="flex items-center gap-2.5"><span class="flex h-9 w-9 items-center justify-center rounded-full {% cycle 'bg-primary-fixed text-primary' 'bg-secondary-fixed text-on-secondary-fixed' 'bg-tertiary-fixed text-on-tertiary-fixed' %} text-[11px] font-extrabold">{{ card.initials }}</span><div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-1.5"><p class="text-body-sm font-bold text-on-surface">{{ card.name }}</p>{% if card.is_referent %}<span class="rounded-full bg-primary-fixed px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">Référent</span>{% endif %}</div><p class="text-[11px] font-semibold {% if card.is_referent %}text-primary{% else %}text-on-surface-variant{% endif %}">{{ card.role_label }}</p><p class="text-[11px] text-on-surface-variant">{{ card.scope_label }}</p></div></div>
 <div class="mt-2.5 flex flex-wrap gap-1.5">
 {% for slot in card.slots %}
-<button class="rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors {% if forloop.parentloop.first and forloop.first %}bg-primary-fixed text-primary hover:bg-primary hover:text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}" data-modal-open="#appointment-modal" data-slot-date="{{ slot.date_value }}" data-slot-time="{{ slot.time_value }}" data-slot-tutor="{{ card.professor.pk }}" type="button">{{ slot.day_label }} {{ slot.time_label }}</button>
+<button class="rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors {% if forloop.parentloop.first and forloop.first %}bg-primary-fixed text-primary hover:bg-primary hover:text-on-primary{% else %}bg-surface-container text-on-surface-variant hover:bg-surface-container-high{% endif %}" data-modal-open="#appointment-modal" data-slot-date="{{ slot.date_value }}" data-slot-time="{{ slot.time_value }}" data-slot-tutor="{{ card.professor.pk }}" data-slot-id="{{ slot.slot.pk }}" type="button">{{ slot.day_label }} {{ slot.time_label }}</button>
 {% endfor %}
 </div>
 </div>
 {% empty %}
-<p class="rounded border border-dashed border-outline-variant/60 px-4 py-6 text-center text-xs text-on-surface-variant">Aucun créneau n'est proposé pour le moment. Envoyez une demande à votre tuteur.</p>
+<p class="rounded border border-dashed border-outline-variant/60 px-4 py-6 text-center text-xs text-on-surface-variant">Aucun créneau n'est proposé pour le moment. Envoyez une demande à votre référent pédagogique.</p>
 {% endfor %}
 </div>
 <button class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-modal-open="#appointment-modal" type="button">Voir plus de créneaux</button>
@@ -84,7 +90,7 @@
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Interlocuteur</th><th class="px-5 py-3 font-bold">Objet</th><th class="px-5 py-3 font-bold">Modalité</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for item in history %}
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">{{ item.when_label }}</td><td class="px-5 py-3 text-on-surface-variant">{{ item.tutor_name }}</td><td class="px-5 py-3 text-on-surface-variant"><span class="block">{{ item.session.topic }}</span>{% if item.session.summary_points %}<span class="mt-1 flex items-start gap-1 text-xs"><span class="material-symbols-outlined shrink-0 text-[14px] text-primary">forum</span><span>{{ item.session.summary_points|truncatechars:140 }}</span></span>{% endif %}</td><td class="px-5 py-3 text-on-surface-variant">{{ item.place }}</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label=item.status_meta.label tone_class=item.status_meta.badge %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">{{ item.when_label }}</td><td class="px-5 py-3 text-on-surface-variant"><span class="block">{{ item.tutor_name }}</span><span class="text-xs">{{ item.role_label }} · {{ item.scope_label }}</span></td><td class="px-5 py-3 text-on-surface-variant"><span class="block">{{ item.session.topic }}</span>{% if item.session.student_comment %}<span class="mt-1 flex items-start gap-1 text-xs"><span class="material-symbols-outlined shrink-0 text-[14px] text-primary">comment</span><span>{{ item.session.student_comment|truncatechars:140 }}</span></span>{% endif %}{% if item.session.summary_points %}<span class="mt-1 flex items-start gap-1 text-xs"><span class="material-symbols-outlined shrink-0 text-[14px] text-primary">forum</span><span>{{ item.session.summary_points|truncatechars:140 }}</span></span>{% endif %}</td><td class="px-5 py-3 text-on-surface-variant">{{ item.place }}</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label=item.status_meta.label tone_class=item.status_meta.badge %}</td></tr>
 {% empty %}
 <tr><td class="px-5 py-8 text-center text-sm text-on-surface-variant" colspan="5">Aucun rendez-vous enregistré pour le moment.</td></tr>
 {% endfor %}
@@ -102,15 +108,18 @@
 </div>
 <form action="{% url 'coaching:student_appointment_request' %}" class="space-y-4 p-5" data-appointment-form data-future-datetime data-lead-minutes="15" data-validate-form method="post" novalidate>
 {% csrf_token %}
-<label class="block"><span class="text-xs font-bold text-on-surface-variant">Tuteur</span>
-<select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-required-message="Sélectionnez un tuteur." name="professor" required>
-{% for option in tutor_options %}<option value="{{ option.id }}">{{ option.name }}</option>{% empty %}<option value="" disabled selected>Aucun tuteur disponible</option>{% endfor %}
-</select></label>
+<input name="slot" type="hidden" value="" data-slot-field>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Interlocuteur</span>
+<select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-required-message="Sélectionnez un interlocuteur." name="professor" required>
+{% for option in tutor_options %}<option value="{{ option.id }}">{{ option.name }}</option>{% empty %}<option value="" disabled selected>Aucun interlocuteur disponible</option>{% endfor %}
+</select>
+<p class="mt-1 text-[11px] text-on-surface-variant">Le référent assure un suivi global, toutes matières. Choisissez un enseignant pour une aide disciplinaire.</p></label>
 <div class="grid gap-4 sm:grid-cols-2">
 <label class="block"><span class="text-xs font-bold text-on-surface-variant">Date souhaitée</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" max="{{ max_date_value }}" min="{{ today_value }}" name="date" required type="date" value="{{ today_value }}"/></label>
 <label class="block"><span class="text-xs font-bold text-on-surface-variant">Créneau</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-clock name="time" required>{% for choice in time_choices %}<option value="{{ choice }}"{% if choice == default_slot_time %} selected{% endif %}>{{ choice }}</option>{% endfor %}</select></label>
 </div>
 <label class="block"><span class="text-xs font-bold text-on-surface-variant">Motif</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Précisez le motif de votre demande." maxlength="200" minlength="5" name="topic" placeholder="Décrivez brièvement votre demande..." required rows="3"></textarea></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Commentaire pour votre interlocuteur <span class="font-normal text-on-surface-variant">(facultatif)</span></span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" maxlength="1000" name="comment" placeholder="Précisez votre situation, vos difficultés ou vos questions..." rows="2"></textarea><span class="mt-1 block text-[11px] text-on-surface-variant">Ce commentaire sera lu par votre interlocuteur avant de confirmer.</span></label>
 <div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer la demande</button></div>
 </form>
 </div>
@@ -128,6 +137,19 @@
       if (form.elements.professor) form.elements.professor.value = btn.getAttribute('data-slot-tutor');
       if (form.elements.date) form.elements.date.value = btn.getAttribute('data-slot-date');
       if (form.elements.time) form.elements.time.value = btn.getAttribute('data-slot-time');
+      if (form.elements.slot) form.elements.slot.value = btn.getAttribute('data-slot-id') || '';
+    });
+  });
+  [form.elements.date, form.elements.time].forEach(function (field) {
+    if (!field) return;
+    field.addEventListener('change', function () {
+      if (form.elements.slot) form.elements.slot.value = '';
+    });
+  });
+  document.querySelectorAll('[data-modal-open="#appointment-modal"]').forEach(function (trigger) {
+    if (trigger.hasAttribute('data-slot-tutor')) return;
+    trigger.addEventListener('click', function () {
+      if (form.elements.slot) form.elements.slot.value = '';
     });
   });
 })();

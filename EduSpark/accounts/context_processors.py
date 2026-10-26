@@ -30,6 +30,19 @@ def _effective_portal_role(request, user):
     return get_user_role(user)
 
 
+def _nav_badge_count(request, role, url_name):
+    """Compteur de la sidebar : notifications tuteur non lues pour l'étudiant."""
+    if role != Profil.ROLE_ETUDIANT or url_name != "coaching:student_notifications":
+        return 0
+    membership = getattr(request, "membership", None)
+    if membership is None or membership.role != Role.STUDENT:
+        return 0
+    from coaching.models import TutorNotification
+
+    student = membership.ensure_profile()
+    return student.tutor_notifications.filter(read_at__isnull=True).count()
+
+
 def portal_context(request):
     """Navigation, identité et université courante pour le shell du portail."""
     user = getattr(request, "user", None)
@@ -71,7 +84,7 @@ def portal_context(request):
                 active_found = True
                 current_label = item["label"]
                 current_section = section["label"]
-            items.append({**item, "active": is_active})
+            items.append({**item, "active": is_active, "badge_count": _nav_badge_count(request, role, item["url_name"])})
             section_active = section_active or is_active
         if items:
             sections.append({"label": section["label"], "items": items, "active": section_active})

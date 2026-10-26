@@ -48,7 +48,7 @@ class _TenantModel(models.Model):
 
 
 class TutorAssignment(_TenantModel):
-    """Référent (professeur ou tuteur pair) d'un étudiant pour une année."""
+    """Référent pédagogique chargé du suivi global d'un étudiant pour une année."""
 
     STATUS_ACTIVE = "active"
     STATUS_CLOSED = "closed"
@@ -134,6 +134,39 @@ class TutorAssignment(_TenantModel):
             return None
         return "%d/%d" % (self.assignments_submitted, self.assignments_total)
 
+    def computed_risk_level(self):
+        """Niveau de vigilance déduit des indicateurs (moyenne, assiduité, rendus)."""
+        def number(value):
+            try:
+                return float(value) if value is not None else None
+            except (TypeError, ValueError):
+                return None
+
+        average = number(self.average_grade)
+        previous = number(self.previous_average)
+        attendance = self.attendance_rate or 0
+        submitted = self.assignments_submitted or 0
+        total = self.assignments_total or 0
+        completion = (submitted / total) if total else None
+
+        if average is None and previous is None and not attendance:
+            return self.RISK_LOW
+
+        if (
+            (average is not None and average < 10)
+            or attendance < 75
+            or (completion is not None and completion < 0.5)
+        ):
+            return self.RISK_HIGH
+        if (
+            (average is not None and average < 12)
+            or attendance < 85
+            or (completion is not None and completion < 0.75)
+            or (average is not None and previous is not None and previous - average > 0.5)
+        ):
+            return self.RISK_WATCH
+        return self.RISK_LOW
+
     def clean(self):
         errors = self.tenant_errors()
         if self.student_id:
@@ -147,6 +180,10 @@ class TutorAssignment(_TenantModel):
     def save(self, *args, **kwargs):
         if self.student_id:
             self.university_id = self.student.university_id
+        self.risk_level = self.computed_risk_level()
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None and "risk_level" not in update_fields:
+            kwargs["update_fields"] = list(update_fields) + ["risk_level"]
         super().save(*args, **kwargs)
 
 
@@ -278,6 +315,7 @@ class TutoringSession(_TenantModel):
     )
     location = models.CharField("Lieu", max_length=120, blank=True)
     topic = models.CharField("Motif", max_length=200)
+    student_comment = models.TextField("Commentaire de l'étudiant", blank=True)
     priority = models.CharField(
         "Priorité", max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_NORMAL,
     )
@@ -596,6 +634,9 @@ class TutorNotification(_TenantModel):
     )
     title = models.CharField("Titre", max_length=200)
     message = models.TextField("Message")
+    read_at = models.DateTimeField("Lue le", null=True, blank=True)
+    reply = models.TextField("Réponse de l'étudiant", null=True, blank=True)
+    replied_at = models.DateTimeField("Répondue le", null=True, blank=True)
     created_at = models.DateTimeField("Créée le", auto_now_add=True)
 
     class Meta:
@@ -608,6 +649,10 @@ class TutorNotification(_TenantModel):
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_unread(self):
+        return self.read_at is None
 
     def save(self, *args, **kwargs):
         if self.student_id:
@@ -798,11 +843,17 @@ class PerseveranceAlert(_TenantModel):
         "Statut", max_length=10, choices=STATUS_CHOICES, default=STATUS_OPEN,
     )
     detected_at = models.DateTimeField("Détectée le", default=timezone.now)
+    reported_by = models.ForeignKey(
+        ProfessorProfile, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="perseverance_alerts", verbose_name="Signalée par",
+    )
     taken_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="+", verbose_name="Prise en charge par",
     )
     taken_at = models.DateTimeField("Prise en charge le", null=True, blank=True)
+    handling_note = models.TextField("Note de prise en charge", null=True, blank=True)
+    closed_at = models.DateTimeField("Clôturée le", null=True, blank=True)
     resolution_note = models.TextField("Note de résolution", blank=True)
     created_at = models.DateTimeField("Créée le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifiée le", auto_now=True)
@@ -1003,3 +1054,173 @@ class LanguageTestFeedback(_TenantModel):
             self.student_id = self.session.student_id
             self.university_id = self.session.university_id
         super().save(*args, **kwargs)
+
+
+class AttendanceSession(_TenantModel):
+    """Séance de cours (CM, TD, TP) servant au relevé des présences."""
+
+    KIND_CM = "cm"
+    KIND_TD = "td"
+    KIND_TP = "tp"
+    KIND_CHOICES = (
+        (KIND_CM, "Cours magistral"),
+        (KIND_TD, "Travaux dirigés"),
+        (KIND_TP, "Travaux pratiques"),
+    )
+
+    STATUS_PLANNED = "planned"
+    STATUS_COMPLETED = "completed"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_CHOICES = (
+        (STATUS_PLANNED, "Planifiée"),
+        (STATUS_COMPLETED, "Réalisée"),
+        (STATUS_CANCELLED, "Annulée"),
+    )
+
+    professor = models.ForeignKey(
+        ProfessorProfile, on_delete=models.CASCADE,
+        related_name="attendance_sessions", verbose_name="Enseignant",
+    )
+    school_class = models.ForeignKey(
+        SchoolClass, on_delete=models.CASCADE,
+        related_name="attendance_sessions", verbose_name="Classe",
+    )
+    student_group = models.ForeignKey(
+        StudentGroup, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="attendance_sessions", verbose_name="Groupe",
+    )
+    title = models.CharField("Module", max_length=160)
+    kind = models.CharField(
+        "Type de séance", max_length=10, choices=KIND_CHOICES, default=KIND_TD,
+    )
+    starts_at = models.DateTimeField("Début")
+    duration_minutes = models.PositiveSmallIntegerField("Durée (min)", default=90)
+    status = models.CharField(
+        "Statut", max_length=12, choices=STATUS_CHOICES, default=STATUS_PLANNED,
+    )
+    notes = models.TextField("Notes", blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+", verbose_name="Créée par",
+    )
+    created_at = models.DateTimeField("Créée le", auto_now_add=True)
+
+    class Meta:
+        ordering = ("-starts_at",)
+        verbose_name = "Séance de cours"
+        verbose_name_plural = "Séances de cours"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("professor", "school_class", "starts_at", "title"),
+                name="unique_attendance_session_per_slot",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(duration_minutes__gt=0),
+                name="attendance_session_duration_positive",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=("university", "starts_at"),
+                name="coach_attendance_uni_date_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s — %s" % (self.title, self.starts_at)
+
+    def clean(self):
+        errors = []
+        if self.school_class_id and self.professor_id:
+            if self.school_class.university_id != self.professor.university_id:
+                errors.append(ValidationError(
+                    "La classe et l'enseignant n'appartiennent pas à la même université."
+                ))
+        if self.student_group_id and self.school_class_id:
+            if self.student_group.school_class_id != self.school_class_id:
+                errors.append(ValidationError(
+                    "Le groupe n'appartient pas à cette classe."
+                ))
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        if self.school_class_id:
+            self.university_id = self.school_class.university_id
+        super().save(*args, **kwargs)
+
+    @property
+    def attended_count(self):
+        return self.records.filter(
+            status__in=(AttendanceRecord.STATUS_PRESENT, AttendanceRecord.STATUS_LATE),
+        ).count()
+
+    @property
+    def recorded_count(self):
+        return self.records.exclude(status=AttendanceRecord.STATUS_EXCUSED).count()
+
+
+class AttendanceRecord(_TenantModel):
+    """Présence, retard, absence ou absence justifiée d'un étudiant à une séance."""
+
+    STATUS_PRESENT = "present"
+    STATUS_LATE = "late"
+    STATUS_ABSENT = "absent"
+    STATUS_EXCUSED = "excused"
+    STATUS_CHOICES = (
+        (STATUS_PRESENT, "Présent"),
+        (STATUS_LATE, "En retard"),
+        (STATUS_ABSENT, "Absent"),
+        (STATUS_EXCUSED, "Absence justifiée"),
+    )
+    ATTENDED_STATUSES = (STATUS_PRESENT, STATUS_LATE)
+    COUNTED_STATUSES = (STATUS_PRESENT, STATUS_LATE, STATUS_ABSENT)
+
+    session = models.ForeignKey(
+        AttendanceSession, on_delete=models.CASCADE,
+        related_name="records", verbose_name="Séance",
+    )
+    student = models.ForeignKey(
+        StudentProfile, on_delete=models.CASCADE,
+        related_name="attendance_records", verbose_name="Étudiant",
+    )
+    status = models.CharField(
+        "Présence", max_length=10, choices=STATUS_CHOICES, default=STATUS_PRESENT,
+    )
+    note = models.CharField("Commentaire", max_length=200, blank=True)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+", verbose_name="Saisi par",
+    )
+    recorded_at = models.DateTimeField("Saisi le", auto_now=True)
+
+    class Meta:
+        ordering = ("session__starts_at", "student__membership__user__last_name")
+        verbose_name = "Présence"
+        verbose_name_plural = "Présences"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("session", "student"), name="unique_attendance_per_session_student",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=("student", "status"), name="coach_att_student_status_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s — %s" % (self.student, self.get_status_display())
+
+    def clean(self):
+        if self.session_id and self.student_id:
+            if self.session.university_id != self.student.university_id:
+                raise ValidationError(
+                    "La séance et l'étudiant n'appartiennent pas à la même université."
+                )
+
+    def save(self, *args, **kwargs):
+        if self.session_id:
+            self.university_id = self.session.university_id
+        super().save(*args, **kwargs)
+

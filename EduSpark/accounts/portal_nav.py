@@ -122,6 +122,7 @@ NAV_SECTIONS = {
         {
             "label": "Suivi & Progression",
             "items": (
+                {"label": "Mes notifications", "icon": "notifications", "url_name": "coaching:student_notifications"},
                 {"label": "Mes Objectifs & Plans", "icon": "flag", "url_name": "coaching:student_progress"},
                 {"label": "Mes Tâches", "icon": "check_circle_outline", "url_name": "coaching:student_tasks"},
                 {"label": "Mes Rendez-vous", "icon": "event_available", "url_name": "coaching:student_appointments"},
@@ -175,6 +176,7 @@ NAV_SECTIONS = {
             "label": "Suivi Référent",
             "items": (
                 {"label": "Tableau de bord étudiants", "icon": "monitoring", "url_name": "coaching:prof_followup"},
+                {"label": "Présences", "icon": "fact_check", "url_name": "coaching:prof_attendance"},
                 {"label": "Fiches & Difficultés", "icon": "person_search", "url_name": "coaching:prof_followup_cards"},
                 {"label": "Rendez-vous de tutorat", "icon": "support_agent", "url_name": "coaching:prof_tutoring"},
                 {"label": "Journal de progression", "icon": "trending_up", "url_name": "coaching:prof_student_journal"},
