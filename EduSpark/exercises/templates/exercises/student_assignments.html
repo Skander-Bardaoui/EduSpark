@@ -1,0 +1,640 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Devoirs — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+
+<!-- Section En-tête de page & Contexte Master 1 -->
+<section class="flex flex-col gap-space-sm mb-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase tracking-wider">Master 1 Informatique &amp; IA</span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Semestre 1 • 2024-2025</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Devoirs &amp; Entraînement Pratique</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+          Suivi des livrables de TP, devoirs maison et séries d'entraînement multimodal.
+        </p>
+</div>
+<!-- Quick Action: Accessible Modal Trigger for AI Assistance -->
+<div class="flex items-center gap-space-sm">
+<button aria-controls="ai-panel-drawer" aria-expanded="false" class="inline-flex items-center gap-2 h-11 px-space-md rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:opacity-95 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary" onclick="document.getElementById('ai-panel-drawer').classList.remove('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Générer un entraînement IA</span>
+</button>
+</div>
+</div>
+<!-- Quick Metrics Strip / Donut progress cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mt-space-sm">
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Travaux urgents</span>
+<span class="font-data-metric text-[20px] font-bold text-primary">{{ urgent_count }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Devoirs à rendre</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">alarm</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">En cours</span>
+<span class="font-data-metric text-[20px] font-bold text-secondary">{{ in_progress_count }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Brouillon / TP actif</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[26px]">pending_actions</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Livrables validés</span>
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ validated_count }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Notés ce semestre</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Moyenne actuelle</span>
+<div class="flex items-baseline gap-1">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{% if avg_grade %}{{ avg_grade }}{% else %}—{% endif %}</span>
+<span class="font-data-metric text-data-metric text-outline">/ 20</span>
+</div>
+<span class="font-body-sm text-body-sm text-tertiary-container font-medium block mt-0.5">Moyenne générale</span>
+</div>
+<!-- Progress mini gauge SVG -->
+<div class="relative w-12 h-12 flex items-center justify-center">
+<svg class="w-12 h-12 -rotate-90" viewbox="0 0 36 36">
+<circle class="text-surface-container stroke-current" cx="18" cy="18" fill="none" r="15.5" stroke-width="3"></circle>
+<circle class="text-primary stroke-current" cx="18" cy="18" fill="none" r="15.5" stroke-dasharray="100" stroke-dashoffset="{{ 100|add:"-"|add:avg_grade_pct }}" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<span class="absolute font-data-metric text-[11px] font-bold text-primary">{% if avg_grade_pct %}{{ avg_grade_pct }}%{% else %}—{% endif %}</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Onglets principaux -->
+<section aria-label="Sections devoirs" class="flex flex-col gap-space-md mb-space-lg">
+<div class="flex max-w-full items-center gap-space-xs overflow-x-auto rounded-full bg-surface-container-low p-1.5">
+<button aria-current="page" class="h-10 px-space-md rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md shadow-xs focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">assignment</span>
+<span>Devoirs notés ({{ total_open }})</span>
+</button>
+<button class="h-10 px-space-md rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">model_training</span>
+<span>Banque d'entraînement libre</span>
+</button>
+<button class="h-10 px-space-md rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+<span>Historique des corrigés</span>
+</button>
+</div>
+<!-- Filtres accessibles WCAG 2.2 AA -->
+<div class="bg-surface-container-lowest p-space-md rounded shadow-xs flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Filtrer :
+        </span>
+<!-- Filtre Statut -->
+<label class="sr-only" for="filter-status">Filtrer par statut</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-status">
+<option selected="">Statut : Tous</option>
+<option>À faire</option>
+<option>En cours de rédaction</option>
+<option>Rendu - En attente de note</option>
+<option>Noté &amp; Corrigé</option>
+</select>
+<!-- Filtre Matière -->
+<label class="sr-only" for="filter-subject">Filtrer par matière</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-subject">
+<option selected="">Matière : Toutes</option>
+<option>Intelligence Artificielle</option>
+<option>Algorithmique Avancée</option>
+<option>Éthique du Numérique</option>
+<option>Systèmes Distribués</option>
+</select>
+<!-- Filtre Échéance -->
+<label class="sr-only" for="filter-deadline">Filtrer par date d'échéance</label>
+<select class="h-10 pl-3 pr-8 bg-surface-container-low text-on-surface text-body-sm font-body-sm rounded outline-none focus:ring-2 focus:ring-primary cursor-pointer" id="filter-deadline">
+<option selected="">Échéance : Plus proche</option>
+<option>Cette semaine</option>
+<option>Ce mois-ci</option>
+<option>Passées</option>
+</select>
+</div>
+<div class="text-on-surface-variant font-body-sm text-body-sm">
+        Affichage de <span class="font-semibold text-on-surface">{{ total_open }} devoir{{ total_open|pluralize }}</span> prioritaires
+      </div>
+</div>
+</section>
+<!-- Grille principale : Cartes de Devoirs -->
+<section aria-label="Liste des devoirs" class="flex flex-col gap-space-md mb-space-xl">
+{% for item in open_assignments %}
+{% with a=item.assignment sub=item.submission %}
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-xs relative overflow-hidden flex flex-col xl:flex-row gap-space-lg justify-between">
+{% if item.is_urgent %}<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-error"></div>{% endif %}
+<div class="flex-1 flex flex-col gap-space-xs">
+  <div class="flex flex-wrap items-center gap-space-xs">
+    {% if item.is_urgent %}
+    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+      <span class="material-symbols-outlined text-[16px]">priority_high</span>
+      <span>Urgent{% if item.days_left is not None %} • Échéance dans {{ item.days_left }} jour{{ item.days_left|pluralize }}{% endif %}</span>
+    </span>
+    {% elif sub and sub.status == "brouillon" %}
+    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+      <span class="material-symbols-outlined text-[16px]">timelapse</span>
+      <span>Statut : En cours de rédaction</span>
+    </span>
+    {% elif sub and sub.status == "rendu" %}
+    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">
+      <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+      <span>Statut : Rendu{% if sub.submitted_at %} le {{ sub.submitted_at|date:"j M." }}{% endif %}</span>
+    </span>
+    {% else %}
+    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+      <span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+      <span>Statut : À commencer</span>
+    </span>
+    {% endif %}
+    {% if a.subject %}<span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">{{ a.subject }}</span>{% endif %}
+    <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Coeff. {{ a.coefficient }}</span>
+  </div>
+  <h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">{{ a.title }}</h2>
+  {% if a.instructions %}<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">{{ a.instructions|truncatechars:200 }}</p>{% endif %}
+  <div class="mt-space-sm max-w-xl">
+    <div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant mb-1.5">
+      <span class="flex items-center gap-1.5 font-medium {% if item.is_urgent %}text-error{% else %}text-secondary{% endif %}">
+        <span class="material-symbols-outlined text-[18px]">timelapse</span>
+        {{ item.status_label }}
+      </span>
+      {% if a.deadline %}<span class="font-data-metric text-data-metric text-on-surface font-semibold">Échéance : {{ a.deadline|date:"j F Y H\hi" }}</span>{% endif %}
+    </div>
+    {% if sub %}
+    <div aria-label="Progression" aria-valuemax="100" aria-valuemin="0" aria-valuenow="{{ sub.progress_pct }}" class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden" role="progressbar">
+      <div class="h-full {% if item.is_urgent %}bg-error{% else %}bg-secondary{% endif %} rounded-full transition-all duration-300" style="width: {{ sub.progress_pct }}%"></div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[220px]">
+  {% if sub and sub.status == "rendu" %}
+  <a href="{% url 'exercises:student_assignment_detail' a.pk %}" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-xs focus:outline-none focus:ring-2 focus:ring-primary">
+    <span class="material-symbols-outlined text-[20px]">visibility</span><span>Voir la copie soumise</span>
+  </a>
+  {% elif sub and sub.status == "corrige" %}
+  <a href="{% url 'exercises:student_assignment_detail' a.pk %}" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary">
+    <span class="material-symbols-outlined text-[20px]">grade</span><span>Voir la correction</span>
+  </a>
+  {% elif sub and sub.status == "brouillon" %}
+  <a href="{% url 'exercises:student_assignment_detail' a.pk %}" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-xs focus:outline-none focus:ring-2 focus:ring-primary">
+    <span class="material-symbols-outlined text-[20px]">edit_document</span><span>Reprendre le devoir</span>
+  </a>
+  {% else %}
+  <a href="{% url 'exercises:student_assignment_detail' a.pk %}" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-low text-primary hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary">
+    <span class="material-symbols-outlined text-[20px]">folder_open</span><span>Ouvrir l'énoncé</span>
+  </a>
+  {% endif %}
+  <a href="{% url 'exercises:student_assignment_pdf' a.pk %}" target="_blank" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest font-label-md text-label-md transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary">
+    <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span><span>Télécharger PDF</span>
+  </a>
+</div>
+</article>
+{% endwith %}
+{% empty %}
+<div class="bg-surface-container-lowest p-space-xl rounded shadow-xs text-center">
+  <span class="material-symbols-outlined text-[48px] text-on-surface-variant">assignment</span>
+  <p class="font-headline-sm text-headline-sm text-on-surface mt-2">Aucun devoir en cours</p>
+  <p class="font-body-md text-body-md text-on-surface-variant mt-1">Votre enseignant n'a pas encore publié de devoirs. Revenez bientôt !</p>
+</div>
+{% endfor %}
+
+{% if past_with_sub %}
+<div class="mt-space-md">
+  <h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-md">Historique des devoirs terminés</h2>
+  {% for item in past_with_sub %}
+  {% with a=item.assignment sub=item.submission %}
+  <article class="bg-surface-container-low p-space-lg rounded shadow-xs flex flex-col xl:flex-row gap-space-lg justify-between opacity-90 mb-space-sm">
+    <div class="flex-1 flex flex-col gap-space-xs">
+      <div class="flex flex-wrap items-center gap-space-xs">
+        {% if sub and sub.grade is not None %}
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">grade</span>
+          <span>Note : {{ sub.grade }}/20</span>
+        </span>
+        {% elif sub and sub.status == "rendu" %}
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+          <span>Rendu — En attente</span>
+        </span>
+        {% else %}
+        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">
+          <span class="material-symbols-outlined text-[16px]">history</span><span>Terminé</span>
+        </span>
+        {% endif %}
+        {% if a.subject %}<span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">{{ a.subject }}</span>{% endif %}
+      </div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">{{ a.title }}</h2>
+      {% if sub and sub.feedback %}<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 italic">Commentaire : {{ sub.feedback }}</p>{% endif %}
+    </div>
+    <div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[200px]">
+      {% if sub %}
+      <a href="{% url 'exercises:student_assignment_detail' a.pk %}" class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all flex items-center justify-center gap-2 shadow-xs focus:outline-none focus:ring-2 focus:ring-primary">
+        <span class="material-symbols-outlined text-[20px]">visibility</span><span>Voir la copie</span>
+      </a>
+      {% endif %}
+    </div>
+  </article>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% endif %}
+</section>
+<!-- Section Entraînement Thématique Multimodal -->
+<section aria-label="S'entraîner par thématique" class="flex flex-col gap-space-md mb-space-xl">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">S'entraîner par thématique</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Modules interactifs ciblés pour consolider vos acquis théoriques et pratiques.</p>
+</div>
+<a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1" href="{% url 'exercises:student_practice' %}">
+<span>Voir tout le catalogue de révision</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<!-- Card QCM interactif -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">quiz</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Auto-évaluation</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">QCM Théorique &amp; Formules</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            30 questions chronométrées sur les descentes de gradients stochastiques, rétropropagation et backpropagation through time.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-on-surface-variant">Durée ~ 15 min</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+            Lancer le quiz
+          </button>
+</div>
+</div>
+<!-- Card Code Sandbox Python / PyTorch -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">terminal</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Pratique guidée</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Code Sandbox PyTorch</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            Bac à sable interactif dans le navigateur avec GPU virtuel alloué. Implémentez un module d'attention multi-têtes en moins de 50 lignes.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-secondary font-semibold">GPU T4 Alloué</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-secondary text-on-secondary hover:opacity-95 font-label-md text-label-md transition-all focus:outline-none focus:ring-2 focus:ring-secondary" type="button">
+            Ouvrir la session
+          </button>
+</div>
+</div>
+<!-- Card Questions réflexives & Éthique -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-tertiary-container mb-space-sm">
+<span class="material-symbols-outlined text-[22px]">psychology</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Analyse conceptuelle</span>
+<h3 class="font-title-md text-title-md text-on-surface mt-1">Études de Cas &amp; Débats</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+            Scénarios décisionnels réels : audit de biais dans le recrutement automatisé et protection des données sensibles sous l'EU AI Act.
+          </p>
+</div>
+<div class="mt-space-lg pt-space-md flex items-center justify-between">
+<span class="font-data-metric text-data-metric text-on-surface-variant">4 cas disponibles</span>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+            Explorer les cas
+          </button>
+</div>
+</div>
+</div>
+<!-- Lecteur Multimédia Accessible (Exercice de Compréhension Orale / Conférence IA) -->
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-xs mt-space-md flex flex-col lg:flex-row gap-space-lg items-center">
+<!-- Media Player Mock with Accessible Visualizer -->
+<div class="w-full lg:w-1/2 flex flex-col gap-space-sm">
+<div class="relative bg-inverse-surface rounded p-space-md overflow-hidden aspect-video flex flex-col justify-between text-inverse-on-surface">
+<!-- Top bar with CC and Audio badges -->
+<div class="flex items-center justify-between z-10">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest/20 backdrop-blur-md text-label-sm font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-error">radio_button_checked</span>
+              Conférence NeurIPS • Audio haute fidélité
+            </span>
+<div class="flex items-center gap-1.5">
+<button aria-label="Sous-titres activés" aria-pressed="true" class="px-2 py-0.5 rounded bg-primary text-on-primary font-data-metric text-[11px] font-bold" type="button">
+                CC ON
+              </button>
+<button aria-label="Paramètres de lecture" class="p-1 rounded hover:bg-surface-container-lowest/20" type="button">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+</div>
+<!-- Animated Audio Waveform (multimodal accessible visualizer) -->
+<div aria-hidden="true" class="flex items-end justify-center gap-1 h-20 my-auto py-2">
+<span class="w-1.5 bg-primary-fixed rounded-full h-8 animate-pulse"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-14 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-20 animate-pulse"></span>
+<span class="w-1.5 bg-secondary rounded-full h-12"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-16 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-6"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-10 animate-pulse"></span>
+<span class="w-1.5 bg-secondary rounded-full h-18 animate-pulse"></span>
+<span class="w-1.5 bg-primary-fixed rounded-full h-14 animate-pulse"></span>
+<span class="w-1.5 bg-secondary-fixed rounded-full h-8"></span>
+</div>
+<!-- Bottom Player Controls -->
+<div class="flex flex-col gap-2 z-10">
+<!-- Scrubber bar -->
+<div class="relative w-full h-1.5 bg-surface-container-lowest/30 rounded-full cursor-pointer">
+<div class="h-full bg-secondary-container rounded-full" style="width: 42%;"></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-data-metric text-xs">
+<div class="flex items-center gap-2">
+<button aria-label="Pause" class="w-8 h-8 rounded-full bg-on-primary text-primary flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button aria-label="Reculer de 10 secondes" class="p-1 text-inverse-on-surface hover:text-on-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">replay_10</span>
+</button>
+<button aria-label="Avancer de 10 secondes" class="p-1 text-inverse-on-surface hover:text-on-primary" type="button">
+<span class="material-symbols-outlined text-[18px]">forward_10</span>
+</button>
+<span>04:12 / 09:58</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/20">Vitesse : 1.0x</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Synchronized Accessible Transcription Column -->
+<div class="w-full lg:w-1/2 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Transcription synchronisée (FR &amp; EN)</span>
+<span class="inline-flex items-center gap-1 text-secondary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px]">hearing</span>
+            Exercice de compréhension auditive
+          </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface">
+          Prof. Yoshua Bengio : "Représentations auto-supervisées et causalité"
+        </h3>
+<div aria-label="Transcription intégrale" class="bg-surface-container-low p-space-md rounded max-h-44 overflow-y-auto flex flex-col gap-space-xs text-body-md font-body-md" tabindex="0">
+<p class="text-on-surface-variant text-body-sm">
+<span class="font-data-metric text-[11px] text-outline">[03:45]</span> Dans le cadre des représentations latentes, l'optimisation ne doit pas se restreindre à la seule corrélation statistique...
+          </p>
+<p class="bg-surface-container-highest p-2 rounded text-primary font-medium text-body-sm">
+<span class="font-data-metric text-[11px] text-primary">[04:12]</span> <em>(Passage actuel)</em> Nous introduisons ici une variable de distribution contrefactuelle qui permet à l'agent de mesurer la stabilité des invariants.
+          </p>
+<p class="text-on-surface-variant text-body-sm">
+<span class="font-data-metric text-[11px] text-outline">[04:38]</span> Ceci contraint l'espace d'hypothèse et prévient l'effondrement des représentations (representation collapse).
+          </p>
+</div>
+<div class="flex items-center gap-space-sm mt-1">
+<button class="min-h-[44px] px-space-md rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">quiz</span>
+<span>Répondre aux questions associées (3)</span>
+</button>
+<button class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Télécharger la transcription</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Panneau Latéral Coulissant IA (Slide-over Drawer Accessible) -->
+<aside aria-labelledby="ai-drawer-title" aria-modal="true" class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface-container-lowest shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col" id="ai-panel-drawer" role="dialog">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="ai-drawer-title">Générateur d'Entraînement IA</h2>
+</div>
+<button aria-label="Fermer le panneau IA" class="w-9 h-9 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary" onclick="document.getElementById('ai-panel-drawer').classList.add('translate-x-full')" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Body -->
+<div class="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
+<!-- Resilience Warning Banner -->
+<div class="bg-surface-container-high p-space-md rounded flex items-start gap-space-sm" role="status">
+<span class="material-symbols-outlined text-primary text-[22px] flex-shrink-0 mt-0.5">verified_user</span>
+<div class="text-body-sm font-body-sm text-on-surface">
+<strong class="font-semibold block mb-0.5">Continuité de service garantie</strong>
+          Le service de correction et d'entraînement manuel reste disponible à 100% en cas d'interruption du service IA.
+        </div>
+</div>
+<!-- Form Inputs -->
+<form class="flex flex-col gap-space-md" onsubmit="event.preventDefault();">
+<!-- Target Subject -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface" for="ai-subject-select">Matière ciblée</label>
+<select class="h-11 px-space-sm bg-surface-container-low text-on-surface text-body-md font-body-md rounded outline-none focus:ring-2 focus:ring-primary" id="ai-subject-select">
+<option selected="">Intelligence Artificielle &amp; Deep Learning</option>
+<option>Algorithmique Avancée &amp; Graphes</option>
+<option>Systèmes Distribués &amp; Consensus</option>
+<option>Éthique du Numérique</option>
+</select>
+</div>
+<!-- Difficulty Level -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-on-surface">Niveau de difficulté</span>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs">
+<label class="flex items-center gap-2 p-3 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container-high transition-colors">
+<input class="w-4 h-4 text-primary focus:ring-primary" name="difficulty" type="radio" value="intermediaire"/>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">Intermédiaire</span>
+</label>
+<label class="flex items-center gap-2 p-3 bg-surface-container-low rounded cursor-pointer border border-primary/20 bg-primary/5">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary" name="difficulty" type="radio" value="avance"/>
+<span class="font-body-sm text-body-sm text-primary font-semibold">Avancé (Master 1)</span>
+</label>
+</div>
+</div>
+<!-- Number of Questions -->
+<div class="flex flex-col gap-1.5">
+<span class="font-label-md text-label-md text-on-surface">Nombre de questions générées</span>
+<div class="flex items-center gap-space-sm">
+<button class="flex-1 py-2 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high" data-count-btn="3" type="button">3 questions</button>
+<button class="flex-1 py-2 rounded bg-primary text-on-primary font-label-md text-label-md shadow-xs" data-count-btn="5" type="button">5 questions</button>
+<button class="flex-1 py-2 rounded bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high" data-count-btn="10" type="button">10 questions</button>
+</div>
+</div>
+<button class="min-h-[44px] w-full rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:opacity-95 transition-all flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-secondary" id="ai-generate-real-btn" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+Générer la série
+</button>
+</form>
+<!-- Loading indicator -->
+<div style="display:none" class="items-center gap-2 text-secondary font-body-sm text-body-sm" id="ai-loading">
+<span class="material-symbols-outlined text-[20px]" style="animation:spin 1s linear infinite">progress_activity</span>
+Génération en cours…
+</div>
+<!-- AI Suggestion Preview Card -->
+<div class="bg-surface-container-low p-space-md rounded flex-col gap-space-sm hidden" style="display:none" id="ai-result-box">
+<div class="flex items-center justify-between">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed text-secondary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+            Suggestion IA prête
+          </span>
+<!-- Confidence metric -->
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric text-primary font-bold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+            Score de confiance : 95%
+          </span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface font-bold" id="ai-series-title">Série générée par IA</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Génération personnalisée alignée avec votre profil.
+          </p>
+</div>
+<!-- Question List Preview -->
+<ol class="list-decimal pl-5 flex flex-col gap-2 font-body-sm text-body-sm text-on-surface" id="ai-questions-list">
+</ol>
+<!-- Standard Actions: Garder, Modifier, Refuser -->
+<div class="flex flex-col sm:flex-row items-center gap-space-xs mt-space-sm pt-space-xs">
+<button class="w-full sm:flex-1 min-h-[44px] px-3 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" id="ai-keep-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span>Garder</span>
+</button>
+<button class="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-full text-error hover:bg-error-container/40 font-label-md text-label-md transition-all flex items-center justify-center gap-1 focus:outline-none focus:ring-2 focus:ring-error" id="ai-refuse-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-space-md bg-surface-container-low text-center text-outline font-data-metric text-[11px]">
+      Modèle certifié {{ portal_university.name }} • RGPD compliant
+    </div>
+</aside>
+</div></main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var GENERATE_URL = "{% url 'exercises:api_ai_generate_student' %}";
+  var CSRF = "{{ csrf_token }}";
+
+  /* ---- AI Drawer ---- */
+  var generateBtn = document.getElementById('ai-generate-real-btn');
+  var resultBox = document.getElementById('ai-result-box');
+  var keepBtn = document.getElementById('ai-keep-btn');
+  var refuseBtn = document.getElementById('ai-refuse-btn');
+  var aiTitle = document.getElementById('ai-series-title');
+  var aiList = document.getElementById('ai-questions-list');
+  var aiLoading = document.getElementById('ai-loading');
+  var countBtns = Array.prototype.slice.call(document.querySelectorAll('[data-count-btn]'));
+  var selectedCount = 5;
+
+  countBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      selectedCount = parseInt(btn.getAttribute('data-count-btn'));
+      countBtns.forEach(function(b) {
+        b.classList.toggle('bg-primary', b === btn);
+        b.classList.toggle('text-on-primary', b === btn);
+        b.classList.toggle('bg-surface-container', b !== btn);
+        b.classList.toggle('text-on-surface', b !== btn);
+      });
+    });
+  });
+
+  if (generateBtn) {
+    generateBtn.addEventListener('click', function() {
+      var subjectEl = document.getElementById('ai-subject-select');
+      var subject = subjectEl ? subjectEl.value : 'Général';
+      var diffEl = document.querySelector('input[name="difficulty"]:checked');
+      // Map radio value to form difficulty value
+      var diffMap = {'intermediaire': 'moyen', 'avance': 'difficile'};
+      var rawDiff = diffEl ? diffEl.value : 'moyen';
+      var difficulty = diffMap[rawDiff] || rawDiff;
+
+      if (aiLoading) { aiLoading.classList.remove('hidden'); aiLoading.style.display='flex'; }
+      if (resultBox) resultBox.classList.add('hidden');
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Génération…';
+
+      fetch(GENERATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({
+          subject: subject,
+          topic: subject,        // use subject as topic (both are the same notion)
+          difficulty: difficulty,
+          exercise_type: 'qcm',
+          count: selectedCount
+        })
+      })
+      .then(function(r) {
+        if (!r.ok) { return r.json().then(function(d){ throw new Error(d.error || 'Erreur serveur'); }); }
+        return r.json();
+      })
+      .then(function(data) {
+        if (aiLoading) aiLoading.style.display='none';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1">auto_awesome</span> Générer la série';
+        if (data.error) {
+          window.portalToast && window.portalToast('Erreur IA : ' + data.error);
+          return;
+        }
+        if (aiTitle) aiTitle.textContent = data.title || 'Série générée par IA';
+        if (aiList) {
+          aiList.innerHTML = '';
+          (data.questions || []).forEach(function(q, i) {
+            var li = document.createElement('li');
+            li.innerHTML = '<strong>' + (i+1) + '.</strong> ' + q.text;
+            aiList.appendChild(li);
+          });
+        }
+        if (resultBox) { resultBox.classList.remove('hidden'); resultBox.style.display='flex'; }
+        generateBtn._lastResult = data;
+      })
+      .catch(function(err) {
+        if (aiLoading) aiLoading.style.display='none';
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1">auto_awesome</span> Générer la série';
+        window.portalToast && window.portalToast('Erreur : ' + (err.message || 'Service IA indisponible.'));
+      });
+    });
+  }
+
+  if (keepBtn) {
+    keepBtn.addEventListener('click', function() {
+      var result = generateBtn && generateBtn._lastResult;
+      document.getElementById('ai-panel-drawer').classList.add('translate-x-full');
+      if (result && result.series_id) {
+        window.location.href = '/etudiant/entrainement/' + result.series_id + '/session/';
+      } else {
+        window.location.href = '/etudiant/entrainement/';
+      }
+    });
+  }
+  if (refuseBtn) {
+    refuseBtn.addEventListener('click', function() {
+      document.getElementById('ai-panel-drawer').classList.add('translate-x-full');
+      if (resultBox) { resultBox.style.display='none'; resultBox.classList.add('hidden'); }
+      if (aiList) aiList.innerHTML = '';
+      if (aiTitle) aiTitle.textContent = 'Série générée par IA';
+      if (generateBtn) generateBtn._lastResult = null;
+    });
+  }
+})();
+</script>
+{% endblock %}
