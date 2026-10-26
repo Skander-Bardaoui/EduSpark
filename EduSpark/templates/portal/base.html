@@ -69,6 +69,24 @@ main form label{font-size:13px;font-weight:600;}
 </div>
 {% include "portal/_flash.html" %}
 <div aria-atomic="true" aria-live="polite" class="fixed bottom-5 right-5 z-[80] flex w-80 max-w-[calc(100vw-2.5rem)] flex-col gap-2" id="portal-toasts"></div>
+<div aria-labelledby="portal-delete-title" aria-modal="true" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="portal-confirm-delete-modal" role="dialog">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-portal-delete-cancel type="button"></button>
+<div class="relative z-10 w-full max-w-md rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start gap-3 border-b border-outline-variant/40 px-5 py-4">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-error-container text-error"><span class="material-symbols-outlined text-[20px]">delete_forever</span></span>
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface" id="portal-delete-title">Confirmer la suppression</h2><p class="mt-1 text-xs text-on-surface-variant">Cette action est définitive et peut supprimer des données liées.</p></div>
+</div>
+<div class="px-5 py-4">
+<p class="hidden rounded bg-error-container/40 px-3 py-2 text-sm text-on-error-container" data-portal-delete-detail></p>
+<p class="text-sm text-on-surface-variant">Voulez-vous vraiment continuer ?</p>
+</div>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 px-5 py-4">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-portal-delete-cancel type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-error px-5 py-2 text-sm font-bold text-on-error transition-colors hover:opacity-90" data-portal-delete-confirm type="button"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</button>
+</div>
+</div>
+</div>
+<form action="" class="hidden" data-no-confirm id="portal-delete-form" method="post">{% csrf_token %}</form>
 <script>
 (function () {
   'use strict';
@@ -305,6 +323,126 @@ main form label{font-size:13px;font-weight:600;}
   });
 
   window.portalCloseModal = closeModal;
+
+  var deleteModal = document.getElementById('portal-confirm-delete-modal');
+  var deleteForm = document.getElementById('portal-delete-form');
+  var deleteDetail = deleteModal ? deleteModal.querySelector('[data-portal-delete-detail]') : null;
+  var deleteConfirm = deleteModal ? deleteModal.querySelector('[data-portal-delete-confirm]') : null;
+  var pendingDeleteForm = null;
+  var pendingDeleteUrl = '';
+  var pendingDeleteOpener = null;
+
+  function isDeleteUrl(value) {
+    if (!value) return false;
+    var path = value;
+    try { path = new URL(value, window.location.href).pathname; } catch (error) { /* keep raw value */ }
+    return /(^|\/)(supprimer|delete)(\/|$)/i.test(path);
+  }
+
+  function deleteDetailText(element) {
+    if (!element) return '';
+    var text = (
+      element.getAttribute('data-confirm-detail')
+      || element.getAttribute('title')
+      || element.getAttribute('aria-label')
+      || ''
+    );
+    if (!text && element.matches && element.matches('a, button, input[type="submit"], input[type="button"]')) {
+      text = element.value || element.textContent || '';
+    }
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
+  function isDeleteForm(form) {
+    if (!form || !form.matches || form.hasAttribute('data-no-confirm')) return false;
+    if (form.hasAttribute('data-confirm-delete')) return true;
+    if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return false;
+    if (isDeleteUrl(form.getAttribute('action') || window.location.pathname)) return true;
+    var action = form.querySelector('input[name="action"]');
+    if (action && (action.value || '').toLowerCase() === 'delete') return true;
+    var submit = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (!submit) return false;
+    var text = normalize(deleteDetailText(submit) + ' ' + (submit.value || ''));
+    return text.indexOf('supprimer') !== -1 || text.indexOf('confirmer la suppression') !== -1;
+  }
+
+  function openDeleteModal(opener, detail) {
+    if (!deleteModal || !deleteConfirm) return;
+    pendingDeleteOpener = opener || null;
+    deleteModal._opener = pendingDeleteOpener;
+    if (deleteDetail) {
+      var text = (detail || '').trim();
+      if (text && normalize(text) !== 'supprimer') {
+        deleteDetail.textContent = text;
+        deleteDetail.classList.remove('hidden');
+      } else {
+        deleteDetail.textContent = '';
+        deleteDetail.classList.add('hidden');
+      }
+    }
+    deleteModal.classList.remove('hidden');
+    deleteModal.classList.add('flex');
+    document.body.classList.add('portal-modal-open');
+    deleteConfirm.focus();
+  }
+
+  function closeDeleteModal() {
+    if (!deleteModal) return;
+    pendingDeleteForm = null;
+    pendingDeleteUrl = '';
+    pendingDeleteOpener = null;
+    closeModal(deleteModal);
+  }
+
+  function confirmDelete() {
+    var form = pendingDeleteForm;
+    var url = pendingDeleteUrl;
+    closeDeleteModal();
+    if (form) {
+      HTMLFormElement.prototype.submit.call(form);
+      return;
+    }
+    if (url && deleteForm) {
+      deleteForm.action = url;
+      HTMLFormElement.prototype.submit.call(deleteForm);
+    }
+  }
+
+  if (deleteModal) {
+    deleteModal.querySelectorAll('[data-portal-delete-cancel]').forEach(function (btn) {
+      btn.addEventListener('click', closeDeleteModal);
+    });
+    if (deleteConfirm) deleteConfirm.addEventListener('click', confirmDelete);
+
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !isDeleteForm(form)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pendingDeleteForm = form;
+      pendingDeleteUrl = '';
+      var submit = event.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+      openDeleteModal(submit, deleteDetailText(form) || deleteDetailText(submit));
+    }, true);
+
+    document.addEventListener('click', function (event) {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      var link = event.target.closest('a[href]');
+      if (!link || link.hasAttribute('data-no-confirm')) return;
+      if (link.hasAttribute('data-modal-open') || link.hasAttribute('data-modal-close')) return;
+      if (link.target && link.target !== '_self') return;
+      var href = link.getAttribute('href');
+      if (!href || href.charAt(0) === '#') return;
+      var url;
+      try { url = new URL(href, window.location.href); } catch (error) { return; }
+      if (url.origin !== window.location.origin || !isDeleteUrl(url.pathname)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pendingDeleteForm = null;
+      pendingDeleteUrl = url.href;
+      openDeleteModal(link, deleteDetailText(link));
+    }, true);
+  }
 
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Tab') return;

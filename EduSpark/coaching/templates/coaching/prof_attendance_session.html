@@ -7,9 +7,12 @@
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevé de présences</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">{{ session.title }} · {{ session.school_class.name }} · {{ session.get_kind_display }} · {{ date_label }}</p>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">{{ session.title }} · {{ session.school_class.name }} · {{ session.get_kind_display }} · {{ date_label }}{% if session.slot_id %}{% if session.slot.room %} · {{ session.slot.room }}{% endif %}{% if session.student_group_id %} · {{ session.student_group.name }}{% endif %}{% endif %}</p>
 </div>
+<div class="flex flex-wrap gap-2">
+{% if session.slot_id %}<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_timetable' %}"><span class="material-symbols-outlined text-[18px]">calendar_month</span>Emploi du temps</a>{% endif %}
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:prof_attendance' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Toutes les séances</a>
+</div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 {% include "portal/_stat_card.html" with label="Étudiants" value=rows|length icon="group" hint="Concernés par la séance" %}

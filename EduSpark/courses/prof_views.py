@@ -1,11 +1,14 @@
 """Portail professeur : ses matières, son emploi du temps, ses cours (chapitres
 et supports) et la publication de chaque cours pour chacune de ses classes."""
 
+from datetime import timedelta
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView,
@@ -101,9 +104,17 @@ class TimetableView(ProfessorMixin, TemplateView):
             )
         )
         grid = build_week_grid(slots)
+        upcoming = next_session(slots)
+        today = timezone.localdate()
+        next_date = upcoming["start"].date() if upcoming else None
         context.update({
             "grid": grid,
-            "next_session": next_session(slots),
+            "next_session": upcoming,
+            "next_attendance_date": next_date,
+            "next_can_record": bool(
+                next_date
+                and today - timedelta(days=180) <= next_date <= today
+            ),
             "class_count": len({slot.assignment.school_class_id for slot in slots}),
             "subject_count": len({slot.assignment.subject_id for slot in slots}),
         })

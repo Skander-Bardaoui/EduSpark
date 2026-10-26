@@ -75,7 +75,7 @@
 <td class="px-5 py-3 text-on-surface-variant">{{ row.session.topic }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ row.when_label }}</td>
 <td class="px-5 py-3 text-on-surface-variant"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">{{ row.mode_icon }}</span>{{ row.mode_label }}</span></td>
-<td class="px-5 py-3 text-right"><button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#session-modal" data-session-action="{% url 'coaching:prof_session_complete' row.session.pk %}" data-session-complete="{{ row.session.pk }}" data-session-info="{{ row.student_name }} · {{ row.when_label }}" type="button">Clôturer</button></td>
+<td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap">{% if row.meeting_url %}<a class="inline-flex items-center gap-1 rounded-full border border-primary/40 px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary-fixed" href="{{ row.meeting_url }}" rel="noopener" target="_blank"><span class="material-symbols-outlined text-[15px]">videocam</span>Visio</a>{% endif %}<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#session-modal" data-session-action="{% url 'coaching:prof_session_complete' row.session.pk %}" data-session-complete="{{ row.session.pk }}" data-session-info="{{ row.student_name }} · {{ row.when_label }}" type="button">Clôturer</button></div></td>
 </tr>
 {% endfor %}
 </tbody>

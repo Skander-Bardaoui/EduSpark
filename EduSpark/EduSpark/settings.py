@@ -202,6 +202,35 @@ EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = env_bool('DJANGO_EMAIL_USE_TLS', True)
 
+def project_path(value):
+    """Résout un chemin relatif depuis la racine du projet Django."""
+    if not value:
+        return value
+    path = Path(value)
+    return str(path if path.is_absolute() else BASE_DIR / path)
+
+
+# Liens de visioconférence générés pour les rendez-vous de tutorat.
+# provider = jitsi (par défaut, aucune configuration)
+# provider = google (API Google Calendar + OAuth ou compte de service)
+VIDEO_MEETING_PROVIDER = os.environ.get('VIDEO_MEETING_PROVIDER', 'jitsi')
+VIDEO_MEETING_BASE_URL = os.environ.get(
+    'VIDEO_MEETING_BASE_URL', 'https://meet.jit.si',
+).rstrip('/')
+GOOGLE_SERVICE_ACCOUNT_FILE = project_path(
+    os.environ.get('GOOGLE_SERVICE_ACCOUNT_FILE', ''),
+)
+GOOGLE_CALENDAR_ID = os.environ.get('GOOGLE_CALENDAR_ID', '')
+GOOGLE_CALENDAR_TIMEZONE = os.environ.get('GOOGLE_CALENDAR_TIMEZONE', TIME_ZONE)
+GOOGLE_IMPERSONATE_USER = os.environ.get('GOOGLE_IMPERSONATE_USER', '')
+# Autorisation OAuth personnelle (recommandée avec un compte Gmail).
+GOOGLE_OAUTH_CLIENT_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_CLIENT_FILE', 'secrets/google-oauth-client.json',
+))
+GOOGLE_OAUTH_TOKEN_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_TOKEN_FILE', 'secrets/google-meet-token.json',
+))
+
 # API : JWT (access court + refresh) en authentification par défaut.
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

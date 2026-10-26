@@ -1,10 +1,12 @@
 import csv
 import json
+import unicodedata
 from collections import defaultdict
 from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
@@ -23,6 +25,7 @@ from accounts.models import (
     StudentProfile,
 )
 from accounts.tenancy import Role
+from courses.models import ScheduleSlot
 
 from .ai_planner import AIPlanError, ai_planner_available, generate_study_plan
 from .forms import (
@@ -48,6 +51,7 @@ from .forms import (
     TutorAllocationForm,
 )
 from .mailer import send_templated_email
+from .meeting import ensure_meeting_url
 from .models import (
     AttendanceRecord,
     AttendanceSession,
@@ -84,15 +88,16 @@ from .services import (
     assign_class_referent,
     assignment_meta,
     attendance_metrics,
+    attendance_occurrences,
+    attendance_pending_count,
     attendance_session_students,
-    auto_assign_class,
     caseload,
     category_distribution,
     class_label,
+    class_tutoring_students,
     display_name,
-    enrolled_count,
-    enrolled_students,
     ensure_attendance_alert,
+    get_or_create_slot_session,
     get_professor,
     get_student,
     latest_notification_view,
@@ -808,11 +813,13 @@ def student_appointments(request):
             ),
             "mode_label": next_session.get_mode_display(),
             "topic": next_session.topic,
-            "meeting_url": next_session.slot.meeting_url if next_session.slot_id else "",
+            "meeting_url": next_session.effective_meeting_url,
         }
         next_view["hint"] = "%s — %s" % (next_view["time_label"], next_view["mode_label"])
     sessions = list(
-        student.tutoring_sessions.select_related("professor__membership__user").order_by("-created_at")[:12]
+        student.tutoring_sessions
+        .select_related("professor__membership__user", "slot")
+        .order_by("-created_at")[:12]
     )
     history = []
     for session in sessions:
@@ -828,6 +835,7 @@ def student_appointments(request):
             "scope_label": scope_label,
             "mode_label": session.get_mode_display(),
             "place": session.location or ("Visioconférence" if session.mode == TutoringSlot.MODE_VIDEO else "À définir"),
+            "meeting_url": session.effective_meeting_url,
             "status_meta": SESSION_STATE_META.get(status, SESSION_STATE_META[TutoringSession.STATUS_PENDING]),
         })
 
@@ -1008,12 +1016,9 @@ def prof_dashboard(request):
         .select_related("student__membership__user", "school_class")
         .order_by("severity", "-opened_at")[:5]
     )
-    pending_attendance = (
-        AttendanceSession.objects.filter(professor=professor, university=request.university)
-        .exclude(status=AttendanceSession.STATUS_CANCELLED)
-        .annotate(record_count=Count("records"))
-        .filter(record_count=0)
-        .count()
+    week_start_day, week_end_day = week_bounds()
+    pending_attendance = attendance_pending_count(
+        professor, week_start_day, week_end_day,
     )
     week_start, week_end = week_bounds()
     journal_week = JournalEntry.objects.filter(
@@ -1061,6 +1066,12 @@ def prof_followup(request):
     assignments = list(caseload(professor))
     rows = []
     student_ids = [item.student_id for item in assignments]
+    sheet_counts = dict(
+        DifficultySheet.objects.filter(professor=professor, student_id__in=student_ids)
+        .exclude(status=DifficultySheet.STATUS_CLOSED)
+        .values_list("student_id")
+        .annotate(total=Count("id"))
+    )
     open_alerts = open_alerts_for_students(student_ids)
     alerts_by_student = defaultdict(list)
     for alert in open_alerts:
@@ -1099,6 +1110,10 @@ def prof_followup(request):
     for assignment in assignments:
         meta = assignment_meta(assignment)
         meta["alerts_count"] = len(alerts_by_student.get(assignment.student_id, []))
+        meta["sheet_count"] = sheet_counts.get(assignment.student_id, 0)
+        meta["sheets_url"] = "%s?student=%d" % (
+            reverse("coaching:prof_followup_cards"), assignment.student_id,
+        )
         meta["last_contact_label"] = relative_since(assignment.last_contact_at) if assignment.last_contact_at else "Aucun échange"
         meta["next_session"] = upcoming_by_student.get(assignment.student_id)
         meta["next_session_label"] = (
@@ -1379,7 +1394,7 @@ def prof_tutoring(request):
             university=request.university,
             status=TutoringSession.STATUS_ACCEPTED,
         )
-        .select_related("student__membership__user", "school_class")
+        .select_related("student__membership__user", "school_class", "slot")
         .order_by("scheduled_at")[:12]
     ):
         session_rows.append({
@@ -1391,6 +1406,7 @@ def prof_tutoring(request):
             "when_label": fr_day_time(item.scheduled_at) if item.scheduled_at else "À définir",
             "mode_label": item.get_mode_display(),
             "mode_icon": "videocam" if item.mode == TutoringSlot.MODE_VIDEO else "room",
+            "meeting_url": item.effective_meeting_url,
         })
     context = {
         "request_rows": request_rows,
@@ -1428,32 +1444,78 @@ def prof_tutoring(request):
 @role_required(Profil.ROLE_PROF)
 def prof_attendance(request):
     professor = get_professor(request)
+    today = timezone.localdate()
+    week_start, week_end = week_bounds(today)
+    occurrence_start = today - timedelta(days=14)
     classes = (
         SchoolClass.objects.filter(university=request.university)
         .filter(Q(professors=professor) | Q(tutor_assignments__professor=professor))
         .distinct()
         .order_by("name")
     )
-    sessions = (
+    occurrence_rows = []
+    for row in attendance_occurrences(professor, occurrence_start, week_end):
+        slot = row["slot"]
+        session = row["session"]
+        occurrence_rows.append({
+            "slot": slot,
+            "date": row["date"],
+            "date_label": fr_day_short(row["starts_at"]),
+            "time_label": slot.time_label,
+            "class_name": slot.assignment.school_class.name,
+            "module": slot.assignment.subject.name,
+            "subject_code": slot.assignment.subject.code,
+            "kind_label": slot.get_session_type_display(),
+            "group_name": slot.group.name if slot.group_id else "",
+            "room": slot.room,
+            "attended": row["attended"],
+            "recorded": row["recorded"],
+            "is_recorded": row["has_record"],
+            "status": row["status"],
+            "status_label": row["status_label"],
+            "is_todo": row["is_todo"],
+            "is_upcoming": row["is_upcoming"],
+            "is_today": row["date"] == today,
+            "url": (
+                reverse("coaching:prof_attendance_session", args=[session.pk])
+                if session is not None else ""
+            ),
+        })
+    history_sessions = (
         AttendanceSession.objects.filter(
             professor=professor, university=request.university,
         )
-        .select_related("school_class")
+        .filter(Q(slot__isnull=True) | Q(session_date__lt=occurrence_start))
+        .select_related("school_class", "slot__assignment__subject")
         .prefetch_related("records")
         .order_by("-starts_at")[:80]
     )
     session_rows = []
-    for session in sessions:
-        recorded = session.recorded_count
+    for session in history_sessions:
+        records = list(session.records.all())
+        has_record = bool(records)
         session_rows.append({
             "session": session,
             "date_label": fr_day_time(session.starts_at),
             "class_name": session.school_class.name,
             "kind_label": session.get_kind_display(),
-            "attended": session.attended_count,
-            "recorded": recorded,
-            "is_recorded": recorded > 0,
-            "status_label": session.get_status_display(),
+            "module": (
+                session.slot.assignment.subject.name
+                if session.slot_id else session.title
+            ),
+            "attended": sum(
+                1 for record in records
+                if record.status in AttendanceRecord.ATTENDED_STATUSES
+            ),
+            "recorded": sum(
+                1 for record in records
+                if record.status in AttendanceRecord.COUNTED_STATUSES
+            ),
+            "is_recorded": has_record,
+            "is_cancelled": session.status == AttendanceSession.STATUS_CANCELLED,
+            "status_label": (
+                "Relevé" if has_record else session.get_status_display()
+            ),
             "url": reverse("coaching:prof_attendance_session", args=[session.pk]),
         })
     assignments = list(caseload(professor).filter(university=request.university))
@@ -1470,12 +1532,24 @@ def prof_attendance(request):
             "excused": metrics["excused"],
         })
     rates = [row["rate"] for row in student_rows if row["rate"] is not None]
+    recorded_count = (
+        sum(1 for row in occurrence_rows if row["is_recorded"])
+        + sum(1 for row in session_rows if row["is_recorded"])
+    )
+    to_record_count = (
+        sum(1 for row in occurrence_rows if row["is_todo"])
+        + sum(
+            1 for row in session_rows
+            if not row["is_recorded"] and not row["is_cancelled"]
+        )
+    )
     context = {
+        "occurrence_rows": occurrence_rows,
         "session_rows": session_rows,
         "student_rows": student_rows,
         "classes": classes,
-        "today_value": timezone.localdate().isoformat(),
-        "min_date_value": (timezone.localdate() - timedelta(days=180)).isoformat(),
+        "today_value": today.isoformat(),
+        "min_date_value": (today - timedelta(days=180)).isoformat(),
         "default_time": "09:00",
         "slot_times": [
             "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
@@ -1483,12 +1557,56 @@ def prof_attendance(request):
             "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
         ],
         "kind_choices": AttendanceSession.KIND_CHOICES,
-        "session_count": len(session_rows),
-        "recorded_count": sum(1 for row in session_rows if row["is_recorded"]),
-        "to_record_count": sum(1 for row in session_rows if not row["is_recorded"]),
+        "session_count": len(occurrence_rows) + len(session_rows),
+        "occurrence_count": len(occurrence_rows),
+        "recorded_count": recorded_count,
+        "to_record_count": to_record_count,
         "average_rate": percent(sum(rates), len(rates)) if rates else None,
+        "period_label": "Semaine du %s au %s" % (
+            fr_day_short(week_start), fr_day_short(week_end),
+        ),
+        "occurrence_start_label": fr_day_short(occurrence_start),
     }
     return render(request, "coaching/prof_attendance.html", context)
+
+
+@require_POST
+@role_required(Profil.ROLE_PROF)
+def prof_attendance_from_slot(request, pk):
+    """Ouvre le relevé d'une occurrence précise de l'emploi du temps."""
+    professor = get_professor(request)
+    slot = get_object_or_404(
+        ScheduleSlot,
+        pk=pk,
+        university=request.university,
+        assignment__professor=professor,
+    )
+    try:
+        session_date = datetime.strptime(request.POST.get("date", ""), "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        messages.error(request, "Choisissez une date valide pour ouvrir la séance.")
+        return redirect("coaching:prof_attendance")
+    today = timezone.localdate()
+    if session_date > today:
+        messages.error(request, "La séance ne peut pas être saisie à l'avance.")
+        return redirect("coaching:prof_attendance")
+    if session_date < today - timedelta(days=180):
+        messages.error(request, "Cette séance est trop ancienne pour être saisie.")
+        return redirect("coaching:prof_attendance")
+    try:
+        session, created = get_or_create_slot_session(
+            professor, slot, session_date, request.user,
+        )
+    except ValidationError as error:
+        messages.error(request, " ".join(error.messages))
+        return redirect("coaching:prof_attendance")
+    if created:
+        messages.success(
+            request, "Séance ouverte depuis l'emploi du temps. Saisissez les présences.",
+        )
+    else:
+        messages.info(request, "Cette séance existe déjà. Complétez son relevé.")
+    return redirect("coaching:prof_attendance_session", pk=session.pk)
 
 
 @require_POST
@@ -1639,37 +1757,54 @@ def prof_attendance_save(request, pk):
     return redirect("coaching:prof_attendance")
 
 
+def _difficulty_sheet_card(sheet):
+    severity = SEVERITY_META.get(
+        sheet.severity, SEVERITY_META[DifficultySheet.SEVERITY_MODERATE],
+    )
+    return {
+        "sheet": sheet,
+        "severity": severity,
+        "category_label": sheet.get_category_display(),
+        "category_tags": sheet.category,
+        "status_label": sheet.get_status_display(),
+        "is_closed": sheet.status == DifficultySheet.STATUS_CLOSED,
+        "observation": sheet.observation,
+        "action_plan": sheet.action_plan,
+        "average_label": (
+            fr_decimal(sheet.average_grade, 1)
+            if sheet.average_grade is not None else "—"
+        ),
+        "attendance_label": (
+            "%d %%" % sheet.attendance_rate if sheet.attendance_rate else "—"
+        ),
+        "assignments_label": sheet.assignments_ratio or "—",
+        "last_contact_label": (
+            relative_since(sheet.last_contact_at)
+            if sheet.last_contact_at else "Aucun échange"
+        ),
+        "opened_label": fr_date_cap(sheet.opened_at),
+        "note_url": reverse("coaching:prof_sheet_note", args=[sheet.pk]),
+        "plan_url": reverse("coaching:prof_sheet_plan", args=[sheet.pk]),
+        "notes_count": len(sheet.notes.all()),
+    }
+
+
 @role_required(Profil.ROLE_PROF)
 def prof_followup_cards(request):
     professor = get_professor(request)
+    assignments = list(caseload(professor))
+    student_ids = [assignment.student_id for assignment in assignments]
     sheets = list(
         DifficultySheet.objects.filter(professor=professor)
-        .select_related("student__membership__user", "school_class")
+        .select_related(
+            "student__membership__user", "school_class",
+            "professor__membership__user",
+        )
         .prefetch_related("notes")
     )
-    sheet_rows = []
+    sheets_by_student = defaultdict(list)
     for sheet in sheets:
-        severity = SEVERITY_META.get(sheet.severity, SEVERITY_META[DifficultySheet.SEVERITY_MODERATE])
-        sheet_rows.append({
-            "sheet": sheet,
-            "severity": severity,
-            "initials": person_initials(sheet.student),
-            "student_name": student_name(sheet.student),
-            "student_program": sheet.student.program or (
-                sheet.school_class.name if sheet.school_class_id else "Filière non renseignée"
-            ),
-            "student_number": sheet.student.student_number or "—",
-            "class_name": sheet.school_class.name if sheet.school_class_id else class_label(sheet.student),
-            "category_label": sheet.get_category_display(),
-            "category_tags": sheet.category,
-            "average_label": fr_decimal(sheet.average_grade, 1) if sheet.average_grade is not None else "—",
-            "attendance_label": "%d %%" % sheet.attendance_rate if sheet.attendance_rate else "—",
-            "assignments_label": sheet.assignments_ratio or "—",
-            "last_contact_label": relative_since(sheet.last_contact_at) if sheet.last_contact_at else "Aucun échange",
-            "note_url": reverse("coaching:prof_sheet_note", args=[sheet.pk]),
-            "plan_url": reverse("coaching:prof_sheet_plan", args=[sheet.pk]),
-            "notes_count": len(sheet.notes.all()),
-        })
+        sheets_by_student[sheet.student_id].append(sheet)
     active = [item for item in sheets if item.status != DifficultySheet.STATUS_CLOSED]
     closed_recent = sum(
         1 for item in sheets
@@ -1677,8 +1812,118 @@ def prof_followup_cards(request):
         and item.closed_at
         and item.closed_at >= timezone.now() - timedelta(days=30)
     )
+
+    focus = (request.GET.get("student") or "").strip()
+    focus_id = int(focus) if focus.isdigit() else None
+    rows = []
+    for assignment in assignments:
+        if focus_id is not None and assignment.student_id != focus_id:
+            continue
+        meta = assignment_meta(assignment)
+        meta["average_label"] = (
+            fr_decimal(assignment.average_grade, 1)
+            if assignment.average_grade is not None else "—"
+        )
+        meta["attendance_label"] = (
+            "%d %%" % assignment.attendance_rate
+            if assignment.attendance_rate else "—"
+        )
+        meta["assignments_label"] = assignment.assignments_ratio or "—"
+        meta["last_contact_label"] = (
+            relative_since(assignment.last_contact_at)
+            if assignment.last_contact_at else "Aucun échange"
+        )
+        meta["risk_reason"] = assignment.risk_reason or "Aucun signalement actif."
+        delta = assignment.delta
+        if delta is None or delta == 0:
+            meta["delta_label"] = "Stable"
+            meta["delta_tone"] = "text-outline"
+            meta["delta_icon"] = "remove"
+        elif delta > 0:
+            meta["delta_label"] = "+%s pts" % fr_decimal(delta, 1)
+            meta["delta_tone"] = "text-primary"
+            meta["delta_icon"] = "trending_up"
+        else:
+            meta["delta_label"] = "%s pts" % fr_decimal(delta, 1)
+            meta["delta_tone"] = "text-error"
+            meta["delta_icon"] = "trending_down"
+        student_sheets = sorted(
+            sheets_by_student.get(assignment.student_id, []),
+            key=lambda item: (
+                item.status == DifficultySheet.STATUS_CLOSED,
+                -item.opened_at.timestamp(),
+            ),
+        )
+        sheet_cards = [_difficulty_sheet_card(sheet) for sheet in student_sheets]
+        rows.append({
+            "assignment": assignment,
+            "meta": meta,
+            "sheets": sheet_cards,
+            "active_sheets": [item for item in sheet_cards if not item["is_closed"]],
+            "closed_sheets": [item for item in sheet_cards if item["is_closed"]],
+            "category_tags": " ".join(sorted({item.category for item in student_sheets})),
+            "initials": person_initials(assignment.student),
+            "student_name": student_name(assignment.student),
+            "student_number": assignment.student.student_number or "—",
+            "student_program": (
+                assignment.student.program
+                or (assignment.school_class.name if assignment.school_class_id else "Filière non renseignée")
+            ),
+            "class_name": (
+                assignment.school_class.name
+                if assignment.school_class_id else class_label(assignment.student)
+            ),
+            "sheet_count": len(sheet_cards),
+            "active_sheet_count": sum(1 for item in sheet_cards if not item["is_closed"]),
+        })
+
+    known_ids = set(student_ids)
+    legacy_groups = defaultdict(list)
+    for sheet in sheets:
+        if sheet.student_id not in known_ids:
+            legacy_groups[sheet.student_id].append(sheet)
+    legacy_rows = []
+    for student_id, student_sheets in legacy_groups.items():
+        if focus_id is not None and student_id != focus_id:
+            continue
+        student = student_sheets[0].student
+        sheet_cards = [
+            _difficulty_sheet_card(sheet)
+            for sheet in sorted(student_sheets, key=lambda item: -item.opened_at.timestamp())
+        ]
+        legacy_rows.append({
+            "student": student,
+            "initials": person_initials(student),
+            "student_name": student_name(student),
+            "student_number": student.student_number or "—",
+            "student_program": student.program or "Filière non renseignée",
+            "class_name": class_label(student),
+            "sheets": sheet_cards,
+            "active_sheets": [item for item in sheet_cards if not item["is_closed"]],
+            "category_tags": " ".join(sorted({sheet.category for sheet in student_sheets})),
+            "sheet_count": len(sheet_cards),
+            "active_sheet_count": sum(1 for item in sheet_cards if not item["is_closed"]),
+        })
+    legacy_rows.sort(key=lambda row: row["student_name"])
+
+    focus_name = ""
+    if focus_id is not None:
+        for row in rows:
+            if row["assignment"].student_id == focus_id:
+                focus_name = row["student_name"]
+                break
+        if not focus_name:
+            for row in legacy_rows:
+                if row["student"].pk == focus_id:
+                    focus_name = row["student_name"]
+                    break
+
+    displayed_sheets = sum(
+        len(row["active_sheets"]) for row in rows
+    ) + sum(len(row["active_sheets"]) for row in legacy_rows)
+
     assignment_options = []
-    for assignment in caseload(professor):
+    for assignment in assignments:
         assignment_options.append({
             "student": assignment.student,
             "label": "%s · %s" % (
@@ -1696,12 +1941,15 @@ def prof_followup_cards(request):
         .order_by("scheduled_at")[:3]
     )
     context = {
-        "sheet_rows": sheet_rows,
+        "rows": rows,
+        "legacy_rows": legacy_rows,
+        "student_count": len(rows) + len(legacy_rows),
+        "displayed_sheet_count": displayed_sheets,
         "active_count": len(active),
         "high_count": sum(1 for item in active if item.severity == DifficultySheet.SEVERITY_HIGH),
         "in_progress_count": sum(1 for item in active if item.status == DifficultySheet.STATUS_IN_PROGRESS),
         "closed_recent": closed_recent,
-        "distribution": category_distribution(sheets),
+        "distribution": category_distribution(active),
         "next_appointments": [
             {
                 "name": student_name(item.student),
@@ -1713,6 +1961,8 @@ def prof_followup_cards(request):
         "category_choices": DifficultySheet.CATEGORY_CHOICES,
         "severity_choices": DifficultySheet.SEVERITY_CHOICES,
         "export_url": reverse("coaching:prof_sheets_export"),
+        "focus_id": focus_id,
+        "focus_name": focus_name,
     }
     return render(request, "coaching/prof_followup_cards.html", context)
 
@@ -1977,7 +2227,7 @@ def admin_perseverance(request):
 def admin_monitoring(request):
     summary = admin_monitoring_summary(request.university)
     alerts = []
-    for alert in summary["alerts"]:
+    for alert in summary["all_alerts"]:
         meta = ALERT_META.get(alert.alert_type, ALERT_META[PerseveranceAlert.TYPE_ENGAGEMENT])
         alerts.append({
             "alert": alert,
@@ -2019,10 +2269,71 @@ def admin_monitoring(request):
             "time": fr_time(activity["at"]) if activity["at"] else "",
             "first": index == 0,
         })
+    alerts.sort(
+        key=lambda row: row["alert"].detected_at or timezone.now(),
+        reverse=True,
+    )
+    query = (request.GET.get("q") or "").strip()[:100]
+    date_from_value = (request.GET.get("date_from") or "").strip()
+    date_to_value = (request.GET.get("date_to") or "").strip()
+    date_from = None
+    date_to = None
+    try:
+        date_from = datetime.strptime(date_from_value, "%Y-%m-%d").date()
+    except ValueError:
+        date_from_value = ""
+    try:
+        date_to = datetime.strptime(date_to_value, "%Y-%m-%d").date()
+    except ValueError:
+        date_to_value = ""
+    if date_from and date_to and date_from > date_to:
+        date_from, date_to = date_to, date_from
+
+    def fold(value):
+        return (
+            unicodedata.normalize("NFD", value or "")
+            .encode("ascii", "ignore")
+            .decode()
+            .casefold()
+        )
+
+    query_folded = fold(query)
+    filtered_alerts = []
+    for row in alerts:
+        if query_folded:
+            student_number = (
+                getattr(row["alert"].student, "student_number", "")
+                if row["alert"].student_id else ""
+            )
+            haystack = fold(" ".join((
+                row["student_name"],
+                row["alert"].title,
+                row["alert"].detail,
+                row["class_name"],
+                student_number,
+            )))
+            if query_folded not in haystack:
+                continue
+        detected_at = row["alert"].detected_at
+        detected_date = timezone.localtime(detected_at).date() if detected_at else None
+        if date_from and (detected_date is None or detected_date < date_from):
+            continue
+        if date_to and (detected_date is None or detected_date > date_to):
+            continue
+        filtered_alerts.append(row)
+
+    open_alert_rows = [row for row in filtered_alerts if row["is_open"]]
+    taken_alert_rows = [row for row in filtered_alerts if row["is_taken"]]
     context = {
         "summary": summary,
         "cohorts": cohorts,
-        "alert_rows": alerts,
+        "alert_rows": filtered_alerts,
+        "open_alert_rows": open_alert_rows,
+        "taken_alert_rows": taken_alert_rows,
+        "query": query,
+        "date_from_value": date_from_value,
+        "date_to_value": date_to_value,
+        "has_alert_filters": bool(query or date_from_value or date_to_value),
         "activities": activities,
         "year": summary["year"],
         "followed_hint": "Avec un référent actif · année %s" % summary["year"],
@@ -2088,6 +2399,22 @@ def student_task_toggle(request, pk):
         messages.success(request, "Tâche marquée comme terminée.")
     else:
         messages.info(request, "Tâche réouverte.")
+    return redirect(_safe_student_redirect(request, "coaching:student_tasks"))
+
+
+@require_POST
+@role_required(Profil.ROLE_ETUDIANT)
+def student_task_delete(request, pk):
+    student = get_student(request)
+    task = get_object_or_404(
+        StudentTask, pk=pk, student=student, university=request.university,
+    )
+    if not task.is_done:
+        messages.error(request, "Terminez la tâche avant de pouvoir la supprimer.")
+        return redirect(_safe_student_redirect(request, "coaching:student_tasks"))
+    title = task.title
+    task.delete()
+    messages.success(request, "Tâche « %s » supprimée." % title)
     return redirect(_safe_student_redirect(request, "coaching:student_tasks"))
 
 
@@ -2795,18 +3122,23 @@ def prof_request_accept(request, pk):
         session.status = TutoringSession.STATUS_ACCEPTED
         session.decided_by = request.user
         session.decided_at = timezone.now()
+        ensure_meeting_url(session)
         session.save()
+        if session.slot_id and session.slot.meeting_url != session.meeting_url:
+            session.slot.meeting_url = session.meeting_url
+            session.slot.save(update_fields=["meeting_url"])
         TutorNotification.objects.create(
             university=request.university,
             student=session.student,
             professor=professor,
             kind=TutorNotification.KIND_SUIVI,
             title="Rendez-vous confirmé",
-            message="%s a confirmé votre rendez-vous du %s. Motif : %s"
+            message="%s a confirmé votre rendez-vous du %s. Motif : %s. Lien visio : %s"
             % (
                 professor_name(professor),
                 fr_day_time(session.scheduled_at),
                 session.topic,
+                session.meeting_url,
             ),
         )
     student_user = session.student.membership.user
@@ -2827,6 +3159,7 @@ def prof_request_accept(request, pk):
             "place": session.location or "À définir",
             "topic": session.topic,
             "comment": session.student_comment,
+            "meeting_url": session.effective_meeting_url,
             "cta_url": request.build_absolute_uri(
                 reverse("coaching:student_appointments"),
             ),
@@ -2932,13 +3265,15 @@ def prof_session_complete(request, pk):
         )
         return redirect("coaching:prof_tutoring")
     now = timezone.now()
+    ensure_meeting_url(session)
     with transaction.atomic():
         session.status = TutoringSession.STATUS_COMPLETED
         session.summary_points = form.cleaned_data["summary_points"]
         session.summary_actions = form.cleaned_data.get("summary_actions") or ""
         session.completed_at = now
         session.save(update_fields=[
-            "status", "summary_points", "summary_actions", "completed_at", "updated_at",
+            "status", "summary_points", "summary_actions", "completed_at",
+            "meeting_url", "updated_at",
         ])
         TutorAssignment.objects.filter(
             professor=professor,
@@ -2946,9 +3281,54 @@ def prof_session_complete(request, pk):
             university=request.university,
             status=TutorAssignment.STATUS_ACTIVE,
         ).update(last_contact_at=now, updated_at=now)
+        TutorNotification.objects.create(
+            university=request.university,
+            student=session.student,
+            professor=professor,
+            kind=TutorNotification.KIND_SUIVI,
+            title="Compte-rendu de rendez-vous disponible",
+            message=(
+                "Votre rendez-vous du %s est clôturé. Lien visio : %s. "
+                "Retrouvez le compte-rendu dans vos rendez-vous."
+            ) % (
+                fr_day_time(session.scheduled_at) if session.scheduled_at else "rendez-vous",
+                session.meeting_url,
+            ),
+        )
+    student_user = session.student.membership.user
+    send_templated_email(
+        subject="Compte-rendu de votre rendez-vous — EduSpark",
+        recipients=[student_user.email],
+        template_name="coaching/emails/appointment_completed.html",
+        context={
+            "university_name": request.university.name,
+            "subject": "Compte-rendu de rendez-vous",
+            "preheader": "%s · %s" % (
+                professor_name(professor),
+                fr_day_time(session.scheduled_at) if session.scheduled_at else "Rendez-vous clôturé",
+            ),
+            "student_first_name": student_user.first_name or student_name(session.student),
+            "professor_name": professor_name(professor),
+            "completed_label": (
+                fr_day_time(session.scheduled_at)
+                if session.scheduled_at else fr_date_time(now)
+            ),
+            "topic": session.topic,
+            "summary_points": session.summary_points,
+            "summary_actions": session.summary_actions,
+            "meeting_url": session.meeting_url,
+            "cta_url": request.build_absolute_uri(
+                reverse("coaching:student_appointments"),
+            ),
+            "cta_label": "Voir mes rendez-vous",
+            "footer_note": "Vous recevez cet e-mail car votre rendez-vous de tutorat vient d'être clôturé.",
+        },
+        reply_to=[professor.membership.user.email],
+    )
     messages.success(
         request,
-        "Entretien avec %s clôturé et compte-rendu enregistré." % student_name(session.student),
+        "Entretien avec %s clôturé, compte-rendu enregistré et lien visio envoyé."
+        % student_name(session.student),
     )
     return redirect("coaching:prof_tutoring")
 
@@ -3032,6 +3412,23 @@ def prof_sheet_create(request):
     )
     messages.success(request, "Fiche de difficulté créée. L'étudiant a été notifié de l'ouverture du suivi.")
     return redirect("coaching:prof_followup_cards")
+
+
+@require_POST
+@role_required(Profil.ROLE_PROF)
+def prof_sheet_delete(request, pk):
+    professor = get_professor(request)
+    sheet = get_object_or_404(
+        DifficultySheet, pk=pk, professor=professor, university=request.university,
+    )
+    label = "%s · %s" % (student_name(sheet.student), sheet.get_category_display())
+    sheet.delete()
+    messages.success(request, "Fiche supprimée : %s." % label)
+    url = reverse("coaching:prof_followup_cards")
+    focus = (request.POST.get("student") or "").strip()
+    if focus.isdigit():
+        url = "%s?student=%s" % (url, focus)
+    return redirect(url)
 
 
 @require_POST
@@ -3352,14 +3749,14 @@ def admin_assign_tutor(request):
         messages.error(request, "Ce référent est inactif et ne peut pas recevoir d'étudiants.")
         return redirect("coaching:admin_perseverance")
     year = school_class.academic_year or academic_year_for(request.university)
-    student_count = enrolled_students(school_class).count()
+    student_count = class_tutoring_students(school_class, year).count()
     if student_count == 0:
         messages.info(request, "Cette classe ne compte aucun étudiant à suivre.")
         return redirect("coaching:admin_perseverance")
-    created = assign_class_referent(
+    changed_students = assign_class_referent(
         school_class, professor, year, request.user,
     )
-    if created:
+    if changed_students:
         TutorNotification.objects.bulk_create([
             TutorNotification(
                 university=request.university,
@@ -3373,41 +3770,21 @@ def admin_assign_tutor(request):
                     "Vous pouvez lui écrire depuis vos rendez-vous de tutorat."
                 ) % (professor_name(professor), year),
             )
-            for student in enrolled_students(school_class)
+            for student in changed_students
         ])
-    messages.success(
-        request,
-        "%d étudiant%s de %s suivi%s par %s. Un référent unique est désigné pour la classe "
-        "et chaque étudiant a été notifié."
-        % (created, "" if created == 1 else "s", school_class.name,
-           "" if created == 1 else "s", professor_name(professor)),
-    )
-    return redirect("coaching:admin_perseverance")
-
-
-@require_POST
-@role_required(Profil.ROLE_ADMIN)
-def admin_auto_assign(request):
-    rows, year = allocation_rows(request.university)
-    created = 0
-    skipped = 0
-    for row in rows:
-        if row["waiting"] <= 0:
-            continue
-        if not row["school_class"].professors.exists():
-            skipped += 1
-            continue
-        created += auto_assign_class(row["school_class"], year, request.user)
-    if created:
         messages.success(
             request,
-            "Attribution automatique : %d étudiant%s affecté%s à un référent unique par classe."
-            % (created, "" if created == 1 else "s", "" if created == 1 else "s"),
+            "%d étudiant%s de %s suivi%s par %s. La classe a maintenant un référent unique."
+            % (len(changed_students), "" if len(changed_students) == 1 else "s",
+               school_class.name, "" if len(changed_students) == 1 else "s",
+               professor_name(professor)),
         )
-    elif skipped:
-        messages.warning(request, "Aucun référent n'est rattaché aux classes en attente.")
     else:
-        messages.info(request, "Aucun étudiant en attente d'affectation.")
+        messages.info(
+            request,
+            "Tous les étudiants de %s sont déjà suivis par %s."
+            % (school_class.name, professor_name(professor)),
+        )
     return redirect("coaching:admin_perseverance")
 
 
@@ -3415,12 +3792,16 @@ def admin_auto_assign(request):
 def admin_perseverance_export(request):
     rows, year = allocation_rows(request.university)
     output = [["Année universitaire", year], []]
-    output.append(["Classe", "Niveau", "Étudiants", "Référents", "Affectés", "En attente", "Taux (%)", "Statut"])
+    output.append([
+        "Classe", "Niveau", "Étudiants", "Hors groupe", "Référent",
+        "Affectés", "En attente", "Taux (%)", "Statut",
+    ])
     for row in rows:
         output.append([
             row["school_class"].name,
             row["school_class"].level,
             row["students"],
+            row["outside_group"],
             ", ".join(row["referent_names"]),
             row["assigned"],
             row["waiting"],
@@ -3526,7 +3907,7 @@ def admin_monitoring_export(request):
         ])
     rows.append([])
     rows.append(["Alerte", "Étudiant", "Classe", "Priorité", "Statut", "Détectée le"])
-    for alert in summary["alerts"]:
+    for alert in summary["all_alerts"]:
         rows.append([
             alert.title,
             student_name(alert.student) if alert.student_id else "",

@@ -1,13 +1,15 @@
 """Calculs et référentiels partagés du module Suivi Référent."""
 
 from collections import defaultdict
-from datetime import timedelta
+from datetime import datetime, timedelta
 
+from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 from django.utils import timezone
 
 from accounts.models import ProfessorProfile, SchoolClass, StudentProfile
 from accounts.tenancy import Role
+from courses.models import ScheduleSlot
 
 from .models import (
     AttendanceRecord,
@@ -373,6 +375,26 @@ def enrolled_students(school_class):
     return students
 
 
+def class_tutoring_students(school_class, academic_year):
+    """Étudiants réellement rattachés à la classe pour le tutorat.
+
+    La population réunit les étudiants des groupes de la classe et ceux qui
+    possèdent déjà une affectation active sur cette classe pour l'année.
+    """
+    return (
+        StudentProfile.objects.filter(
+            Q(groups__school_class=school_class)
+            | Q(
+                tutor_assignments__school_class=school_class,
+                tutor_assignments__academic_year=academic_year,
+                tutor_assignments__status=TutorAssignment.STATUS_ACTIVE,
+            )
+        )
+        .distinct()
+        .select_related("membership__user")
+    )
+
+
 def waiting_students(school_class, academic_year):
     enrolled = enrolled_students(school_class)
     assigned = TutorAssignment.objects.filter(
@@ -494,6 +516,146 @@ def attendance_session_students(session):
     )
 
 
+def attendance_occurrence_start(slot, session_date):
+    """Début réel d'une occurrence hebdomadaire de l'emploi du temps."""
+    return timezone.make_aware(datetime.combine(session_date, slot.start_time))
+
+
+def attendance_occurrence_end(slot, session_date):
+    """Fin réelle d'une occurrence hebdomadaire de l'emploi du temps."""
+    return timezone.make_aware(datetime.combine(session_date, slot.end_time))
+
+
+def _attendance_occurrence_row(slot, session_date, session=None):
+    records = list(session.records.all()) if session is not None else []
+    has_record = bool(records)
+    starts_at = attendance_occurrence_start(slot, session_date)
+    is_upcoming = starts_at > timezone.now()
+    if session is not None and session.status == AttendanceSession.STATUS_CANCELLED:
+        status = AttendanceSession.STATUS_CANCELLED
+        status_label = session.get_status_display()
+    elif has_record:
+        status = AttendanceSession.STATUS_COMPLETED
+        status_label = "Relevé"
+    elif is_upcoming:
+        status = "upcoming"
+        status_label = "À venir"
+    else:
+        status = "todo"
+        status_label = "À saisir"
+    return {
+        "slot": slot,
+        "date": session_date,
+        "starts_at": starts_at,
+        "ends_at": attendance_occurrence_end(slot, session_date),
+        "session": session,
+        "has_record": has_record,
+        "attended": sum(
+            1 for record in records
+            if record.status in AttendanceRecord.ATTENDED_STATUSES
+        ),
+        "recorded": sum(
+            1 for record in records
+            if record.status in AttendanceRecord.COUNTED_STATUSES
+        ),
+        "status": status,
+        "status_label": status_label,
+        "is_todo": status == "todo",
+        "is_upcoming": status == "upcoming",
+    }
+
+
+def attendance_occurrences(professor, start_date, end_date):
+    """Occurrences réelles des séances d'emploi du temps d'un professeur.
+
+    Chaque séance hebdomadaire est projetée sur les dates demandées. La
+    ``AttendanceSession`` correspondante n'est créée qu'à l'ouverture du
+    relevé : tant qu'elle n'existe pas, l'occurrence reste « à saisir ».
+    """
+    if start_date > end_date:
+        return []
+    slots = (
+        ScheduleSlot.objects.filter(
+            university=professor.university, assignment__professor=professor,
+        )
+        .select_related(
+            "assignment__school_class", "assignment__subject",
+            "assignment__professor__membership__user", "group",
+        )
+    )
+    existing = {
+        (session.slot_id, session.session_date): session
+        for session in AttendanceSession.objects.filter(
+            professor=professor,
+            slot__isnull=False,
+            session_date__gte=start_date,
+            session_date__lte=end_date,
+        )
+        .select_related("school_class", "student_group")
+        .prefetch_related("records")
+    }
+    rows = []
+    for slot in slots:
+        offset = (slot.weekday - start_date.weekday()) % 7
+        day = start_date + timedelta(days=offset)
+        while day <= end_date:
+            session = existing.get((slot.pk, day))
+            rows.append(_attendance_occurrence_row(slot, day, session))
+            day += timedelta(days=7)
+    rows.sort(key=lambda row: (row["starts_at"], row["slot"].pk))
+    return rows
+
+
+def get_or_create_slot_session(professor, slot, session_date, created_by=None):
+    """Ouvre le relevé d'une occurrence précise de l'emploi du temps."""
+    if slot.assignment.professor_id != professor.pk:
+        raise ValidationError("Cette séance de l'emploi du temps ne vous est pas affectée.")
+    if session_date.weekday() != slot.weekday:
+        raise ValidationError(
+            "Cette date ne correspond pas au jour de la séance dans l'emploi du temps."
+        )
+    session, created = AttendanceSession.objects.get_or_create(
+        slot=slot,
+        session_date=session_date,
+        defaults={
+            "university": slot.university,
+            "professor": professor,
+            "school_class": slot.assignment.school_class,
+            "student_group": slot.group,
+            "title": slot.assignment.subject.name,
+            "kind": slot.session_type,
+            "starts_at": attendance_occurrence_start(slot, session_date),
+            "duration_minutes": slot.duration_minutes,
+            "created_by": created_by,
+        },
+    )
+    return session, created
+
+
+def attendance_pending_count(professor, start_date=None, end_date=None):
+    """Occurrences de la période encore sans relevé, plus les séances libres."""
+    start_date = start_date or timezone.localdate()
+    end_date = end_date or start_date
+    count = sum(
+        1 for row in attendance_occurrences(professor, start_date, end_date)
+        if row["is_todo"]
+    )
+    count += (
+        AttendanceSession.objects.filter(
+            professor=professor,
+            university=professor.university,
+            slot__isnull=True,
+            starts_at__date__gte=start_date,
+            starts_at__date__lte=end_date,
+        )
+        .exclude(status=AttendanceSession.STATUS_CANCELLED)
+        .annotate(record_count=Count("records"))
+        .filter(record_count=0)
+        .count()
+    )
+    return count
+
+
 def create_assignment(student, professor, school_class, academic_year, assigned_by=None):
     metrics = {
         "average_grade": None,
@@ -530,39 +692,27 @@ def create_assignment(student, professor, school_class, academic_year, assigned_
 
 
 def assign_class_referent(school_class, professor, academic_year, assigned_by=None):
-    """Affecte un référent unique à tous les étudiants de la classe."""
-    students = list(enrolled_students(school_class))
-    for student in students:
+    """Affecte un référent unique à toute la population de la classe.
+
+    Retourne uniquement les étudiants dont le référent a réellement changé,
+    afin de ne pas renvoyer de notifications inutiles.
+    """
+    changed = []
+    for student in class_tutoring_students(school_class, academic_year):
+        current = TutorAssignment.objects.filter(
+            student=student,
+            academic_year=academic_year,
+            status=TutorAssignment.STATUS_ACTIVE,
+        ).first()
+        if (
+            current is not None
+            and current.professor_id == professor.pk
+            and current.school_class_id == school_class.pk
+        ):
+            continue
         create_assignment(student, professor, school_class, academic_year, assigned_by)
-    return len(students)
-
-
-def auto_assign_class(school_class, academic_year, assigned_by=None):
-    professors = list(school_class.professors.all())
-    if not professors:
-        return 0
-    existing = TutorAssignment.objects.filter(
-        school_class=school_class,
-        academic_year=academic_year,
-        status=TutorAssignment.STATUS_ACTIVE,
-    ).values_list("professor_id", flat=True)
-    referent_id = next(iter(existing), None)
-    professor = next(
-        (item for item in professors if item.pk == referent_id),
-        None,
-    )
-    if professor is None:
-        professor = min(
-            professors,
-            key=lambda item: (
-                TutorAssignment.objects.filter(
-                    professor=item,
-                    status=TutorAssignment.STATUS_ACTIVE,
-                ).count(),
-                display_name(item),
-            ),
-        )
-    return assign_class_referent(school_class, professor, academic_year, assigned_by)
+        changed.append(student)
+    return changed
 
 
 def allocation_rows(university, academic_year=None):
@@ -588,27 +738,45 @@ def allocation_rows(university, academic_year=None):
     rows = []
     for school_class in classes:
         class_assignments = by_class.get(school_class.pk, [])
-        students = enrolled_count(school_class)
+        roster = list(class_tutoring_students(school_class, year))
+        student_ids = {student.pk for student in roster}
+        class_assignments = [
+            item for item in class_assignments if item.student_id in student_ids
+        ]
+        students = len(student_ids)
         assigned = len({item.student_id for item in class_assignments})
-        if not students:
-            students = assigned
+        group_count = enrolled_count(school_class)
+        outside_group = max(students - group_count, 0)
         tutors = len({item.professor_id for item in class_assignments})
         referent_names = sorted({
             display_name(item.professor) for item in class_assignments
         })
         waiting = max(students - assigned, 0)
-        rate = percent(assigned, students) if students else 0
+        rate = min(percent(assigned, students), 100) if students else 0
         if not students:
-            status, status_class, tags = "Sans étudiants", "bg-surface-container text-on-surface-variant", ""
-        elif rate >= 100:
-            status, status_class, tags = "Complet", "bg-primary-fixed text-primary", "a_jour"
-        elif rate >= 90:
-            status, status_class, tags = "À jour", "bg-primary-fixed text-primary", "a_jour"
+            status, status_class, tags = (
+                "Sans étudiants", "bg-surface-container text-on-surface-variant", "",
+            )
+        elif tutors > 1:
+            status, status_class, tags = (
+                "Référents multiples",
+                "bg-error-container text-on-error-container",
+                "a_completer",
+            )
+        elif waiting > 0:
+            status, status_class, tags = (
+                "À compléter",
+                "bg-error-container text-on-error-container",
+                "a_completer",
+            )
         else:
-            status, status_class, tags = "À compléter", "bg-error-container text-on-error-container", "a_completer"
+            status, status_class, tags = (
+                "Complet", "bg-primary-fixed text-primary", "a_jour",
+            )
         rows.append({
             "school_class": school_class,
             "students": students,
+            "outside_group": outside_group,
             "tutors": tutors,
             "referent_names": referent_names,
             "assigned": assigned,
@@ -642,7 +810,7 @@ def next_accepted_session(student):
             status=TutoringSession.STATUS_ACCEPTED,
             scheduled_at__gte=timezone.now(),
         )
-        .select_related("professor__membership__user")
+        .select_related("professor__membership__user", "slot")
         .order_by("scheduled_at")
         .first()
     )
@@ -895,9 +1063,15 @@ def admin_monitoring_summary(university, academic_year=None):
         university=university,
         status__in=(PerseveranceAlert.STATUS_OPEN, PerseveranceAlert.STATUS_TAKEN),
     ).select_related("student__membership__user", "school_class")
-    active_alerts = sum(1 for alert in alerts if alert.status == PerseveranceAlert.STATUS_OPEN)
+    ordered_alerts = list(alerts.order_by("status", "-detected_at"))
+    active_alerts = sum(
+        1 for alert in ordered_alerts if alert.status == PerseveranceAlert.STATUS_OPEN
+    )
+    taken_alerts = sum(
+        1 for alert in ordered_alerts if alert.status == PerseveranceAlert.STATUS_TAKEN
+    )
     high_alerts = sum(
-        1 for alert in alerts
+        1 for alert in ordered_alerts
         if alert.status == PerseveranceAlert.STATUS_OPEN
         and alert.priority == PerseveranceAlert.PRIORITY_HIGH
     )
@@ -963,12 +1137,14 @@ def admin_monitoring_summary(university, academic_year=None):
         "followed": followed,
         "assignments": assignments,
         "active_alerts": active_alerts,
+        "taken_alerts": taken_alerts,
         "high_alerts": high_alerts,
         "open_sheets": open_sheets,
         "closed_recent": closed_recent,
         "perseverance_rate": perseverance_rate,
         "cohorts": cohorts[:3],
-        "alerts": list(alerts.order_by("status", "-detected_at")[:6]),
+        "alerts": ordered_alerts[:6],
+        "all_alerts": ordered_alerts,
         "activities": activities,
     }
 
