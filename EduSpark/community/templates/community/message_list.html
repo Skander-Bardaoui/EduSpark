@@ -1,46 +1,328 @@
 {% extends portal_base_template %}
+{% load community_extras %}
 {% block title %}Messagerie — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
-<div class="mx-auto flex w-full max-w-[1000px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
-<div class="flex flex-wrap items-end justify-between gap-3">
-{% include "portal/_page_header.html" with eyebrow="Classe virtuelle" title="Messagerie" subtitle="Échangez en privé avec les membres de votre université." %}
-<a class="mb-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'community:message_create' %}">
-<span class="material-symbols-outlined text-[18px]">edit</span>Nouveau message</a>
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" data-last-id="{{ last_id }}" data-poll-url="{% url 'community:message_poll' %}" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Échanges</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Messagerie</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Échangez en privé avec les membres de {{ university.name }}<span data-unread-wrap {% if not unread_total %}hidden{% endif %}> · <strong class="text-primary"><span data-unread-total>{{ unread_total }}</span> non lu(s)</strong></span> <span class="ml-1 inline-flex items-center gap-1 text-[11px] text-outline" title="Les nouveaux messages apparaissent sans recharger la page"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500" data-live-dot></span>en direct</span>.</p>
 </div>
-
-<div class="flex flex-wrap items-center gap-2">
-<a class="rounded-full px-4 py-2 text-xs font-bold {% if folder == 'recus' %}bg-primary text-on-primary{% else %}border border-outline-variant/70 text-on-surface-variant hover:bg-surface-container{% endif %}" href="?dossier=recus">Reçus{% if unread %} ({{ unread }}){% endif %}</a>
-<a class="rounded-full px-4 py-2 text-xs font-bold {% if folder == 'envoyes' %}bg-primary text-on-primary{% else %}border border-outline-variant/70 text-on-surface-variant hover:bg-surface-container{% endif %}" href="?dossier=envoyes">Envoyés</a>
-<form class="ml-auto flex flex-wrap items-center gap-2" method="get" role="search">
-<input name="dossier" type="hidden" value="{{ folder }}"/>
-<input class="min-w-[12rem] rounded-full bg-surface-container-low px-4 py-2 text-sm outline-none focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]" name="q" placeholder="Rechercher…" type="search" value="{{ q }}"/>
-{% if folder == 'recus' %}<label class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant"><input class="accent-primary" name="etat" onchange="this.form.submit()" type="checkbox" value="non_lus" {% if only_unread %}checked{% endif %}/>Non lus</label>{% endif %}
-<button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary" type="submit">Rechercher</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#new-message-modal" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_square</span>Nouveau message
+</button>
+</header>
+{% if conversations %}
+<section class="grid overflow-hidden rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm lg:grid-cols-[320px_minmax(0,1fr)]">
+<div class="border-b border-outline-variant/40 lg:border-b-0 lg:border-r">
+<div class="border-b border-outline-variant/40 p-4">
+<label class="relative block">
+<span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input class="w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest py-2 pl-9 pr-3 text-body-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20" data-thread-search placeholder="Rechercher une conversation..." type="search"/>
+</label>
+</div>
+<div class="max-h-[520px] overflow-y-auto" data-thread-list>
+{% for c in conversations %}
+<button class="flex w-full items-start gap-3 border-b border-outline-variant/30 px-4 py-2.5 text-left transition-colors hover:bg-surface-container/60" data-thread="c{{ c.user.pk }}" data-user="{{ c.user.pk }}" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ c.user|tone }} text-[11px] font-extrabold">{{ c.user|initials }}</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">{{ c.user|display_name }}</span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant" data-f="time">{{ c.last.created_at|date:"d/m H:i" }}</span></span>
+<span class="mt-0.5 block truncate text-xs text-on-surface-variant" data-f="preview">{% if c.last.sender_id == request.user.pk %}Vous : {% endif %}{{ c.last.body|truncatechars:60 }}</span>
+<span class="mt-1 flex items-center gap-2" data-f="badges">{% include "portal/_badge.html" with label=c.role_label tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% if c.unread %}<span class="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-on-primary" data-unread>{{ c.unread }}</span>{% endif %}</span></span>
+</button>
+{% endfor %}
+</div>
+</div>
+<div class="flex min-h-[520px] flex-col" id="thread-panels">
+{% for c in conversations %}
+<div class="hidden flex-1 flex-col" data-thread-panel="c{{ c.user.pk }}">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-2.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full {{ c.user|tone }} text-[11px] font-extrabold">{{ c.user|initials }}</span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface">{{ c.user|display_name }}</p><p class="text-xs text-on-surface-variant">{{ c.role_label }} · {{ university.name }}</p></div>
+<form action="{% url 'community:conversation_delete' c.user.pk %}" class="ml-auto" method="post" onsubmit="return confirm('Supprimer cette conversation de votre boîte ?');">{% csrf_token %}
+<button class="flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" type="submit"><span class="material-symbols-outlined text-[16px]">delete</span>Supprimer</button></form>
+</div>
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages>
+{% for m in c.messages %}
+{% if m.sender_id == request.user.pk %}
+<div class="ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm" data-mine="1" data-msg-id="{{ m.pk }}">{% if m.subject %}<p class="text-xs font-bold text-white/80">{{ m.subject }}</p>{% endif %}<p class="whitespace-pre-line text-sm leading-relaxed">{{ m.body }}</p><p class="mt-1 text-right text-[11px] text-white/60">{{ m.created_at|date:"d/m · H:i" }}<span data-read>{% if m.read_at %} · lu{% endif %}</span></p></div>
+{% else %}
+<div class="max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm" data-msg-id="{{ m.pk }}">{% if m.subject %}<p class="text-xs font-bold text-secondary">{{ m.subject }}</p>{% endif %}<p class="whitespace-pre-line text-sm leading-relaxed text-on-surface">{{ m.body }}</p><p class="mt-1 text-right text-[11px] text-outline">{{ m.created_at|date:"d/m · H:i" }}</p></div>
+{% endif %}
+{% endfor %}
+</div>
+</div>
+{% endfor %}
+<form action="{% url 'community:message_create' %}" class="border-t border-outline-variant/40 bg-surface-container-lowest p-3" data-message-form method="post">
+{% csrf_token %}
+<input data-recipient name="recipient" type="hidden" value="{{ active_id }}"/>
+<div class="flex items-end gap-2">
+<label class="sr-only" for="message-input">Votre message</label>
+<textarea class="max-h-32 min-h-[96px] flex-1 resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20" id="message-input" name="body" placeholder="Écrire un message... (Ctrl + Entrée pour envoyer)" required rows="3"></textarea>
+<button aria-label="Envoyer" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[20px]">send</span></button>
+</div>
+<p class="mt-1.5 text-[11px] text-on-surface-variant">Les messages sont privés : seuls vous et votre correspondant peuvent les lire.</p>
 </form>
 </div>
-
-{% if page %}
-<ul class="overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
-{% for m in page %}
-<li class="border-b border-outline-variant/30 last:border-b-0">
-<a class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-surface-container-low" href="{% url 'community:message_detail' m.pk %}">
-<span class="h-2 w-2 shrink-0 rounded-full {% if folder == 'recus' and not m.read_at %}bg-primary{% else %}bg-transparent{% endif %}" aria-hidden="true"></span>
-<div class="min-w-0 flex-1">
-<p class="truncate text-sm {% if folder == 'recus' and not m.read_at %}font-bold text-on-surface{% else %}text-on-surface-variant{% endif %}">
-{% if folder == 'recus' %}{% firstof m.sender.get_full_name m.sender.email %}{% else %}À : {% firstof m.recipient.get_full_name m.recipient.email %}{% endif %}
-<span class="font-normal text-outline"> — {{ m.subject }}</span></p>
-<p class="truncate text-xs text-outline">{{ m.body|truncatechars:110 }}</p>
+</section>
+<!-- Modèles pour les conversations qui apparaissent en direct -->
+<template id="tpl-thread-button">
+<button class="flex w-full items-start gap-3 border-b border-outline-variant/30 px-4 py-2.5 text-left transition-colors hover:bg-surface-container/60" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold" data-f="avatar"></span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface" data-f="name"></span><span class="shrink-0 text-[11px] font-semibold text-on-surface-variant" data-f="time"></span></span>
+<span class="mt-0.5 block truncate text-xs text-on-surface-variant" data-f="preview"></span>
+<span class="mt-1 flex items-center gap-2" data-f="badges"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary-fixed px-2.5 py-1 font-label-sm text-label-sm text-on-secondary-fixed" data-f="role"></span></span></span>
+</button>
+</template>
+<template id="tpl-thread-panel">
+<div class="hidden flex-1 flex-col">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-2.5">
+<span class="flex h-10 w-10 items-center justify-center rounded-full text-[11px] font-extrabold" data-f="avatar"></span>
+<div class="min-w-0"><p class="truncate text-sm font-bold text-on-surface" data-f="name"></p><p class="text-xs text-on-surface-variant"><span data-f="role"></span> · {{ university.name }}</p></div>
+<form action="{% url 'community:conversation_delete' 0 %}" class="ml-auto" data-f="delete" method="post" onsubmit="return confirm('Supprimer cette conversation de votre boîte ?');">{% csrf_token %}
+<button class="flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-error-container/50 hover:text-error" type="submit"><span class="material-symbols-outlined text-[16px]">delete</span>Supprimer</button></form>
 </div>
-<span class="shrink-0 text-xs text-outline">{{ m.created_at|date:"d/m/Y H:i" }}</span>
-</a>
-</li>
-{% endfor %}
-</ul>
-{% include "portal/_pagination.html" with is_paginated=page.has_other_pages page_obj=page %}
+<div class="flex-1 space-y-3 overflow-y-auto bg-surface-container/30 p-5" data-thread-messages></div>
+</div>
+</template>
 {% else %}
-{% include "portal/_empty_state.html" with icon="mail" title="Aucun message" hint="Vos conversations privées apparaîtront ici." %}
+{% include "portal/_empty_state.html" with icon="mail" title="Aucune conversation" hint="Écrivez à un enseignant ou à un camarade avec « Nouveau message »." %}
 {% endif %}
 </div>
+<div class="fixed inset-0 z-[90] {% if open_modal %}flex{% else %}hidden{% endif %} items-center justify-center p-4" data-modal="" id="new-message-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Nouveau message</h2>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="{% url 'community:message_create' %}" class="space-y-4 p-5" method="post">
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Destinataire</span>
+<select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" name="recipient" required>
+<option value="">— Choisir —</option>
+{% for value, label in form.fields.recipient.choices %}{% if value %}<option value="{{ value }}" {% if form.recipient.value|stringformat:'s' == value|stringformat:'s' %}selected{% endif %}>{{ label }}</option>{% endif %}{% endfor %}
+</select></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Objet</span>
+<input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" maxlength="200" name="subject" placeholder="Objet du message (facultatif)" type="text"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Message</span>
+<textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" name="body" placeholder="Votre message..." required rows="4"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer</button></div>
+</form>
+</div>
+</div>
 </main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var main = document.getElementById('main-content');
+  var list = document.querySelector('[data-thread-list]');
+  var panelsHost = document.getElementById('thread-panels');
+  var composer = document.querySelector('[data-message-form]');
+  var recipient = document.querySelector('[data-recipient]');
+  var token = (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || '';
+  var markUrl = "{% url 'community:conversation_mark_read' 0 %}";
+  var deleteUrl = "{% url 'community:conversation_delete' 0 %}";
+  var lastId = parseInt(main.dataset.lastId || '0', 10);
+  var active = null;
+
+  function buttons() { return Array.prototype.slice.call(document.querySelectorAll('[data-thread]')); }
+  function panelFor(key) { return document.querySelector('[data-thread-panel="' + key + '"]'); }
+  function buttonFor(key) { return document.querySelector('[data-thread="' + key + '"]'); }
+  function scrollDown(panel) { var box = panel.querySelector('[data-thread-messages]'); if (box) box.scrollTop = box.scrollHeight; }
+  function markRead(userId) {
+    return fetch(markUrl.replace('/0/', '/' + userId + '/'), { method: 'POST', headers: { 'X-CSRFToken': token } });
+  }
+
+  function openThread(key) {
+    active = key;
+    var userId = key.replace('c', '');
+    buttons().forEach(function (btn) {
+      var on = btn.getAttribute('data-thread') === key;
+      btn.classList.toggle('bg-primary-fixed/30', on);
+      if (on) {
+        var dot = btn.querySelector('[data-unread]');
+        if (dot) { dot.remove(); markRead(userId); }
+      }
+    });
+    document.querySelectorAll('[data-thread-panel]').forEach(function (panel) {
+      var on = panel.getAttribute('data-thread-panel') === key;
+      panel.classList.toggle('hidden', !on);
+      panel.classList.toggle('flex', on);
+      if (on) scrollDown(panel);
+    });
+    if (recipient) recipient.value = userId;
+  }
+
+  function bindButton(btn) {
+    btn.addEventListener('click', function () { openThread(btn.getAttribute('data-thread')); });
+  }
+  buttons().forEach(bindButton);
+
+  // --- affichage en direct -------------------------------------------------
+  function field(root, name) { return root.querySelector('[data-f="' + name + '"]'); }
+
+  function bubble(m) {
+    var box = document.createElement('div');
+    box.setAttribute('data-msg-id', m.id);
+    var subject = null;
+    if (m.subject) { subject = document.createElement('p'); subject.textContent = m.subject; }
+    var body = document.createElement('p');
+    body.className = 'whitespace-pre-line text-sm leading-relaxed' + (m.mine ? '' : ' text-on-surface');
+    body.textContent = m.body;
+    var time = document.createElement('p');
+    time.textContent = m.time;
+    if (m.mine) {
+      box.className = 'ml-auto max-w-[85%] rounded rounded-tr-none bg-primary p-3.5 text-on-primary shadow-sm';
+      box.setAttribute('data-mine', '1');
+      if (subject) subject.className = 'text-xs font-bold text-white/80';
+      time.className = 'mt-1 text-right text-[11px] text-white/60';
+      var read = document.createElement('span');
+      read.setAttribute('data-read', '');
+      read.textContent = m.read ? ' · lu' : '';
+      time.appendChild(read);
+    } else {
+      box.className = 'max-w-[85%] rounded rounded-tl-none bg-surface-container-lowest p-3.5 shadow-sm';
+      if (subject) subject.className = 'text-xs font-bold text-secondary';
+      time.className = 'mt-1 text-right text-[11px] text-outline';
+    }
+    if (subject) box.appendChild(subject);
+    box.appendChild(body);
+    box.appendChild(time);
+    return box;
+  }
+
+  function createConversation(m) {
+    var key = 'c' + m.other_id;
+    var btn = document.getElementById('tpl-thread-button').content.firstElementChild.cloneNode(true);
+    btn.setAttribute('data-thread', key);
+    btn.setAttribute('data-user', m.other_id);
+    var avatar = field(btn, 'avatar');
+    avatar.className += ' ' + m.other_tone; avatar.textContent = m.other_initials;
+    field(btn, 'name').textContent = m.other_name;
+    field(btn, 'role').textContent = m.role_label;
+    list.insertBefore(btn, list.firstChild);
+    bindButton(btn);
+
+    var panel = document.getElementById('tpl-thread-panel').content.firstElementChild.cloneNode(true);
+    panel.setAttribute('data-thread-panel', key);
+    var pAvatar = field(panel, 'avatar');
+    pAvatar.className += ' ' + m.other_tone; pAvatar.textContent = m.other_initials;
+    field(panel, 'name').textContent = m.other_name;
+    field(panel, 'role').textContent = m.role_label;
+    field(panel, 'delete').setAttribute('action', deleteUrl.replace('/0/', '/' + m.other_id + '/'));
+    panelsHost.insertBefore(panel, composer);
+    return panel;
+  }
+
+  function applyMessage(m) {
+    if (document.querySelector('[data-msg-id="' + m.id + '"]')) { lastId = Math.max(lastId, m.id); return; }
+    if (!composer) { window.location.reload(); return; } // première conversation : la page est reconstruite
+    var key = 'c' + m.other_id;
+    var panel = panelFor(key) || createConversation(m);
+    var box = panel.querySelector('[data-thread-messages]');
+    box.appendChild(bubble(m));
+
+    var btn = buttonFor(key);
+    field(btn, 'time').textContent = m.short_time;
+    field(btn, 'preview').textContent = (m.mine ? 'Vous : ' : '') + (m.body.length > 60 ? m.body.slice(0, 59) + '…' : m.body);
+    list.insertBefore(btn, list.firstChild);
+
+    var visible = active === key && !document.hidden;
+    if (visible) scrollDown(panel);
+    if (!m.mine) {
+      if (visible) {
+        markRead(m.other_id);
+      } else {
+        var dot = btn.querySelector('[data-unread]');
+        if (!dot) {
+          dot = document.createElement('span');
+          dot.className = 'flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-on-primary';
+          dot.setAttribute('data-unread', '');
+          dot.textContent = '0';
+          field(btn, 'badges').appendChild(dot);
+        }
+        dot.textContent = String(parseInt(dot.textContent, 10) + 1);
+      }
+    }
+    lastId = Math.max(lastId, m.id);
+  }
+
+  function setUnreadTotal(n) {
+    var wrap = document.querySelector('[data-unread-wrap]');
+    var total = document.querySelector('[data-unread-total]');
+    if (!wrap || !total) return;
+    total.textContent = String(n);
+    wrap.hidden = !n;
+  }
+
+  function pendingReceipts() {
+    return Array.prototype.slice.call(document.querySelectorAll('[data-mine="1"][data-msg-id]'))
+      .filter(function (el) { var r = el.querySelector('[data-read]'); return r && !r.textContent.trim(); })
+      .map(function (el) { return el.getAttribute('data-msg-id'); }).slice(-100);
+  }
+
+  var busy = false;
+  function poll() {
+    if (busy || document.hidden) return;
+    busy = true;
+    var url = main.dataset.pollUrl + '?apres=' + lastId + '&suivis=' + pendingReceipts().join(',');
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        data.messages.forEach(applyMessage);
+        data.read_ids.forEach(function (id) {
+          var r = document.querySelector('[data-mine="1"][data-msg-id="' + id + '"] [data-read]');
+          if (r) r.textContent = ' · lu';
+        });
+        setUnreadTotal(data.unread_total);
+      })
+      .catch(function () {})
+      .then(function () { busy = false; });
+  }
+  setInterval(poll, 2000);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && active) { var btn = buttonFor(active); if (btn && btn.querySelector('[data-unread]')) openThread(active); }
+    poll();
+  });
+
+  // --- envoi sans rechargement ------------------------------------------------
+  if (composer) {
+    var input = composer.querySelector('textarea');
+    function send() {
+      var text = input.value.trim();
+      if (!text || !recipient.value) return;
+      composer.querySelector('button[type=submit]').disabled = true;
+      fetch(composer.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ recipient: recipient.value, subject: '', body: text }).toString()
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.ok) throw new Error('refus');
+          applyMessage(data.message);
+          input.value = '';
+        })
+        .catch(function () { alert('Le message n’a pas pu être envoyé. Réessayez.'); })
+        .then(function () { composer.querySelector('button[type=submit]').disabled = false; input.focus(); });
+    }
+    composer.addEventListener('submit', function (e) { e.preventDefault(); send(); });
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+  }
+
+  var search = document.querySelector('[data-thread-search]');
+  if (search) {
+    search.addEventListener('input', function () {
+      var q = (search.value || '').toLowerCase();
+      buttons().forEach(function (btn) { btn.classList.toggle('hidden', btn.textContent.toLowerCase().indexOf(q) === -1); });
+    });
+  }
+
+  if (buttons().length) openThread('c{{ active_id }}');
+})();
+</script>
 {% endblock %}

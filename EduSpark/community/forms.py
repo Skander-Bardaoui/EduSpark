@@ -24,7 +24,7 @@ class RequestFormMixin:
 class AnnouncementForm(RequestFormMixin, StyledFormMixin, forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ("title", "body", "audience", "school_class", "course_ref", "priority", "is_pinned")
+        fields = ("title", "body", "category", "audience", "school_class", "course_ref", "priority", "is_pinned")
         widgets = {"body": forms.Textarea(attrs={"rows": 6})}
 
 
@@ -40,6 +40,20 @@ class ThreadForm(StyledFormMixin, forms.ModelForm):
         model = Thread
         fields = ("title", "body")
         widgets = {"body": forms.Textarea(attrs={"rows": 8})}
+
+
+class ThreadAskForm(ThreadForm):
+    """Poser une question depuis le fil : le forum se choisit dans le formulaire."""
+
+    forum = forms.ModelChoiceField(label="Forum", queryset=Forum.objects.none())
+    field_order = ("forum", "title", "body")
+
+    def __init__(self, *args, request, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .access import can_manage_forum, forums_for
+        postable = [f.pk for f in forums_for(request) if not f.is_locked or can_manage_forum(request, f)]
+        self.fields["forum"].queryset = Forum.objects.filter(pk__in=postable).order_by("title")
+        self.fields["forum"].label_from_instance = lambda f: (f.course_ref + " • " if f.course_ref else "") + f.title
 
 
 class ReplyForm(StyledFormMixin, forms.ModelForm):

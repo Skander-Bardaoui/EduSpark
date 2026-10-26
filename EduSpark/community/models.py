@@ -24,6 +24,23 @@ class Announcement(models.Model):
         (PRIORITY_NORMAL, "Normale"),
         (PRIORITY_IMPORTANT, "Importante"),
     )
+    # Catégorie : filtre des pages d'annonces ; (icône Material, classes de teinte du badge).
+    CATEGORY_CHOICES = (
+        ("organisation", "Organisation"),
+        ("pedagogie", "Pédagogie"),
+        ("examens", "Examens"),
+        ("ressources", "Ressources"),
+        ("campus", "Vie du campus"),
+        ("stages", "Stages"),
+    )
+    CATEGORY_STYLES = {
+        "organisation": ("event", "bg-primary-fixed text-primary"),
+        "pedagogie": ("menu_book", "bg-primary-fixed text-primary"),
+        "examens": ("event_busy", "bg-error-container text-on-error-container"),
+        "ressources": ("folder_shared", "bg-secondary-fixed text-on-secondary-fixed"),
+        "campus": ("local_cafe", "bg-secondary-fixed text-on-secondary-fixed"),
+        "stages": ("work", "bg-tertiary-fixed text-on-tertiary-fixed"),
+    }
 
     university = models.ForeignKey(
         University, on_delete=models.CASCADE,
@@ -41,6 +58,7 @@ class Announcement(models.Model):
         related_name="announcements", verbose_name="Classe",
     )
     course_ref = models.CharField("Cours / matière", max_length=120, blank=True)
+    category = models.CharField("Catégorie", max_length=15, choices=CATEGORY_CHOICES, default="organisation")
     priority = models.CharField("Priorité", max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_NORMAL)
     is_pinned = models.BooleanField("Épinglée", default=False)
     published_at = models.DateTimeField("Publiée le", default=timezone.now)
@@ -54,6 +72,14 @@ class Announcement(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def category_icon(self):
+        return self.CATEGORY_STYLES.get(self.category, ("campaign", ""))[0]
+
+    @property
+    def category_tone(self):
+        return self.CATEGORY_STYLES.get(self.category, ("", "bg-surface-container text-on-surface-variant"))[1]
+
     def clean(self):
         if self.audience == self.AUDIENCE_CLASS and not self.school_class_id:
             raise ValidationError({"school_class": "Choisissez la classe destinataire."})
@@ -64,6 +90,17 @@ class Announcement(models.Model):
         elif self.school_class_id:
             self.university_id = self.school_class.university_id
         super().save(*args, **kwargs)
+
+
+class AnnouncementRead(models.Model):
+    """Annonce lue par un utilisateur (points « non lu », compteur, « tout marquer comme lu »)."""
+
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="reads")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="announcement_reads")
+    read_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("announcement", "user"), name="unique_announcement_read")]
 
 
 class Forum(models.Model):
@@ -119,6 +156,7 @@ class Thread(models.Model):
     is_resolved = models.BooleanField("Résolue", default=False)
     is_pinned = models.BooleanField("Épinglée", default=False)
     is_hidden = models.BooleanField("Masquée par la modération", default=False)
+    view_count = models.PositiveIntegerField("Vues", default=0, editable=False)
     created_at = models.DateTimeField("Posée le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifiée le", auto_now=True)
 
@@ -133,6 +171,17 @@ class Thread(models.Model):
     def save(self, *args, **kwargs):
         self.university_id = self.forum.university_id
         super().save(*args, **kwargs)
+
+
+class ThreadVote(models.Model):
+    """« Vote utile » sur une question : un par utilisateur."""
+
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="votes")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="thread_votes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("thread", "user"), name="unique_thread_vote")]
 
 
 class Reply(models.Model):
@@ -195,7 +244,7 @@ class Message(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name="messages_received", verbose_name="Destinataire",
     )
-    subject = models.CharField("Objet", max_length=200)
+    subject = models.CharField("Objet", max_length=200, blank=True)
     body = models.TextField("Message")
     read_at = models.DateTimeField("Lu le", null=True, blank=True)
     sender_deleted = models.BooleanField(default=False)

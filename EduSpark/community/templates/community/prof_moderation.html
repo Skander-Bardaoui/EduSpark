@@ -1,0 +1,72 @@
+{% extends "portal/base_prof.html" %}
+{% load community_extras %}
+{% block title %}Modération — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Échanges</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Modération</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Signalements des forums de vos cours, à traiter selon la charte pédagogique.</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'community:prof_forums' %}"><span class="material-symbols-outlined text-[18px]">forum</span>Ouvrir les forums</a>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Signalements en attente</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[20px]">warning</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ open_count }}</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">{{ high_count }} priorité{{ high_count|pluralize }} haute{{ high_count|pluralize }}</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Traités cette semaine</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">verified_user</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ treated_week }}</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">Délai moyen : {{ average_delay }}</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Messages masqués</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-container text-secondary"><span class="material-symbols-outlined text-[20px]">visibility_off</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ forums_hidden }}</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">Dans les forums concernés</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Forums concernés</p><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">forum</span></span></div><p class="font-data-metric text-kpi font-bold mt-2 leading-none text-on-surface">{{ concerned_forums|length }}</p><p class="mt-2 text-xs leading-snug text-on-surface-variant">{{ concerned_forums|join:" · "|default:"Aucun pour le moment" }}</p></article>
+</div>
+<section data-filter-scope>
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">File de modération</h2>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="ouvert" type="button">À traiter</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="question" type="button">Questions</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="reponse" type="button">Réponses</button>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+{% for r in reports %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" data-filter-item data-tags="{{ r.kind_tag }} {{ r.status }}">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="flex items-start gap-3">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded {% if r.is_high %}bg-error-container text-on-error-container{% else %}bg-tertiary-fixed text-on-tertiary-fixed{% endif %}"><span class="material-symbols-outlined text-[20px]">report</span></span>
+<div><p class="text-sm font-bold text-on-surface">{% if r.reply_id %}Réponse signalée{% else %}Question signalée{% endif %} sur le forum {{ r.forum_obj.title }}</p><p class="text-xs text-on-surface-variant">Signalé par {{ r.reporter|display_name }} · {{ r.created_at|ago }} · Priorité {% if r.is_high %}haute{% else %}normale{% endif %}</p></div>
+</div>
+{% include "portal/_badge.html" with label="Forum" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+</div>
+<blockquote class="mt-3 rounded bg-surface-container/70 p-3.5 text-sm italic leading-relaxed text-on-surface-variant">« {{ r.excerpt|truncatewords:50 }} »<span class="mt-1 block text-xs not-italic text-outline">Auteur : {{ r.author_obj|display_name }} · <a class="font-bold text-primary hover:underline" href="{% if r.reply_id %}{% url 'community:thread_detail' r.reply.thread_id %}#reponse-{{ r.reply_id }}{% else %}{% url 'community:thread_detail' r.thread_id %}{% endif %}">voir dans la discussion</a></span></blockquote>
+<p class="mt-2 text-xs text-on-surface-variant">Motif : {{ r.get_reason_display }}{% if r.details %} — {{ r.details }}{% endif %}</p>
+<div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-3">
+{% if r.status == 'ouvert' %}
+<span class="text-xs font-semibold text-on-surface-variant">En attente</span>
+<div class="flex flex-wrap gap-2">
+<form action="{% url 'community:report_resolve' r.pk %}" method="post">{% csrf_token %}<input name="action" type="hidden" value="ignorer"/><button class="rounded-full border border-outline-variant/70 px-3.5 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit">Conserver</button></form>
+<form action="{% url 'community:report_resolve' r.pk %}" method="post">{% csrf_token %}<input name="action" type="hidden" value="masquer"/><button class="rounded-full bg-error px-3.5 py-1.5 text-xs font-bold text-on-error transition-colors hover:opacity-90" type="submit">Masquer</button></form>
+</div>
+{% else %}
+<span class="text-xs font-semibold {% if r.status == 'traite' %}text-error{% else %}text-primary{% endif %}">{% if r.status == 'traite' %}Masqué{% else %}Conservé{% endif %} · {{ r.handled_by|display_name }}, {{ r.handled_at|date:"d/m/Y H:i" }}</span>
+{% endif %}
+</div>
+</article>
+{% empty %}
+<p class="rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant">Aucun signalement : rien à modérer pour le moment.</p>
+{% endfor %}
+</div>
+<p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun signalement ne correspond à ce filtre.</p>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Charte de modération</h2>
+<ul class="mt-3 grid gap-2 text-sm text-on-surface-variant sm:grid-cols-2">
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>Conserver les désaccords argumentés et constructifs.</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>Masquer les contenus haineux, discriminatoires ou promotionnels.</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>Signaler à la scolarité tout cas relevant du règlement disciplinaire.</li>
+<li class="flex items-start gap-2"><span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>Informer l'étudiant concerné après chaque décision.</li>
+</ul>
+</section>
+</div>
+</main>
+{% endblock %}

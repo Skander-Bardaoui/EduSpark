@@ -1,0 +1,181 @@
+{% extends "portal/base_prof.html" %}
+{% load community_extras %}
+{% block title %}Forums &amp; Questions — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full bg-surface min-h-[calc(100vh-4rem)]" id="main-content">
+<div class="relative w-full overflow-hidden">
+<div class="pointer-events-none absolute -top-32 right-12 w-96 h-96 rounded-full bg-primary-fixed/30 blur-3xl -z-10"></div>
+<div class="pointer-events-none absolute top-96 -left-20 w-80 h-80 rounded-full bg-secondary-fixed/40 blur-3xl -z-10"></div>
+<div class="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
+<!-- 1. Titre principal & Description synthétique -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="max-w-3xl space-y-1.5">
+<div class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span>Flux de modération centralisé • {{ university.name }}</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Forums Pédagogiques &amp; Modération des Échanges</h1>
+<p class="max-w-2xl text-[13px] leading-relaxed text-on-surface-variant">Répondez aux sollicitations académiques de vos étudiants, validez les bonnes réponses et identifiez les incompréhensions récurrentes.</p>
+</div>
+<!-- 2. Barre d'action supérieure -->
+<div class="flex shrink-0 flex-wrap items-center gap-2">
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-low px-3.5 text-[13px] font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container-high" href="?etat=ouverte">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>{{ kpi_pending }} question{{ kpi_pending|pluralize }} sans réponse de l'équipe</span>
+{% if kpi_pending %}<span class="ml-0.5 h-2 w-2 rounded-full bg-error"></span>{% endif %}
+</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-secondary-fixed px-3.5 text-[13px] font-semibold text-on-secondary-fixed transition-colors hover:bg-secondary-fixed-dim" href="{% url 'community:forum_manage' %}">
+<span class="material-symbols-outlined text-[18px]">forum</span><span>Gérer les forums</span>
+</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary shadow-md transition-colors hover:bg-primary/90" href="{% url 'community:announcement_create' %}">
+<span class="material-symbols-outlined text-[18px]">campaign</span><span>+ Nouvelle annonce</span>
+</a>
+</div>
+</div>
+<!-- 3. Cartes statistiques / KPIs -->
+<section aria-label="Indicateurs des forums" class="mt-5">
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+<div class="relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-4 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between"><span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Questions en attente</span><div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-primary"><span class="material-symbols-outlined text-[18px]">mark_chat_unread</span></div></div>
+<div class="mt-3 flex items-baseline gap-2"><span class="font-data-metric text-[20px] font-bold leading-none text-on-surface">{{ kpi_pending }}</span>
+{% if kpi_overdue %}<span class="inline-flex items-center gap-1 rounded-full bg-error-container px-2 py-0.5 text-[11px] font-bold text-on-error-container"><span class="material-symbols-outlined text-[13px]">warning</span>{{ kpi_overdue }} &gt; 24h</span>{% endif %}</div>
+<p class="mt-1.5 text-[12px] text-on-surface-variant">Sans réponse d'un enseignant</p>
+<div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-error" style="width: {% if kpi_pending %}{% widthratio kpi_overdue kpi_pending 100 %}{% else %}0{% endif %}%"></div></div>
+</div>
+<div class="flex flex-col justify-between rounded bg-surface-container-lowest p-4 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between"><span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Délai moyen de réponse</span><div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-secondary"><span class="material-symbols-outlined text-[18px]">timer</span></div></div>
+<div class="mt-3 flex items-baseline gap-2"><span class="font-data-metric text-[20px] font-bold leading-none text-on-surface">{{ kpi_delay }}</span></div>
+<p class="mt-1.5 text-[12px] text-on-surface-variant">Avant la première réponse d'un enseignant</p>
+<div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high"><div class="h-full w-[60%] rounded-full bg-primary"></div></div>
+</div>
+<div class="flex flex-col justify-between rounded bg-surface-container-lowest p-4 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between"><span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Annonces actives</span><div class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[18px]">verified</span></div></div>
+<div class="mt-3 flex items-baseline gap-2"><span class="font-data-metric text-[20px] font-bold leading-none text-on-surface">{{ kpi_announcements }}</span></div>
+<p class="mt-1.5 text-[12px] text-on-surface-variant">Visibles par vos classes</p>
+<div class="mt-3 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="w-2 h-2 rounded-full bg-primary"></span><span class="w-2 h-2 rounded-full bg-outline-variant"></span></div>
+</div>
+<div class="flex flex-col justify-between rounded bg-surface-container-lowest p-4 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between"><span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Taux de résolution</span><div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-primary"><span class="material-symbols-outlined text-[18px]">task_alt</span></div></div>
+<div class="mt-3 flex items-baseline gap-2"><span class="font-data-metric text-[20px] font-bold leading-none text-primary">{{ kpi_resolution }}%</span><span class="text-[11px] text-on-surface-variant">/ {{ kpi_resolved }} résolue{{ kpi_resolved|pluralize }} sur {{ total }}</span></div>
+<p class="mt-1.5 text-[12px] text-on-surface-variant">Questions marquées comme résolues</p>
+<div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width: {{ kpi_resolution }}%"></div></div>
+</div>
+</div>
+</section>
+<!-- 4. Filtres -->
+<section class="mt-5 space-y-3">
+<div class="flex flex-wrap items-center gap-1.5 pb-1">
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full {% if not forum_id %}bg-primary text-on-primary shadow-sm{% else %}bg-surface-container-low text-on-surface hover:bg-surface-container-high{% endif %} px-3.5 text-[13px] font-semibold transition-colors" href="?{% if state %}etat={{ state }}{% endif %}"><span>Tous mes cours</span><span class="rounded-full bg-white/20 px-1.5 py-0.5 text-[11px]">{{ total }}</span></a>
+{% for f in forums %}
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full {% if forum_id == f.pk|stringformat:'s' %}bg-primary text-on-primary shadow-sm{% else %}bg-surface-container-low text-on-surface hover:bg-surface-container-high{% endif %} px-3.5 text-[13px] transition-colors" href="?forum={{ f.pk }}{% if state %}&amp;etat={{ state }}{% endif %}"><span>{% if f.course_ref %}{{ f.course_ref }} • {% endif %}{{ f.title }}</span><span class="rounded-full {% cycle 'bg-primary-fixed text-on-primary-fixed' 'bg-secondary-fixed text-on-secondary-fixed' 'bg-surface-container-highest text-on-surface-variant' %} px-1.5 py-0.5 text-[11px]">{{ f.n }}</span></a>
+{% endfor %}
+</div>
+<div class="flex flex-col items-stretch justify-between gap-2 lg:flex-row lg:items-center">
+<div class="flex flex-wrap items-center gap-1.5">
+<a class="inline-flex h-7 items-center rounded-full {% if not state %}bg-surface-container text-on-surface{% else %}bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high{% endif %} px-3 text-[11px] font-bold uppercase tracking-wide" href="?{% if forum_id %}forum={{ forum_id }}{% endif %}">Toutes</a>
+<a class="inline-flex h-7 items-center gap-1 rounded-full bg-error-container px-3 text-[11px] font-bold uppercase tracking-wide text-on-error-container {% if state == 'urgent' %}ring-2 ring-error{% endif %}" href="?etat=urgent{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}"><span class="h-1.5 w-1.5 rounded-full bg-error"></span>Sans réponse depuis +24 h ({{ count_urgent }})</a>
+<a class="inline-flex h-7 items-center rounded-full {% if state == 'sans_prof' %}bg-primary text-on-primary{% else %}bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high{% endif %} px-3 text-[11px] font-bold uppercase tracking-wide transition-colors" href="?etat=sans_prof{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}">Sans réponse de l'équipe ({{ count_sans_prof }})</a>
+<a class="inline-flex h-7 items-center gap-1 rounded-full bg-secondary-fixed px-3 text-[11px] font-bold uppercase tracking-wide text-on-secondary-fixed {% if state == 'a_certifier' %}ring-2 ring-secondary{% endif %}" href="?etat=a_certifier{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}"><span class="material-symbols-outlined text-[14px]">how_to_reg</span>Résolues par les pairs à certifier ({{ count_a_certifier }})</a>
+</div>
+<form class="relative w-full lg:w-96" method="get" role="search">
+{% if forum_id %}<input name="forum" type="hidden" value="{{ forum_id }}"/>{% endif %}{% if state %}<input name="etat" type="hidden" value="{{ state }}"/>{% endif %}
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="h-9 w-full rounded-full bg-surface-container-lowest pl-10 pr-3 text-[13px] text-on-surface shadow-sm placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary" name="q" placeholder="Rechercher un concept, une question ou un étudiant..." type="search" value="{{ q }}"/>
+</form>
+</div>
+</section>
+<!-- Layout principal : Flux de questions (Col 8) + Volet IA (Col 4) -->
+<div class="mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+<section aria-label="Fils de questions à modérer" class="space-y-4 lg:col-span-8">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center gap-2"><h2 class="text-[16px] font-bold text-on-surface">Questions prioritaires &amp; Discussions</h2><span class="font-data-metric text-[12px] text-on-surface-variant">Page {{ page.number }} sur {{ page.paginator.num_pages }}</span></div>
+</div>
+{% for t in page %}
+<article class="relative space-y-3 rounded bg-surface-container-lowest p-4 shadow-sm {% if t.is_hidden %}opacity-60{% endif %}">
+<div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+<div class="flex items-center gap-2.5">
+<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ t.author|tone }} text-[12px] font-bold">{{ t.author|initials }}</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2"><span class="text-[13px] font-semibold text-on-surface">{{ t.author|display_name }}</span>{% if t.forum.school_class %}<span class="rounded-full bg-surface-container px-2 py-0.5 text-[11px] text-on-surface-variant">{{ t.forum.school_class.name }}</span>{% endif %}</div>
+<span class="text-[12px] text-on-surface-variant">Posée {{ t.created_at|ago }} • {{ t.reply_count }} réponse{{ t.reply_count|pluralize }} • {{ t.view_count }} vue{{ t.view_count|pluralize }}</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 self-start sm:self-auto">
+{% if not t.has_staff_reply and not t.is_resolved %}<span class="inline-flex items-center gap-1 rounded-full bg-error-container px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-on-error-container"><span class="material-symbols-outlined text-[14px]">error</span>Sans réponse</span>{% endif %}
+{% if t.is_pinned %}<span class="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary"><span class="material-symbols-outlined text-[14px]">push_pin</span>Épinglée</span>{% endif %}
+{% if t.is_hidden %}<span class="rounded-full bg-error-container px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-on-error-container">Masquée</span>{% endif %}
+<span class="rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary">{% if t.forum.course_ref %}{{ t.forum.course_ref }}{% else %}{{ t.forum.title }}{% endif %}</span>
+</div>
+</div>
+<div class="space-y-1.5">
+<h3 class="text-[14px] font-semibold text-on-surface"><a class="hover:text-primary" href="{% url 'community:thread_detail' t.pk %}">{{ t.title }}</a></h3>
+<p class="text-[13px] leading-relaxed text-on-surface-variant">{{ t.body|truncatewords:50 }}</p>
+</div>
+{% for s in t.solutions %}
+<div class="flex items-start gap-2 rounded bg-surface-container-low px-3 py-2 text-[12px] text-on-surface-variant"><span class="material-symbols-outlined text-[16px] text-primary">verified</span><span><strong class="text-on-surface">Solution validée{% if s.validated_by %} par Pr. {{ s.validator_name }}{% endif %}</strong> : « {{ s.body|truncatewords:30 }} »</span></div>
+{% empty %}
+<div class="flex items-center gap-2 rounded bg-surface-container-low px-3 py-2 text-[12px] text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">pending_actions</span>
+<span>Statut : <strong class="text-on-surface">{% if t.has_staff_reply %}Réponse d'un enseignant publiée, solution non validée{% elif t.reply_count %}En attente de validation enseignant{% else %}Aucune réponse pour le moment{% endif %}</strong>.{% if t.reply_count %} {{ t.reply_count }} réponse{{ t.reply_count|pluralize }} déposée{{ t.reply_count|pluralize }}.{% endif %}</span>
+</div>
+{% endfor %}
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3.5 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" href="{% url 'community:thread_detail' t.pk %}#reply-title"><span class="material-symbols-outlined text-[16px]">reply</span><span>Répondre directement</span></a>
+{% if t.reply_count and not t.has_solution %}<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-secondary-fixed px-3.5 text-[13px] font-semibold text-on-secondary-fixed transition-colors hover:bg-secondary-fixed-dim" href="{% url 'community:thread_detail' t.pk %}#replies-title"><span class="material-symbols-outlined text-[16px]">thumb_up</span><span>Valider la réponse d'un pair</span></a>{% endif %}
+<form action="{% url 'community:thread_toggle_pin' t.pk %}" method="post">{% csrf_token %}<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3.5 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-container-highest" type="submit"><span class="material-symbols-outlined text-[16px]">push_pin</span><span>{% if t.is_pinned %}Désépingler{% else %}Épingler{% endif %}</span></button></form>
+<form action="{% url 'community:thread_toggle_hidden' t.pk %}" method="post">{% csrf_token %}<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3.5 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-container-highest" type="submit"><span class="material-symbols-outlined text-[16px]">{% if t.is_hidden %}visibility{% else %}visibility_off{% endif %}</span><span>{% if t.is_hidden %}Rendre visible{% else %}Masquer{% endif %}</span></button></form>
+</div>
+<a class="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface" href="{% url 'community:thread_detail' t.pk %}" title="Ouvrir le fil"><span class="material-symbols-outlined text-[18px]">open_in_new</span></a>
+</div>
+</article>
+{% empty %}
+<div class="rounded bg-surface-container-lowest p-6 text-center shadow-sm"><span class="material-symbols-outlined text-primary text-[28px]">forum</span><p class="mt-1 text-sm font-semibold text-on-surface">Aucune question pour ce filtre</p></div>
+{% endfor %}
+{% if page.paginator.num_pages > 1 %}
+<nav aria-label="Pagination" class="flex items-center justify-between px-1 py-2 text-[12px] text-on-surface-variant">
+<span>Affichage de {{ page.start_index }} à {{ page.end_index }} sur {{ page.paginator.count }}</span>
+<div class="flex items-center gap-2">
+{% if page.has_previous %}<a class="rounded-full bg-surface-container p-2 hover:bg-surface-container-high" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.previous_page_number }}"><span class="material-symbols-outlined text-[18px]">chevron_left</span></a>{% endif %}
+<span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[12px] font-bold text-on-primary">{{ page.number }}</span>
+{% if page.has_next %}<a class="rounded-full bg-surface-container p-2 hover:bg-surface-container-high" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.next_page_number }}"><span class="material-symbols-outlined text-[18px]">chevron_right</span></a>{% endif %}
+</div>
+</nav>
+{% endif %}
+</section>
+<!-- 6. Volet IA latéral -->
+<aside aria-labelledby="assistant-ia-title" class="space-y-4 lg:col-span-4 lg:sticky lg:top-24">
+<div class="relative overflow-hidden rounded-2xl bg-surface-container-lowest p-4 shadow-sm border border-secondary-fixed/40">
+<div class="mb-3 flex items-start justify-between gap-2">
+<div class="flex items-center gap-2"><div class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-on-secondary"><span class="material-symbols-outlined text-[18px]">auto_awesome</span></div><div><h3 class="text-[14px] font-bold text-on-surface" id="assistant-ia-title">Assistant IA Pédagogique</h3><span class="text-[11px] text-outline">Suggérer une réponse</span></div></div>
+<span class="rounded-full bg-secondary-fixed px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-on-secondary-fixed">BETA</span>
+</div>
+<label class="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-on-surface-variant" for="ai-thread-select">Question à traiter</label>
+<select class="mb-3 w-full rounded bg-surface-container-low py-2.5 pl-3 pr-8 text-[13px] text-on-surface outline-none focus:ring-2 focus:ring-secondary" id="ai-thread-select">
+{% for c in ai_candidates %}<option value="{{ c.pk }}">{{ c.title|truncatechars:60 }}</option>{% empty %}<option value="">Aucune question ouverte</option>{% endfor %}
+</select>
+<div class="rounded-xl bg-gradient-to-br from-surface-container-low to-surface-container p-3">
+<span class="mb-1 inline-flex items-center gap-1 text-[11px] font-bold uppercase text-secondary"><span class="material-symbols-outlined text-[16px]">tips_and_updates</span>Suggestion de réponse</span>
+<p class="whitespace-pre-line text-[13px] font-medium leading-relaxed text-on-surface" id="ai-draft">{% if ai_candidates %}Choisissez une question, puis demandez une suggestion. Vous la relisez avant de publier.{% else %}Aucune question ouverte pour le moment.{% endif %}</p>
+<p class="mt-2 text-[11px] text-outline" id="ai-status" role="status">{% if not ai_configured %}L'assistant IA n'est pas configuré sur ce serveur.{% endif %}</p>
+<div class="mt-3 flex flex-col gap-2">
+<button class="flex w-full items-center justify-center gap-1 rounded-full bg-secondary py-2.5 px-3 text-[12px] font-bold text-on-secondary transition-colors hover:bg-secondary-container disabled:opacity-50" id="ai-ask" type="button" {% if not ai_candidates %}disabled{% endif %}><span class="material-symbols-outlined text-[16px]">auto_awesome</span>Suggérer une réponse</button>
+<div class="grid grid-cols-2 gap-2" id="ai-actions" hidden>
+<form action="" id="ai-keep-form" method="post">{% csrf_token %}<input id="ai-keep-body" name="body" type="hidden"/><input name="ai_assisted" type="hidden" value="True"/>
+<button class="flex w-full items-center justify-center gap-1 rounded-full bg-primary py-2.5 px-3 text-[12px] font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">check</span>Garder et publier</button></form>
+<button class="flex w-full items-center justify-center gap-1 rounded-full bg-secondary-fixed py-2.5 px-3 text-[12px] font-bold text-on-secondary-fixed transition-colors hover:bg-secondary-fixed-dim" id="ai-edit" type="button"><span class="material-symbols-outlined text-[16px]">edit</span>Modifier</button>
+<button class="col-span-2 w-full rounded-full py-1.5 px-3 text-[12px] font-medium text-outline transition-colors hover:bg-surface-container-high/50 hover:text-on-surface" id="ai-refuse" type="button">Refuser la suggestion</button>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="mt-3 flex items-start gap-2 rounded bg-surface-container p-2.5 text-on-surface-variant" role="note"><span class="material-symbols-outlined mt-0.5 text-[18px] text-outline">info</span><p class="text-xs leading-relaxed"><strong>Garantie de continuité :</strong> l'IA est optionnelle ; la modération humaine et l'accès aux forums restent assurés si elle est indisponible.</p></div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "community/_feed_ai_script.html" %}
+{% endblock %}

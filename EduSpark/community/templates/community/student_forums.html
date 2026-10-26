@@ -1,0 +1,275 @@
+{% extends "portal/base_student.html" %}
+{% load community_extras %}
+{% block title %}Forums &amp; Questions — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative overflow-x-clip px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Top decorative atmospheric ambient lighting -->
+<div class="relative w-full">
+<div class="absolute -top-10 left-1/4 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<div class="absolute top-20 right-10 w-80 h-80 bg-secondary-fixed/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+<!-- 1. En-tête de page & Titre -->
+<section class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg mb-space-xl">
+<div class="max-w-3xl">
+<div class="flex items-center gap-space-xs mb-space-xs text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<span class="inline-flex items-center gap-1 font-semibold text-primary">
+<span class="material-symbols-outlined text-[16px]">forum</span>
+            Espace d'entraide
+          </span>
+<span class="text-outline-variant">•</span>
+<span class="text-secondary font-medium">{{ university.name }}</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface text-balance">
+          Échanges, Annonces &amp; Forums de Discussion
+        </h1>
+<p class="mt-space-xs font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          Communiquez avec vos professeurs, posez vos questions techniques et collaborez avec vos camarades de promotion.
+        </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-wrap items-center gap-space-sm shrink-0">
+<a class="inline-flex items-center gap-space-xs px-space-md py-3 rounded-full bg-surface-container-high text-primary hover:bg-surface-variant transition-all font-label-md text-label-md shadow-sm active:scale-98" href="{% url 'community:student_announcements' %}">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+<span>Toutes les annonces</span>
+</a>
+<a class="inline-flex items-center gap-space-xs px-space-lg py-3 rounded-full bg-gradient-to-r from-primary via-primary-container to-secondary text-on-primary hover:shadow-md hover:brightness-110 transition-all font-label-md text-label-md shadow-sm active:scale-98" href="{% url 'community:thread_new' %}{% if forum_id %}?forum={{ forum_id }}{% endif %}">
+<span class="material-symbols-outlined text-[20px]">add_comment</span>
+<span>+ Poser une question</span>
+</a>
+</div>
+</section>
+<!-- 2. Barre d'outils, Filtres & Recherche -->
+<section class="mb-space-lg bg-surface-container-lowest rounded-2xl p-space-md shadow-sm">
+<form class="flex flex-col gap-space-md" method="get" role="search">
+{% if forum_id %}<input name="forum" type="hidden" value="{{ forum_id }}"/>{% endif %}
+{% if state %}<input name="etat" type="hidden" value="{{ state }}"/>{% endif %}
+<!-- Champ de recherche plein texte -->
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-space-md flex items-center pointer-events-none text-primary">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</div>
+<input class="w-full pl-12 pr-28 py-2.5 bg-surface-container-low text-on-surface placeholder:text-outline font-body-md text-body-md rounded-full outline-none focus:ring-2 focus:ring-primary transition-all" name="q" placeholder="Rechercher par sujet, mot-clé, cours ou auteur..." type="search" value="{{ q }}"/>
+<div class="absolute inset-y-0 right-3 flex items-center gap-1.5">
+<button class="px-3 py-1 rounded-full bg-primary text-on-primary font-label-sm text-label-sm" type="submit">Rechercher</button>
+</div>
+</div>
+</form>
+<!-- Filtres contextuels par cours / forum (Pills) -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pt-space-xs">
+<div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+<a class="px-space-md py-1.5 rounded-full {% if not forum_id %}bg-primary text-on-primary shadow-xs{% else %}bg-surface-container-high hover:bg-surface-variant text-on-surface{% endif %} font-label-sm text-label-sm whitespace-nowrap transition-colors" href="?{% if state %}etat={{ state }}{% endif %}">Tous les cours</a>
+{% for f in forums %}
+<a class="px-space-md py-1.5 rounded-full {% if forum_id == f.pk|stringformat:'s' %}bg-primary text-on-primary shadow-xs{% else %}bg-surface-container-high hover:bg-surface-variant text-on-surface{% endif %} font-label-sm text-label-sm whitespace-nowrap transition-colors flex items-center gap-1.5" href="?forum={{ f.pk }}{% if state %}&amp;etat={{ state }}{% endif %}">
+<span class="w-2 h-2 rounded-full {% cycle 'bg-secondary' 'bg-primary' 'bg-tertiary-container' %}"></span>
+              {% if f.course_ref %}{{ f.course_ref }} • {% endif %}{{ f.title }}
+            </a>
+{% endfor %}
+</div>
+<!-- Filtre d'état -->
+<div class="flex max-w-full shrink-0 items-center gap-1 overflow-x-auto rounded-full bg-surface-container-low p-1">
+<a class="px-3 py-1 rounded-full {% if not state %}text-on-primary bg-primary{% else %}text-on-surface-variant hover:text-on-surface{% endif %} font-label-sm text-label-sm flex items-center gap-1 transition-colors" href="?{% if forum_id %}forum={{ forum_id }}{% endif %}"><span>Toutes</span></a>
+<a class="px-3 py-1 rounded-full {% if state == 'resolue' %}text-on-primary bg-primary{% else %}text-on-surface-variant hover:text-on-surface{% endif %} font-label-sm text-label-sm flex items-center gap-1 transition-colors" href="?etat=resolue{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}">
+<span class="material-symbols-outlined text-body-md text-green-700">check_circle</span><span>Résolues</span></a>
+<a class="px-3 py-1 rounded-full {% if state == 'ouverte' %}text-on-primary bg-primary{% else %}text-on-surface-variant hover:text-on-surface{% endif %} font-label-sm text-label-sm flex items-center gap-1 transition-colors" href="?etat=ouverte{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}">
+<span class="material-symbols-outlined text-body-md text-amber-600">hourglass_top</span><span>Non résolues</span></a>
+<a class="px-3 py-1 rounded-full {% if state == 'officielle' %}text-on-primary bg-primary{% else %}text-on-surface-variant hover:text-on-surface{% endif %} font-label-sm text-label-sm flex items-center gap-1 transition-colors" href="?etat=officielle{% if forum_id %}&amp;forum={{ forum_id }}{% endif %}">
+<span class="material-symbols-outlined text-body-md text-secondary">school</span><span>Officielle</span></a>
+</div>
+</div>
+</section>
+{% if priority_announcements %}
+<!-- 3. Section Annonces Officielles Épinglées -->
+<section aria-label="Annonces officielles de l'équipe pédagogique" class="mb-space-xl">
+<div class="flex items-center justify-between mb-space-sm px-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">push_pin</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Annonces Officielles Prioritaires</h2>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">{{ priority_announcements|length }} annonce{{ priority_announcements|length|pluralize }} active{{ priority_announcements|length|pluralize }}</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+{% for a in priority_announcements %}
+<article class="relative overflow-hidden bg-gradient-to-br from-surface-container-lowest to-surface-container-low rounded-2xl p-space-md shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-full {{ a.author|tone }} flex items-center justify-center font-bold shrink-0">{{ a.author|initials }}</div>
+<div class="flex-1 min-w-0">
+<div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface font-bold">{{ a.author|display_name }}</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-[11px] uppercase font-bold tracking-wider">{% if a.school_class %}{{ a.school_class.name }}{% else %}{{ a.get_category_display }}{% endif %}</span>
+</div>
+<span class="font-data-metric text-data-metric text-outline flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>{{ a.published_at|ago }}</span>
+</div>
+<h3 class="font-title-md text-title-md {% if forloop.first %}text-primary{% else %}text-on-surface{% endif %} mb-1">{{ a.title }}</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">{{ a.body|truncatewords:30 }}</p>
+<div class="mt-space-sm pt-space-xs flex items-center justify-between text-on-surface-variant">
+<span class="font-data-metric text-data-metric text-outline">{% if a.course_ref %}{{ a.course_ref }}{% else %}{{ a.get_category_display }}{% endif %}</span>
+<a class="text-primary hover:text-primary-container font-label-sm text-label-sm flex items-center gap-0.5 font-bold" href="{% url 'community:announcement_detail' a.pk %}">Consulter les détails<span class="material-symbols-outlined text-sm">arrow_forward</span></a>
+</div>
+</div>
+</div>
+</article>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+<!-- MAIN TWO-COLUMN WORKSPACE: Discussions (Left 8 cols) & AI Panel (Right 4 cols) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+<!-- 4. Fil des Discussions & Questions d'entraide (8 Columns) -->
+<section aria-label="Liste des sujets de discussion" class="flex min-w-0 flex-col gap-4 xl:col-span-8">
+<div class="flex items-center justify-between px-space-xs">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Questions &amp; Échanges récents</h2>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high font-data-metric text-data-metric font-semibold text-primary">{{ page.paginator.count }} question{{ page.paginator.count|pluralize }}</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<a class="font-label-md text-label-md text-primary font-semibold flex items-center gap-0.5" href="?mes=1">Mes questions</a>
+</div>
+</div>
+{% for t in page %}
+<!-- DISCUSSION CARD -->
+<article class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm hover:shadow-md transition-all flex flex-col gap-space-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full {{ t.author|tone }} flex items-center justify-center font-bold text-label-md shrink-0">{{ t.author|initials }}</div>
+<div>
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-label-md text-label-md text-on-surface font-semibold">{{ t.author|display_name }}</span>
+{% if t.forum.school_class %}<span class="font-body-sm text-body-sm text-on-surface-variant">• {{ t.forum.school_class.name }}</span>{% endif %}
+<span class="font-data-metric text-data-metric text-outline">{{ t.created_at|ago }}</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-semibold">{% if t.forum.course_ref %}{{ t.forum.course_ref }}{% else %}{{ t.forum.title }}{% endif %}</span>
+{% if t.forum.course_ref %}<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">{{ t.forum.title }}</span>{% endif %}
+</div>
+</div>
+</div>
+{% if t.has_solution %}
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low text-primary font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px] text-green-700" style="font-variation-settings: 'FILL' 1;">verified</span>
+              Résolu certifié Enseignant
+            </span>
+{% elif t.is_resolved %}
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[16px]">check_circle</span>Résolue</span>
+{% elif not t.has_staff_reply %}
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-tertiary font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px] text-amber-600">hourglass_top</span>
+              En attente de réponse enseignant
+            </span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[16px]">groups</span>Entraide étudiante</span>
+{% endif %}
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface hover:text-primary transition-colors mb-space-xs"><a href="{% url 'community:thread_detail' t.pk %}">{{ t.title }}</a></h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">{{ t.body|truncatewords:45 }}</p>
+</div>
+{% for s in t.solutions %}
+<!-- Réponse validée par l'enseignant -->
+<div class="bg-surface-container-low rounded p-space-sm flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">psychology_alt</span>
+<div class="text-body-sm font-body-sm text-on-surface">
+<span class="font-semibold text-primary">Réponse validée{% if s.validated_by %} par Pr. {{ s.validator_name }}{% endif %} :</span>
+              « {{ s.body|truncatewords:35 }} »
+            </div>
+</div>
+{% endfor %}
+<!-- Discussion Footer Metrics & CTAs -->
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<form action="{% url 'community:thread_toggle_vote' t.pk %}" method="post">{% csrf_token %}<input name="next" type="hidden" value="{{ request.get_full_path }}"/>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full {% if t.pk in voted_ids %}bg-primary-fixed{% else %}bg-surface-container hover:bg-surface-container-high{% endif %} transition-colors font-data-metric text-data-metric text-primary font-semibold" type="submit">
+<span class="material-symbols-outlined text-[16px]">thumb_up</span><span>{{ t.vote_count }} vote{{ t.vote_count|pluralize }} utile{{ t.vote_count|pluralize }}</span>
+</button></form>
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric"><span class="material-symbols-outlined text-[16px]">chat_bubble</span>{{ t.reply_count }} réponse{{ t.reply_count|pluralize }}</span>
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric hidden sm:inline-flex"><span class="material-symbols-outlined text-[16px]">visibility</span>{{ t.view_count }} vue{{ t.view_count|pluralize }}</span>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-primary-container font-semibold inline-flex items-center gap-1" href="{% url 'community:thread_detail' t.pk %}"><span>Voir le fil complet</span><span class="material-symbols-outlined text-[18px]">chevron_right</span></a>
+</div>
+</article>
+{% empty %}
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm text-center">
+<span class="material-symbols-outlined text-primary text-[32px]">forum</span>
+<p class="mt-2 font-title-md text-title-md text-on-surface">Aucune question pour ce filtre</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Soyez le premier à poser une question dans ce cours.</p>
+</div>
+{% endfor %}
+<!-- Pagination -->
+{% if page.paginator.count %}
+<nav aria-label="Pagination des questions" class="flex items-center justify-between py-space-md px-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Affichage de {{ page.start_index }} à {{ page.end_index }} sur {{ page.paginator.count }} question{{ page.paginator.count|pluralize }}</span>
+<div class="flex items-center gap-2">
+{% if page.has_previous %}<a class="p-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.previous_page_number }}"><span class="material-symbols-outlined text-[20px]">chevron_left</span></a>{% else %}<span class="p-2 rounded-full bg-surface-container text-outline opacity-50"><span class="material-symbols-outlined text-[20px]">chevron_left</span></span>{% endif %}
+<span class="w-8 h-8 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold flex items-center justify-center">{{ page.number }}</span>
+{% if page.has_next %}<a class="p-2 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page.next_page_number }}"><span class="material-symbols-outlined text-[20px]">chevron_right</span></a>{% else %}<span class="p-2 rounded-full bg-surface-container text-outline opacity-50"><span class="material-symbols-outlined text-[20px]">chevron_right</span></span>{% endif %}
+</div>
+</nav>
+{% endif %}
+</section>
+<!-- 5. Volet latéral droit - Assistant IA (4 Columns) -->
+<aside aria-labelledby="assistant-ia-title" class="flex min-w-0 flex-col gap-4 xl:col-span-4 2xl:sticky 2xl:top-28">
+<div class="bg-surface-container-lowest rounded-3xl p-space-lg shadow-sm border border-secondary-fixed/40 relative overflow-hidden">
+<div class="absolute -right-12 -top-12 w-44 h-44 bg-secondary-fixed/30 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start justify-between gap-2 mb-space-md relative">
+<div class="flex items-center gap-space-xs">
+<div class="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-on-secondary shadow-xs"><span class="material-symbols-outlined text-[20px]">auto_awesome</span></div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface" id="assistant-ia-title">Assistant IA Forums</h3>
+<span class="font-body-sm text-[11px] text-outline">Suggérer une réponse</span>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-[11px] uppercase font-bold tracking-wider shrink-0">BETA</span>
+</div>
+<div class="mb-space-md">
+<label class="block font-label-sm text-label-sm text-on-surface-variant font-semibold mb-1.5 uppercase tracking-wide" for="ai-thread-select">Question à traiter</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-low text-on-surface font-body-sm text-body-sm py-2.5 pl-3.5 pr-10 rounded outline-none focus:ring-2 focus:ring-secondary transition-all" id="ai-thread-select">
+{% for c in ai_candidates %}<option value="{{ c.pk }}">{{ c.title|truncatechars:60 }}</option>{% empty %}<option value="">Aucune question ouverte</option>{% endfor %}
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Suggestion -->
+<div class="bg-gradient-to-br from-surface-container-low to-surface-container rounded-2xl p-space-md mb-space-md relative">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary font-bold uppercase"><span class="material-symbols-outlined text-body-md">tips_and_updates</span>Suggestion de réponse</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium leading-relaxed whitespace-pre-line" id="ai-draft">{% if ai_candidates %}Choisissez une question, puis demandez une suggestion. Vous la relisez avant de publier.{% else %}Aucune question ouverte pour le moment.{% endif %}</p>
+<p class="mt-2 font-body-sm text-[11px] text-outline" id="ai-status" role="status">{% if not ai_configured %}L'assistant IA n'est pas configuré sur ce serveur.{% endif %}</p>
+<div class="flex flex-col gap-2 pt-space-sm">
+<button class="w-full py-2.5 px-3 rounded-full bg-secondary text-on-secondary hover:bg-secondary-container font-label-sm text-label-sm font-bold text-center shadow-xs transition-colors flex items-center justify-center gap-1 disabled:opacity-50" id="ai-ask" type="button" {% if not ai_candidates %}disabled{% endif %}>
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span><span>Suggérer une réponse</span>
+</button>
+<div class="grid grid-cols-2 gap-2" id="ai-actions" hidden>
+<form action="" id="ai-keep-form" method="post">{% csrf_token %}<input id="ai-keep-body" name="body" type="hidden"/><input name="ai_assisted" type="hidden" value="True"/>
+<button class="w-full py-2.5 px-3 rounded-full bg-primary text-on-primary hover:bg-primary-container font-label-sm text-label-sm font-bold text-center shadow-xs transition-colors flex items-center justify-center gap-1" type="submit"><span class="material-symbols-outlined text-[16px]">check</span><span>Garder et publier</span></button></form>
+<button class="w-full py-2.5 px-3 rounded-full bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim font-label-sm text-label-sm font-bold text-center transition-colors flex items-center justify-center gap-1" id="ai-edit" type="button"><span class="material-symbols-outlined text-[16px]">edit</span><span>Modifier</span></button>
+<button class="col-span-2 w-full py-1.5 px-3 rounded-full text-outline hover:text-on-surface font-label-sm text-label-sm font-medium transition-colors text-center hover:bg-surface-container-high/50" id="ai-refuse" type="button">Refuser la suggestion</button>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="p-space-sm rounded bg-surface-container text-on-surface-variant flex items-start gap-space-xs" role="note">
+<span class="material-symbols-outlined text-[18px] text-outline shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-xs leading-relaxed"><strong>Garantie de continuité de service :</strong> l'IA est un outil d'assistance optionnel. Si le service est indisponible, l'accès direct aux forums, à la modération humaine et au contact enseignant reste garanti.</p>
+</div>
+</div>
+{% if top_contributors %}
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm">
+<h4 class="font-title-md text-label-md text-on-surface font-bold uppercase tracking-wider mb-space-sm flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">leaderboard</span>Top Contributeurs</h4>
+<ul class="space-y-space-sm">
+{% for c in top_contributors %}
+<li class="flex items-center justify-between text-body-sm">
+<div class="flex items-center gap-2"><span class="font-data-metric text-data-metric font-bold {% if forloop.first %}text-secondary{% else %}text-outline{% endif %}">#{{ forloop.counter }}</span><span class="font-medium text-on-surface">{{ c.user|display_name }}</span></div>
+<span class="font-data-metric text-data-metric text-outline">{{ c.count }} réponse{{ c.count|pluralize }} validée{{ c.count|pluralize }}</span>
+</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+</aside>
+</div>
+</div>
+</div></main>
+{% endblock %}
+{% block page_scripts %}
+{% include "community/_feed_ai_script.html" %}
+{% endblock %}

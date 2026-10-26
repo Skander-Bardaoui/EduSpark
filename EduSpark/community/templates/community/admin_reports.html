@@ -1,0 +1,67 @@
+{% extends "portal/base_admin.html" %}
+{% load community_extras %}
+{% block title %}Signalements &amp; Modération — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Échanges &amp; Modération</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Signalements &amp; Modération</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Traitement des signalements issus des forums de {{ portal_university.name|default:"l'université courante" }}.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'community:admin_forum_supervision' %}"><span class="material-symbols-outlined text-[18px]">forum</span>Supervision des forums</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Signalements ouverts</p><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-error-container text-on-error-container"><span class="material-symbols-outlined text-[20px]">flag</span></span></div><p class="mt-2 font-data-metric text-kpi font-bold leading-none text-on-surface">{{ open_count }}</p><p class="mt-2 text-body-sm leading-snug text-on-surface-variant">File active ce jour</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Priorité haute</p><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">priority_high</span></span></div><p class="mt-2 font-data-metric text-kpi font-bold leading-none text-error">{{ high_count }}</p><p class="mt-2 text-body-sm leading-snug text-on-surface-variant">Propos irrespectueux ou triche</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Traités</p><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">verified_user</span></span></div><p class="mt-2 font-data-metric text-kpi font-bold leading-none text-on-surface">{{ treated_total }}</p><p class="mt-2 text-body-sm leading-snug text-on-surface-variant">Dont {{ kept_count }} conservé{{ kept_count|pluralize }} et {{ hidden_count }} masqué{{ hidden_count|pluralize }}</p></article>
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm"><div class="flex items-start justify-between gap-3"><p class="font-label-md text-label-md text-on-surface-variant">Délai moyen de traitement</p><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">timer</span></span></div><p class="mt-2 font-data-metric text-kpi font-bold leading-none text-on-surface">{{ average_delay }}</p><p class="mt-2 text-body-sm leading-snug text-on-surface-variant">Entre le signalement et la décision</p></article>
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">File de modération</h2><p class="text-xs text-on-surface-variant"><span data-filter-count>{{ reports|length }}</span> signalements affichés</p></div>
+<div class="flex flex-wrap gap-2">
+<button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="ouvert" type="button">À traiter</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="haute" type="button">Priorité haute</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="question" type="button">Questions</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="reponse" type="button">Réponses</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[1080px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr>
+<th class="px-5 py-3 font-bold">Signalement</th><th class="px-5 py-3 font-bold">Espace</th><th class="px-5 py-3 font-bold">Signalé par</th><th class="px-5 py-3 font-bold">Motif</th><th class="px-5 py-3 font-bold">Priorité</th><th class="px-5 py-3 font-bold">Statut</th><th class="px-5 py-3 text-right font-bold">Actions</th>
+</tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for r in reports %}
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{% if r.is_high %}haute {% endif %}{{ r.kind_tag }} {{ r.status }}">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ r.excerpt|truncatechars:60 }}</p><p class="text-xs text-on-surface-variant">{{ r.created_at|ago }} · <a class="font-bold text-primary hover:underline" href="{% if r.reply_id %}{% url 'community:thread_detail' r.reply.thread_id %}#reponse-{{ r.reply_id }}{% else %}{% url 'community:thread_detail' r.thread_id %}{% endif %}">voir</a></p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ r.forum_obj.title }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ r.reporter|display_name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ r.get_reason_display }}</td>
+<td class="px-5 py-3">{% if r.is_high %}{% include "portal/_badge.html" with label="Haute" tone_class="bg-error-container text-on-error-container" %}{% else %}{% include "portal/_badge.html" with label="Normale" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-surface-container px-2.5 py-1 font-label-sm text-label-sm text-on-surface-variant">{{ r.get_status_display }}</span></td>
+<td class="px-5 py-3 text-right">
+{% if r.status == 'ouvert' %}
+<div class="inline-flex flex-wrap justify-end gap-1.5">
+<form action="{% url 'community:report_resolve' r.pk %}" method="post">{% csrf_token %}<input name="action" type="hidden" value="ignorer"/><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit">Conserver</button></form>
+<form action="{% url 'community:report_resolve' r.pk %}" method="post">{% csrf_token %}<input name="action" type="hidden" value="masquer"/><button class="rounded-full bg-error px-3 py-1 text-xs font-bold text-on-error transition-colors hover:opacity-90" type="submit">Masquer</button></form>
+</div>
+{% else %}<span class="text-xs text-on-surface-variant">{{ r.handled_by|display_name }} · {{ r.handled_at|date:"d/m H:i" }}</span>{% endif %}
+</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="7">Aucun signalement pour le moment.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p class="hidden border-t border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucun signalement ne correspond à ce filtre.</p>
+</section>
+</div>
+</main>
+{% endblock %}

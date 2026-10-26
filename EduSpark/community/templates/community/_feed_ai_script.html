@@ -1,0 +1,47 @@
+<style>#ai-actions[hidden], #ai-ask[hidden] { display: none !important; }</style>
+<script>
+(function () {
+  var ask = document.getElementById('ai-ask');
+  if (!ask) return;
+  var select = document.getElementById('ai-thread-select');
+  var draft = document.getElementById('ai-draft');
+  var status = document.getElementById('ai-status');
+  var actions = document.getElementById('ai-actions');
+  var keepForm = document.getElementById('ai-keep-form');
+  var keepBody = document.getElementById('ai-keep-body');
+  var token = keepForm.querySelector('input[name=csrfmiddlewaretoken]').value;
+  var urls = {
+    suggest: "{% url 'community:thread_ai_suggestion' 0 %}",
+    reply: "{% url 'community:reply_create' 0 %}",
+    thread: "{% url 'community:thread_detail' 0 %}"
+  };
+  var idle = draft.textContent;
+  function url(kind) { return urls[kind].replace('/0/', '/' + select.value + '/'); }
+  function reset() {
+    draft.textContent = idle; actions.hidden = true; ask.hidden = false; status.textContent = '';
+  }
+  select.addEventListener('change', reset);
+  ask.addEventListener('click', function () {
+    if (!select.value) return;
+    ask.disabled = true;
+    status.textContent = 'L’assistant rédige un brouillon…';
+    fetch(url('suggest'), { method: 'POST', headers: { 'X-CSRFToken': token } })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok && d.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.d.error || 'Suggestion impossible pour le moment.');
+        draft.textContent = res.d.text;
+        keepBody.value = res.d.text;
+        keepForm.action = url('reply');
+        actions.hidden = false; ask.hidden = true;
+        status.textContent = 'Relisez la suggestion : vous pouvez la garder, la modifier ou la refuser.';
+      })
+      .catch(function (e) { status.textContent = e.message; })
+      .then(function () { ask.disabled = false; });
+  });
+  document.getElementById('ai-edit').addEventListener('click', function () {
+    try { sessionStorage.setItem('community-ai-draft:' + select.value, keepBody.value); } catch (e) {}
+    window.location.href = url('thread');
+  });
+  document.getElementById('ai-refuse').addEventListener('click', reset);
+})();
+</script>

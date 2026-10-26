@@ -62,7 +62,7 @@ class VisibilityTests(CommunityTestCase):
     def forum_titles(self, user):
         response = self.login(user).get(reverse("community:student_forums"))
         self.assertEqual(response.status_code, 200)
-        return {f.title for f in response.context["page"]}
+        return {f.title for f in response.context["forums"]}
 
     def test_student_sees_own_class_and_general_forums_only(self):
         self.assertEqual(self.forum_titles(self.student), {"Forum L3", "Vie du campus"})
@@ -73,6 +73,8 @@ class VisibilityTests(CommunityTestCase):
 
     def test_admin_sees_every_forum_of_the_university_but_not_others(self):
         self.assertEqual(self.forum_titles(self.admin), {"Forum L3", "Forum M1", "Vie du campus"})
+        table = self.login(self.admin).get(reverse("community:admin_forum_supervision"))
+        self.assertEqual({row["forum"].title for row in table.context["rows"]}, {"Forum L3", "Forum M1", "Vie du campus"})
 
     def test_forum_of_another_class_or_university_is_a_404(self):
         client = self.login(self.student)
@@ -89,12 +91,19 @@ class VisibilityTests(CommunityTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/connexion/", response["Location"])
 
-    def test_forum_search_and_filter(self):
-        client = self.login(self.admin)
-        found = client.get(reverse("community:admin_forum_supervision"), {"q": "campus"})
-        self.assertEqual([f.title for f in found.context["page"]], ["Vie du campus"])
-        general = client.get(reverse("community:admin_forum_supervision"), {"classe": "general"})
-        self.assertEqual([f.title for f in general.context["page"]], ["Vie du campus"])
+    def test_feed_search_and_forum_filter(self):
+        Thread.objects.create(forum=self.forum_general, author=self.student, title="Horaires de la bibliothèque", body="…")
+        client = self.login(self.student)
+        url = reverse("community:student_forums")
+        self.assertEqual([t.title for t in client.get(url, {"q": "bibliothèque"}).context["page"]], ["Horaires de la bibliothèque"])
+        self.assertEqual([t.title for t in client.get(url, {"forum": self.forum_a.pk}).context["page"]], ["Pile ou file ?"])
+
+    def test_forum_detail_opens_the_feed_filtered_on_that_forum(self):
+        response = self.login(self.student).get(reverse("community:forum_detail", args=[self.forum_a.pk]))
+        self.assertRedirects(
+            response, "%s?forum=%d" % (reverse("community:student_forums"), self.forum_a.pk), fetch_redirect_response=False,
+        )
+        self.assertEqual(self.client.get(reverse("community:forum_detail", args=[self.forum_b.pk])).status_code, 404)
 
 
 class ForumManagementTests(CommunityTestCase):
@@ -224,9 +233,10 @@ class ThreadAndReplyTests(CommunityTestCase):
     def test_search_and_state_filters_in_a_forum(self):
         Thread.objects.create(forum=self.forum_a, author=self.student, title="Sans réponse ici", body="…")
         client = self.login(self.student)
-        url = reverse("community:forum_detail", args=[self.forum_a.pk])
-        self.assertEqual([t.title for t in client.get(url, {"etat": "sans_reponse"}).context["page"]], ["Sans réponse ici"])
-        self.assertEqual([t.title for t in client.get(url, {"q": "pile"}).context["page"]], ["Pile ou file ?"])
+        url = reverse("community:student_forums")
+        params = {"forum": self.forum_a.pk}
+        self.assertEqual([t.title for t in client.get(url, {**params, "etat": "sans_prof"}).context["page"]], ["Sans réponse ici"])
+        self.assertEqual([t.title for t in client.get(url, {**params, "q": "pile"}).context["page"]], ["Pile ou file ?"])
 
 
 class ModerationTests(CommunityTestCase):
@@ -259,7 +269,7 @@ class ModerationTests(CommunityTestCase):
         self.assertEqual((report.reporter, report.reply, report.university), (self.classmate, self.reply, self.uni))
 
         queue = self.login(self.prof).get(reverse("community:prof_moderation"))
-        self.assertEqual([r.pk for r in queue.context["page"]], [report.pk])
+        self.assertEqual([r.pk for r in queue.context["reports"]], [report.pk])
         self.client.post(reverse("community:report_resolve", args=[report.pk]), {"action": "masquer"})
         report.refresh_from_db(); self.reply.refresh_from_db()
         self.assertEqual((report.status, report.handled_by, self.reply.is_hidden), (Report.STATUS_ACTIONED, self.prof, True))
@@ -275,9 +285,9 @@ class ModerationTests(CommunityTestCase):
         Report.objects.create(thread=foreign, reporter=self.outsider, reason=Report.REASON_SPAM)
         mine = Report.objects.create(thread=self.thread, reporter=self.classmate, reason=Report.REASON_SPAM)
         queue = self.login(self.prof).get(reverse("community:prof_moderation"))
-        self.assertEqual([r.pk for r in queue.context["page"]], [mine.pk])
+        self.assertEqual([r.pk for r in queue.context["reports"]], [mine.pk])
         every = self.login(self.admin).get(reverse("community:admin_reports"))
-        self.assertEqual(len(every.context["page"]), 2)
+        self.assertEqual(len(every.context["reports"]), 2)
 
     def test_cannot_report_own_message(self):
         self.login(self.student).post(reverse("community:report_create", args=["question", self.thread.pk]), {"reason": Report.REASON_SPAM})
@@ -300,7 +310,7 @@ class AnnouncementTests(CommunityTestCase):
 
     def titles(self, user, **params):
         response = self.login(user).get(reverse("community:student_announcements"), params)
-        return {a.title for a in response.context["page"]}
+        return {a.title for a in response.context["announcements"]}
 
     def test_audience_rules(self):
         self.assertEqual(self.titles(self.student), {"Rentrée", "Consigne L3"})
@@ -309,14 +319,14 @@ class AnnouncementTests(CommunityTestCase):
 
     def test_student_cannot_publish(self):
         response = self.login(self.student).post(reverse("community:announcement_create"), {
-            "title": "Faux", "body": "x", "audience": "tous", "priority": "normale"})
+            "title": "Faux", "body": "x", "audience": "tous", "priority": "normale", "category": "organisation"})
         self.assertEqual(response.status_code, 403)
 
     def test_professor_publishes_and_edits_only_their_own(self):
         client = self.login(self.prof)
         client.post(reverse("community:announcement_create"), {
             "title": "Devoir reporté", "body": "Au lundi suivant.", "audience": "classe",
-            "school_class": self.class_a.pk, "priority": "importante"})
+            "school_class": self.class_a.pk, "priority": "importante", "category": "examens"})
         created = Announcement.objects.get(title="Devoir reporté")
         self.assertEqual((created.author, created.university), (self.prof, self.uni))
         self.assertEqual(client.post(reverse("community:announcement_edit", args=[self.for_b.pk]), {"title": "x"}).status_code, 404)
@@ -324,7 +334,7 @@ class AnnouncementTests(CommunityTestCase):
 
     def test_class_audience_needs_a_class(self):
         response = self.login(self.prof).post(reverse("community:announcement_create"), {
-            "title": "Sans classe", "body": "x", "audience": "classe", "priority": "normale"})
+            "title": "Sans classe", "body": "x", "audience": "classe", "priority": "normale", "category": "organisation"})
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Announcement.objects.filter(title="Sans classe").exists())
 
@@ -337,31 +347,40 @@ class AnnouncementTests(CommunityTestCase):
 
     def test_search_filters(self):
         self.assertEqual(self.titles(self.admin, q="M1"), {"Consigne M1"})
-        self.assertEqual(self.titles(self.admin, classe=self.class_a.pk), {"Consigne L3"})
 
 
 class MessageTests(CommunityTestCase):
+    def conversations(self, user):
+        return self.login(user).get(reverse("community:student_messages")).context["conversations"]
+
     def test_send_read_reply_and_delete(self):
         client = self.login(self.student)
         client.post(reverse("community:message_create"), {"recipient": self.prof.pk, "subject": "Horaire", "body": "Jeudi ?"})
         message = Message.objects.get()
         self.assertEqual((message.sender, message.recipient, message.university, message.read_at), (self.student, self.prof, self.uni, None))
 
-        self.login(self.prof)
-        self.assertEqual(self.client.get(reverse("community:prof_messages")).context["unread"], 1)
-        self.client.get(reverse("community:message_detail", args=[message.pk]))
+        inbox = self.login(self.prof).get(reverse("community:prof_messages"))
+        self.assertEqual(inbox.context["unread_total"], 1)
+        self.assertEqual([c["user"] for c in inbox.context["conversations"]], [self.student])
+        self.client.post(reverse("community:conversation_mark_read", args=[self.student.pk]))
         message.refresh_from_db()
         self.assertIsNotNone(message.read_at)
 
-        self.client.post(reverse("community:message_delete", args=[message.pk]))
-        self.assertTrue(Message.objects.filter(pk=message.pk).exists())  # encore dans la boîte de l'expéditeur
-        self.login(self.student).post(reverse("community:message_delete", args=[message.pk]))
-        self.assertFalse(Message.objects.filter(pk=message.pk).exists())
+        # réponse rapide (sans objet) : la conversation regroupe les deux messages
+        self.client.post(reverse("community:message_create"), {"recipient": self.student.pk, "subject": "", "body": "Oui, 10h."})
+        self.assertEqual([len(c["messages"]) for c in self.conversations(self.student)], [2])
 
-    def test_third_party_cannot_read_a_message(self):
-        message = Message.objects.create(university=self.uni, sender=self.student, recipient=self.prof, subject="Privé", body="…")
+        self.login(self.prof).post(reverse("community:conversation_delete", args=[self.student.pk]))
+        self.assertEqual(Message.objects.count(), 2)  # encore dans la boîte de l'étudiant
+        self.login(self.student).post(reverse("community:conversation_delete", args=[self.prof.pk]))
+        self.assertFalse(Message.objects.exists())
+
+    def test_third_party_never_sees_a_conversation(self):
+        Message.objects.create(university=self.uni, sender=self.student, recipient=self.prof, subject="Privé", body="…")
         for user in (self.classmate, self.admin, self.stranger):
-            self.assertEqual(self.login(user).get(reverse("community:message_detail", args=[message.pk])).status_code, 404)
+            self.assertEqual(self.conversations(user), [])
+        self.assertEqual(self.login(self.classmate).post(reverse("community:conversation_delete", args=[self.prof.pk])).status_code, 404)
+        self.assertEqual(Message.objects.count(), 1)
 
     def test_can_only_write_to_members_of_the_same_university(self):
         response = self.login(self.student).post(reverse("community:message_create"), {
@@ -373,13 +392,90 @@ class MessageTests(CommunityTestCase):
         self.login(self.student).post(reverse("community:message_create"), {"recipient": self.student.pk, "subject": "Moi", "body": "…"})
         self.assertFalse(Message.objects.exists())
 
-    def test_folders_and_search(self):
-        Message.objects.create(university=self.uni, sender=self.student, recipient=self.prof, subject="Alpha", body="…")
-        Message.objects.create(university=self.uni, sender=self.prof, recipient=self.student, subject="Bêta", body="…")
-        client = self.login(self.student)
-        self.assertEqual([m.subject for m in client.get(reverse("community:student_messages")).context["page"]], ["Bêta"])
-        self.assertEqual([m.subject for m in client.get(reverse("community:student_messages"), {"dossier": "envoyes"}).context["page"]], ["Alpha"])
-        self.assertEqual(list(client.get(reverse("community:student_messages"), {"q": "zzz"}).context["page"]), [])
+    def test_conversations_are_grouped_per_correspondent_and_ordered_by_recency(self):
+        Message.objects.create(university=self.uni, sender=self.student, recipient=self.prof, subject="Alpha", body="1")
+        Message.objects.create(university=self.uni, sender=self.classmate, recipient=self.student, subject="Bêta", body="2")
+        Message.objects.create(university=self.uni, sender=self.prof, recipient=self.student, subject="", body="3")
+        convs = self.conversations(self.student)
+        self.assertEqual([c["user"] for c in convs], [self.prof, self.classmate])
+        self.assertEqual([c["unread"] for c in convs], [1, 1])
+        self.assertEqual([m.body for m in convs[0]["messages"]], ["1", "3"])
+        page = self.client.get(reverse("community:student_messages"), {"avec": self.classmate.pk})
+        self.assertEqual(page.context["active_id"], self.classmate.pk)
+
+
+class LiveMessagingTests(CommunityTestCase):
+    def poll(self, user, **params):
+        response = self.login(user).get(reverse("community:message_poll"), params)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "no-store")
+        return response.json()
+
+    def send(self, user, recipient, body, subject=""):
+        return self.login(user).post(
+            reverse("community:message_create"), {"recipient": recipient.pk, "subject": subject, "body": body},
+            headers={"X-Requested-With": "XMLHttpRequest"},
+        )
+
+    def test_ajax_send_returns_the_message_without_redirect(self):
+        response = self.send(self.student, self.prof, "Bonjour en direct")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["message"]["body"], "Bonjour en direct")
+        self.assertTrue(data["message"]["mine"])
+        self.assertEqual(data["message"]["other_id"], self.prof.pk)
+        self.assertEqual(Message.objects.get().sender, self.student)
+
+    def test_ajax_send_reports_errors_as_json(self):
+        response = self.send(self.student, self.stranger, "Hors université")
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()["ok"])
+        self.assertFalse(Message.objects.exists())
+
+    def test_poll_returns_only_new_messages_for_the_recipient(self):
+        first = self.send(self.student, self.prof, "Un").json()["message"]
+        data = self.poll(self.prof, apres=0)
+        self.assertEqual([m["body"] for m in data["messages"]], ["Un"])
+        self.assertFalse(data["messages"][0]["mine"])
+        self.assertEqual(data["messages"][0]["other_name"], "Camille Martin")
+        self.assertEqual(data["unread_total"], 1)
+        self.send(self.student, self.prof, "Deux")
+        later = self.poll(self.prof, apres=first["id"])
+        self.assertEqual([m["body"] for m in later["messages"]], ["Deux"])
+        self.assertEqual(self.poll(self.prof, apres=later["messages"][0]["id"])["messages"], [])
+
+    def test_poll_also_returns_my_own_messages_sent_from_another_tab(self):
+        self.send(self.student, self.prof, "Depuis un autre onglet")
+        data = self.poll(self.student, apres=0)
+        self.assertEqual([(m["body"], m["mine"]) for m in data["messages"]], [("Depuis un autre onglet", True)])
+
+    def test_poll_never_leaks_messages_of_others_or_deleted_ones(self):
+        self.send(self.student, self.prof, "Privé")
+        for user in (self.classmate, self.admin, self.stranger):
+            self.assertEqual(self.poll(user, apres=0)["messages"], [])
+        self.login(self.prof).post(reverse("community:conversation_delete", args=[self.student.pk]))
+        self.assertEqual(self.poll(self.prof, apres=0)["messages"], [])
+        self.assertEqual(len(self.poll(self.student, apres=0)["messages"]), 1)
+
+    def test_read_receipts_come_back_for_followed_messages(self):
+        sent = self.send(self.student, self.prof, "Lu ?").json()["message"]
+        self.assertEqual(self.poll(self.student, apres=sent["id"], suivis=str(sent["id"]))["read_ids"], [])
+        self.login(self.prof).post(reverse("community:conversation_mark_read", args=[self.student.pk]))
+        data = self.poll(self.student, apres=sent["id"], suivis=str(sent["id"]))
+        self.assertEqual(data["read_ids"], [sent["id"]])
+        self.assertEqual(self.poll(self.prof, apres=sent["id"])["unread_total"], 0)
+
+    def test_inbox_exposes_the_last_message_id_to_start_polling_from(self):
+        self.send(self.student, self.prof, "A")
+        last = self.send(self.student, self.prof, "B").json()["message"]["id"]
+        self.assertEqual(self.login(self.prof).get(reverse("community:prof_messages")).context["last_id"], last)
+
+    def test_poll_requires_login_and_ignores_garbage_parameters(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("community:message_poll")).status_code, 302)
+        data = self.poll(self.student, apres="abc", suivis="x,1;2,,")
+        self.assertEqual(data["messages"], [])
 
 
 class AISuggestionTests(CommunityTestCase):
@@ -448,3 +544,152 @@ class AISuggestionTests(CommunityTestCase):
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "Suggérer une réponse")
         self.assertContains(page, "pas configuré")
+
+
+class FeedDesignTests(CommunityTestCase):
+    def test_each_role_gets_its_own_page(self):
+        student = self.login(self.student).get(reverse("community:student_forums"))
+        self.assertTemplateUsed(student, "community/student_forums.html")
+        self.assertContains(student, "Assistant IA Forums")
+        prof = self.login(self.prof).get(reverse("community:prof_forums"))
+        self.assertTemplateUsed(prof, "community/prof_forums.html")
+        self.assertContains(prof, "Taux de résolution")
+        self.assertTemplateUsed(self.login(self.admin).get(reverse("community:admin_forum_supervision")), "community/admin_forum_supervision.html")
+        self.assertTemplateUsed(self.login(self.admin).get(reverse("community:admin_communication")), "community/admin_communication.html")
+        self.assertTemplateUsed(self.login(self.admin).get(reverse("community:admin_reports")), "community/admin_reports.html")
+        self.assertTemplateUsed(self.login(self.prof).get(reverse("community:prof_moderation")), "community/prof_moderation.html")
+
+    def test_validated_solution_is_shown_as_certified_in_the_feed(self):
+        self.login(self.prof).post(reverse("community:reply_mark_solution", args=[self.reply.pk]))
+        page = self.login(self.student).get(reverse("community:student_forums"))
+        self.assertContains(page, "Résolu certifié Enseignant")
+        self.assertContains(page, "Réponse validée par Pr. Hélène Vasseur")
+        self.assertEqual([t.title for t in self.client.get(reverse("community:student_forums"), {"etat": "officielle"}).context["page"]], ["Pile ou file ?"])
+
+    def test_question_without_staff_reply_is_waiting_for_a_teacher(self):
+        waiting = Thread.objects.create(forum=self.forum_a, author=self.classmate, title="Sans prof", body="…")
+        Reply.objects.create(thread=waiting, author=self.student, body="Réponse d'un camarade")
+        feed = self.login(self.prof).get(reverse("community:prof_forums"), {"etat": "sans_prof"})
+        self.assertEqual([t.title for t in feed.context["page"]], ["Sans prof"])
+        self.assertEqual(feed.context["kpi_pending"], 1)
+        self.assertEqual(feed.context["count_sans_prof"], 1)
+
+    def test_votes_toggle_once_per_user(self):
+        url = reverse("community:thread_toggle_vote", args=[self.thread.pk])
+        self.login(self.student).post(url)
+        self.login(self.classmate).post(url)
+        self.assertEqual(self.thread.votes.count(), 2)
+        self.client.post(url)  # le même étudiant retire son vote
+        self.assertEqual(self.thread.votes.count(), 1)
+        feed = self.client.get(reverse("community:student_forums"))
+        self.assertEqual(feed.context["page"][0].vote_count, 1)
+
+    def test_vote_on_a_thread_one_cannot_see_is_a_404(self):
+        hidden = Thread.objects.create(forum=self.forum_b, author=self.outsider, title="Autre classe", body="…")
+        self.assertEqual(self.login(self.student).post(reverse("community:thread_toggle_vote", args=[hidden.pk])).status_code, 404)
+
+    def test_view_counter_ignores_the_author(self):
+        url = reverse("community:thread_detail", args=[self.thread.pk])
+        self.login(self.student).get(url)
+        self.login(self.classmate).get(url)
+        self.login(self.prof).get(url)
+        self.thread.refresh_from_db()
+        self.assertEqual(self.thread.view_count, 2)
+
+    def test_ask_a_question_from_the_feed_with_a_forum_choice(self):
+        client = self.login(self.classmate)
+        page = client.get(reverse("community:thread_new"))
+        self.assertEqual({f.title for f in page.context["form"].fields["forum"].queryset}, {"Forum L3", "Vie du campus"})
+        client.post(reverse("community:thread_new"), {"forum": self.forum_a.pk, "title": "Depuis le fil", "body": "…"})
+        self.assertEqual(Thread.objects.get(title="Depuis le fil").forum, self.forum_a)
+        refused = client.post(reverse("community:thread_new"), {"forum": self.forum_b.pk, "title": "Mauvais forum", "body": "…"})
+        self.assertEqual(refused.status_code, 200)
+        self.assertFalse(Thread.objects.filter(title="Mauvais forum").exists())
+
+    def test_locked_forums_are_not_offered_to_students(self):
+        self.forum_a.is_locked = True
+        self.forum_a.save()
+        form = self.login(self.student).get(reverse("community:thread_new")).context["form"]
+        self.assertEqual({f.title for f in form.fields["forum"].queryset}, {"Vie du campus"})
+
+    def test_ai_panel_keep_publishes_the_draft_as_an_ai_assisted_reply(self):
+        self.login(self.classmate).post(
+            reverse("community:reply_create", args=[self.thread.pk]), {"body": "Suggestion gardée", "ai_assisted": "True"},
+        )
+        reply = Reply.objects.get(body="Suggestion gardée")
+        self.assertEqual((reply.author, reply.ai_assisted), (self.classmate, True))
+
+    def test_top_contributors_count_validated_solutions(self):
+        self.login(self.prof).post(reverse("community:reply_mark_solution", args=[self.reply.pk]))
+        top = self.login(self.student).get(reverse("community:student_forums")).context["top_contributors"]
+        self.assertEqual([(c["user"], c["count"]) for c in top], [(self.prof, 1)])
+
+
+class AnnouncementDesignTests(CommunityTestCase):
+    def setUp(self):
+        super().setUp()
+        self.exam = Announcement.objects.create(
+            university=self.uni, author=self.prof, title="Partiel", body="Amphi A", category="examens",
+            audience=Announcement.AUDIENCE_CLASS, school_class=self.class_a, is_pinned=True,
+        )
+        self.campus = Announcement.objects.create(university=self.uni, author=self.admin, title="Campus fermé", body="…", category="campus")
+
+    def test_unread_tracking_and_mark_all_read(self):
+        page = self.login(self.student).get(reverse("community:student_announcements"))
+        self.assertEqual(page.context["unread_count"], 2)
+        self.assertEqual(page.context["pinned"], self.exam)
+        self.assertEqual([a.title for a in page.context["announcements"]], ["Campus fermé"])  # l'épinglée a sa carte dédiée
+        self.client.get(reverse("community:announcement_detail", args=[self.campus.pk]))
+        self.assertEqual(self.client.get(reverse("community:student_announcements")).context["unread_count"], 1)
+        self.client.post(reverse("community:announcement_mark_all_read"))
+        self.assertEqual(self.client.get(reverse("community:student_announcements")).context["unread_count"], 0)
+        # la lecture est personnelle
+        self.assertEqual(self.login(self.classmate).get(reverse("community:student_announcements")).context["unread_count"], 2)
+
+    def test_categories_offered_as_filters_match_the_visible_announcements(self):
+        categories = dict(self.login(self.student).get(reverse("community:student_announcements")).context["categories"])
+        self.assertEqual(categories, {"examens": "Examens", "campus": "Vie du campus"})
+
+    def test_admin_stats_and_read_rate(self):
+        self.login(self.student).get(reverse("community:announcement_detail", args=[self.campus.pk]))
+        page = self.login(self.admin).get(reverse("community:admin_communication"))
+        self.assertEqual((page.context["total"], page.context["pinned_count"]), (2, 1))
+        self.assertEqual(page.context["read_rate"], round(100 * 1 / 6))
+
+    def test_category_is_stored_with_the_announcement(self):
+        self.login(self.prof).post(reverse("community:announcement_create"), {
+            "title": "Dépôt TP", "body": "Vendredi", "audience": "tous", "priority": "normale", "category": "ressources"})
+        created = Announcement.objects.get(title="Dépôt TP")
+        self.assertEqual((created.category, created.category_icon), ("ressources", "folder_shared"))
+
+
+class ForumManagementPageTests(CommunityTestCase):
+    def test_professor_manages_only_their_forums_and_admin_all(self):
+        prof_rows = self.login(self.prof).get(reverse("community:forum_manage")).context["rows"]
+        self.assertEqual({r["forum"].title for r in prof_rows}, {"Forum L3"})
+        admin_rows = self.login(self.admin).get(reverse("community:forum_manage")).context["rows"]
+        self.assertEqual(len(admin_rows), 3)
+        self.assertEqual(self.login(self.student).get(reverse("community:forum_manage")).status_code, 403)
+
+    def test_lock_toggle_and_watch_status(self):
+        client = self.login(self.prof)
+        client.post(reverse("community:forum_toggle_lock", args=[self.forum_a.pk]))
+        self.forum_a.refresh_from_db()
+        self.assertTrue(self.forum_a.is_locked)
+        self.assertEqual(client.get(reverse("community:forum_manage")).context["rows"][0]["status"], "locked")
+        client.post(reverse("community:forum_toggle_lock", args=[self.forum_a.pk]))
+        Report.objects.create(thread=self.thread, reporter=self.classmate, reason=Report.REASON_SPAM)
+        self.assertEqual(client.get(reverse("community:forum_manage")).context["rows"][0]["status"], "watch")
+
+    def test_only_a_manager_can_lock(self):
+        url = reverse("community:forum_toggle_lock", args=[self.forum_a.pk])
+        self.assertEqual(self.login(self.student).post(url).status_code, 403)
+        self.assertEqual(self.login(self.other_prof).post(url).status_code, 404)
+
+    def test_moderation_page_computes_its_kpis(self):
+        report = Report.objects.create(thread=self.thread, reporter=self.classmate, reason=Report.REASON_DISRESPECT)
+        page = self.login(self.prof).get(reverse("community:prof_moderation"))
+        self.assertEqual((page.context["open_count"], page.context["high_count"]), (1, 1))
+        self.client.post(reverse("community:report_resolve", args=[report.pk]), {"action": "masquer"})
+        page = self.client.get(reverse("community:prof_moderation"))
+        self.assertEqual((page.context["open_count"], page.context["treated_week"], page.context["hidden_count"]), (0, 1, 1))

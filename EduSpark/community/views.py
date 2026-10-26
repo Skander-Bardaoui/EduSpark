@@ -10,7 +10,7 @@ import os
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, Max, Q
+from django.db.models import Count, F, Max, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -25,7 +25,7 @@ from .access import (
     is_admin, is_staff_member, replies_for, role_kind, section_url_name, threads_for,
 )
 from .forms import AnnouncementForm, ForumForm, ReplyForm, ReportForm, ThreadForm
-from .models import Announcement, Reply, Report
+from .models import Announcement, AnnouncementRead, Reply, Report, Thread
 from .services import ai
 
 PER_PAGE = 12
@@ -67,35 +67,11 @@ def _form_page(request, form, *, title, icon, cancel_url, submit_label="Enregist
 # ---------------------------------------------------------------------------
 
 @etudiant_required
-def announcement_list(request):
-    qs = announcements_for(request).select_related("author", "school_class")
-    q = request.GET.get("q", "").strip()
-    if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(body__icontains=q) | Q(course_ref__icontains=q))
-    priority = request.GET.get("priorite", "")
-    if priority in dict(Announcement.PRIORITY_CHOICES):
-        qs = qs.filter(priority=priority)
-    class_id = request.GET.get("classe", "")
-    if class_id.isdigit():
-        qs = qs.filter(school_class_id=int(class_id))
-    mine = request.GET.get("mes") == "1" and is_staff_member(request)
-    if mine:
-        qs = qs.filter(author=request.user)
-
-    page = paginate(request, qs)
-    return render(request, "community/announcement_list.html", _context(
-        request, page=page, q=q, priority=priority, class_id=class_id, mine=mine,
-        classes=access.visible_classes(request).order_by("name"),
-        priorities=Announcement.PRIORITY_CHOICES, querystring=_querystring(request),
-        editable_ids={a.pk for a in page if can_edit_announcement(request, a)},
-    ))
-
-
-@etudiant_required
 def announcement_detail(request, pk):
     announcement = get_object_or_404(
         announcements_for(request).select_related("author", "school_class"), pk=pk,
     )
+    AnnouncementRead.objects.get_or_create(announcement=announcement, user=request.user)
     return render(request, "community/announcement_detail.html", _context(
         request, announcement=announcement,
         can_edit=can_edit_announcement(request, announcement),
@@ -152,62 +128,10 @@ def announcement_delete(request, pk):
 # ---------------------------------------------------------------------------
 
 @etudiant_required
-def forum_list(request):
-    visible_threads = Q(threads__is_hidden=False)
-    qs = (
-        forums_for(request).select_related("school_class")
-        .annotate(
-            thread_count=Count("threads", filter=visible_threads, distinct=True),
-            last_activity=Max("threads__created_at", filter=visible_threads),
-        )
-        .order_by("-last_activity", "title")
-    )
-    q = request.GET.get("q", "").strip()
-    if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(course_ref__icontains=q))
-    class_id = request.GET.get("classe", "")
-    if class_id == "general":
-        qs = qs.filter(school_class__isnull=True)
-    elif class_id.isdigit():
-        qs = qs.filter(school_class_id=int(class_id))
-
-    return render(request, "community/forum_list.html", _context(
-        request, page=paginate(request, qs), q=q, class_id=class_id, querystring=_querystring(request),
-        classes=access.visible_classes(request).order_by("name"),
-    ))
-
-
-@etudiant_required
 def forum_detail(request, pk):
-    forum = get_object_or_404(forums_for(request).select_related("school_class"), pk=pk)
-    qs = (
-        threads_for(request).filter(forum=forum).select_related("author")
-        .annotate(
-            reply_count=Count("replies", filter=Q(replies__is_hidden=False), distinct=True),
-            last_reply=Max("replies__created_at", filter=Q(replies__is_hidden=False)),
-        )
-        .order_by("-is_pinned", "-created_at")  # un annotate avec agrégat ignore Meta.ordering
-    )
-    q = request.GET.get("q", "").strip()
-    if q:
-        qs = qs.filter(Q(title__icontains=q) | Q(body__icontains=q))
-    state = request.GET.get("etat", "")
-    if state == "sans_reponse":
-        qs = qs.filter(reply_count=0)
-    elif state == "resolue":
-        qs = qs.filter(is_resolved=True)
-    elif state == "ouverte":
-        qs = qs.filter(is_resolved=False)
-    mine = request.GET.get("mes") == "1"
-    if mine:
-        qs = qs.filter(author=request.user)
-
-    return render(request, "community/forum_detail.html", _context(
-        request, forum=forum, page=paginate(request, qs), q=q, state=state, mine=mine,
-        can_manage=can_manage_forum(request, forum), querystring=_querystring(request),
-        can_post=not forum.is_locked or can_manage_forum(request, forum),
-        back_url=reverse(section_url_name(request, "forums")),
-    ))
+    """Ouvrir un forum = le fil des questions filtré sur ce forum."""
+    forum = get_object_or_404(forums_for(request), pk=pk)
+    return redirect("%s?forum=%d" % (reverse(section_url_name(request, "forums")), forum.pk))
 
 
 @prof_required
@@ -298,13 +222,17 @@ def thread_detail(request, pk):
         replies = replies.filter(is_hidden=False)
     forum = thread.forum
     can_manage = can_manage_forum(request, forum)
+    if not _is_author(request, thread):
+        Thread.objects.filter(pk=thread.pk).update(view_count=F("view_count") + 1)
+        thread.view_count += 1
     return render(request, "community/thread_detail.html", _context(
         request, thread=thread, forum=forum, replies=replies, can_manage=can_manage,
+        vote_count=thread.votes.count(), voted=thread.votes.filter(user=request.user).exists(),
         can_validate=can_validate_solution(request, forum),
         has_solution=any(r.is_solution for r in replies),
         can_post=_can_post(request, forum), is_author=_is_author(request, thread),
         reply_form=ReplyForm(),
-        back_url=reverse("community:forum_detail", args=[forum.pk]),
+        back_url=reverse(section_url_name(request, "forums")) + "?forum=%d" % forum.pk,
         ai_configured=bool(os.environ.get("GROQ_API_KEY", "").strip()),
     ))
 
