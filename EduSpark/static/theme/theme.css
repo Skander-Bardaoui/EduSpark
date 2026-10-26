@@ -7,11 +7,15 @@
  *
  * - :root                         thème clair (palette du portail enseignant)
  * - :root[data-palette=…]         nuances claires propres aux portails admin / étudiant
+ *                                 et aux pages de connexion / inscription (auth)
  * - :root[data-theme="dark"]      thème sombre, choisi par le bouton ou le système
  * - @media (prefers-color-scheme) même thème sombre quand aucun choix n'est appliqué
  *
  * Le bloc sombre est volontairement répété dans la media query : le script de
  * contrôle (scripts/check_contrast.py) vérifie que les deux copies sont identiques.
+ *
+ * [data-theme-scope="light"] : zone qui garde les couleurs claires même en
+ * thème sombre (ex. panneau photo des pages de connexion).
  */
 
 :root {
@@ -101,6 +105,10 @@
   --nav-via: 248 250 255;
   --nav-to: 237 243 255;
   --nav-shadow: 0 20px 60px rgb(var(--md-scrim) / 0.14);
+
+  /* Fond dégradé des pages hors portail (invitation…) */
+  --page-tint-from: 238 244 255;
+  --page-tint-to: 246 241 255;
 }
 
 :root[data-palette="admin"] {
@@ -129,6 +137,22 @@
   --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
   --md-secondary-container: 100 94 251;  /* #645efb */
   --md-surface-container: 236 236 255;  /* #ececff */
+  --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
+}
+
+:root[data-palette="auth"] {
+  --md-inverse-surface: 31 45 96;  /* #1f2d60 */
+  --md-on-primary-container: 254 252 255;  /* #fefcff */
+  --md-on-tertiary-container: 255 251 255;  /* #fffbff */
+  --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+  --md-primary: 0 88 190;  /* #0058be */
+  --md-primary-container: 33 112 228;  /* #2170e4 */
+  --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+  --md-secondary-container: 100 94 251;  /* #645efb */
+  --md-surface-dim: 209 216 255;  /* #d1d8ff */
+  --md-surface-tint: 0 90 194;  /* #005ac2 */
+  --md-tertiary: 118 87 0;  /* #765700 */
+  --md-tertiary-container: 149 110 0;  /* #956e00 */
   --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
 }
 
@@ -201,6 +225,109 @@
     --nav-via: 18 23 35;
     --nav-to: 18 23 35;
     --nav-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
+    --page-tint-from: 18 23 35;
+    --page-tint-to: 23 21 35;
+  }
+
+  :root[data-theme="dark"] [data-theme-scope="light"] {
+    color-scheme: light;
+    --md-background: 251 248 255;  /* #fbf8ff */
+    --md-error: 186 26 26;  /* #ba1a1a */
+    --md-error-container: 255 218 214;  /* #ffdad6 */
+    --md-hero-from: 0 39 82;  /* #002752 */
+    --md-hero-to: 0 26 63;  /* #001a3f */
+    --md-hero-via: 0 65 145;  /* #004191 */
+    --md-info: 75 65 225;  /* #4b41e1 */
+    --md-inverse-on-surface: 239 239 255;  /* #efefff */
+    --md-inverse-primary: 173 198 255;  /* #adc6ff */
+    --md-inverse-surface: 31 45 97;  /* #1f2d61 */
+    --md-on-background: 6 22 75;  /* #06164b */
+    --md-on-error: 255 255 255;  /* #ffffff */
+    --md-on-error-container: 147 0 10;  /* #93000a */
+    --md-on-hero: 255 255 255;  /* #ffffff */
+    --md-on-primary: 255 255 255;  /* #ffffff */
+    --md-on-primary-container: 141 177 255;  /* #8db1ff */
+    --md-on-primary-fixed: 0 26 66;  /* #001a42 */
+    --md-on-primary-fixed-variant: 0 67 149;  /* #004395 */
+    --md-on-secondary: 255 255 255;  /* #ffffff */
+    --md-on-secondary-container: 255 251 255;  /* #fffbff */
+    --md-on-secondary-fixed: 15 0 105;  /* #0f0069 */
+    --md-on-secondary-fixed-variant: 51 35 204;  /* #3323cc */
+    --md-on-surface: 6 22 75;  /* #06164b */
+    --md-on-surface-variant: 66 71 84;  /* #424754 */
+    --md-on-tertiary: 255 255 255;  /* #ffffff */
+    --md-on-tertiary-container: 250 207 116;  /* #facf74 */
+    --md-on-tertiary-fixed: 38 26 0;  /* #261a00 */
+    --md-on-tertiary-fixed-variant: 92 67 0;  /* #5c4300 */
+    --md-outline: 114 119 133;  /* #727785 */
+    --md-outline-variant: 195 198 211;  /* #c3c6d3 */
+    --md-primary: 0 65 145;  /* #004191 */
+    --md-primary-container: 0 65 145;  /* #004191 */
+    --md-primary-fixed: 216 226 255;  /* #d8e2ff */
+    --md-primary-fixed-dim: 174 198 255;  /* #aec6ff */
+    --md-scrim: 6 22 75;  /* #06164b */
+    --md-secondary: 75 65 225;  /* #4b41e1 */
+    --md-secondary-container: 101 93 251;  /* #655dfb */
+    --md-secondary-fixed: 226 223 255;  /* #e2dfff */
+    --md-secondary-fixed-dim: 195 192 255;  /* #c3c0ff */
+    --md-success: 21 128 61;  /* #15803d */
+    --md-surface: 251 248 255;  /* #fbf8ff */
+    --md-surface-bright: 251 248 255;  /* #fbf8ff */
+    --md-surface-container: 236 237 255;  /* #ecedff */
+    --md-surface-container-high: 228 231 255;  /* #e4e7ff */
+    --md-surface-container-highest: 221 225 255;  /* #dde1ff */
+    --md-surface-container-low: 243 242 255;  /* #f3f2ff */
+    --md-surface-container-lowest: 255 255 255;  /* #ffffff */
+    --md-surface-dim: 210 216 255;  /* #d2d8ff */
+    --md-surface-tint: 8 90 192;  /* #085ac0 */
+    --md-surface-variant: 221 225 255;  /* #dde1ff */
+    --md-tertiary: 89 65 0;  /* #594100 */
+    --md-tertiary-container: 89 65 0;  /* #594100 */
+    --md-tertiary-fixed: 255 223 159;  /* #ffdf9f */
+    --md-tertiary-fixed-dim: 230 194 119;  /* #e6c277 */
+    --md-warning: 217 119 6;  /* #d97706 */
+  }
+  :root[data-theme="dark"][data-palette="admin"] [data-theme-scope="light"] {
+    --md-on-primary-container: 254 252 255;  /* #fefcff */
+    --md-on-primary-fixed-variant: 6 68 148;  /* #064494 */
+    --md-on-surface-variant: 67 71 81;  /* #434751 */
+    --md-on-tertiary-container: 208 174 101;  /* #d0ae65 */
+    --md-on-tertiary-fixed-variant: 91 67 2;  /* #5b4302 */
+    --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+    --md-primary-container: 33 112 228;  /* #2170e4 */
+    --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+    --md-surface-dim: 209 216 255;  /* #d1d8ff */
+    --md-surface-tint: 45 92 173;  /* #2d5cad */
+    --md-tertiary-container: 149 110 0;  /* #956e00 */
+    --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
+  }
+  :root[data-theme="dark"][data-palette="student"] [data-theme-scope="light"] {
+    --md-inverse-primary: 174 198 255;  /* #aec6ff */
+    --md-on-primary-container: 254 252 255;  /* #fefcff */
+    --md-on-primary-fixed-variant: 6 68 148;  /* #064494 */
+    --md-on-secondary-fixed-variant: 51 34 204;  /* #3322cc */
+    --md-on-surface-variant: 67 71 81;  /* #434751 */
+    --md-on-tertiary-container: 208 174 101;  /* #d0ae65 */
+    --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+    --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+    --md-secondary-container: 100 94 251;  /* #645efb */
+    --md-surface-container: 236 236 255;  /* #ececff */
+    --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
+  }
+  :root[data-theme="dark"][data-palette="auth"] [data-theme-scope="light"] {
+    --md-inverse-surface: 31 45 96;  /* #1f2d60 */
+    --md-on-primary-container: 254 252 255;  /* #fefcff */
+    --md-on-tertiary-container: 255 251 255;  /* #fffbff */
+    --md-outline-variant: 194 198 214;  /* #c2c6d6 */
+    --md-primary: 0 88 190;  /* #0058be */
+    --md-primary-container: 33 112 228;  /* #2170e4 */
+    --md-primary-fixed-dim: 173 198 255;  /* #adc6ff */
+    --md-secondary-container: 100 94 251;  /* #645efb */
+    --md-surface-dim: 209 216 255;  /* #d1d8ff */
+    --md-surface-tint: 0 90 194;  /* #005ac2 */
+    --md-tertiary: 118 87 0;  /* #765700 */
+    --md-tertiary-container: 149 110 0;  /* #956e00 */
+    --md-tertiary-fixed-dim: 249 189 34;  /* #f9bd22 */
   }
 }
 
@@ -272,6 +399,8 @@
     --nav-via: 18 23 35;
     --nav-to: 18 23 35;
     --nav-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
+    --page-tint-from: 18 23 35;
+    --page-tint-to: 23 21 35;
   }
 }
 
