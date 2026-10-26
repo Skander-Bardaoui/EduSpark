@@ -1,0 +1,90 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Emploi du temps global — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8" data-filter-scope>
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours &amp; Catalogue</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Emploi du temps global</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Semaine type de chaque classe de {{ portal_university.name }}. {{ week_label }}. Chaque séance est liée à une affectation (classe, matière, professeur) : elle apparaît aussi chez le professeur et chez les étudiants de la classe.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:admin_assignments' %}"><span class="material-symbols-outlined text-[18px]">how_to_reg</span>Affectations</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:admin_slot_create' %}{% if current.classe %}?classe={{ current.classe }}{% endif %}"><span class="material-symbols-outlined text-[18px]">add</span>Planifier une séance</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Classes affichées" value=class_count icon="groups" hint="Selon les filtres" %}
+{% include "portal/_stat_card.html" with label="Séances par semaine" value=slot_count icon="calendar_month" icon_class="bg-secondary-fixed text-on-secondary" hint="Toutes classes affichées" %}
+{% include "portal/_stat_card.html" with label="Enseignants mobilisés" value=professor_count icon="school" icon_class="bg-surface-container text-secondary" hint="Intervenants planifiés" %}
+{% include "portal/_stat_card.html" with label="Affectations à planifier" value=pending_count icon="pending_actions" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Sans aucune séance" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest px-5 py-4 shadow-sm">
+<form class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end" method="get">
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Niveau
+<select class="h-10 min-w-[160px] rounded-full border border-outline-variant/60 bg-surface px-4 text-xs font-semibold normal-case tracking-normal text-on-surface outline-none focus:border-primary" name="niveau"><option value="">Tous les niveaux</option>{% for value, label in level_choices %}<option value="{{ value }}" {% if current.niveau == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Filière
+<select class="h-10 min-w-[180px] rounded-full border border-outline-variant/60 bg-surface px-4 text-xs font-semibold normal-case tracking-normal text-on-surface outline-none focus:border-primary" name="filiere"><option value="">Toutes les filières</option>{% for value, label in program_choices %}<option value="{{ value }}" {% if current.filiere == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Classe
+<select class="h-10 min-w-[220px] rounded-full border border-outline-variant/60 bg-surface px-4 text-xs font-semibold normal-case tracking-normal text-on-surface outline-none focus:border-primary" name="classe"><option value="">Toutes les classes</option>{% for value, label in class_choices %}<option value="{{ value }}" {% if current.classe == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if filters_active %}<a class="rounded-full border border-outline-variant/60 px-3 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'courses:admin_timetable' %}">Réinitialiser</a>{% endif %}
+</div>
+<div class="flex flex-wrap items-center gap-4 text-xs text-on-surface-variant lg:ml-auto">
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-primary"></span>CM</span>
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-tertiary-fixed-dim"></span>TD</span>
+<span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-secondary"></span>TP</span>
+</div>
+</form>
+</section>
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Plannings par classe</h2>
+<p class="text-xs text-on-surface-variant">{{ class_count }} classe{{ class_count|pluralize }} · {{ slot_count }} séance{{ slot_count|pluralize }} par semaine</p>
+</div>
+{% include "courses/_type_chips.html" %}
+</div>
+{% for entry in timetables %}
+<section aria-labelledby="class-{{ entry.school_class.pk }}" class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div class="flex min-w-0 items-center gap-3">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">groups</span></div>
+<div class="min-w-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface" id="class-{{ entry.school_class.pk }}"><a class="hover:text-primary" href="{% url 'portal:admin_class_detail' entry.school_class.pk %}">{{ entry.school_class.name }}</a></h3>
+<p class="mt-0.5 text-xs text-on-surface-variant">{{ entry.school_class.level|default:"Niveau non renseigné" }}{% if entry.school_class.program %} · {{ entry.school_class.program }}{% endif %}{% if entry.school_class.academic_year %} · {{ entry.school_class.academic_year }}{% endif %} · {{ entry.group_count }} groupe{{ entry.group_count|pluralize }}</p>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
+<span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">{{ entry.grid.slot_count }} séance{{ entry.grid.slot_count|pluralize }} · {{ entry.grid.total_label }}</span>
+<span class="rounded-full bg-surface-container px-3 py-1 text-on-surface-variant">{{ entry.professor_count }} enseignant{{ entry.professor_count|pluralize }}</span>
+<a class="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-on-primary transition-colors hover:bg-primary-container" href="{% url 'courses:admin_slot_create' %}?classe={{ entry.school_class.pk }}"><span class="material-symbols-outlined text-[14px]">add</span>Séance</a>
+</div>
+</div>
+{% if entry.pending %}
+<div class="flex flex-wrap items-center gap-2 border-b border-outline-variant/40 bg-tertiary-fixed/30 px-5 py-2.5 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-tertiary">pending_actions</span>
+<span class="font-semibold text-on-surface">À planifier :</span>
+{% for assignment in entry.pending %}<span class="rounded-full bg-surface-container-lowest px-2.5 py-1 font-semibold">{{ assignment.subject.code }} · {{ assignment.professor_name }}</span>{% endfor %}
+</div>
+{% endif %}
+<div class="p-4">
+{% if entry.grid.slot_count %}
+{% include "courses/_week_grid.html" with grid=entry.grid mode="admin" can_edit=True %}
+{% else %}
+<p class="px-5 py-8 text-center text-sm text-on-surface-variant">Aucune séance planifiée pour cette classe. {% if entry.pending %}Planifiez les matières ci-dessus.{% else %}<a class="font-bold text-primary hover:underline" href="{% url 'courses:admin_assignment_create' %}?classe={{ entry.school_class.pk }}">Affectez d'abord des professeurs à ses matières.</a>{% endif %}</p>
+{% endif %}
+</div>
+</section>
+{% empty %}
+<div class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest px-5 py-10 text-center">
+<span class="material-symbols-outlined text-[36px] text-outline">event_busy</span>
+<p class="mt-2 text-sm text-on-surface-variant">{% if filters_active %}Aucune classe ne correspond à ces filtres.{% else %}Aucune classe n'est enregistrée pour cette université.{% endif %}</p>
+{% if not filters_active %}<a class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'portal:admin_class_create' %}">Créer une classe</a>{% endif %}
+</div>
+{% endfor %}
+<p class="hidden px-5 py-8 text-center text-sm text-on-surface-variant" data-filter-empty>Aucune séance ne correspond à ce type.</p>
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "portal/base_student.html" %}
+{% load static %}
+{% block title %}Salle d’examen — Test de langue orale{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">{{ exam.name }} · {{ language.label }} · {{ level_label }} · {{ exercise_label }}</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Salle d’examen</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">L’examinateur pose la première question ci-dessous. Connectez votre micro, répondez à voix haute, puis envoyez votre réponse pour poursuivre.</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:student_language_tests' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Mes tests</a>
+</header>
+<div class="flex items-start gap-3 rounded border border-tertiary/30 bg-tertiary-fixed/30 px-4 py-3">
+<span class="material-symbols-outlined text-[20px] text-tertiary">headset</span>
+<p class="text-xs leading-relaxed text-on-surface-variant"><span class="font-bold text-on-surface">Utilisez un casque avec micro.</span> Parlez distinctement, à vitesse normale. Ne quittez pas cette page pendant la session : l’évaluation se génère à la fin.</p>
+</div>
+<div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]" data-language-locale="{{ language.locale }}" data-language="{{ session.language }}" data-session-id="{{ session.pk }}" data-session-page data-worklet-url="{% static 'coaching/language/worklets/pcm-processor.js' %}">
+<div class="flex flex-col gap-4">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50" id="connect-btn" type="button">Connecter le micro</button>
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50" disabled id="disconnect-btn" type="button">Déconnecter</button>
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50" disabled id="send-llm-btn" type="button">Envoyer la réponse</button>
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50" disabled id="speak-btn" type="button">Écouter l’examinateur</button>
+<button class="inline-flex items-center justify-center gap-1.5 rounded-full bg-error px-4 py-2 text-xs font-bold text-on-error transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50" disabled id="end-session-btn" type="button">Terminer la session</button>
+</div>
+<div class="mt-4 grid gap-3 sm:grid-cols-3">
+<div class="rounded bg-surface-container-low px-3 py-2.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Micro</p><p class="mt-0.5 text-sm font-bold text-on-surface" id="mic-status">inactif</p></div>
+<div class="rounded bg-surface-container-low px-3 py-2.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Transcription</p><p class="mt-0.5 text-sm font-bold text-on-surface" id="transcription-status">inactive</p></div>
+<div class="rounded bg-surface-container-low px-3 py-2.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Audio</p><p class="mt-0.5 text-sm font-bold text-on-surface" id="audio-status">inactif</p></div>
+</div>
+<p class="mt-3 hidden rounded border border-error/30 bg-error-container/40 px-3 py-2 text-xs font-semibold text-on-error-container" id="session-error" role="alert"></p>
+</section>
+<section class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
+<div class="flex items-center justify-between gap-3">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Question de l’examinateur</p>
+<span class="flex h-9 w-9 items-center justify-center rounded-full bg-white/10"><span class="material-symbols-outlined text-[20px] text-white">forum</span></span>
+</div>
+<p aria-live="polite" class="mt-3 min-h-[4rem] text-base leading-relaxed text-white" id="examiner-text">Préparation de la première question de l’examinateur…</p>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">En direct</h2>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-bold text-on-surface-variant"><span class="h-1.5 w-1.5 rounded-full bg-error"></span>Transcription en cours</span>
+</div>
+<p class="mt-3 min-h-[2.5rem] text-sm leading-relaxed text-on-surface-variant" id="live-transcript">—</p>
+</section>
+</div>
+<aside class="flex flex-col gap-4">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Transcription validée</h2>
+<p class="mt-2 text-xs text-on-surface-variant" id="committed-empty">Les segments de transcription validés apparaîtront ici au fil de votre prise de parole.</p>
+<ol class="mt-3 hidden space-y-2 text-sm leading-relaxed text-on-surface" id="committed-list"></ol>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Conseils</h2>
+<ul class="mt-3 space-y-3 text-xs leading-relaxed text-on-surface-variant">
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">volume_up</span>Écoutez la question, puis développez votre réponse avec des exemples.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">sync</span>Quand votre réponse est transcrite, cliquez sur « Envoyer la réponse ».</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">lightbulb</span>Il n’y a pas de mauvaise réponse : justifiez votre point de vue.</li>
+</ul>
+</section>
+<div class="hidden">{% csrf_token %}</div>
+</aside>
+</div>
+</div>
+</main>
+{{ config|json_script:"language-test-config" }}
+{% endblock %}
+{% block page_scripts %}
+<script src="{% static 'coaching/language/js/session.js' %}" type="module"></script>
+{% endblock %}

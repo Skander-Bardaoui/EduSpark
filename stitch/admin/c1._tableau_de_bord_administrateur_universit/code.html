@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><title>Hub Éducatif Multimodal - Portail Administrateur</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-primary":"#ffffff","on-primary-fixed":"#001a42","on-background":"#06164b","on-tertiary":"#ffffff","on-tertiary-fixed":"#261a00","surface-variant":"#dde1ff","surface":"#fbf8ff","on-primary-container":"#fefcff","surface-container-high":"#e4e7ff","secondary-fixed":"#e2dfff","tertiary-container":"#956e00","tertiary-fixed":"#ffdf9f","secondary-container":"#655dfb","inverse-on-surface":"#efefff","on-secondary-container":"#fffbff","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-tertiary-fixed-variant":"#5b4302","surface-container-highest":"#dde1ff","primary":"#004191","outline":"#727785","surface-tint":"#2d5cad","inverse-surface":"#1f2d61","primary-fixed-dim":"#adc6ff","on-surface-variant":"#434751","surface-bright":"#fbf8ff","on-secondary":"#ffffff","surface-container":"#ecedff","tertiary":"#594100","error-container":"#ffdad6","tertiary-fixed-dim":"#f9bd22","on-secondary-fixed":"#0f0069","on-surface":"#06164b","primary-container":"#2170e4","inverse-primary":"#adc6ff","on-secondary-fixed-variant":"#3323cc","surface-container-low":"#f3f2ff","surface-dim":"#d1d8ff","on-error":"#ffffff","secondary":"#4b41e1","primary-fixed":"#d8e2ff","outline-variant":"#c2c6d6","secondary-fixed-dim":"#c3c0ff","on-tertiary-container":"#d0ae65","error":"#ba1a1a","on-primary-fixed-variant":"#064494","background":"#fbf8ff"},borderRadius:{DEFAULT:"1rem",lg:"2rem",xl:"3rem",full:"9999px"},spacing:{"margin-mobile":"1.25rem","space-lg":"1.5rem","space-sm":"0.5rem","gutter-mobile":"1rem",margin:"3rem",gutter:"1.5rem","space-md":"1rem","space-xl":"2.5rem","space-xs":"0.25rem"},fontFamily:{"headline-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"body-lg":["Inter"],display:["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"title-md":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"data-metric":["JetBrains Mono"],"display-mobile":["Plus Jakarta Sans"],"body-sm":["Inter"]},fontSize:{"headline-lg":["40px",{lineHeight:"48px",letterSpacing:"-0.025em",fontWeight:"700"}],"label-sm":["11px",{lineHeight:"16px",letterSpacing:"0.04em",fontWeight:"700"}],"body-lg":["18px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"400"}],display:["56px",{lineHeight:"64px",letterSpacing:"-0.03em",fontWeight:"800"}],"headline-lg-mobile":["30px",{lineHeight:"38px",letterSpacing:"-0.02em",fontWeight:"700"}],"title-md":["16px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-md":["14px",{lineHeight:"20px",letterSpacing:"0.01em",fontWeight:"600"}],"body-md":["15px",{lineHeight:"24px",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["20px",{lineHeight:"28px",letterSpacing:"-0.015em",fontWeight:"600"}],"data-metric":["13px",{lineHeight:"18px",letterSpacing:"-0.02em",fontWeight:"500"}],"display-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.02em",fontWeight:"800"}],"body-sm":["13px",{lineHeight:"20px",letterSpacing:"0.005em",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><a class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-on-primary focus:rounded-full font-label-md shadow-lg outline-none" href="#main-content">Aller au contenu principal</a><header class="fixed top-0 left-0 right-0 h-16 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(6,22,75,0.05)]"><div class="h-16 w-full px-6 flex items-center justify-between gap-4"><div class="flex items-center gap-3 w-80 shrink-0"><div class="w-10 h-10 rounded-DEFAULT bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[22px]">account_balance</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-2"><span class="font-title-md text-title-md text-on-surface truncate">Hub Éducatif</span><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed uppercase tracking-wider">Portail Admin</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Université Paris Cité</span></div></div><div class="flex-1 max-w-2xl"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-4 text-on-surface-variant text-[20px] pointer-events-none">search</span><input class="w-full h-11 pl-11 pr-24 rounded-full bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary shadow-[0_1px_4px_rgba(6,22,75,0.02)] transition-all" placeholder="Rechercher un utilisateur, cours, session, classe..." type="search"/><kbd class="absolute right-3.5 px-2 py-0.5 rounded-DEFAULT bg-surface-container-high text-on-surface-variant font-data-metric text-data-metric shadow-sm border border-outline-variant/30">Ctrl+K</kbd></div></div><div class="flex items-center justify-end gap-3.5 shrink-0"><div class="hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span class="font-data-metric text-data-metric">Année univ. 2024-2025</span></div><button aria-label="Notifications" class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-error text-on-error font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">5</span></button><div class="flex items-center gap-3 pl-2"><div class="flex flex-col text-right hidden lg:flex"><span class="font-title-md text-title-md text-on-surface leading-tight">Marcelle Dupont</span><div class="flex items-center justify-end gap-1.5"><span class="font-body-sm text-body-sm text-on-surface-variant">Secrétaire Générale / DSI</span><span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-primary-fixed text-on-primary-fixed font-bold">Admin Central</span></div></div><div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-sm ring-2 ring-surface-container-high"><span class="material-symbols-outlined text-on-primary text-[20px]">person</span></div></div></div></div></header><aside class="fixed left-0 top-16 bottom-0 w-80 bg-surface-container-low z-40 overflow-y-auto"><div class="px-4 py-6"><nav class="flex flex-col gap-6" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-sm"><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Tableau de bord</h2><div class="space-y-1"><a aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT transition-colors bg-primary-container text-on-primary-container font-semibold shadow-sm" data-path="mon-tableau-de-bord-admin" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span>Mon Tableau de bord Admin</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Utilisateurs & Organisation</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="enseignants-et-chercheurs" href="#"><span class="material-symbols-outlined text-[20px]">school</span><span>Enseignants & Chercheurs</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="etudiants-et-inscriptions" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Étudiants & Inscriptions</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="classes-groupes-et-promos" href="#"><span class="material-symbols-outlined text-[20px]">layers</span><span>Classes, Groupes & Promos</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="invitations-et-roles" href="#"><span class="material-symbols-outlined text-[20px]">mark_email_read</span><span>Invitations & Rôles</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="profil-de-luniversite" href="#"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span>Profil de l'Université</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Cours & Catalogue</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="departements-et-filieres" href="#"><span class="material-symbols-outlined text-[20px]">account_tree</span><span>Départements & Filières</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="tous-les-cours" href="#"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Tous les cours</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="emploi-du-temps-global" href="#"><span class="material-symbols-outlined text-[20px]">calendar_today</span><span>Emploi du temps global</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Exercices & Évaluations</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="supervision-des-banques" href="#"><span class="material-symbols-outlined text-[20px]">fact_check</span><span>Supervision des Banques</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="categories-et-niveaux" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span>Catégories & Niveaux</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Examens & Notes</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="sessions-dexamen" href="#"><span class="material-symbols-outlined text-[20px]">event_available</span><span>Sessions d'examen</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="releves-officiels-et-jurys" href="#"><span class="material-symbols-outlined text-[20px]">workspace_premium</span><span>Relevés officiels & Jurys</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="statistiques-et-taux-de-reussite" href="#"><span class="material-symbols-outlined text-[20px]">insights</span><span>Statistiques & Taux de réussite</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Échanges & Modération</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="annonces-institutionnelles" href="#"><span class="material-symbols-outlined text-[20px]">campaign</span><span>Annonces institutionnelles</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="supervision-des-forums" href="#"><span class="material-symbols-outlined text-[20px]">forum</span><span>Supervision des forums</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="signalements-et-moderation" href="#"><span class="material-symbols-outlined text-[20px]">warning</span><span>Signalements & Modération</span></a></div></section><section><h2 class="px-3 mb-2 font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80">Suivi & Pilotage</h2><div class="space-y-1"><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="tableau-de-bord-de-suivi" href="#"><span class="material-symbols-outlined text-[20px]">monitoring</span><span>Tableau de bord de suivi</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="attribution-des-tuteurs" href="#"><span class="material-symbols-outlined text-[20px]">how_to_reg</span><span>Attribution des tuteurs</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-label-md text-label-md transition-colors" data-path="parametres-de-la-plateforme" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span>Paramètres de la plateforme</span></a></div></section></nav></div></aside><div class="pl-80"><main class="relative pt-16 min-h-screen bg-surface px-8 py-6 w-full" id="main-content"><div class="flex flex-col w-full pb-16">
+<!-- Fil d'Ariane & Contexte temporel -->
+<div class="flex items-center justify-between gap-4 mb-4">
+<nav aria-label="Fil d'Ariane" class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="hover:text-primary transition-colors cursor-pointer">Portail Administration</span>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<span class="hover:text-primary transition-colors cursor-pointer">Vue d'ensemble</span>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<span aria-current="page" class="text-on-surface font-label-md text-label-md font-semibold">Tableau de bord Central</span>
+</nav>
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-data-metric text-data-metric">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span>Dernière synchro : Aujourd'hui à 09:42</span>
+</div>
+</div>
+<!-- En-tête de page & Actions principales -->
+<header class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 mb-8">
+<div class="flex flex-col gap-1 max-w-3xl">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Gouvernance Académique</span>
+<span class="inline-block w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Paris Cité - Rentrée S2</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Tableau de bord de Supervision Établissement</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Indicateurs d'activité en temps réel, gouvernance des cohortes et alertes académiques - Année 2024-2025.</p>
+</div>
+<!-- Boutons d'actions groupés -->
+<div class="flex flex-wrap items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md hover:bg-secondary-fixed-dim transition-all shadow-sm" id="toggleAiPanelBtn" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">auto_awesome</span>
+<span>Assistant IA Pilotage</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">upload_file</span>
+<span>Importer CSV</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">add_box</span>
+<span>Créer une classe</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-md" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>+ Inviter un utilisateur</span>
+</button>
+</div>
+</header>
+<!-- CARTES KPI HAUTES -->
+<section aria-label="Indicateurs clés de performance" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+<!-- KPI 1 -->
+<div class="flex flex-col justify-between p-5 rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Étudiants Actifs</span>
+<span class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</span>
+</div>
+<div class="mt-4">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md font-display text-on-surface font-bold">14 820</span>
+<span class="font-data-metric text-data-metric text-tertiary-container font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +3.2%
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Répartis sur 4 Campus centraux</p>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="flex flex-col justify-between p-5 rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Enseignants & Chercheurs</span>
+<span class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">school</span>
+</span>
+</div>
+<div class="mt-4">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md font-display text-on-surface font-bold">1 240</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Dont <strong class="text-on-surface font-semibold">380</strong> vacataires extérieurs</p>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="flex flex-col justify-between p-5 rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Invitations en attente</span>
+<span class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+</span>
+</div>
+<div class="mt-4">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md font-display text-on-surface font-bold">42</span>
+</div>
+<div class="flex items-center gap-1.5 mt-1 text-tertiary">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="font-label-sm text-label-sm font-semibold">12 expirant sous 48h</span>
+</div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="flex flex-col justify-between p-5 rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sessions d'examen</span>
+<span class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">event_note</span>
+</span>
+</div>
+<div class="mt-4">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md font-display text-on-surface font-bold">28</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Session principale d'hiver</p>
+</div>
+</div>
+<!-- KPI 5 -->
+<div class="flex flex-col justify-between p-5 rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Signaux Décrochage</span>
+<span class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</span>
+</div>
+<div class="mt-4">
+<div class="flex items-baseline gap-2">
+<span class="font-headline-md text-headline-md font-display text-error font-bold">18</span>
+<span class="font-label-sm text-label-sm uppercase font-semibold text-error px-2 py-0.5 rounded-full bg-error-container/60">Alerte</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Nécessite contact tuteur</p>
+</div>
+</div>
+</section>
+<!-- CONTENEUR PRINCIPAL FLEX AVEC PANNEAU IA LATÉRAL -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- COLONNE PRINCIPALE (8 ou 12 colonnes selon affichage du panneau IA) -->
+<div class="lg:col-span-8 flex flex-col gap-8" id="primaryDashboardContent">
+<!-- SECTION 1: SESSIONS D'EXAMENS & JURYS CRITIQUES -->
+<section aria-labelledby="exams-section-title" class="p-6 rounded-DEFAULT bg-surface-container-lowest shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="exams-section-title">Sessions d'examens & Jurys critiques</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Semaine en cours · Déploiement des grilles d'évaluation multimodales</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-data-metric text-data-metric text-on-surface-variant px-3 py-1 rounded-DEFAULT bg-surface-container">4 jurys prioritaires</span>
+<button class="px-3.5 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-variant transition-colors flex items-center gap-1" type="button">
+<span>Voir tout l'agenda</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Table de données accessible -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-4 rounded-l-DEFAULT" scope="col">Code Session</th>
+<th class="py-3 px-4" scope="col">Intitulé</th>
+<th class="py-3 px-4" scope="col">Composante & Filière</th>
+<th class="py-3 px-4" scope="col">Date & Horaires</th>
+<th class="py-3 px-4" scope="col">Salles</th>
+<th class="py-3 px-4" scope="col">Statut</th>
+<th class="py-3 px-4 text-right rounded-r-DEFAULT" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-primary font-bold">INFO-S402</td>
+<td class="py-3.5 px-4 font-title-md text-title-md text-on-surface">Algorithmique Distribuée</td>
+<td class="py-3.5 px-4 text-on-surface-variant">UFR Informatique (L3)</td>
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-on-surface">Jeu. 14 Mars · 08:30</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-DEFAULT bg-surface-container-high font-data-metric text-data-metric text-on-surface">Amphi Turing</span></td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Validé
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button aria-label="Gérer jurys INFO-S402" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+</button>
+<button aria-label="Détails session INFO-S402" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-primary font-bold">MATH-A201</td>
+<td class="py-3.5 px-4 font-title-md text-title-md text-on-surface">Topologie Générale & Mesure</td>
+<td class="py-3.5 px-4 text-on-surface-variant">UFR Mathématiques (M1)</td>
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-on-surface">Ven. 15 Mars · 14:00</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-DEFAULT bg-surface-container-high font-data-metric text-data-metric text-on-surface">Salle 401-B</span></td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> À approuver
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button aria-label="Gérer jurys MATH-A201" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+</button>
+<button aria-label="Détails session MATH-A201" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-primary font-bold">PHYS-Q109</td>
+<td class="py-3.5 px-4 font-title-md text-title-md text-on-surface">Physique Quantique Appliquée</td>
+<td class="py-3.5 px-4 text-on-surface-variant">UFR Physique (L2)</td>
+<td class="py-3.5 px-4 font-data-metric text-data-metric text-on-surface">Sam. 16 Mars · 09:00</td>
+<td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-DEFAULT bg-surface-container-high font-data-metric text-data-metric text-on-surface">Amphi Curie</span></td>
+<td class="py-3.5 px-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span> En cours
+                  </span>
+</td>
+<td class="py-3.5 px-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button aria-label="Gérer jurys PHYS-Q109" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+</button>
+<button aria-label="Détails session PHYS-Q109" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- SECTION 2: FLUX D'ACTIVITÉ & INVITATIONS RÉCENTES (Split 2-columns) -->
+<section aria-labelledby="activity-section-title" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<h2 class="sr-only" id="activity-section-title">Flux d'activité, inscriptions récentes et alertes académiques</h2>
+<!-- Colonne 1: Dernières inscriptions & Rôles validés -->
+<div class="p-6 rounded-DEFAULT bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">person_check</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Inscriptions & Rôles validés</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">Dernières 24h</span>
+</div>
+<div class="space-y-3">
+<!-- Item 1 -->
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold font-title-md shrink-0">
+                    AD
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate">Pr. Antoine Delorme</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Enseignant Chercheur · Informatique</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Actif
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Hier 18:22</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold font-title-md shrink-0">
+                    SM
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate">Sara Mansouri</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Doctorante Monitrice · Physique</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-tertiary font-semibold">
+<span class="material-symbols-outlined text-[14px]">send</span> Invitation envoyée
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Aujourd'hui 08:15</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-3 rounded-DEFAULT bg-surface-container-low flex items-center justify-between gap-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-9 h-9 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold font-title-md shrink-0">
+                    TL
+                  </div>
+<div class="flex flex-col min-w-0">
+<span class="font-title-md text-title-md text-on-surface truncate">Théo Laurent</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Délégué Master 2 · Mathématiques</span>
+</div>
+</div>
+<div class="flex flex-col items-end shrink-0">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Actif
+                  </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">22 Janvier</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-4 py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+<span>Gérer l'annuaire complet</span>
+</button>
+</div>
+<!-- Colonne 2: Alertes Signalements & Décrochage de promotion -->
+<div class="p-6 rounded-DEFAULT bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[20px]">notification_important</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Alertes & Risques Décrochage</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold">Priorité Haute</span>
+</div>
+<div class="space-y-3">
+<!-- Alerte 1 -->
+<div class="p-4 rounded-DEFAULT bg-error-container/20 flex flex-col gap-2.5">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-[18px]">person_alert</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Cohorte L1 Sciences Numériques (Gr. 3)</span>
+</div>
+<span class="font-data-metric text-data-metric text-error font-bold">4 absents répétitifs</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Tuteur référent assigné : <strong class="text-on-surface font-medium">Dr. Éléonore Vasseur</strong>
+</p>
+<div class="flex items-center justify-between pt-1">
+<span class="font-data-metric text-data-metric text-on-surface-variant">Détecté il y a 3h via assiduité TD</span>
+<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm hover:bg-primary-fixed transition-colors shadow-sm font-semibold" type="button">
+                    Contacter le responsable
+                  </button>
+</div>
+</div>
+<!-- Alerte 2 -->
+<div class="p-4 rounded-DEFAULT bg-surface-container-low flex flex-col gap-2.5">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">crisis_alert</span>
+<span class="font-title-md text-title-md text-on-surface font-bold">Licence Pro Médias Interactifs</span>
+</div>
+<span class="font-data-metric text-data-metric text-tertiary-container font-bold">Non-remise Devoir #2</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Tuteur référent assigné : <strong class="text-on-surface font-medium">Julien Mercier</strong>
+</p>
+<div class="flex items-center justify-between pt-1">
+<span class="font-data-metric text-data-metric text-on-surface-variant">Retard cumulé > 5 jours</span>
+<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm hover:bg-primary-fixed transition-colors shadow-sm font-semibold" type="button">
+                    Contacter le responsable
+                  </button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm mt-4 pt-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">info</span>
+<span>Les signalements automatisés respectent le protocole RGPD de l'université.</span>
+</div>
+</div>
+</section>
+<!-- SECTION 3: STATISTIQUES GLOBALES DU CAMPUS -->
+<section aria-labelledby="stats-section-title" class="p-6 rounded-DEFAULT bg-surface-container-lowest shadow-sm flex flex-col gap-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">bar_chart</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="stats-section-title">Statistiques Globales : Taux de complétion des Syllabus</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Pourcentage de validation des programmes pédagogiques avant transmission aux jurys</p>
+</div>
+<span class="font-label-sm text-label-sm px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">Semestre 2</span>
+</div>
+<!-- Graphique Visuel Barres Horizontales Stylisées -->
+<div class="space-y-4">
+<!-- UFR Informatique -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-title-md text-title-md text-on-surface">UFR Informatique</span>
+<span class="font-data-metric text-data-metric text-primary font-bold">94% validé</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden flex">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="94" class="bg-primary h-full rounded-full transition-all duration-500" role="progressbar" style="width: 94%;"></div>
+</div>
+</div>
+<!-- UFR Physique -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-title-md text-title-md text-on-surface">UFR Physique</span>
+<span class="font-data-metric text-data-metric text-secondary font-bold">91% validé</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden flex">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="91" class="bg-secondary h-full rounded-full transition-all duration-500" role="progressbar" style="width: 91%;"></div>
+</div>
+</div>
+<!-- UFR Mathématiques -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="font-title-md text-title-md text-on-surface">UFR Mathématiques</span>
+<span class="font-data-metric text-data-metric text-tertiary-container font-bold">88% validé</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden flex">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="88" class="bg-tertiary-container h-full rounded-full transition-all duration-500" role="progressbar" style="width: 88%;"></div>
+</div>
+</div>
+</div>
+<!-- Tableau d'équivalence textuelle accessible complet pour lecteurs d'écran & conformité WCAG -->
+<div class="mt-2 p-4 rounded-DEFAULT bg-surface-container-low">
+<h3 class="font-label-md text-label-md text-on-surface mb-2 font-bold">Tableau récapitulatif d'accessibilité (Audits Pédagogiques)</h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<caption class="sr-only">Taux de complétion des syllabus et nombre d'Unités d'Enseignement par département</caption>
+<thead>
+<tr class="text-on-surface-variant font-label-sm text-label-sm border-b border-surface-container-high pb-1">
+<th class="py-2" scope="col">Département</th>
+<th class="py-2" scope="col">Unités d'Enseignement</th>
+<th class="py-2" scope="col">Taux Validé</th>
+<th class="py-2" scope="col">Reste à valider</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<tr>
+<td class="py-2 font-medium text-on-surface">UFR Informatique</td>
+<td class="py-2 font-data-metric text-data-metric">64 UEs</td>
+<td class="py-2 font-data-metric text-data-metric text-primary font-bold">94%</td>
+<td class="py-2 text-on-surface-variant">4 UEs en révision</td>
+</tr>
+<tr>
+<td class="py-2 font-medium text-on-surface">UFR Physique</td>
+<td class="py-2 font-data-metric text-data-metric">52 UEs</td>
+<td class="py-2 font-data-metric text-data-metric text-secondary font-bold">91%</td>
+<td class="py-2 text-on-surface-variant">5 UEs en attente de visa</td>
+</tr>
+<tr>
+<td class="py-2 font-medium text-on-surface">UFR Mathématiques</td>
+<td class="py-2 font-data-metric text-data-metric">58 UEs</td>
+<td class="py-2 font-data-metric text-data-metric text-tertiary font-bold">88%</td>
+<td class="py-2 text-on-surface-variant">7 UEs sans responsable désigné</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- Aperçu du Campus en direct & Activité Multimodale -->
+<section aria-labelledby="spaces-section-title" class="p-6 rounded-DEFAULT bg-surface-container-lowest shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">hub</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="spaces-section-title">Hubs d'Apprentissage & Présence Connectée</h2>
+</div>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Campus Saint-Germain & Grands Moulins</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="relative rounded-DEFAULT overflow-hidden h-48 bg-surface-container flex flex-col justify-end p-4">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A modern university library amphitheater in Paris with students working on laptops, ambient natural lighting from large high windows, minimalist navy blue architectural details and wooden study booths." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWuwHSpOh_9hnqgY6uWCBuYF2AJeCP5UGKGrF7vRmRQfxMx7NDIxUVxVx4V0BJMrhHZQfaaMG4NE8cvHUa2_kCTwW3XRPC9uaKx4HV3jOpFNdFbOru7UWIGV379Q3tGpa2gFJpkQUZ7dJams8By6eY7CITAQR0gvNKfGkhzHZuLRBarriybpj5YlkGrPsrubDQKVgn8Mabj9fQWEeGor-h9k11q18odqzEE4HnClQ')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/30 to-transparent"></div>
+<div class="relative z-10 text-on-primary">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Espace Tiers-Lieu</span>
+<p class="font-title-md text-title-md font-bold">Amphithéâtre Buffon Multimodal</p>
+<div class="flex items-center gap-2 text-body-sm font-data-metric mt-1">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span>Affluence : 86% · 312 étudiants connectés</span>
+</div>
+</div>
+</div>
+<div class="relative rounded-DEFAULT overflow-hidden h-48 bg-surface-container flex flex-col justify-end p-4">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="A university computer science laboratory with dual monitors, soft warm amber task lamps, group collaboration pods with glass partitions, in a collegiate Parisian research center." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBaUobkv7__R8silXXgxM04SRh1tDgkKgq16N15KZbNG_QTLTVrHNcb3YyEF9KUQYijf_Q_F5NshwDprSlhMbL5qR3AswL5WnGPTADyjmDASig9_WQ2pwXDJ00ffWQ1YFVl0TfeE-2cahN9qWibe4APJI8AFrPAaohutvbqXoCM_A_h7Dbdfn7J1udYSv3tUKceJlfT9wmWAJSTOdeopcFd-_XFkK3mH8iEfQFdBo4')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/30 to-transparent"></div>
+<div class="relative z-10 text-on-primary">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary-fixed">Laboratoire Informatique</span>
+<p class="font-title-md text-title-md font-bold">Plateforme de Calcul GPU Recherche</p>
+<div class="flex items-center gap-2 text-body-sm font-data-metric mt-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span>
+<span>Charge serveur : 42% · Sessions TP actives</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- COLONNE DROITE / AI SIDE PANEL (Standard Reusable Component) -->
+<aside aria-label="Assistant IA d'Analyse Institutionnelle" class="lg:col-span-4 flex flex-col gap-6" id="aiSidePanel">
+<!-- Carte Principale Assistant IA -->
+<div class="p-6 rounded-DEFAULT bg-surface-container-low shadow-sm flex flex-col gap-5 sticky top-24">
+<!-- En-tête Assistant IA -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-title-md text-title-md text-on-surface font-bold">Assistant IA d'Analyse</h2>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold uppercase">Beta</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pilotage Institutionnel & Synthèse</p>
+</div>
+</div>
+<button aria-label="Réduire le panneau IA" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container-high transition-colors" id="closeAiPanelBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Objectif & Cible -->
+<div class="flex flex-col gap-3 p-4 rounded-DEFAULT bg-surface-container-lowest">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold" for="ai-objective-input">Objectif d'analyse</label>
+<div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
+<span class="material-symbols-outlined text-primary text-[18px]">psychology</span>
+<span id="ai-objective-input">Synthèse des alertes d'absentéisme et d'évaluation</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 pt-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold" for="ai-target-filter">Filtre appliqué</label>
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm w-fit">
+<span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
+<span class="font-medium" id="ai-target-filter">Département Sciences Fondamentales</span>
+</div>
+</div>
+<button class="w-full mt-2 py-2 px-4 rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container transition-all flex items-center justify-center gap-2 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Générer la note de synthèse</span>
+</button>
+</div>
+<!-- AI Suggestion Card -->
+<div class="flex flex-col gap-3 p-4 rounded-DEFAULT bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-[16px]">lightbulb</span> Suggestion Proactive
+            </span>
+<span class="font-data-metric text-data-metric text-on-surface-variant">Il y a 10 min</span>
+</div>
+<div class="p-3 rounded-DEFAULT bg-surface-variant/40">
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+<strong class="font-semibold text-primary">Rapport de conformité des syllabus :</strong> 6% des UEs de Licence 3 présentent un retard de validation de syllabus avant le début des jurys. Recommandation : envoyer un rappel automatisé aux 8 coordinateurs de matière identifiés.
+            </p>
+</div>
+<!-- Standard 3 Action buttons -->
+<div class="grid grid-cols-3 gap-2 pt-1">
+<button class="py-1.5 px-2 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-colors text-center font-bold" title="Sauvegarde dans les mémos d'administration" type="button">
+              Garder
+            </button>
+<button class="py-1.5 px-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-variant transition-colors text-center font-bold" title="Éditer le plan d'action" type="button">
+              Modifier
+            </button>
+<button class="py-1.5 px-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm hover:bg-error-container hover:text-error transition-colors text-center font-bold" title="Ignorer cette suggestion" type="button">
+              Refuser
+            </button>
+</div>
+</div>
+<!-- Bannière de Fallback opérationnel -->
+<div class="p-3.5 rounded-DEFAULT bg-surface-container-high flex items-start gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+            L'IA est momentanément indisponible. Le pilotage manuel des données reste opérationnel sans interruption.
+          </p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<script>
+  // Interaction fluide pour replier / afficher l'assistant IA
+  const toggleBtn = document.getElementById('toggleAiPanelBtn');
+  const closeBtn = document.getElementById('closeAiPanelBtn');
+  const aiSidePanel = document.getElementById('aiSidePanel');
+  const primaryDashboardContent = document.getElementById('primaryDashboardContent');
+
+  function toggleAiPanel() {
+    if (aiSidePanel.classList.contains('hidden')) {
+      aiSidePanel.classList.remove('hidden');
+      primaryDashboardContent.classList.remove('lg:col-span-12');
+      primaryDashboardContent.classList.add('lg:col-span-8');
+    } else {
+      aiSidePanel.classList.add('hidden');
+      primaryDashboardContent.classList.remove('lg:col-span-8');
+      primaryDashboardContent.classList.add('lg:col-span-12');
+    }
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener('click', toggleAiPanel);
+  if (closeBtn) closeBtn.addEventListener('click', toggleAiPanel);
+</script></main></div></body></html>

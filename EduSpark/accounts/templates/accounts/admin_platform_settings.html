@@ -1,0 +1,39 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Paramètres de la plateforme — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Plateforme</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Paramètres de la plateforme</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Vue d'ensemble des données gérées par le hub et accès rapide aux outils d'administration.</p>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Universités" value=university_count icon="account_balance" hint="Établissements enregistrés" %}
+{% include "portal/_stat_card.html" with label="Comptes" value=account_count icon="manage_accounts" icon_class="bg-surface-container text-secondary" hint="Tous rôles confondus" %}
+{% include "portal/_stat_card.html" with label="Appartenances" value=membership_count icon="badge" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Liens compte ↔ université" %}
+{% include "portal/_stat_card.html" with label="Invitations actives" value=pending_invitations icon="mark_email_read" hint="En attente d'acceptation" %}
+</div>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Administration</h2>
+{% include "portal/_badge.html" with label="Admin plateforme" tone_class="bg-primary-fixed text-primary" dot=True %}
+</div>
+<div class="mt-4 grid gap-3 md:grid-cols-2">
+<a class="flex items-start gap-3 rounded-xl border border-outline-variant/40 p-4 transition-colors hover:border-primary/40 hover:bg-surface-container/50" href="{% url 'portal:admin_universities' %}">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[20px]">account_balance</span></span>
+<span class="min-w-0"><span class="block text-sm font-semibold text-on-surface">Universités</span><span class="block text-xs text-on-surface-variant">Créer, modifier, désactiver et administrer les établissements.</span></span>
+</a>
+<a class="flex items-start gap-3 rounded-xl border border-outline-variant/40 p-4 transition-colors hover:border-primary/40 hover:bg-surface-container/50" href="{% url 'portal:admin_accounts' %}">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary-fixed text-on-secondary-fixed"><span class="material-symbols-outlined text-[20px]">manage_accounts</span></span>
+<span class="min-w-0"><span class="block text-sm font-semibold text-on-surface">Comptes &amp; accès</span><span class="block text-xs text-on-surface-variant">Consulter les comptes, leurs rôles et leurs appartenances.</span></span>
+</a>
+<a class="flex items-start gap-3 rounded-xl border border-outline-variant/40 p-4 transition-colors hover:border-primary/40 hover:bg-surface-container/50" href="{% url 'portal:admin_profile' %}">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">person</span></span>
+<span class="min-w-0"><span class="block text-sm font-semibold text-on-surface">Mon profil</span><span class="block text-xs text-on-surface-variant">Mettre à jour votre identité de connexion.</span></span>
+</a>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

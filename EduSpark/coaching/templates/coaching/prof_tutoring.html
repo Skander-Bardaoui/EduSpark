@@ -1,0 +1,157 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Rendez-vous de tutorat — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Rendez-vous de tutorat</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Demandes étudiantes, disponibilités hebdomadaires et historique des entretiens.</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#slot-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Ouvrir un créneau</button>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Demandes en attente" value=pending_count icon="pending_actions" hint="Réponse attendue sous 48 h" %}
+{% include "portal/_stat_card.html" with label="Entretiens cette semaine" value=interviews_this_week icon="event_available" icon_class="bg-surface-container text-secondary" hint=interviews_hint %}
+{% include "portal/_stat_card.html" with label="Étudiants suivis" value=caseload_count icon="support_agent" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=caseload_hint %}
+{% include "portal/_stat_card.html" with label="Créneaux ouverts" value=open_slots icon="schedule" hint=week_label %}
+</div>
+<section class="grid gap-4 lg:grid-cols-3">
+{% for group in groups %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">{{ group.label }}</h2><p class="text-xs text-on-surface-variant">{{ group.slots|length }} créneau{{ group.slots|length|pluralize }}</p></div><span class="material-symbols-outlined text-primary">event</span></div>
+<ul class="mt-4 space-y-2 text-sm">
+{% for item in group.slots %}
+<li class="flex items-center justify-between gap-2 rounded bg-surface-container px-3 py-2"><span class="font-semibold text-on-surface">{{ item.time_label }}</span>{% if item.is_booked %}<span class="text-xs text-on-surface-variant">Réservé{% if item.student_name %} · {{ item.student_name }}{% endif %}</span>{% else %}<span class="text-xs text-primary">Disponible</span>{% endif %}</li>
+{% empty %}
+<li class="rounded bg-surface-container px-3 py-2 text-xs text-on-surface-variant">Aucun créneau ce jour.</li>
+{% endfor %}
+</ul>
+</article>
+{% empty %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm lg:col-span-3"><p class="text-sm text-on-surface-variant">Aucun créneau planifié cette semaine. Ouvrez une disponibilité pour permettre aux étudiants de réserver.</p></article>
+{% endfor %}
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Demandes de rendez-vous</h2>
+<span class="text-xs text-on-surface-variant"><span data-tutoring-pending>{{ pending_count }}</span> demandes en attente</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[900px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Motif</th><th class="px-5 py-3 font-bold">Créneau souhaité</th><th class="px-5 py-3 font-bold">Priorité</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in request_rows %}
+<tr class="hover:bg-surface-container/40" data-tutoring-row>
+<td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">{{ row.student_initials }}</span><div><p class="font-semibold text-on-surface">{{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.student_email }}</p></div></div></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td><td class="px-5 py-3 text-on-surface-variant"><span class="block">{{ row.session.topic }}</span>{% if row.comment %}<span class="mt-1 flex items-start gap-1 text-xs"><span class="material-symbols-outlined shrink-0 text-[14px] text-primary">comment</span><span>{{ row.comment|linebreaksbr }}</span></span>{% endif %}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.preferred_label }}</td><td class="px-5 py-3">{% include "portal/_badge.html" with label=row.priority_meta.label tone_class=row.priority_meta.badge %}</td>
+<td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap" data-tutoring-actions>
+<form method="post" action="{% url 'coaching:prof_request_accept' row.session.pk %}">{% csrf_token %}<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Confirmer</button></form>
+<form method="post" action="{% url 'coaching:prof_request_decline' row.session.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit">Refuser</button></form>
+</div></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-8 text-center text-sm text-on-surface-variant" colspan="6">Aucune demande en attente.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+{% if session_rows %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Entretiens confirmés</h2>
+<span class="text-xs text-on-surface-variant">{{ session_count }} entretien{{ session_count|pluralize }} à clôturer</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[900px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Motif</th><th class="px-5 py-3 font-bold">Rendez-vous</th><th class="px-5 py-3 font-bold">Modalité</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in session_rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">{{ row.student_initials }}</span><div><p class="font-semibold text-on-surface">{{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.student_email }}</p></div></div></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.session.topic }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.when_label }}</td>
+<td class="px-5 py-3 text-on-surface-variant"><span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">{{ row.mode_icon }}</span>{{ row.mode_label }}</span></td>
+<td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap">{% if row.meeting_url %}<a class="inline-flex items-center gap-1 rounded-full border border-primary/40 px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary-fixed" href="{{ row.meeting_url }}" rel="noopener" target="_blank"><span class="material-symbols-outlined text-[15px]">videocam</span>Visio</a>{% endif %}<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#session-modal" data-session-action="{% url 'coaching:prof_session_complete' row.session.pk %}" data-session-complete="{{ row.session.pk }}" data-session-info="{{ row.student_name }} · {{ row.when_label }}" type="button">Clôturer</button></div></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+{% endif %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Compte-rendu du dernier entretien</h2>
+{% if last_view %}
+<p class="mt-1 text-xs text-on-surface-variant">{{ last_view.student_name }} · {{ last_view.when_label }} · {{ last_view.duration }} · {{ last_view.place }}</p>
+<div class="mt-3 grid gap-3 sm:grid-cols-2">
+<div class="rounded bg-surface-container p-3.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Points abordés</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">{{ last_view.session.summary_points|default:"Aucun point consigné pour cet entretien." }}</p></div>
+<div class="rounded bg-surface-container p-3.5"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Actions décidées</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">{{ last_view.session.summary_actions|default:"Aucune action consignée pour cet entretien." }}</p></div>
+</div>
+<div class="mt-3 flex justify-end"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:prof_student_journal' %}?student={{ last_view.session.student_id }}">Consulter le journal de progression</a></div>
+{% else %}
+<p class="mt-1 text-sm text-on-surface-variant">Aucun entretien clôturé pour le moment.</p>
+{% endif %}
+</section>
+</div>
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="slot-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-md rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Ouvrir un créneau</h2><p class="text-xs text-on-surface-variant">Visible par les étudiants de vos classes et vos étudiants suivis.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="space-y-3 p-5" data-future-datetime data-lead-minutes="15" data-validate-form id="slot-form" method="post" action="{% url 'coaching:prof_slot_create' %}" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Date</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus max="{{ max_date_value }}" min="{{ today_value }}" name="date" required type="date" value="{{ default_slot_date }}"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Créneau</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-clock name="time" required>{% for choice in slot_time_choices %}<option value="{{ choice }}">{{ choice }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Type d'entretien</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Choisissez un type d'entretien." name="mode" required>{% for value, label in mode_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Publier le créneau</button>
+</div>
+</form>
+</div>
+</div>
+{% if session_rows %}
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="session-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Clôturer l'entretien</h2><p class="text-xs text-on-surface-variant" data-session-info></p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="space-y-3 p-5" data-session-form data-validate-form method="post" action="{% url 'coaching:prof_session_complete' session_rows.0.session.pk %}" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Points abordés</span><textarea class="min-h-16 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus data-required-message="Résumez les points abordés." maxlength="2000" minlength="5" name="summary_points" placeholder="Synthèse de l'échange avec l'étudiant…" required rows="3"></textarea></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Actions décidées</span><textarea class="min-h-12 rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="2000" name="summary_actions" placeholder="Engagements et prochaines étapes…" rows="2"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Clôturer l'entretien</button>
+</div>
+</form>
+</div>
+</div>
+{% endif %}
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var form = document.querySelector('[data-session-form]');
+  if (!form) return;
+  var info = document.querySelector('[data-session-info]');
+  document.querySelectorAll('[data-session-complete]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      form.reset();
+      form.setAttribute('action', btn.getAttribute('data-session-action') || '');
+      if (info) info.textContent = btn.getAttribute('data-session-info') || '';
+    });
+  });
+})();
+</script>
+{% endblock %}

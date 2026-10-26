@@ -14,16 +14,16 @@
 </button>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Exercices résolus" value=total_resolved icon="task_alt" hint="Total tentatives" %}
-{% include "portal/_stat_card.html" with label="Taux de réussite" value=success_rate suffix="%" icon="insights" icon_class="bg-surface-container text-secondary" hint="Objectif : 80 %" %}
-{% include "portal/_stat_card.html" with label="Série en cours" value=streak suffix=" jours" icon="local_fire_department" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Jours consécutifs" %}
-{% include "portal/_stat_card.html" with label="Séries disponibles" value=series_with_progress|length icon="timer" hint="Dans votre université" %}
+{% include "portal/_stat_card.html" with label="Exercices résolus" value="148" icon="task_alt" hint="+23 cette semaine" %}
+{% include "portal/_stat_card.html" with label="Taux de réussite" value="82" suffix="%" icon="insights" icon_class="bg-surface-container text-secondary" hint="Objectif : 80 %" %}
+{% include "portal/_stat_card.html" with label="Série en cours" value="6" suffix=" jours" icon="local_fire_department" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Record personnel : 11 jours" %}
+{% include "portal/_stat_card.html" with label="Temps moyen" value="12" suffix=" min" icon="timer" hint="Par exercice complété" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
 <div>
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Séries recommandées</h2>
-<p class="mt-0.5 text-xs text-on-surface-variant"><span data-series-count>{{ series_with_progress|length }}</span> séries adaptées à votre profil</p>
+<p class="mt-0.5 text-xs text-on-surface-variant"><span data-series-count>6</span> séries adaptées à votre profil</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <label class="sr-only" for="practice-subject">Matière</label>
@@ -44,56 +44,48 @@
 </div>
 </div>
 <div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3" data-series-grid>
-{% for item in series_with_progress %}
-{% with s=item.series total=item.total attempt=item.last_attempt %}
-<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm"
-  data-series data-subject="{{ s.subject|lower|slugify }}" data-level="intermediaire">
-<div class="flex items-start justify-between gap-2">
-  <span class="flex h-9 w-9 items-center justify-center rounded {% if s.author == request.user %}bg-secondary-fixed text-secondary{% else %}bg-surface-container text-primary{% endif %}">
-    <span class="material-symbols-outlined text-[19px]">{% if s.author == request.user %}auto_awesome{% else %}library_books{% endif %}</span>
-  </span>
-  {% if s.author == request.user %}
-  {% include "portal/_badge.html" with label="Générée par IA" tone_class="bg-secondary-fixed text-secondary" %}
-  {% elif s.visibility == 'publiee' %}{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}{% endif %}
-</div>
-<h3 class="font-title-md text-title-md mt-3 text-on-surface">{{ s.name }}</h3>
-<p class="mt-1 text-xs text-on-surface-variant">{{ s.subject|default:"Général" }} · {{ total }} exercice{{ total|pluralize }}</p>
-{% if s.description %}<p class="mt-1 text-xs text-on-surface-variant italic">{{ s.description|truncatechars:80 }}</p>{% endif %}
-{% if attempt %}
-<div class="mt-3">
-  <div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant">
-    <span>Dernier score</span>
-    <span>{{ attempt.score }}/{{ attempt.max_score }}</span>
-  </div>
-  <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container">
-    {% if attempt.max_score %}
-    <div class="h-full rounded-full bg-primary" style="width:{% widthratio attempt.score attempt.max_score 100 %}%"></div>
-    {% endif %}
-  </div>
-</div>
-{% else %}
-<div class="mt-3">
-  <div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant">
-    <span>Progression</span><span>Pas encore commencé</span>
-  </div>
-  <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container">
-    <div class="h-full rounded-full bg-surface-container-high" style="width:0%"></div>
-  </div>
-</div>
-{% endif %}
-<a href="{% url 'exercises:student_practice_session' s.pk %}"
-   class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container">
-  {% if attempt %}Rejouer{% else %}Commencer{% endif %}
-  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="algorithmique" data-level="intermediaire">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-primary"><span class="material-symbols-outlined text-[19px]">account_tree</span></span>{% include "portal/_badge.html" with label="Intermédiaire" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Arbres &amp; parcours en profondeur</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Algorithmique · 12 exercices · ~25 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>4/12</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-primary" style="width:33%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Série « Arbres &amp; parcours » ouverte." type="button">Continuer<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
 </article>
-{% endwith %}
-{% empty %}
-<div class="md:col-span-2 xl:col-span-3 py-10 text-center text-sm text-on-surface-variant">
-  <span class="material-symbols-outlined text-[48px] block mb-2">library_books</span>
-  Aucune série disponible pour le moment. Votre enseignant n'en a pas encore publié.
-</div>
-{% endfor %}
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="mathematiques" data-level="avance">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-secondary"><span class="material-symbols-outlined text-[19px]">functions</span></span>{% include "portal/_badge.html" with label="Avancé" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Calcul matriciel &amp; gradients</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Mathématiques · 10 exercices · ~30 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>7/10</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-secondary" style="width:70%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Série « Calcul matriciel » ouverte." type="button">Continuer<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
+</article>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="reseaux" data-level="debutant">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-tertiary"><span class="material-symbols-outlined text-[19px]">lan</span></span>{% include "portal/_badge.html" with label="Débutant" tone_class="bg-primary-fixed text-primary" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Bases du protocole TCP/IP</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Réseaux · 8 exercices · ~15 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>2/8</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-primary" style="width:25%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Série « TCP/IP » ouverte." type="button">Continuer<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
+</article>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="probabilites" data-level="intermediaire">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-primary"><span class="material-symbols-outlined text-[19px]">casino</span></span>{% include "portal/_badge.html" with label="Intermédiaire" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Chaînes de Markov</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Probabilités · 9 exercices · ~20 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>0/9</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-surface-container-high" style="width:0%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Série « Chaînes de Markov » ouverte." type="button">Commencer<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
+</article>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="algorithmique" data-level="avance">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-secondary"><span class="material-symbols-outlined text-[19px]">speed</span></span>{% include "portal/_badge.html" with label="Avancé" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Complexité &amp; optimisation</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Algorithmique · 6 exercices · ~35 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>1/6</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-secondary" style="width:16%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Série « Complexité » ouverte." type="button">Continuer<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
+</article>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm" data-series data-subject="mathematiques" data-level="debutant">
+<div class="flex items-start justify-between gap-2"><span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-tertiary"><span class="material-symbols-outlined text-[19px]">calculate</span></span>{% include "portal/_badge.html" with label="Débutant" tone_class="bg-primary-fixed text-primary" %}</div>
+<h3 class="font-title-md text-title-md mt-3 text-on-surface">Dérivées &amp; règles de base</h3>
+<p class="mt-1 text-xs text-on-surface-variant">Mathématiques · 15 exercices · ~18 min</p>
+<div class="mt-3"><div class="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant"><span>Progression</span><span>15/15 · Terminé</span></div><div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-container"><div class="h-full rounded-full bg-primary" style="width:100%"></div></div></div>
+<button class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-toast="Série rejouée depuis le début." type="button">Rejouer<span class="material-symbols-outlined text-[16px]">replay</span></button>
+</article>
 </div>
 <p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-series-empty>Aucune série ne correspond à ces filtres.</p>
 </section>
@@ -106,18 +98,10 @@
 <table class="w-full min-w-[700px] text-left">
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Série</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Score</th><th class="px-5 py-3 font-bold">Durée</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 text-right font-bold">Résultat</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-{% for attempt in recent_attempts %}
-<tr class="hover:bg-surface-container/40">
-  <td class="px-5 py-3 font-semibold text-on-surface">{{ attempt.series.name }}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{{ attempt.series.subject|default:"—" }}</td>
-  <td class="px-5 py-3 font-data-metric font-semibold text-on-surface">{{ attempt.score }}/{{ attempt.max_score }}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{{ attempt.duration_minutes }} min</td>
-  <td class="px-5 py-3 text-on-surface-variant">{{ attempt.created_at|date:"j M. Y" }}</td>
-  <td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label=attempt.get_result_display tone_class=attempt.result_badge_class %}</td>
-</tr>
-{% empty %}
-<tr><td colspan="6" class="px-5 py-8 text-center text-sm text-on-surface-variant">Aucune tentative enregistrée. Commencez une série pour voir votre historique !</td></tr>
-{% endfor %}
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Arbres binaires de recherche</td><td class="px-5 py-3 text-on-surface-variant">Algorithmique</td><td class="px-5 py-3 font-data-metric font-semibold text-on-surface">9/10</td><td class="px-5 py-3 text-on-surface-variant">14 min</td><td class="px-5 py-3 text-on-surface-variant">22 oct. 2024</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Réussi" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Gradient d'une matrice</td><td class="px-5 py-3 text-on-surface-variant">Mathématiques</td><td class="px-5 py-3 font-data-metric font-semibold text-on-surface">7/10</td><td class="px-5 py-3 text-on-surface-variant">21 min</td><td class="px-5 py-3 text-on-surface-variant">21 oct. 2024</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À revoir" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Sous-réseaux &amp; masques</td><td class="px-5 py-3 text-on-surface-variant">Réseaux</td><td class="px-5 py-3 font-data-metric font-semibold text-on-surface">8/8</td><td class="px-5 py-3 text-on-surface-variant">11 min</td><td class="px-5 py-3 text-on-surface-variant">20 oct. 2024</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Parfait" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Probabilités conditionnelles</td><td class="px-5 py-3 text-on-surface-variant">Probabilités</td><td class="px-5 py-3 font-data-metric font-semibold text-on-surface">6/10</td><td class="px-5 py-3 text-on-surface-variant">17 min</td><td class="px-5 py-3 text-on-surface-variant">18 oct. 2024</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À revoir" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
 </tbody>
 </table>
 </div>

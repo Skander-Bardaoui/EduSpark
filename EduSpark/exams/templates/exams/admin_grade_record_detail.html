@@ -1,0 +1,251 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Relevé — {{ record.school_class.name }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<nav class="flex flex-wrap items-center gap-1.5 text-on-surface-variant text-[11px] font-semibold uppercase tracking-wider">
+<a class="transition-colors hover:text-primary" href="{% url 'exams:admin_official_records' %}">Relevés officiels</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-bold">{{ record.school_class.name }}</span>
+</nav>
+<h1 class="mt-1.5 font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevé officiel · {{ record.school_class.name }}</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">{{ record.semester }} · {{ portal_university.name }} · {{ record.school_class.level }}</p>
+</div>
+<div class="flex flex-wrap gap-2 print:hidden">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:admin_official_records' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Retour</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" onclick="window.print()" type="button"><span class="material-symbols-outlined text-[18px]">print</span>Imprimer</button>
+</div>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Moyenne générale" value=record.average_label suffix=" /20" icon="grade" hint=record.semester %}
+{% include "portal/_stat_card.html" with label="Taux de réussite" value=record.rate_label icon="insights" icon_class="bg-surface-container text-secondary" hint="Admis sur inscrits" %}
+{% include "portal/_stat_card.html" with label="Étudiants inscrits" value=record.students_count icon="group" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Effectif du PV" %}
+{% include "portal/_stat_card.html" with label="Étudiants admis" value=record.admitted_count icon="workspace_premium" hint="Décision du jury" %}
+</div>
+
+<div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+<div class="flex flex-col gap-5">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 pb-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Données du procès-verbal</h2>
+<p class="text-xs text-on-surface-variant">Ces valeurs sont calculées automatiquement depuis les notes QCM publiées.</p>
+</div>
+<span class="font-data-metric text-[11px] text-on-surface-variant">Dernière mise à jour : {{ record.updated_at|date:"d/m/Y H:i" }}</span>
+</div>
+<div class="mt-4 grid gap-3 sm:grid-cols-3">
+<div class="rounded bg-surface-container-low px-3 py-2">
+<span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Étudiants inscrits</span>
+<p class="mt-1 font-data-metric text-xl font-bold text-on-surface">{{ record.students_count }}</p>
+</div>
+<div class="rounded bg-surface-container-low px-3 py-2">
+<span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Étudiants admis</span>
+<p class="mt-1 font-data-metric text-xl font-bold text-on-surface">{{ record.admitted_count }}</p>
+</div>
+<div class="rounded bg-surface-container-low px-3 py-2">
+<span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Moyenne générale /20</span>
+<p class="mt-1 font-data-metric text-xl font-bold text-on-surface">{{ record.average_label }}</p>
+</div>
+</div>
+<form action="{% url 'exams:admin_grade_record_detail' record.pk %}" class="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-outline-variant/40 pt-4" method="post">
+{% csrf_token %}
+<input name="action" type="hidden" value="recalculate"/>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">calculate</span>Recalculer le PV</button>
+</form>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Épreuves de la classe</h2>
+<p class="text-xs text-on-surface-variant">{{ sessions|length }} épreuve(s) rattachée(s) au semestre {{ record.semester }}.</p>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[640px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Épreuve</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 text-right font-bold">QCM</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for session in sessions %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.date_label }}</p><p class="text-xs text-on-surface-variant">{{ session.time_label }}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ session.title }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% else %}—{% endif %}</td>
+<td class="px-5 py-3 text-right">{% if session.quiz %}{% if session.quiz.is_published %}{% include "portal/_badge.html" with label="QCM publié" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% else %}{% include "portal/_badge.html" with label="QCM brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}{% else %}{% include "portal/_badge.html" with label="Aucun QCM" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="4">Aucune épreuve planifiée pour cette classe.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes des enseignants · matrice étudiants × matières</h2>
+<p class="text-xs text-on-surface-variant">Vérifiez matière par matière les notes publiées, validées ou en brouillon avant de publier le relevé.</p>
+</div>
+<form action="{% url 'exams:admin_grade_record_detail' record.pk %}" class="flex flex-wrap items-center gap-2" method="post">
+{% csrf_token %}
+<input name="action" type="hidden" value="recalculate"/>
+<span class="text-xs font-semibold text-on-surface-variant">{{ deliberation_admitted }}/{{ deliberation_count }} admis · {{ deliberation_pending }} en attente</span>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" title="Le recalcul est manuel et ne se déclenche pas à la publication" type="submit"><span class="material-symbols-outlined text-[16px]">calculate</span>Recalculer le PV</button>
+</form>
+</div>
+{% if grade_overview.published == 0 %}
+<div class="flex items-start gap-2 border-b border-outline-variant/40 bg-error-container px-5 py-3 text-xs font-semibold text-on-error-container">
+<span class="material-symbols-outlined text-[18px]">block</span>
+<span>Publication impossible : aucune note publiée par les enseignants. Les notes en brouillon ou validées ne sont pas reprises dans le relevé officiel.</span>
+</div>
+{% elif grade_overview.incomplete %}
+<div class="flex items-start gap-2 border-b border-outline-variant/40 bg-tertiary-fixed/50 px-5 py-3 text-xs font-semibold text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<span>Vérification incomplète : {{ grade_overview.hint }} La publication reste possible ; seules les notes publiées apparaîtront dans le relevé.</span>
+</div>
+{% endif %}
+<div class="flex flex-wrap items-center gap-2 border-b border-outline-variant/40 px-5 py-2.5 text-[11px] text-on-surface-variant">
+<span class="font-bold uppercase tracking-wide">Légende</span>
+{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}
+{% include "portal/_badge.html" with label="Validée" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}
+{% include "portal/_badge.html" with label="Sans note" tone_class="bg-surface-container text-on-surface-variant" %}
+{% include "portal/_badge.html" with label="Absent" tone_class="bg-error-container text-on-error-container" %}
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-max text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr>
+<th class="sticky left-0 z-10 bg-surface-container px-5 py-3 font-bold">Étudiant</th>
+{% for column in matrix_columns %}
+<th class="min-w-[150px] border-l border-outline-variant/30 px-4 py-3 font-bold">
+<p>{{ column.label }}</p>
+<p class="mt-0.5 text-[10px] font-semibold normal-case tracking-normal text-on-surface-variant">{{ column.code|default:"—" }} · {{ column.exam_type }} · coeff. {{ column.coefficient }}</p>
+</th>
+{% empty %}
+<th class="border-l border-outline-variant/30 px-4 py-3 font-bold">Matières</th>
+{% endfor %}
+<th class="px-5 py-3 font-bold">Moyenne</th>
+<th class="px-5 py-3 font-bold">Décision</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in deliberation_rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="sticky left-0 z-10 bg-surface-container-lowest px-5 py-3">
+<p class="font-semibold text-on-surface">{{ row.student.membership.user.get_full_name|default:row.student.membership.user.email }}</p>
+<p class="text-xs text-on-surface-variant">N° {{ row.student.student_number|default:"—" }}</p>
+</td>
+{% for cell in row.cells %}
+<td class="border-l border-outline-variant/30 px-4 py-3 align-top">
+<div class="flex flex-col items-start gap-1">
+{% if cell.has_score %}<span class="font-data-metric font-bold text-on-surface">{{ cell.score_label }}<span class="text-xs font-normal text-on-surface-variant">/20</span></span>{% else %}<span class="font-data-metric text-on-surface-variant">—</span>{% endif %}
+{% include "portal/_badge.html" with label=cell.badge_label tone_class=cell.badge_class %}
+</div>
+</td>
+{% empty %}
+<td class="border-l border-outline-variant/30 px-4 py-3 text-xs text-on-surface-variant">Aucune note</td>
+{% endfor %}
+<td class="px-5 py-3 align-top">
+{% if row.graded_total %}
+<span class="font-data-metric font-bold text-on-surface">{{ row.average_label }}</span><span class="text-xs text-on-surface-variant"> /20</span>
+{% else %}
+<span class="text-xs text-on-surface-variant">-</span>
+{% endif %}
+</td>
+<td class="px-5 py-3 align-top">
+{% if row.decision == "Admis" %}
+{% include "portal/_badge.html" with label="Admis" tone_class="bg-primary-fixed text-primary" dot=True %}
+{% elif row.decision == "Ajourné" %}
+{% include "portal/_badge.html" with label="Ajourné" tone_class="bg-error-container text-on-error-container" %}
+{% else %}
+{% include "portal/_badge.html" with label="En attente" tone_class="bg-surface-container text-on-surface-variant" %}
+{% endif %}
+</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="{{ matrix_columns|length|add:3 }}">Aucun étudiant rattaché à cette classe.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 bg-surface-container/40 px-5 py-3 text-xs text-on-surface-variant">
+<span>Notes publiées : <span class="font-data-metric font-bold text-on-surface">{{ grade_overview.notes_label }}</span> · {{ grade_overview.pending_label }}</span>
+<span>{{ grade_overview.pending }} note(s) en attente · {{ grade_overview.missing }} case(s) sans note</span>
+</div>
+</section>
+</div>
+
+<aside class="flex flex-col gap-5">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes de la classe</h2>
+<ul class="mt-4 space-y-3 text-sm">
+<li class="flex items-center justify-between gap-3"><span class="text-on-surface-variant">Notes publiées</span><span class="font-data-metric font-bold text-on-surface">{{ grade_overview.published }} / {{ grade_overview.cells }}</span></li>
+<li class="flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-3"><span class="text-on-surface-variant">En attente de publication</span><span class="font-data-metric font-bold {% if grade_overview.pending %}text-on-tertiary-fixed{% else %}text-on-surface{% endif %}">{{ grade_overview.pending }}</span></li>
+<li class="flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-3"><span class="text-on-surface-variant">Cases sans note</span><span class="font-data-metric font-bold {% if grade_overview.missing %}text-error{% else %}text-on-surface{% endif %}">{{ grade_overview.missing }}</span></li>
+<li class="flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-3"><span class="text-on-surface-variant">Matières sans note publiée</span><span class="font-data-metric font-bold text-on-surface">{{ grade_overview.sessions_without_published }} / {{ grade_overview.sessions }}</span></li>
+</ul>
+<p class="mt-4 rounded-md bg-surface-container px-3 py-2 text-xs text-on-surface-variant">{{ grade_overview.hint }}</p>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Statut du relevé</h2>
+<ul class="mt-4 space-y-3 text-sm">
+<li class="flex items-center justify-between gap-3">
+<span class="text-on-surface-variant">PV du jury</span>
+{% if record.pv_signed %}{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+</li>
+{% if record.pv_signed %}
+<li class="flex flex-col gap-1 border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant">
+<span>Signé le {{ record.pv_signed_at|date:"d/m/Y à H:i" }}</span>
+{% if record.pv_signed_by %}<span>Par {{ record.pv_signed_by.get_full_name|default:record.pv_signed_by.email }}</span>{% endif %}
+</li>
+{% endif %}
+<li class="flex items-center justify-between gap-3 border-t border-outline-variant/40 pt-3">
+<span class="text-on-surface-variant">Relevé étudiant</span>
+{% if record.transcript_published %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Non publié" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+</li>
+{% if record.transcript_published %}
+<li class="border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant">Publié le {{ record.published_at|date:"d/m/Y à H:i" }}</li>
+{% endif %}
+</ul>
+<div class="mt-4 flex flex-col gap-2 border-t border-outline-variant/40 pt-4">
+{% if not record.pv_signed %}
+<form action="{% url 'exams:admin_grade_record_sign' record.pk %}" method="post">
+{% csrf_token %}
+<input name="next" type="hidden" value="{% url 'exams:admin_grade_record_detail' record.pk %}"/>
+<button class="w-full rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Signer le PV</button>
+</form>
+{% elif not record.transcript_published and grade_overview.can_publish %}
+<form action="{% url 'exams:admin_grade_record_publish' record.pk %}" method="post">
+{% csrf_token %}
+<input name="next" type="hidden" value="{% url 'exams:admin_grade_record_detail' record.pk %}"/>
+<button class="w-full rounded-full bg-secondary-container px-4 py-2.5 text-xs font-bold text-on-secondary-container transition-colors hover:bg-secondary" type="submit">Publier le relevé</button>
+</form>
+<p class="text-center text-[11px] leading-relaxed text-on-surface-variant">Chaque étudiant de la classe accédera immédiatement à son relevé officiel.</p>
+{% elif not record.transcript_published %}
+<button class="w-full cursor-not-allowed rounded-full bg-surface-container px-4 py-2.5 text-xs font-bold text-on-surface-variant" disabled type="button">Publication impossible</button>
+<p class="text-center text-[11px] leading-relaxed text-error">Aucune note publiée par les enseignants dans cette classe.</p>
+{% else %}
+<p class="rounded-md bg-primary-fixed/40 px-3 py-2 text-center text-xs font-semibold text-primary">Ce relevé est publié et consultable par les étudiants.</p>
+{% endif %}
+</div>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container p-5 text-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Règles de délibération</h2>
+<ul class="mt-3 space-y-2 text-xs leading-relaxed text-on-surface-variant">
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Le PV doit être signé avant la publication du relevé.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>La publication est bloquée sans au moins une note publiée par un enseignant.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Les notes validées ou en brouillon sont signalées mais ne bloquent pas la publication.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Le recalcul du PV reste manuel et ne se déclenche pas à la publication.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Toute modification est horodatée et rattachée à votre compte.</li>
+</ul>
+</section>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

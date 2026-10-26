@@ -1,0 +1,66 @@
+{% extends portal_base_template %}
+{% block title %}{{ forum.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1100px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<a class="inline-flex w-fit items-center gap-1 text-xs font-bold text-on-surface-variant hover:text-primary" href="{{ back_url }}"><span class="material-symbols-outlined text-[16px]">arrow_back</span>Tous les forums</a>
+
+<header class="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="min-w-0">
+<div class="mb-1.5 flex flex-wrap items-center gap-1.5">
+{% if forum.school_class %}{% include "portal/_badge.html" with label=forum.school_class.name tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Forum général" %}{% endif %}
+{% if forum.course_ref %}{% include "portal/_badge.html" with label=forum.course_ref %}{% endif %}
+{% if forum.is_locked %}{% include "portal/_badge.html" with label="Verrouillé" tone_class="bg-error-container text-on-error-container" %}{% endif %}
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ forum.title }}</h1>
+{% if forum.description %}<p class="mt-1 max-w-2xl text-sm text-on-surface-variant">{{ forum.description }}</p>{% endif %}
+</div>
+<div class="flex flex-wrap gap-2">
+{% if can_post %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'community:thread_create' forum.pk %}"><span class="material-symbols-outlined text-[18px]">add_comment</span>Poser une question</a>
+{% endif %}
+{% if can_manage %}
+<a class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container" href="{% url 'community:forum_edit' forum.pk %}">Modifier</a>
+<a class="rounded-full border border-error/40 px-4 py-2.5 text-xs font-bold text-error hover:bg-error-container" href="{% url 'community:forum_delete' forum.pk %}">Supprimer</a>
+{% endif %}
+</div>
+</header>
+
+<form class="flex flex-wrap items-center gap-2 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-3 shadow-sm" method="get" role="search">
+<input class="min-w-[14rem] flex-1 rounded-full bg-surface-container-low px-4 py-2 text-sm outline-none focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]" name="q" placeholder="Rechercher une question…" type="search" value="{{ q }}"/>
+<select class="rounded-full bg-surface-container-low px-3 py-2 text-sm outline-none" name="etat" onchange="this.form.submit()">
+<option value="">Toutes les questions</option>
+<option value="sans_reponse" {% if state == 'sans_reponse' %}selected{% endif %}>Sans réponse</option>
+<option value="ouverte" {% if state == 'ouverte' %}selected{% endif %}>Non résolues</option>
+<option value="resolue" {% if state == 'resolue' %}selected{% endif %}>Résolues</option>
+</select>
+<label class="flex items-center gap-1.5 px-2 text-xs font-semibold text-on-surface-variant"><input class="accent-primary" name="mes" onchange="this.form.submit()" type="checkbox" value="1" {% if mine %}checked{% endif %}/>Mes questions</label>
+<button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary" type="submit">Filtrer</button>
+</form>
+
+{% if page %}
+<ul class="flex flex-col gap-2.5">
+{% for t in page %}
+<li class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm {% if t.is_hidden %}opacity-60{% endif %}">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="min-w-0">
+<div class="mb-1 flex flex-wrap items-center gap-1.5">
+{% if t.is_pinned %}{% include "portal/_badge.html" with label="Épinglée" tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if t.is_resolved %}{% include "portal/_badge.html" with label="Résolue" tone_class="bg-secondary-fixed text-on-secondary-fixed" dot=True %}{% elif t.reply_count == 0 %}{% include "portal/_badge.html" with label="Sans réponse" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+{% if t.is_hidden %}{% include "portal/_badge.html" with label="Masquée" tone_class="bg-error-container text-on-error-container" %}{% endif %}
+</div>
+<h2 class="font-title-md text-title-md text-on-surface"><a class="hover:text-primary" href="{% url 'community:thread_detail' t.pk %}">{{ t.title }}</a></h2>
+<p class="mt-0.5 text-xs text-outline">{% firstof t.author.get_full_name t.author.email "Compte supprimé" %} · il y a {{ t.created_at|timesince }}</p>
+</div>
+<div class="flex shrink-0 items-center gap-1 text-sm font-semibold text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">chat_bubble</span>{{ t.reply_count }}</div>
+</div>
+</li>
+{% endfor %}
+</ul>
+{% include "portal/_pagination.html" with is_paginated=page.has_other_pages page_obj=page %}
+{% else %}
+{% include "portal/_empty_state.html" with icon="help" title="Aucune question" hint="Soyez le premier à poser une question dans ce forum." %}
+{% endif %}
+</div>
+</main>
+{% endblock %}

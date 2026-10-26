@@ -1,0 +1,74 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Mes Cours — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Cours</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Créez le contenu de vos matières (chapitres, supports) puis publiez chaque cours pour les classes auxquelles vous l'enseignez : seuls les étudiants de ces classes le voient.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_subjects' %}"><span class="material-symbols-outlined text-[18px]">auto_stories</span>Mes matières</a>
+{% if can_create %}<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:prof_course_create' %}"><span class="material-symbols-outlined text-[18px]">add</span>Nouveau cours</a>{% endif %}
+</div>
+</header>
+{% if not can_create %}
+<div class="flex items-start gap-3 rounded-2xl border border-tertiary/30 bg-tertiary-fixed/40 px-4 py-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-tertiary">info</span>
+<p>Aucune matière ne vous est encore affectée. L'administration de {{ portal_university.name }} doit d'abord vous affecter à une classe (menu « Affectations enseignants ») pour que vous puissiez créer des cours.</p>
+</div>
+{% endif %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Cours" value=stats.courses icon="menu_book" hint="Créés par vous" %}
+{% include "portal/_stat_card.html" with label="Cours publiés" value=stats.published icon="publish" icon_class="bg-secondary-fixed text-on-secondary" hint="Visibles dans au moins une classe" %}
+{% include "portal/_stat_card.html" with label="Chapitres" value=stats.chapters icon="view_agenda" icon_class="bg-surface-container text-secondary" hint="Tous cours confondus" %}
+{% include "portal/_stat_card.html" with label="Supports" value=stats.materials icon="folder_shared" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="PDF, présentations, Word, vidéos, audios" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes cours par matière</h2>
+<p class="text-xs text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ courses|length }}{% endif %} cours</p>
+</div>
+<form class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center" method="get">
+<label class="relative block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary sm:w-60" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/></label>
+{% for filter in filters %}
+<select aria-label="Filtrer par {{ filter.label }}" class="h-10 cursor-pointer rounded-full border border-outline-variant/60 bg-surface px-4 text-xs font-semibold text-on-surface outline-none transition-colors focus:border-primary" name="{{ filter.param }}">
+<option value="">{{ filter.label }} — toutes</option>
+{% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+</select>
+{% endfor %}
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if is_filtered %}<a class="rounded-full border border-outline-variant/60 px-3 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'courses:prof_course' %}">Réinitialiser</a>{% endif %}
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[980px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Cours</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Classes</th><th class="px-5 py-3 font-bold">Contenu</th><th class="px-5 py-3 font-bold">Statut</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for course in courses %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><a class="font-semibold text-on-surface hover:text-primary" href="{% url 'courses:prof_course_detail' course.pk %}">{{ course.title }}</a><p class="text-xs text-on-surface-variant">Mis à jour le {{ course.updated_at|date:"d/m/Y" }}</p></td>
+<td class="px-5 py-3 text-on-surface-variant"><span class="font-data-metric text-[11px] font-semibold text-primary">{{ course.subject.code }}</span> · {{ course.subject.name }}<span class="block text-xs">{{ course.subject.program.name }} · {{ course.subject.semester_label }}</span></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ course.published_count }} / {{ course.assigned_class_count }} publiée{{ course.published_count|pluralize }}{% if course.to_publish %}<span class="block text-xs text-tertiary">Reste {{ course.to_publish }} classe{{ course.to_publish|pluralize }} à publier</span>{% endif %}</td>
+<td class="whitespace-nowrap px-5 py-3 text-xs text-on-surface-variant">{{ course.chapter_count }} chapitre{{ course.chapter_count|pluralize }}<br/>{{ course.material_count }} support{{ course.material_count|pluralize }}</td>
+<td class="px-5 py-3">{% if course.published_count %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<td class="px-5 py-3"><div class="flex items-center justify-end gap-3">
+<a class="text-xs font-bold text-primary transition-colors hover:text-primary-container" href="{% url 'courses:prof_course_detail' course.pk %}">Ouvrir</a>
+<a class="text-xs font-bold text-on-surface-variant transition-colors hover:text-primary" href="{% url 'courses:prof_course_update' course.pk %}">Modifier</a>
+<a class="text-xs font-bold text-on-surface-variant transition-colors hover:text-error" href="{% url 'courses:prof_course_delete' course.pk %}">Supprimer</a>
+</div></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="6">{% if is_filtered %}Aucun cours ne correspond à votre recherche.{% elif can_create %}Vous n'avez pas encore de cours. <a class="font-bold text-primary hover:underline" href="{% url 'courses:prof_course_create' %}">Créer mon premier cours</a>{% else %}Aucun cours pour le moment.{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% include "portal/_pagination.html" %}
+</section>
+</div>
+</main>
+{% endblock %}

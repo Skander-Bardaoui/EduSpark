@@ -1,0 +1,74 @@
+{% extends "portal/base_student.html" %}
+{% load courses_extras %}
+{% block title %}Supports de cours — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Supports de cours</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Les documents, présentations, vidéos et audios déposés par vos enseignants pour {% if school_class %}la classe {{ school_class.name }}{% else %}votre classe{% endif %}, classés par matière.</p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<a class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:student_catalogue' %}{% if school_class %}?classe={{ school_class.pk }}{% endif %}"><span class="material-symbols-outlined text-[18px]">menu_book</span>Catalogue des cours</a>
+</div>
+</header>
+{% include "courses/_class_switcher.html" %}
+{% if not school_class %}
+{% include "portal/_empty_state.html" with icon="groups" title="Vous n'êtes rattaché à aucune classe" hint="Les supports de vos cours apparaîtront dès que vous serez ajouté à un groupe de classe." %}
+{% else %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Supports disponibles" value=stats.materials icon="folder_shared" icon_class="bg-primary-fixed text-primary" hint="Cours publiés pour votre classe" %}
+{% include "portal/_stat_card.html" with label="Nouveaux (7 jours)" value=stats.recent icon="new_releases" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Ajoutés cette semaine" %}
+{% include "portal/_stat_card.html" with label="Matières concernées" value=stats.subjects icon="auto_stories" icon_class="bg-surface-container text-secondary" hint="Avec au moins un support" %}
+{% include "portal/_stat_card.html" with label="Vidéos et audios" value=stats.media icon="movie" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Lecture dans le portail" %}
+</div>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Bibliothèque de ma classe</h2>
+<p class="text-xs text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ materials|length }}{% endif %} support{{ materials|length|pluralize }}</p>
+</div>
+<form class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center" method="get">
+{% if school_class %}<input name="classe" type="hidden" value="{{ school_class.pk }}"/>{% endif %}
+<label class="relative block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary sm:w-60" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/></label>
+{% for filter in filters %}
+<select aria-label="Filtrer par {{ filter.label }}" class="h-10 cursor-pointer rounded-full border border-outline-variant/60 bg-surface px-4 text-xs font-semibold text-on-surface outline-none transition-colors focus:border-primary" name="{{ filter.param }}">
+<option value="">{{ filter.label }} — toutes</option>
+{% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+</select>
+{% endfor %}
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if is_filtered %}<a class="rounded-full border border-outline-variant/60 px-3 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'courses:student_course_materials' %}{% if school_class %}?classe={{ school_class.pk }}{% endif %}">Réinitialiser</a>{% endif %}
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[960px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Support</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Enseignant</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Taille</th><th class="px-5 py-3 font-bold">Ajouté le</th><th class="px-5 py-3 text-right font-bold">Action</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for material in materials %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {{ material.tone_class }}"><span class="material-symbols-outlined text-[19px]">{{ material.icon }}</span></span><div class="min-w-0"><a class="block font-semibold text-on-surface hover:text-primary" href="{% url 'courses:material_view' material.pk %}">{{ material.title }}</a><p class="text-xs text-on-surface-variant">{{ material.course.title }}{% if material.chapter %} · {{ material.chapter.title }}{% endif %}</p></div></div></td>
+<td class="px-5 py-3 text-on-surface-variant"><span class="font-data-metric text-[11px] font-semibold text-primary">{{ material.course.subject.code }}</span> · {{ material.course.subject.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ material.course.professor.user.get_full_name|default:material.course.professor.user.email }}</td>
+<td class="px-5 py-3">{% include "portal/_badge.html" with label=material.get_material_type_display tone_class=material.tone_class %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ material.size|size_fr }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ material.created_at|date:"d/m/Y" }}</td>
+<td class="px-5 py-3"><div class="flex items-center justify-end gap-1.5">
+<a class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'courses:material_view' material.pk %}"><span class="material-symbols-outlined text-[16px]">{% if material.can_preview %}visibility{% else %}open_in_new{% endif %}</span>Ouvrir</a>
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'courses:material_file' material.pk %}?telecharger=1" title="Télécharger" aria-label="Télécharger {{ material.title }}"><span class="material-symbols-outlined text-[18px]">download</span></a>
+</div></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="7">{% if is_filtered %}Aucun support ne correspond à votre recherche.{% else %}Aucun support n'est disponible pour le moment : vos enseignants n'ont pas encore publié de contenu pour votre classe.{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% include "portal/_pagination.html" %}
+</section>
+{% endif %}
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Invitation — Hub Éducatif Multimodal</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+{% include "portal/_tailwind_admin.html" %}
+<style>
+html,body{margin:0;padding:0;}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid #004191;outline-offset:2px;}
+</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-[#eef4ff] via-surface to-[#f6f1ff] font-body-md text-on-surface antialiased">
+<main class="mx-auto flex min-h-screen w-full max-w-[560px] flex-col justify-center px-4 py-10" id="main-content">
+<div class="mb-6 flex items-center justify-center gap-3">
+<span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg"><span class="material-symbols-outlined text-[26px]">school</span></span>
+<div><p class="font-headline-sm text-headline-sm font-extrabold tracking-tight text-on-surface">Hub Éducatif</p><p class="text-[11px] font-bold uppercase tracking-[0.16em] text-primary/70">Invitation</p></div>
+</div>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-xl sm:p-8">
+<div class="flex items-center gap-3">
+<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[22px]">account_balance</span></span>
+<div class="min-w-0"><h1 class="font-headline-sm text-headline-sm text-on-surface">{{ invitation.university.name }}</h1><p class="text-xs text-on-surface-variant">Invitation à rejoindre l'établissement</p></div>
+</div>
+<div class="mt-5 rounded-xl bg-surface-container px-4 py-3 text-sm">
+<dl class="grid gap-2 sm:grid-cols-2">
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">E-mail invité</dt><dd class="truncate font-semibold text-on-surface">{{ invitation.email }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Rôle</dt><dd class="font-semibold text-on-surface">{{ invitation.get_role_display }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Expire le</dt><dd class="font-semibold text-on-surface">{{ invitation.expires_at|date:"d/m/Y à H:i" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Statut</dt><dd class="font-semibold text-on-surface">{{ invitation.display_status }}</dd></div>
+</dl>
+{% if invitation.message %}<p class="mt-3 border-t border-outline-variant/40 pt-3 text-xs leading-relaxed text-on-surface-variant">{{ invitation.message|linebreaksbr }}</p>{% endif %}
+</div>
+
+{% if state == "invalid" %}
+<div class="mt-5 rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">
+<p class="font-semibold">Cette invitation n'est plus utilisable.</p>
+<p class="mt-1 text-xs">Elle a peut-être expiré, été révoquée ou déjà été acceptée. Contactez l'administration de l'université pour obtenir un nouveau lien.</p>
+</div>
+<a class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'accounts:login' %}"><span class="material-symbols-outlined text-[18px]">login</span>Se connecter</a>
+
+{% elif state == "wrong_account" %}
+<div class="mt-5 rounded-xl bg-tertiary-fixed/40 px-4 py-3 text-sm text-on-surface">
+<p class="font-semibold">Vous êtes connecté avec un autre compte.</p>
+<p class="mt-1 text-xs text-on-surface-variant">Cette invitation est destinée à <strong>{{ invitation.email }}</strong>, mais vous êtes connecté en tant que <strong>{{ request.user.email }}</strong>. Déconnectez-vous puis rouvrez le lien reçu par e-mail.</p>
+</div>
+<div class="mt-5 flex flex-col gap-2 sm:flex-row">
+<a class="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-outline-variant/60 px-5 py-3 text-sm font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="{% url portal_home_url_name %}">Retour au portail</a>
+<a class="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'accounts:logout' %}"><span class="material-symbols-outlined text-[18px]">logout</span>Se déconnecter</a>
+</div>
+
+{% elif state == "confirm" %}
+<p class="mt-4 text-sm text-on-surface-variant">Vous êtes connecté avec <strong class="text-on-surface">{{ request.user.email }}</strong>. Confirmez pour rejoindre cette université avec le rôle indiqué.</p>
+<form class="mt-5" method="post">
+{% csrf_token %}
+<button class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">check_circle</span>Rejoindre {{ invitation.university.name }}</button>
+</form>
+<a class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-full border border-outline-variant/60 px-5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="{% url portal_home_url_name %}">Plus tard</a>
+
+{% elif state == "login" %}
+<p class="mt-4 text-sm text-on-surface-variant">Un compte existe déjà avec l'adresse <strong class="text-on-surface">{{ invitation.email }}</strong>. Connectez-vous pour accepter l'invitation, puis vous serez redirigé vers cette page.</p>
+<a class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{{ login_url }}"><span class="material-symbols-outlined text-[18px]">login</span>Se connecter et accepter</a>
+
+{% elif state == "signup" %}
+<p class="mt-4 text-sm text-on-surface-variant">Créez votre compte pour rejoindre l'université. L'adresse e-mail est imposée par l'invitation.</p>
+<form class="mt-4 flex flex-col gap-4" method="post" novalidate>
+{% csrf_token %}
+{% for field in form.visible_fields %}
+{% include "portal/_form_field.html" with field=field %}
+{% endfor %}
+{% for error in form.non_field_errors %}<div class="rounded-xl bg-error-container px-4 py-3 text-sm text-on-error-container">{{ error }}</div>{% endfor %}
+<button class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">person_add</span>Créer mon compte et rejoindre</button>
+</form>
+<p class="mt-3 text-center text-xs text-on-surface-variant">Vous avez déjà un compte ? <a class="font-bold text-primary hover:underline" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Se connecter</a></p>
+{% endif %}
+</section>
+<p class="mt-6 text-center text-[11px] text-on-surface-variant">Hub Éducatif Multimodal · invitation valable 7 jours</p>
+</main>
+</body>
+</html>

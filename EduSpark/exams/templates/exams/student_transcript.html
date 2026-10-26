@@ -1,0 +1,127 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Relevés de notes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Résultats académiques</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Relevés de notes</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
+{% if not transcript_available %}
+Votre relevé sera disponible dès sa publication par l'administration.
+{% elif semester_rows %}
+Relevé officiel · {% for row in semester_rows %}{{ row.label }}{% if not forloop.last %} · {% endif %}{% endfor %}.
+{% else %}
+Relevé officiel de vos notes publiées par l'université.
+{% endif %}
+</p>
+{% if published_records %}
+<p class="mt-1 text-xs font-semibold text-on-surface-variant">
+Publié le {% for record in published_records %}{{ record.published_at|date:"d/m/Y" }}{% if not forloop.last %}, {% endif %}{% endfor %}
+</p>
+{% endif %}
+</div>
+<div class="flex flex-wrap items-center gap-2 print:hidden">
+{% if transcript_available %}
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:student_transcript_pdf' %}">
+<span class="material-symbols-outlined text-[18px]">download</span>Télécharger
+</a>
+{% else %}
+<span aria-disabled="true" class="inline-flex cursor-not-allowed items-center gap-2 rounded-full border border-outline-variant/40 bg-surface-container px-4 py-2.5 font-label-md text-label-md text-on-surface-variant/60" title="Relevé en attente de publication">
+<span class="material-symbols-outlined text-[18px]">lock</span>Télécharger
+</span>
+{% endif %}
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[18px]">print</span>Imprimer
+</button>
+</div>
+</header>
+{% if pending_classes %}
+<div class="flex items-start gap-2 rounded border border-outline-variant/40 bg-tertiary-fixed/40 px-4 py-3 text-xs font-semibold text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[18px]">hourglass_top</span>
+<span>{% if pending_classes|length == 1 %}Le relevé de la classe {{ pending_classes.0.name }} n'est pas encore publié{% else %}Le relevé de certaines de vos classes n'est pas encore publié{% endif %} : les notes correspondantes n'apparaissent pas encore dans cette page.</span>
+</div>
+{% endif %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Moyenne générale" value=average_label suffix="/20" icon="emoji_events" hint=mention_hint %}
+{% include "portal/_stat_card.html" with label="UE validées" value=validated suffix=suffix_validated icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Notes publiées par l'université" %}
+{% include "portal/_stat_card.html" with label="Rang de promotion" value=rank_label suffix=rank_suffix icon="leaderboard" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Sur la base des moyennes publiées" %}
+{% include "portal/_stat_card.html" with label="Mention" value=mention_label icon="military_tech" hint="Objectif : Très bien" %}
+</div>
+<section class="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-tabs>
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes par unité d'enseignement</h2>
+<div class="inline-flex rounded-full bg-surface-container p-1" role="tablist" aria-label="Semestres">
+{% for row in semester_rows %}
+<button aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" class="tab-btn {% if forloop.first %}is-active{% endif %} rounded-full px-4 py-1.5 text-xs font-bold text-on-surface-variant" data-tab="s{{ forloop.counter }}" role="tab" type="button">{{ row.label }}</button>
+{% endfor %}
+</div>
+</div>
+{% for row in semester_rows %}
+<div {% if not forloop.first %}class="hidden"{% endif %} data-tab-panel="s{{ forloop.counter }}">
+<div class="overflow-x-auto">
+<table class="w-full min-w-[640px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Code</th><th class="px-5 py-3 font-bold">Unité d'enseignement</th><th class="px-5 py-3 font-bold">Coeff.</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for grade in row.rows %}
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-data-metric text-xs text-on-surface-variant">{{ grade.session.code|default:"—" }}</td><td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ grade.session.title }}</p><p class="text-xs text-on-surface-variant">{{ grade.graded_by.get_full_name|default:"Jury académique" }}</p></td><td class="px-5 py-3 text-on-surface-variant">{{ grade.session.coefficient }}</td><td class="px-5 py-3 font-data-metric font-bold text-on-surface">{{ grade.score_label }}</td><td class="px-5 py-3">{% if grade.score >= 10 %}{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Non validé" tone_class="bg-error-container text-on-error-container" %}{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 bg-surface-container/40 px-5 py-3 text-xs text-on-surface-variant"><span>{{ row.validated }} UE validée(s) sur {{ row.rows|length }} · {{ row.label }}</span><span class="font-data-metric font-bold text-on-surface">Moyenne : {{ row.average_label }} / 20</span></div>
+</div>
+{% empty %}
+<div class="flex flex-col items-center justify-center gap-3 px-5 py-14 text-center">
+{% if transcript_available %}
+<span aria-hidden="true" class="material-symbols-outlined text-[40px] text-on-surface-variant">fact_check</span>
+<p class="font-title-md text-title-md text-on-surface">Aucune note publiée pour le moment</p>
+<p class="max-w-md font-body-sm text-body-sm text-on-surface-variant">Vos notes apparaîtront ici dès leur publication par l'administration, après validation du jury.</p>
+{% else %}
+<span aria-hidden="true" class="material-symbols-outlined text-[40px] text-on-surface-variant">hourglass_top</span>
+<p class="font-title-md text-title-md text-on-surface">Relevé en attente de publication</p>
+<p class="max-w-md font-body-sm text-body-sm text-on-surface-variant">Votre relevé officiel sera disponible dès sa publication par l'administration.</p>
+{% endif %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'exams:student_exams' %}">
+<span class="material-symbols-outlined text-[18px]">event_upcoming</span>Voir mes examens
+</a>
+</div>
+{% endfor %}
+</div>
+<aside class="flex flex-col gap-4">
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Synthèse annuelle</p>
+<p class="font-data-metric text-[20px] font-bold mt-2">{{ average_label }}<span class="text-lg font-normal text-white/60">/20</span></p>
+<p class="mt-1 text-sm text-white/70">Mention {{ mention_label }} · {{ validated }} UE validée(s)</p>
+<div class="mt-4 space-y-2 border-t border-white/15 pt-3 text-xs text-white/75">
+<div class="flex justify-between"><span>UE validées</span><span class="font-bold text-white">{{ validated }} / {{ grade_count }}</span></div>
+<div class="flex justify-between"><span>Rang de promotion</span><span class="font-bold text-white">{% if rank %}{{ rank }}e / {{ promotion_size }}{% else %}—{% endif %}</span></div>
+<div class="flex justify-between"><span>Objectif personnel</span><span class="font-bold text-white">16 / 20</span></div>
+</div>
+{% if transcript_available %}
+<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-label-md text-label-md font-bold text-primary transition-transform hover:scale-[1.01]" href="{% url 'exams:student_attestation_pdf' %}">
+<span class="material-symbols-outlined text-[18px]">verified</span>Attestation de réussite
+</a>
+{% else %}
+<span aria-disabled="true" class="mt-4 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-full bg-white/40 px-4 py-2.5 font-label-md text-label-md font-bold text-white/60" title="Relevé en attente de publication">
+<span class="material-symbols-outlined text-[18px]">lock</span>Attestation de réussite
+</span>
+{% endif %}
+</div>
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Règles de validation</h2>
+<ul class="mt-3 space-y-2.5 text-xs leading-relaxed text-on-surface-variant">
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Chaque UE est validée à partir de 10/20.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Compensation possible entre les UE d'un même semestre.</li>
+<li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>La moyenne annuelle doit atteindre 10/20 pour le passage.</li>
+</ul>
+<button class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" data-toast="Règlement des études disponible auprès du secrétariat pédagogique." type="button">Consulter le règlement<span class="material-symbols-outlined text-[16px]">open_in_new</span></button>
+</div>
+</aside>
+</section>
+</div>
+</main>
+{% endblock %}

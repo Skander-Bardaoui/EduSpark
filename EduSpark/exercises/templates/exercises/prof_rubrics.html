@@ -9,40 +9,63 @@
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Séries &amp; Barèmes</h1>
 <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Grilles d'évaluation réutilisables et échelle de notation appliquée à vos devoirs.</p>
 </div>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#rubric-create-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Créer un barème</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Nouveau barème vierge créé." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Créer un barème</button>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Barèmes actifs" value=active_rubrics icon="checklist" hint="Dans vos devoirs" %}
-{% include "portal/_stat_card.html" with label="Critères évalués" value=total_criteria icon="rule" icon_class="bg-surface-container text-secondary" hint="Tous barèmes" %}
-{% include "portal/_stat_card.html" with label="Séries d'exercices" value=series_count icon="library_books" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Pour l'entraînement" %}
+{% include "portal/_stat_card.html" with label="Barèmes actifs" value="3" icon="checklist" hint="Utilisés dans 5 devoirs" %}
+{% include "portal/_stat_card.html" with label="Critères évalués" value="14" icon="rule" icon_class="bg-surface-container text-secondary" hint="4 à 6 par barème" %}
+{% include "portal/_stat_card.html" with label="Séries d'exercices" value="6" icon="library_books" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="2 séries de révision" %}
 {% include "portal/_stat_card.html" with label="Échelle appliquée" value="0 – 20" icon="grade" hint="Conversion ECTS automatique" %}
 </div>
 <section class="grid gap-4 lg:grid-cols-3">
-{% for rubric in rubrics %}
 <article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
 <div class="flex items-start justify-between gap-3">
-  <div class="flex items-center gap-3">
-    <span class="flex h-10 w-10 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[20px]">{{ rubric.icon }}</span></span>
-    <div><h2 class="font-headline-sm text-headline-sm text-on-surface">{{ rubric.name }}</h2><p class="text-xs text-on-surface-variant">{{ rubric.subject }}{% if rubric.level %} · {{ rubric.level }}{% endif %}</p></div>
-  </div>
-  {% if rubric.status == 'actif' %}{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}
-  {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[20px]">code</span></span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Grille TP programmation</h2><p class="text-xs text-on-surface-variant">Algorithmique · L3</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}
 </div>
 <ul class="mt-4 flex-1 space-y-2.5 text-sm">
-  {% for criterion in rubric.criteria.all %}
-  <li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">{{ criterion.name }}</span><span class="font-bold text-on-surface">{{ criterion.points }} pts</span></li>
-  {% empty %}
-  <li class="text-xs text-on-surface-variant">Aucun critère défini.</li>
-  {% endfor %}
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Fonctionnalité</span><span class="font-bold text-on-surface">40 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Qualité du code</span><span class="font-bold text-on-surface">25 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Tests automatisés</span><span class="font-bold text-on-surface">20 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Documentation</span><span class="font-bold text-on-surface">15 pts</span></li>
 </ul>
 <div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
-  <span class="text-xs text-on-surface-variant">Utilisé {{ rubric.usage_count }} fois</span>
-  <a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubric_edit' rubric.pk %}">Modifier</a>
+<span class="text-xs text-on-surface-variant">Utilisé 14 fois</span>
+<button class="text-xs font-bold text-primary hover:underline" data-toast="Barème « Grille TP programmation » ouvert en édition." type="button">Modifier</button>
 </div>
 </article>
-{% empty %}
-<div class="lg:col-span-3 py-10 text-center text-sm text-on-surface-variant">Aucun barème créé. Créez votre premier barème !</div>
-{% endfor %}
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-secondary text-on-secondary"><span class="material-symbols-outlined text-[20px]">description</span></span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Rapport de projet</h2><p class="text-xs text-on-surface-variant">Systèmes distribués · M1</p></div></div>
+{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}
+</div>
+<ul class="mt-4 flex-1 space-y-2.5 text-sm">
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Problématique &amp; contexte</span><span class="font-bold text-on-surface">20 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Architecture proposée</span><span class="font-bold text-on-surface">30 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Résultats &amp; analyse</span><span class="font-bold text-on-surface">30 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Rigueur bibliographique</span><span class="font-bold text-on-surface">20 pts</span></li>
+</ul>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<span class="text-xs text-on-surface-variant">Utilisé 8 fois</span>
+<button class="text-xs font-bold text-primary hover:underline" data-toast="Barème « Rapport de projet » ouvert en édition." type="button">Modifier</button>
+</div>
+</article>
+<article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">record_voice_over</span></span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Soutenance de mémoire</h2><p class="text-xs text-on-surface-variant">Jury M2 Data Science</p></div></div>
+{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+</div>
+<ul class="mt-4 flex-1 space-y-2.5 text-sm">
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Présentation orale</span><span class="font-bold text-on-surface">30 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Démarche scientifique</span><span class="font-bold text-on-surface">30 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Réponses au jury</span><span class="font-bold text-on-surface">25 pts</span></li>
+<li class="flex items-start justify-between gap-3"><span class="text-on-surface-variant">Support visuel</span><span class="font-bold text-on-surface">15 pts</span></li>
+</ul>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<span class="text-xs text-on-surface-variant">Jamais utilisé</span>
+<button class="text-xs font-bold text-primary hover:underline" data-toast="Barème « Soutenance de mémoire » ouvert en édition." type="button">Modifier</button>
+</div>
+</article>
 </section>
 <div class="grid grid-cols-1 gap-6 2xl:grid-cols-[minmax(0,1fr)_360px]">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
@@ -54,20 +77,10 @@
 <table class="w-full min-w-[720px] text-left">
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Série</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Exercices</th><th class="px-5 py-3 font-bold">Barème associé</th><th class="px-5 py-3 text-right font-bold">Visibilité</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-{% for s in series %}
-<tr class="hover:bg-surface-container/40">
-<td class="px-5 py-3 font-semibold text-on-surface">{{ s.name }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ s.subject|default:"—" }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ s.exercise_count }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{% if s.rubric %}{{ s.rubric.name|truncatechars:25 }}{% else %}—{% endif %}</td>
-<td class="px-5 py-3 text-right">
-  {% if s.visibility == 'publiee' %}{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}
-  {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="5" class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucune série créée.</td></tr>
-{% endfor %}
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Révisions · Graphes</td><td class="px-5 py-3 text-on-surface-variant">Algorithmique avancée</td><td class="px-5 py-3 text-on-surface-variant">12</td><td class="px-5 py-3 text-on-surface-variant">Grille TP programmation</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Révisions · Consensus</td><td class="px-5 py-3 text-on-surface-variant">Systèmes distribués</td><td class="px-5 py-3 text-on-surface-variant">9</td><td class="px-5 py-3 text-on-surface-variant">Rapport de projet</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Entraînement · RNN</td><td class="px-5 py-3 text-on-surface-variant">Réseaux de neurones profonds</td><td class="px-5 py-3 text-on-surface-variant">15</td><td class="px-5 py-3 text-on-surface-variant">Grille TP programmation</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Préparation · SQL</td><td class="px-5 py-3 text-on-surface-variant">Bases de données avancées</td><td class="px-5 py-3 text-on-surface-variant">10</td><td class="px-5 py-3 text-on-surface-variant">QCM automatique</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}</td></tr>
 </tbody>
 </table>
 </div>
@@ -91,31 +104,4 @@
 </div>
 </div>
 </main>
-
-<!-- Modal Créer un barème -->
-<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="rubric-create-modal">
-<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
-<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl max-h-[90vh] overflow-y-auto">
-<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4 sticky top-0 bg-surface-container-lowest">
-  <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Créer un barème</h2></div>
-  <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
-</div>
-<form method="post" class="p-5 space-y-3">
-  {% csrf_token %}
-  <input type="hidden" name="action" value="create_rubric">
-  {% for field in rubric_form %}
-  <div class="flex flex-col gap-1.5">
-    <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}</label>
-    {{ field }}
-    {% if field.errors %}<p class="text-xs text-error">{{ field.errors|join:', ' }}</p>{% endif %}
-  </div>
-  {% endfor %}
-  <div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
-    <button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
-    <button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Créer le barème</button>
-  </div>
-</form>
-</div>
-</div>
-
 {% endblock %}

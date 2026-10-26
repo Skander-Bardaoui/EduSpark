@@ -1,0 +1,230 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes examens — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-background px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col gap-6">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="max-w-3xl">
+<div class="mb-2 inline-flex items-center gap-2 rounded-full bg-surface-container-high px-3 py-1 font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>{{ semester_label }}</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes examens &amp; résultats</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">Passez vos QCM, déposez vos projets ZIP et tirez votre sujet d’oral pendant la fenêtre prévue. Retrouvez ensuite vos notes publiées.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:exam_dashboard' %}">
+<span class="material-symbols-outlined text-[18px]">space_dashboard</span>
+<span>Tableau de bord examens</span>
+</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:student_transcript' %}">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Mes relevés de notes</span>
+</a>
+</div>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Épreuves" value=session_rows|length icon="event_available" hint=semester_label %}
+{% include "portal/_stat_card.html" with label="QCM soumis" value=quiz_submitted_count icon="task_alt" hint="Résultats disponibles" %}
+{% include "portal/_stat_card.html" with label="Projets déposés" value=project_submitted_count icon="upload_file" hint="Dépôts ZIP" %}
+{% include "portal/_stat_card.html" with label="Sujets d’oral tirés" value=oral_drawn_count icon="record_voice_over" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Préparation en cours" %}
+</div>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Épreuves planifiées</h2>
+<p class="text-xs text-on-surface-variant">Une session par classe et par matière, tous formats confondus.</p>
+</div>
+</div>
+<div class="divide-y divide-outline-variant/30">
+{% for row in session_rows %}
+{% with session=row.session quiz=row.quiz attempt=row.quiz_attempt %}
+<article class="flex flex-col gap-4 px-5 py-5">
+<div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+<div class="min-w-0">
+<div class="flex flex-wrap items-center gap-2">
+<span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">{{ session.get_exam_type_display }}</span>
+<span class="text-xs text-on-surface-variant">{{ session.school_class.name }}{% if session.school_class.level %} · {{ session.school_class.level }}{% endif %}</span>
+</div>
+<h3 class="mt-2 font-title-md text-title-md font-semibold text-on-surface">{{ session.title }}</h3>
+<p class="mt-1 text-sm text-on-surface-variant">
+{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% else %}Matière non rattachée{% endif %}
+</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ session.date_label }} · {{ session.time_label }}</p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+{% if session.is_project %}
+{% if row.project_graded %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>Projet noté</span>
+{% elif row.project_submitted %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">upload_file</span>Projet déposé</span>
+{% elif session.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">upload</span>Dépôt ouvert</span>
+{% elif session.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Dépôt fermé</span>
+{% endif %}
+{% elif session.is_oral %}
+{% if row.oral_graded %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>Oral noté</span>
+{% elif row.oral_drawn %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-tertiary-fixed px-3 py-1.5 text-xs font-bold text-on-tertiary-fixed"><span class="material-symbols-outlined text-[16px]">casino</span>Sujet tiré</span>
+{% elif session.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">casino</span>Tirage ouvert</span>
+{% elif session.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Tirage fermé</span>
+{% endif %}
+{% elif row.quiz_absent %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-error-container px-3 py-1.5 text-xs font-bold text-error"><span class="material-symbols-outlined text-[16px]">person_off</span>Absent</span>
+{% elif row.quiz_submitted %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">task_alt</span>QCM soumis</span>
+{% elif quiz and quiz.is_open %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1.5 text-xs font-bold text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">play_circle</span>QCM ouvert</span>
+{% elif quiz and quiz.access_status == "before" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">lock_clock</span>Programmé</span>
+{% elif quiz and quiz.access_status == "after" %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">event_busy</span>Terminé</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3 py-1.5 text-xs font-bold text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">pending_actions</span>QCM en préparation</span>
+{% endif %}
+</div>
+</div>
+
+{% if session.is_project %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">upload_file</span>Dépôt d’une archive ZIP</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ session.opens_at|date:"d/m/Y H:i" }} au {{ session.closes_at|date:"d/m/Y H:i" }}</span>
+{% if row.project_submission %}
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">schedule</span>Déposé le {{ row.project_submission.submitted_at|date:"d/m/Y H:i" }}</span>
+{% endif %}
+</div>
+{% if session.instructions %}<p class="text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>{% endif %}
+<div class="flex flex-wrap items-center gap-2">
+{% if row.project_graded %}
+<span class="text-sm font-semibold text-primary">Note du projet : {{ row.project_score }}/20</span>
+{% endif %}
+{% if row.project_submission %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_project_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Voir mon dépôt</span>
+</a>
+{% elif row.project_can_submit %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_project_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+<span>Déposer mon projet</span>
+</a>
+{% elif session.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le dépôt ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.</span>
+{% else %}
+<span class="text-sm text-on-surface-variant">Le dépôt est fermé.</span>
+{% endif %}
+</div>
+{% elif session.is_oral %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">casino</span>Tirage au sort d’un sujet</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ session.opens_at|date:"d/m/Y H:i" }} au {{ session.closes_at|date:"d/m/Y H:i" }}</span>
+{% if row.oral_attempt %}
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">timer</span>Préparation jusqu’à {{ row.oral_attempt.preparation_deadline|date:"d/m/Y H:i" }}</span>
+{% endif %}
+</div>
+{% if session.instructions %}<p class="text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>{% endif %}
+{% if row.oral_attempt %}
+<p class="text-sm text-on-surface"><span class="font-semibold">Sujet :</span> {{ row.oral_attempt.topic.title|default:"Sujet non disponible" }}</p>
+{% if row.oral_graded %}<p class="text-sm font-semibold text-primary">Note de l’oral : {{ row.oral_score }}/20</p>{% endif %}
+{% endif %}
+<div class="flex flex-wrap items-center gap-2">
+{% if row.oral_attempt %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_oral_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Voir mon sujet</span>
+</a>
+{% elif row.oral_can_draw %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_oral_exam' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">casino</span>
+<span>Tirer mon sujet</span>
+</a>
+{% elif session.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le tirage ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.</span>
+{% else %}
+<span class="text-sm text-on-surface-variant">Le tirage est fermé.</span>
+{% endif %}
+</div>
+{% elif quiz %}
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2 rounded bg-surface-container-low px-4 py-3 text-xs text-on-surface-variant">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">quiz</span>{{ row.question_total }} question(s)</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">timer</span>{{ row.duration_minutes }} min</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">event</span>Du {{ quiz.starts_at|date:"d/m/Y H:i" }} au {{ quiz.ends_at|date:"d/m/Y H:i" }}</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">target</span>Validation {{ quiz.pass_score }}/20</span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+{% if row.quiz_absent %}
+<span class="text-sm font-semibold text-error">Aucune participation dans le délai : 0/20 enregistré.</span>
+{% elif row.quiz_submitted %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_quiz_result' attempt.pk %}">
+<span class="material-symbols-outlined text-[18px]">task_alt</span>
+<span>Voir mon corrigé et mon feedback</span>
+</a>
+{% elif row.can_start %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'exams:student_quiz_start' session.pk %}">
+<span class="material-symbols-outlined text-[18px]">{% if attempt %}play_circle{% else %}play_arrow{% endif %}</span>
+<span>{% if attempt %}Reprendre le QCM{% else %}Commencer le QCM{% endif %}</span>
+</a>
+{% elif quiz.access_status == "before" %}
+<span class="text-sm text-on-surface-variant">Le QCM sera accessible le {{ quiz.starts_at|date:"d/m/Y à H:i" }}.</span>
+{% elif quiz.access_status == "after" %}
+<span class="text-sm text-on-surface-variant">Le QCM est terminé.</span>
+{% else %}
+<span class="text-sm text-on-surface-variant">Le QCM n’est pas encore publié par l’enseignant.</span>
+{% endif %}
+</div>
+{% else %}
+<p class="text-sm text-on-surface-variant">Aucun QCM n’a encore été préparé pour cette session.</p>
+{% endif %}
+</article>
+{% endwith %}
+{% empty %}
+<div class="px-5 py-12 text-center">
+<span class="material-symbols-outlined text-[42px] text-outline">event_busy</span>
+<p class="mt-2 text-sm text-on-surface-variant">Aucune épreuve pour vos classes pour le moment.</p>
+</div>
+{% endfor %}
+</div>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Notes publiées</h2>
+<p class="text-xs text-on-surface-variant">Notes issues des QCM, projets et oraux, validées par l’administration.</p>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[720px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Note</th><th class="px-5 py-3 font-bold">Statut</th></tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for grade in published_grades %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ grade.session.title }}</p><p class="text-xs text-on-surface-variant">{% if grade.session.course_subject %}{{ grade.session.course_subject.code }} · {{ grade.session.course_subject.name }}{% endif %}</p></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ grade.session.school_class.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ grade.session.date_label }}</td>
+<td class="px-5 py-3 font-data-metric font-bold text-on-surface">{{ grade.score_label }} / 20</td>
+<td class="px-5 py-3">{% if grade.is_absent %}{% include "portal/_badge.html" with label="Absent" tone_class="bg-error-container text-on-error-container" %}{% elif grade.score >= 10 %}{% include "portal/_badge.html" with label="Validé" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Non validé" tone_class="bg-error-container text-on-error-container" %}{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucune note publiée pour le moment.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Bilan du test de langue — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi &amp; progression</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Bilan de mon test de langue</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Rapport généré le {{ created_label }} pour {{ student_name }}.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{{ setup_url }}"><span class="material-symbols-outlined text-[18px]">replay</span>Refaire un test</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ list_url }}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Mes tests</a>
+</div>
+</header>
+{% include "coaching/_language_test_result.html" with candidate_label="Vous" %}
+</div>
+</main>
+{% endblock %}

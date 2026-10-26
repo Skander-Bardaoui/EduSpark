@@ -1,0 +1,28 @@
+# Dépendances Python du projet EduSpark (Django 5.2 LTS).
+# Installation :  python -m venv .venv  puis  .venv\Scripts\python -m pip install -r requirements.txt
+Django==5.2.17
+djangorestframework==3.18.1
+djangorestframework-simplejwt==5.5.1
+python-dotenv==1.2.3
+# Client HTTP utilisé par les services ElevenLabs / Groq / OpenAI du test de langue.
+requests==2.34.2
+# Driver PostgreSQL. psycopg 3 est le driver recommandé pour Django 5.2
+# (psycopg >= 3.1.8 exigé par le backend django.db.backends.postgresql).
+# La variante "binary" embarque libpq : rien à compiler côté Python.
+# En production, préférer psycopg[c] (compilé localement, plus rapide).
+psycopg[binary]==3.3.6
+# Génération des PDF officiels (convocations, relevés de notes).
+reportlab==5.1.0
+# Traitement des pages de copies numérisées (rotation, recadrage).
+Pillow==13.0.0
+# IA du module cours : rédaction du plan (API Anthropic) et lecture locale
+# des supports (texte des PDF et des présentations PowerPoint).
+anthropic==2.3.0
+pypdf==6.17.0
+python-pptx==1.0.2
+# Extraction du texte des supports PDF pour la génération de QCM par IA.
+pypdf==5.1.0
+# Génération de vrais liens Google Meet via l'API Google Calendar.
+google-api-python-client==2.201.0
+google-auth==2.62.0
+google-auth-oauthlib==1.5.0

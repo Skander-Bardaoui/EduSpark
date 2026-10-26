@@ -1,0 +1,41 @@
+[
+  {
+    "id": "1",
+    "password": "pbkdf2_sha256$600000$9nOdCBFfDxtcfsCeTTZ0Ya$V4JJV/tWI3tTreqqyOBLaVDD9IKFIj6pYvWLjOdO494=",
+    "last_login": "2026-09-21 19:00:06.665000+00:00",
+    "is_superuser": "False",
+    "username": "test.ui@example.com",
+    "first_name": "Test User",
+    "last_name": "",
+    "email": "test.ui@example.com",
+    "is_staff": "False",
+    "is_active": "True",
+    "date_joined": "2026-09-21 18:59:29.643000+00:00"
+  },
+  {
+    "id": "2",
+    "password": "pbkdf2_sha256$1000000$q3yqJxzR2HnO84QIdcnT1B$EkU02WELgWkj59/ElzNaQ9vUU+Oz8sGxWNnp6IfKYiA=",
+    "last_login": "2026-09-29 09:09:36.728549+00:00",
+    "is_superuser": "True",
+    "username": "admin@eduspark.local",
+    "first_name": "Admin EduSpark",
+    "last_name": "",
+    "email": "admin@eduspark.local",
+    "is_staff": "True",
+    "is_active": "True",
+    "date_joined": "2026-09-27 15:35:39.990000+00:00"
+  },
+  {
+    "id": "3",
+    "password": "pbkdf2_sha256$1000000$kjTr1RrAtZpZrZe8E6faNA$INiDgzsY8le6YwTxH/uq58glJocmRkyWZnHz6xsC8is=",
+    "last_login": "2026-09-27 15:36:35.232000+00:00",
+    "is_superuser": "False",
+    "username": "prof.test@eduspark.local",
+    "first_name": "Prof Test",
+    "last_name": "",
+    "email": "prof.test@eduspark.local",
+    "is_staff": "False",
+    "is_active": "True",
+    "date_joined": "2026-09-27 15:36:09.440000+00:00"
+  }
+]

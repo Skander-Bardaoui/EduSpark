@@ -1,0 +1,14 @@
+Bonjour,
+
+{{ invitation.invited_by.get_full_name|default:"L'administration" }} vous invite à rejoindre {{ invitation.university.name }} sur EduSpark en tant que {{ invitation.get_role_display|lower }}.
+
+{% if invitation.message %}{{ invitation.message }}
+
+{% endif %}Pour accepter cette invitation, ouvrez le lien suivant :
+{{ link }}
+
+Ce lien expire le {{ invitation.expires_at|date:"d/m/Y à H:i" }}.
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.
+
+— L'équipe EduSpark

@@ -1,0 +1,131 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Relire le QCM — {{ session.title }}{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+  <header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div>
+      <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
+        <a class="hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Sessions d'examen</a>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span class="text-primary">Relire le QCM</span>
+      </nav>
+      <h1 class="mt-1 font-headline-md text-headline-md font-bold tracking-tight text-on-surface">QCM — {{ session.title }}</h1>
+      <p class="mt-1 text-sm text-on-surface-variant">
+        {{ session.school_class.name }} · {{ questions|length }} question(s) ·
+        {{ quiz.duration_minutes }} min ·
+        {% if quiz.status == quiz.STATUS_PUBLISHED %}<span class="font-semibold text-primary">Publié</span>{% else %}<span class="font-semibold">{{ quiz.status_label }}</span>{% endif %}
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_quiz_results' quiz.pk %}">
+        <span class="material-symbols-outlined text-[18px]">leaderboard</span>Résultats
+      </a>
+      {% if not has_attempts %}
+      <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_quiz_generate' session.pk %}">
+        <span class="material-symbols-outlined text-[18px]">refresh</span>Régénérer
+      </a>
+      {% endif %}
+      <form action="{% url 'exams:prof_quiz_edit' quiz.pk %}" method="post" onsubmit="return confirm('Fermer ce QCM ? Les étudiants ne pourront plus commencer de tentative.');">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="close"/>
+        <button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-surface-container" type="submit">
+          <span class="material-symbols-outlined text-[18px]">lock</span>Fermer
+        </button>
+      </form>
+    </div>
+  </header>
+
+  {% if has_attempts %}
+  <div class="flex items-start gap-3 rounded border border-tertiary/30 bg-tertiary-fixed px-4 py-3 text-on-tertiary-fixed">
+    <span class="material-symbols-outlined text-[20px]">lock</span>
+    <p class="text-sm">Des étudiants ont déjà passé ce QCM : les questions, les réponses et le barème sont verrouillés pour préserver l'équité des notes. Seule la fermeture du QCM reste possible.</p>
+  </div>
+  {% endif %}
+
+  <div class="grid gap-3 sm:grid-cols-3">
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Questions valides</p>
+      <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ correct_count }} / {{ questions|length }}</p>
+    </div>
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Fenêtre</p>
+      <p class="mt-1 text-sm font-semibold text-on-surface">{{ window.0|date:"d/m/Y H:i" }} → {{ window.1|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Barème</p>
+      <p class="mt-1 text-sm font-semibold text-on-surface">{{ quiz.total_points }} point(s) · validation à {{ quiz.pass_score }}/20</p>
+    </div>
+  </div>
+
+  <form class="flex flex-col gap-5" id="quiz-edit-form" method="post">
+    {% csrf_token %}
+    {% for question in questions %}
+    <article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <span class="inline-flex items-center gap-2 rounded-full bg-primary-fixed px-3 py-1 text-xs font-bold text-primary">Question {{ forloop.counter }}</span>
+        {% if not has_attempts %}
+        <button class="inline-flex items-center gap-1 text-xs font-semibold text-error hover:underline" form="delete-question-{{ question.pk }}" type="submit">
+          <span class="material-symbols-outlined text-[16px]">delete</span>Supprimer
+        </button>
+        {% endif %}
+      </div>
+      <div class="grid gap-3 sm:grid-cols-[1fr_120px]">
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant" for="q_{{ question.pk }}_prompt">Énoncé</label>
+          <textarea class="w-full rounded-md border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none focus:border-primary" id="q_{{ question.pk }}_prompt" name="q_{{ question.pk }}_prompt" rows="2">{{ question.prompt }}</textarea>
+        </div>
+        <div>
+          <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant" for="q_{{ question.pk }}_points">Points</label>
+          <input class="w-full rounded-md border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none focus:border-primary" id="q_{{ question.pk }}_points" min="0.25" name="q_{{ question.pk }}_points" step="0.25" type="number" value="{{ question.points }}"/>
+        </div>
+      </div>
+      <div class="mt-3 flex flex-col gap-2">
+        <p class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Propositions — cochez la bonne réponse</p>
+        {% for choice in question.choices.all %}
+        <label class="flex items-center gap-3 rounded border border-outline-variant/40 bg-surface px-3 py-2">
+          <input class="h-4 w-4 text-primary" name="q_{{ question.pk }}_correct" type="radio" value="{{ choice.pk }}"{% if choice.is_correct %} checked{% endif %}/>
+          <span class="font-data-metric text-xs text-on-surface-variant">{{ forloop.counter|stringformat:"s" }}</span>
+          <input class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-on-surface outline-none" name="choice_{{ choice.pk }}_label" type="text" value="{{ choice.label }}"/>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="mt-3">
+        <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-on-surface-variant" for="q_{{ question.pk }}_explanation">Explication (affichée à l'étudiant)</label>
+        <textarea class="w-full rounded-md border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none focus:border-primary" id="q_{{ question.pk }}_explanation" name="q_{{ question.pk }}_explanation" rows="2">{{ question.explanation }}</textarea>
+      </div>
+    </article>
+    {% empty %}
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-8 text-center text-sm text-on-surface-variant">
+      Aucune question. Régénérez le QCM ou ajoutez une question.
+    </div>
+    {% endfor %}
+
+    {% if not has_attempts %}
+    <div class="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest/95 px-4 py-3 shadow-lg backdrop-blur">
+      <div class="flex flex-wrap gap-2">
+        <button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-surface-container" name="action" type="submit" value="add">
+          <span class="material-symbols-outlined text-[18px]">add</span>Ajouter une question
+        </button>
+        <button class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-4 py-2 text-sm font-semibold text-on-surface hover:bg-surface-variant" name="action" type="submit" value="save">
+          <span class="material-symbols-outlined text-[18px]">save</span>Enregistrer les modifications
+        </button>
+      </div>
+      <button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-container" name="action" type="submit" value="publish">
+        <span class="material-symbols-outlined text-[18px]">publish</span>Publier le QCM
+      </button>
+    </div>
+    {% endif %}
+  </form>
+
+  {% for question in questions %}
+  <form action="{% url 'exams:prof_quiz_edit' quiz.pk %}" data-confirm-detail="Supprimer cette question ?" id="delete-question-{{ question.pk }}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete"/>
+    <input type="hidden" name="question" value="{{ question.pk }}"/>
+  </form>
+  {% endfor %}
+</div>
+</main>
+{% endblock %}

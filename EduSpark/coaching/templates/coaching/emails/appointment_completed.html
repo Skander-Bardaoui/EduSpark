@@ -1,0 +1,27 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Compte-rendu de votre rendez-vous{% endblock %}
+{% block body %}
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Bonjour {{ student_first_name }},</p>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#33415c;">Votre rendez-vous avec <strong>{{ professor_name }}</strong> est clôturé. Voici le compte-rendu de l'échange.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9ff;border:1px solid #e2eafc;border-radius:14px;">
+<tr>
+<td style="padding:20px 22px;">
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Rendez-vous</p>
+<p style="margin:0 0 14px;font-size:17px;font-weight:700;color:#14213d;">{{ completed_label }}</p>
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Motif</p>
+<p style="margin:0 0 14px;font-size:14px;line-height:1.75;color:#33415c;">{{ topic|linebreaksbr }}</p>
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Points abordés</p>
+<p style="margin:0 0 14px;font-size:14px;line-height:1.75;color:#33415c;">{{ summary_points|linebreaksbr }}</p>
+{% if summary_actions %}
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Actions décidées</p>
+<p style="margin:0 0 14px;font-size:14px;line-height:1.75;color:#33415c;">{{ summary_actions|linebreaksbr }}</p>
+{% endif %}
+{% if meeting_url %}
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Lien de la visioconférence</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#33415c;"><a href="{{ meeting_url }}" style="color:#2457d6;font-weight:700;">Rejoindre la visioconférence</a></p>
+{% endif %}
+</td>
+</tr>
+</table>
+<p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#5b6b8c;">Retrouvez ce compte-rendu dans « Mes rendez-vous ».</p>
+{% endblock %}

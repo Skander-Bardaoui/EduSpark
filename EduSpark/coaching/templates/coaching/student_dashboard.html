@@ -1,0 +1,187 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mon tableau de bord — Suivi &amp; Progression{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+
+<header class="flex flex-col gap-4 rounded bg-surface-container-lowest p-5 shadow-sm xl:flex-row xl:items-center xl:justify-between">
+<div class="flex min-w-0 flex-col gap-2">
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-3 py-1 font-label-sm text-label-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">school</span>{{ academic_year }}
+</span>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 font-label-sm text-label-sm text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[16px]">event</span>{{ today_label }}
+</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Bonjour, {{ portal_user_first_name }} 👋</h1>
+<p class="max-w-3xl font-body-md text-body-md text-on-surface-variant">
+  Voici votre suivi pédagogique réel : objectifs, planning, rendez-vous et relances de votre référent à {{ portal_university.name }}.
+</p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2.5 font-label-md text-label-md text-on-secondary transition-colors hover:bg-secondary/90" href="{% url 'coaching:student_progress' %}">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>Plan d'étude &amp; IA
+</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:student_appointments' %}">
+<span class="material-symbols-outlined text-[18px]">event_available</span>Prendre rendez-vous
+</a>
+</div>
+</header>
+
+<section aria-label="Indicateurs clés" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Progression des objectifs" value=goal_progress suffix=" %" icon="flag" hint="Moyenne d'avancement de vos objectifs actifs" %}
+{% include "portal/_stat_card.html" with label="Révision cette semaine" value=completed_hours icon="hourglass_top" icon_class="bg-secondary-fixed text-secondary" hint=planned_hint %}
+{% include "portal/_stat_card.html" with label="Tâches terminées" value=task_counts.done suffix=task_counts.total|stringformat:"s" icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=tasks_hint %}
+{% include "portal/_stat_card.html" with label="Assiduité" value=attendance_rate|default_if_none:"—" suffix=" %" icon="fact_check" icon_class="bg-surface-container text-primary" hint=attendance_hint %}
+</section>
+
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 xl:col-span-8">
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Ma semaine</h2>
+<span class="text-xs text-on-surface-variant">{{ week_label }}</span>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for item in upcoming_sessions %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ item.session.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ item.when_label }}{% if item.session.location %} · {{ item.session.location }}{% endif %}</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+{% include "portal/_badge.html" with label=item.meta.label tone_class=item.meta.variant %}
+<form method="post" action="{% url 'coaching:student_session_toggle' item.session.pk %}">{% csrf_token %}
+<button class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-on-primary" type="submit">Marquer terminée</button>
+</form>
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune session planifiée cette semaine. <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Planifier une session</a> ou demander un plan à l'IA.</p>
+{% endfor %}
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes priorités</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_tasks' %}">Toutes mes tâches ({{ task_counts.total }})</a>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for item in task_rows %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ item.task.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ item.task.context_label|default:"Tâche personnelle" }} · {{ item.due_label }}</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+<span class="rounded-full px-2 py-0.5 text-[11px] font-bold {{ item.class }}">{{ item.task.get_priority_display }}</span>
+<form method="post" action="{% url 'coaching:student_task_toggle' item.task.pk %}">{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.path }}"/>
+<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Terminer</button>
+</form>
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune tâche en attente. Ajoutez-en depuis <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_tasks' %}">Mes tâches</a>.</p>
+{% endfor %}
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes objectifs</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Gérer mes objectifs</a>
+</div>
+<div class="mt-3 grid gap-3 md:grid-cols-2">
+{% for goal in stats.goals|slice:":4" %}
+<article class="flex flex-col gap-2 rounded bg-surface-container-low p-3">
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ goal.title }}</p>
+<p class="text-xs text-on-surface-variant">{% if goal.course_code %}{{ goal.course_code }} · {% endif %}{{ goal.get_status_display }}</p>
+</div>
+<span class="font-data-metric text-sm font-bold text-primary">{{ goal.progress }}%</span>
+</div>
+<div class="h-2 w-full overflow-hidden rounded-full bg-surface-container">
+<div class="h-2 rounded-full {% if goal.status == 'at_risk' %}bg-error{% else %}bg-primary{% endif %}" style="width: {{ goal.progress }}%;"></div>
+</div>
+</article>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant md:col-span-2">Aucun objectif. <a class="font-semibold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Créer mon premier objectif</a>.</p>
+{% endfor %}
+</div>
+</section>
+
+</div>
+
+<aside class="flex min-w-0 flex-col gap-5 xl:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-fixed font-bold text-primary">{{ tutor_initials }}</span>
+<div class="min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">{{ tutor_name }}</h2>
+<p class="text-xs text-on-surface-variant">Référent pédagogique</p>
+</div>
+</div>
+<div class="mt-3 flex flex-col gap-2 text-sm">
+<p class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-primary">event_upcoming</span>{{ next_tutoring_label }}</p>
+<p class="flex items-center gap-2 text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-secondary">notifications</span>{{ unread_notifications }} notification(s) non lue(s)</p>
+{% if risk_meta %}
+<span class="inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ risk_meta.badge }}">{{ risk_meta.label }}</span>
+{% endif %}
+</div>
+<div class="mt-3 flex flex-wrap gap-2">
+<a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:student_notifications' %}">Notifications</a>
+<a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:student_appointments' %}">Mes rendez-vous</a>
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Prochain jalon</h2>
+{% if exam %}
+<div class="mt-3 rounded bg-tertiary-fixed/40 p-3">
+<p class="text-sm font-bold text-on-surface">{{ exam.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ exam.course_code }}{% if exam.location %} · {{ exam.location }}{% endif %}</p>
+<p class="mt-2 text-xs font-bold text-tertiary">{{ exam_label }}{% if exam_days != None %} · dans {{ exam_days }} jour(s){% endif %}</p>
+</div>
+{% else %}
+<p class="mt-2 text-sm text-on-surface-variant">Aucun examen planifié. Ajoutez un jalon de type « Examen » dans votre plan d'étude.</p>
+{% endif %}
+<a class="mt-3 inline-flex text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_progress' %}">Ouvrir mon planning</a>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Journal</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_journal' %}">Écrire</a>
+</div>
+{% if latest_journal %}
+<div class="mt-3">
+<p class="text-sm font-bold text-on-surface">{{ latest_journal.title }}</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ latest_journal.get_sentiment_display }} · confiance {{ latest_journal.confidence }}/10</p>
+<p class="mt-2 line-clamp-3 text-sm text-on-surface-variant">{{ latest_journal.reflection }}</p>
+</div>
+{% else %}
+<p class="mt-2 text-sm text-on-surface-variant">Aucune entrée. Rédigez votre première réflexion pour partager votre progression.</p>
+{% endif %}
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Test de langue</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_language_tests' %}">Mes tests</a>
+</div>
+{% for result in language_results %}
+<p class="mt-2 text-sm text-on-surface">Niveau {{ result.overall_level }} · {{ result.get_overall_verdict_display }}</p>
+{% empty %}
+<p class="mt-2 text-sm text-on-surface-variant">Passez un examen blanc IELTS / Cambridge pour évaluer votre oral.</p>
+{% endfor %}
+</section>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

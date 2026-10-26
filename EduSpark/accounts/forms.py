@@ -1,23 +1,120 @@
+from datetime import timedelta
+
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.apps import apps
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
+from django.utils import timezone
 
-# Shared classes for the glass-style inputs. The wrapper div in the template
-# supplies the glass frame; the input itself stays transparent.
-INPUT_CLASS = (
-    "auth-input bg-transparent text-sm text-white placeholder:text-white/30 "
-    "focus:outline-none w-full"
+from .models import (
+    MAX_STUDENTS_PER_CLASS, Invitation, Membership, ProfessorProfile, SchoolClass,
+    StudentGroup, StudentProfile, University, sync_user_profil,
 )
+from .tenancy import MEMBERSHIP_ROLES, Role
 
+# Classes exactes extraites des maquettes stitch (dossier stitch/).
+# Connexion : inputs sur fond transparent dans un wrapper bg-surface-container-low.
+LOGIN_INPUT_CLASS = (
+    "w-full pl-11 pr-4 py-3 bg-transparent rounded-lg font-body-md text-body-md "
+    "text-on-surface placeholder:text-outline outline-none"
+)
+LOGIN_PASSWORD_CLASS = (
+    "w-full pl-11 pr-11 py-3 bg-transparent rounded-lg font-body-md text-body-md "
+    "text-on-surface placeholder:text-outline outline-none"
+)
+# Inscription : inputs bg-surface-container-low.
+SIGNUP_INPUT_CLASS = (
+    "w-full pl-10 pr-4 py-2.5 bg-surface-container-low focus:bg-surface-container-lowest "
+    "rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline "
+    "outline-none transition-all focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]"
+)
+SIGNUP_PASSWORD_CLASS = (
+    "w-full pl-10 pr-10 py-2.5 bg-surface-container-low focus:bg-surface-container-lowest "
+    "rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline "
+    "outline-none transition-all focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]"
+)
+# Pages de gestion : même langage visuel que l'inscription, sans icône.
+FIELD_CLASS = (
+    "w-full px-4 py-2.5 bg-surface-container-low focus:bg-surface-container-lowest "
+    "rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline "
+    "outline-none transition-all focus:shadow-[0_0_0_2px_rgba(0,88,190,0.3)]"
+)
+CHECKBOX_CLASS = "w-4 h-4 rounded accent-primary cursor-pointer"
+
+
+class StyledFormMixin:
+    """Applique les classes Tailwind du design system à tous les widgets.
+
+    ``placeholders`` (attribut de classe facultatif) associe un exemple
+    « ex. … » à chaque champ texte. Une aide de champ qui commence par « ex. »
+    (sans tiret d'explication) sert automatiquement de placeholder.
+    """
+
+    placeholders = {}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            widget = field.widget
+            if isinstance(widget, forms.HiddenInput):
+                continue
+            if isinstance(widget, (forms.CheckboxInput, forms.CheckboxSelectMultiple)):
+                widget.attrs.setdefault("class", CHECKBOX_CLASS)
+                continue
+            widget.attrs.setdefault("class", FIELD_CLASS)
+            if isinstance(widget, forms.Textarea):
+                widget.attrs.setdefault("rows", 4)
+            help_text = (field.help_text or "").strip()
+            if help_text.lower().startswith("ex.") and "—" not in help_text:
+                widget.attrs.setdefault("placeholder", help_text)
+        for name, placeholder in self.placeholders.items():
+            if name in self.fields:
+                self.fields[name].widget.attrs["placeholder"] = placeholder
+
+
+# ---------------------------------------------------------------------------
+# Authentification
+# ---------------------------------------------------------------------------
 
 class SignUpForm(UserCreationForm):
-    """Sign-up form styled for the liquid-glass auth card."""
+    """Inscription publique : crée le compte et une appartenance à l'université.
+
+    L'étudiant choisit son niveau et sa section ; toute inscription reste en
+    attente de validation par l'admin de l'université, qui l'affecte ensuite à
+    la classe correspondante.
+    """
+
+    ROLE_CHOICES = (
+        ("etudiant", "Apprenant"),
+        ("prof", "Enseignant"),
+    )
+
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        required=False,
+        initial="etudiant",
+    )
+
+    university = forms.ModelChoiceField(
+        queryset=University.objects.filter(is_active=True),
+        empty_label="Choisissez votre université",
+        label="Université",
+        widget=forms.Select(attrs={"id": "university", "class": SIGNUP_INPUT_CLASS}),
+        error_messages={"required": "Choisissez votre université."},
+    )
 
     full_name = forms.CharField(
         max_length=150,
-        required=False,
+        required=True,
+        label="Nom complet",
         widget=forms.TextInput(
-            attrs={"placeholder": "Elena Rostova", "autocomplete": "name", "class": INPUT_CLASS}
+            attrs={
+                "id": "fullName",
+                "placeholder": "ex. Alexandre Dumas",
+                "autocomplete": "name",
+                "class": SIGNUP_INPUT_CLASS,
+            }
         ),
     )
 
@@ -25,41 +122,83 @@ class SignUpForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(
             attrs={
-                "placeholder": "elena@studio.design",
+                "id": "email",
+                "placeholder": "ex. alexandre@universite.fr",
                 "autocomplete": "email",
-                "class": INPUT_CLASS,
+                "class": SIGNUP_INPUT_CLASS,
+            }
+        ),
+    )
+
+    level = forms.CharField(
+        label="Niveau",
+        max_length=60,
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "id": "level",
+                "list": "level-options",
+                "placeholder": "ex. 3e année, Master 1",
+                "class": SIGNUP_INPUT_CLASS,
+                "autocomplete": "off",
+            }
+        ),
+    )
+
+    section = forms.CharField(
+        label="Section",
+        max_length=60,
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "id": "section",
+                "list": "section-options",
+                "placeholder": "ex. A, B, Sciences",
+                "class": SIGNUP_INPUT_CLASS,
+                "autocomplete": "off",
             }
         ),
     )
 
     password1 = forms.CharField(
+        label="Mot de passe",
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "At least 8 characters",
+                "id": "password",
+                "placeholder": "••••••••••••",
                 "autocomplete": "new-password",
-                "class": INPUT_CLASS,
+                "class": SIGNUP_PASSWORD_CLASS,
             }
         )
     )
 
+    # Maquette stitch : un seul champ mot de passe visible. password2 est
+    # synchronisé côté serveur pour satisfaire UserCreationForm.
     password2 = forms.CharField(
-        widget=forms.PasswordInput(
-            attrs={
-                "placeholder": "Repeat your password",
-                "autocomplete": "new-password",
-                "class": INPUT_CLASS,
-            }
-        )
+        required=False,
+        widget=forms.HiddenInput(attrs={"id": "password2"}),
     )
 
     class Meta:
         model = User
         fields = ("full_name", "email", "password1", "password2")
 
+    def clean(self):
+        cleaned = super().clean()
+        if not cleaned.get("password2") and cleaned.get("password1"):
+            cleaned["password2"] = cleaned["password1"]
+        return cleaned
+
+    def clean_role(self):
+        role = self.cleaned_data.get("role") or "etudiant"
+        if role not in ("etudiant", "prof"):
+            raise forms.ValidationError("Rôle invalide.")
+        return role
+
     def clean_email(self):
-        email = self.cleaned_data["email"]
+        email = self.cleaned_data["email"].strip().lower()
         if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("An account with this email already exists.")
+            raise forms.ValidationError("Un compte existe déjà avec cet e-mail.")
         return email
 
     def save(self, commit=True):
@@ -67,22 +206,44 @@ class SignUpForm(UserCreationForm):
         email = self.cleaned_data["email"]
         user.email = email
         user.username = email
-        user.first_name = self.cleaned_data.get("full_name", "")
-        if commit:
-            user.save()
+        first, _sep, last = self.cleaned_data.get("full_name", "").strip().partition(" ")
+        user.first_name = first
+        user.last_name = last
+        user.save()
+
+        university = self.cleaned_data["university"]
+        role = Role.STUDENT if self.cleaned_data.get("role") == "etudiant" else Role.PROFESSOR
+        domain = email.rsplit("@", 1)[-1].lower()
+        official_domain = bool(university.email_domain) and (
+            domain == university.email_domain.strip().lower().lstrip("@")
+        )
+        # Les étudiants qui utilisent le domaine officiel sont activés
+        # immédiatement ; les autres inscriptions restent en attente.
+        membership = Membership.objects.create(
+            user=user, university=university, role=role,
+            is_active=role == Role.STUDENT and official_domain,
+        )
+        profile = membership.ensure_profile()
+        if role == Role.STUDENT and profile is not None:
+            profile.level = (self.cleaned_data.get("level") or "").strip()
+            profile.section = (self.cleaned_data.get("section") or "").strip()
+            profile.save(update_fields=["level", "section"])
+        sync_user_profil(user)
         return user
 
 
 class SignInForm(AuthenticationForm):
-    """Sign-in form keyed on email instead of username."""
+    """Sign-in form calqué sur la maquette stitch eduspark_connexion."""
 
     username = forms.EmailField(
-        label="Email Address",
+        label="Identifiant étudiant ou adresse e-mail",
         widget=forms.EmailInput(
             attrs={
-                "placeholder": "name@company.com",
+                "id": "login-email",
+                "placeholder": "nom@universite.fr ou nom@domaine.com",
                 "autofocus": True,
-                "class": INPUT_CLASS,
+                "autocomplete": "email",
+                "class": LOGIN_INPUT_CLASS,
             }
         ),
     )
@@ -90,14 +251,623 @@ class SignInForm(AuthenticationForm):
     password = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
-                "placeholder": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+                "id": "login-password",
+                "placeholder": "••••••••••••",
                 "autocomplete": "current-password",
-                "class": INPUT_CLASS,
+                "class": LOGIN_PASSWORD_CLASS,
             }
         )
     )
 
     error_messages = {
         **AuthenticationForm.error_messages,
-        "invalid_login": "No account matches that email and password.",
+        "invalid_login": "Aucun compte ne correspond à cet e-mail et ce mot de passe.",
     }
+
+    def clean_username(self):
+        return self.cleaned_data["username"].strip().lower()
+
+
+# ---------------------------------------------------------------------------
+# Universités et comptes (admin plateforme)
+# ---------------------------------------------------------------------------
+
+class UniversityForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "name": "ex. Université Paris Cité",
+        "code": "ex. UPC",
+        "city": "ex. Paris",
+        "country": "ex. France",
+        "email_domain": "ex. u-paris.fr",
+        "website": "ex. https://u-paris.fr",
+        "description": "ex. Université pluridisciplinaire en sciences et santé…",
+    }
+
+    class Meta:
+        model = University
+        fields = ("name", "code", "city", "country", "email_domain", "website", "description", "is_active")
+
+
+class UniversityAdminEditForm(StyledFormMixin, forms.ModelForm):
+    """Champs qu'un admin université peut modifier sur sa propre université."""
+
+    placeholders = {
+        "code": "ex. UPC",
+        "city": "ex. Paris",
+        "country": "ex. France",
+        "website": "ex. https://u-paris.fr",
+        "description": "ex. Université pluridisciplinaire en sciences et santé…",
+    }
+
+    class Meta:
+        model = University
+        fields = ("code", "city", "country", "website", "description")
+
+
+class AccountForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "first_name": "ex. Marie",
+        "last_name": "ex. Dupont",
+        "email": "ex. marie.dupont@u-paris.fr",
+    }
+
+    is_platform_admin = forms.BooleanField(
+        label="Admin plateforme", required=False,
+        help_text="Donne accès à toutes les universités et au back-office.",
+    )
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email", "is_active")
+        labels = {"first_name": "Prénom", "last_name": "Nom", "is_active": "Compte actif"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["is_platform_admin"].initial = self.instance.is_superuser
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Un autre compte utilise déjà cet e-mail.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = user.email
+        user.is_superuser = user.is_staff = self.cleaned_data["is_platform_admin"]
+        if commit:
+            user.save()
+            sync_user_profil(user)
+        return user
+
+
+class ProfileForm(StyledFormMixin, forms.ModelForm):
+    """Chacun édite son propre profil (informations de compte)."""
+
+    placeholders = {
+        "first_name": "ex. Marie",
+        "last_name": "ex. Dupont",
+        "email": "ex. marie.dupont@u-paris.fr",
+    }
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email")
+        labels = {"first_name": "Prénom", "last_name": "Nom"}
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Un autre compte utilise déjà cet e-mail.")
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = user.email
+        if commit:
+            user.save()
+        return user
+
+
+# ---------------------------------------------------------------------------
+# Professeurs et étudiants (admin université)
+# ---------------------------------------------------------------------------
+
+class _MemberCreateForm(StyledFormMixin, forms.Form):
+    """Création d'un membre : réutilise le compte si l'e-mail existe déjà
+    (un professeur peut enseigner dans plusieurs universités)."""
+
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+    }
+
+    email = forms.EmailField(label="E-mail")
+    first_name = forms.CharField(label="Prénom", max_length=150)
+    last_name = forms.CharField(label="Nom", max_length=150)
+
+    role = None
+    profile_fields = ()
+
+    def __init__(self, *args, university=None, **kwargs):
+        self.university = university
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if Membership.objects.filter(
+            user__email__iexact=email, university=self.university,
+        ).exists():
+            raise forms.ValidationError("Cette personne est déjà membre de l'université.")
+        return email
+
+    def save_member(self):
+        """Retourne (membership, compte_créé)."""
+        email = self.cleaned_data["email"]
+        user = User.objects.filter(email__iexact=email).first()
+        created = user is None
+        if created:
+            user = User(
+                email=email, username=email,
+                first_name=self.cleaned_data["first_name"],
+                last_name=self.cleaned_data["last_name"],
+            )
+            user.set_unusable_password()
+            user.save()
+        membership, _created = Membership.objects.get_or_create(
+            user=user, university=self.university,
+            defaults={"role": self.role, "is_active": True},
+        )
+        if not _created:
+            membership.role = self.role
+            membership.is_active = True
+            membership.save(update_fields=["role", "is_active"])
+        profile = membership.ensure_profile()
+        for name in self.profile_fields:
+            setattr(profile, name, self.cleaned_data.get(name, ""))
+        profile.save()
+        return membership, created
+
+
+class ProfessorCreateForm(_MemberCreateForm):
+    role = Role.PROFESSOR
+    profile_fields = ("department", "speciality", "grade")
+
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+        "department": "ex. Informatique",
+        "speciality": "ex. Réseaux et systèmes",
+    }
+
+    department = forms.CharField(label="Département", max_length=120, required=False)
+    speciality = forms.CharField(label="Spécialité", max_length=120, required=False)
+    grade = forms.ChoiceField(
+        label="Grade", choices=(("", "—"),) + ProfessorProfile.GRADE_CHOICES, required=False,
+    )
+
+
+class StudentCreateForm(_MemberCreateForm):
+    role = Role.STUDENT
+    profile_fields = ("student_number", "program", "promotion", "level", "section")
+
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+        "student_number": "ex. 2024-0123",
+        "program": "ex. Informatique",
+        "promotion": "ex. 2026",
+        "level": "ex. 3e année, Master 1",
+        "section": "ex. A, B, Sciences",
+    }
+
+    student_number = forms.CharField(label="Matricule", max_length=40, required=False)
+    program = forms.CharField(label="Filière", max_length=120, required=False)
+    promotion = forms.CharField(label="Promotion", max_length=20, required=False)
+    level = forms.CharField(label="Niveau", max_length=60, required=False)
+    section = forms.CharField(label="Section", max_length=60, required=False)
+
+    def clean_student_number(self):
+        number = self.cleaned_data.get("student_number", "").strip()
+        if number and StudentProfile.objects.filter(
+            university=self.university, student_number=number,
+        ).exists():
+            raise forms.ValidationError("Ce matricule est déjà utilisé dans l'université.")
+        return number
+
+
+class _MemberProfileForm(StyledFormMixin, forms.ModelForm):
+    """Modification d'un profil métier (+ statut pour l'admin)."""
+
+    is_active = forms.BooleanField(
+        label="Membre actif", required=False,
+        help_text="Décochez pour suspendre l'accès à l'université.",
+    )
+
+    def __init__(self, *args, admin=True, **kwargs):
+        self.admin = admin
+        super().__init__(*args, **kwargs)
+        if admin:
+            self.fields["is_active"].initial = self.instance.membership.is_active
+        else:
+            self.fields.pop("is_active", None)
+
+    def save(self, commit=True):
+        profile = super().save(commit=commit)
+        if self.admin:
+            membership = profile.membership
+            membership.is_active = self.cleaned_data["is_active"]
+            membership.save(update_fields=["is_active"])
+        return profile
+
+
+class ProfessorProfileForm(_MemberProfileForm):
+    placeholders = {
+        "department": "ex. Informatique",
+        "speciality": "ex. Réseaux et systèmes",
+    }
+
+    class Meta:
+        model = ProfessorProfile
+        fields = ("department", "speciality", "grade")
+
+
+class StudentProfileForm(_MemberProfileForm):
+    placeholders = {
+        "student_number": "ex. 2024-0123",
+        "program": "ex. Informatique",
+        "promotion": "ex. 2026",
+        "level": "ex. 3e année, Master 1",
+        "section": "ex. A, B, Sciences",
+    }
+
+    class Meta:
+        model = StudentProfile
+        fields = ("student_number", "program", "promotion", "level", "section")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.admin:
+            # Le niveau et la section servent à l'affectation initiale : seul
+            # l'admin de l'université peut les corriger ensuite.
+            self.fields.pop("level", None)
+            self.fields.pop("section", None)
+
+    def clean_student_number(self):
+        number = self.cleaned_data.get("student_number", "").strip()
+        clash = StudentProfile.objects.filter(university=self.instance.university, student_number=number)
+        if number and clash.exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce matricule est déjà utilisé dans l'université.")
+        return number
+
+
+# ---------------------------------------------------------------------------
+# Classes et groupes
+# ---------------------------------------------------------------------------
+
+class ProfessorChipSelectMultiple(forms.CheckboxSelectMultiple):
+    """Cases à cocher en cartes (nom + département) pour choisir les professeurs."""
+
+    template_name = "portal/_chip_checkbox_select.html"
+    option_template_name = "portal/_chip_checkbox_option.html"
+
+
+class SchoolClassForm(StyledFormMixin, forms.ModelForm):
+    class Meta:
+        model = SchoolClass
+        fields = (
+            "name", "level", "section", "study_program", "program",
+            "academic_year", "description", "professors",
+        )
+
+    def __init__(self, *args, university=None, **kwargs):
+        self.university = university
+        super().__init__(*args, **kwargs)
+        placeholders = {
+            "name": "ex. Informatique",
+            "level": "ex. 3e année, Master 1",
+            "section": "ex. A, B, Sciences, Littérature",
+            "academic_year": "ex. 2025-2026",
+            "description": "ex. Classe orientée systèmes et réseaux…",
+            "program": "ex. Informatique",
+        }
+        for field_name, placeholder in placeholders.items():
+            if field_name in self.fields:
+                self.fields[field_name].widget.attrs["placeholder"] = placeholder
+
+        programs = apps.get_model("courses", "Program").objects.filter(
+            university=university,
+        ).select_related("department")
+        if programs.exists():
+            # Des filières existent dans le catalogue : on en choisit une dans la
+            # liste, et le libellé texte de la classe la suit automatiquement.
+            study_program = self.fields["study_program"]
+            study_program.queryset = programs
+            study_program.label = "Filière"
+            study_program.help_text = "Filières créées dans « Départements & Filières »."
+            study_program.label_from_instance = lambda program: "%s — %s" % (
+                program.name, program.department.name,
+            )
+            self.fields.pop("program")
+        else:
+            self.fields.pop("study_program")
+
+        professors = self.fields.get("professors")
+        if professors is not None:
+            professors.queryset = ProfessorProfile.objects.filter(
+                membership__university=university,
+            ).select_related("membership__user").order_by(
+                "membership__user__last_name", "membership__user__first_name",
+            )
+            professors.required = False
+            professors.label = "Professeurs"
+            professors.widget = forms.CheckboxSelectMultiple()
+            professors.help_text = (
+                "Les professeurs qui enseignent déjà une matière de cette classe "
+                "ne peuvent pas être retirés ici."
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        name = cleaned.get("name")
+        section = (cleaned.get("section") or "").strip()
+        year = cleaned.get("academic_year", "")
+        clash = SchoolClass.objects.filter(
+            university=self.university, name=name, section=section, academic_year=year,
+        )
+        if name and clash.exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(
+                "Une classe porte déjà ce nom, cette section et cette année universitaire."
+            )
+        if self.instance.pk:
+            self._check_teaching_assignments(cleaned)
+            self._check_professors(cleaned)
+        return cleaned
+
+    def _check_professors(self, cleaned):
+        professors = cleaned.get("professors")
+        if professors is None:
+            return
+        selected = {professor.pk for professor in professors}
+        assigned = self.instance.teaching_assignments.select_related(
+            "professor__membership__user",
+        )
+        blocked = [
+            assignment.professor for assignment in assigned
+            if assignment.professor_id not in selected
+        ]
+        if blocked:
+            names = ", ".join(
+                professor.user.get_full_name() or professor.user.email
+                for professor in blocked
+            )
+            self.add_error(
+                "professors",
+                "Impossible de retirer un professeur qui enseigne dans cette classe : %s."
+                % names,
+            )
+
+    def _check_teaching_assignments(self, cleaned):
+        """Les affectations du module cours doivent rester cohérentes avec la classe."""
+        assignments = list(
+            self.instance.teaching_assignments.select_related("subject")
+        )
+        study_program = cleaned.get("study_program")
+        if study_program is not None:
+            foreign = sorted({a.subject.code for a in assignments if a.subject.program_id != study_program.pk})
+            if foreign:
+                self.add_error("study_program", (
+                    "Des matières affectées à cette classe n'appartiennent pas à la filière « %s » (%s) : "
+                    "retirez d'abord ces affectations."
+                ) % (study_program.name, ", ".join(foreign)))
+
+
+class StudentGroupForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "name": "ex. Groupe A",
+        "capacity": "ex. 24",
+    }
+
+    class Meta:
+        model = StudentGroup
+        fields = ("name", "capacity", "students")
+        widgets = {"students": forms.CheckboxSelectMultiple}
+
+    def __init__(self, *args, school_class=None, **kwargs):
+        self.school_class = school_class
+        super().__init__(*args, **kwargs)
+        students = StudentProfile.objects.filter(
+            university=school_class.university,
+            membership__is_active=True,
+        ).select_related("membership__user")
+        # On ne propose que les étudiants du niveau/section de la classe, ou
+        # ceux qui y sont déjà rattachés (pour modifier un groupe existant).
+        # Un étudiant sans niveau renseigné reste sélectionnable : il pourra
+        # être rattaché à la classe par l'administration.
+        matching = Q(level__iexact=school_class.level) | Q(level="")
+        if school_class.section:
+            matching &= Q(section__iexact=school_class.section)
+        students = students.filter(
+            (matching & Q(groups__isnull=True))
+            | Q(groups__school_class=school_class)
+        ).distinct()
+        self.fields["students"].queryset = students
+        self.fields["students"].help_text = (
+            "Les étudiants déjà affectés à une autre classe ne sont pas proposés. "
+            "La classe ne peut pas dépasser %d étudiants." % MAX_STUDENTS_PER_CLASS
+        )
+
+    def clean_name(self):
+        name = self.cleaned_data["name"]
+        if StudentGroup.objects.filter(
+            school_class=self.school_class, name=name,
+        ).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce groupe existe déjà dans la classe.")
+        return name
+
+    def clean(self):
+        cleaned = super().clean()
+        capacity, students = cleaned.get("capacity"), cleaned.get("students")
+        if students is not None and self.school_class is not None:
+            selected_ids = [student.pk for student in students]
+            other_groups = StudentGroup.objects.filter(school_class=self.school_class)
+            if self.instance.pk:
+                other_groups = other_groups.exclude(pk=self.instance.pk)
+            final_ids = set(other_groups.values_list("students__pk", flat=True))
+            final_ids.discard(None)
+            final_ids.update(selected_ids)
+            if len(final_ids) > MAX_STUDENTS_PER_CLASS:
+                self.add_error(
+                    "students",
+                    "La classe dépasserait l'effectif maximal de %d étudiants (%d)."
+                    % (MAX_STUDENTS_PER_CLASS, len(final_ids)),
+                )
+
+        if capacity and students is not None and len(students) > capacity:
+            self.add_error(
+                "students",
+                "Le groupe dépasse sa capacité (%s / %s)." % (len(students), capacity),
+            )
+        return cleaned
+
+
+class ClassStudentAssignForm(forms.Form):
+    """Affecte directement un étudiant sans groupe à un groupe de la classe."""
+
+    student = forms.ModelChoiceField(
+        label="Étudiant",
+        queryset=StudentProfile.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un étudiant.",
+            "invalid_choice": "Sélectionnez un étudiant valide.",
+        },
+    )
+    group = forms.ModelChoiceField(
+        label="Groupe",
+        queryset=StudentGroup.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un groupe.",
+            "invalid_choice": "Sélectionnez un groupe valide.",
+        },
+    )
+
+    def __init__(self, *args, school_class=None, **kwargs):
+        self.school_class = school_class
+        super().__init__(*args, **kwargs)
+        students = StudentProfile.objects.filter(
+            university=school_class.university,
+            membership__is_active=True,
+            groups__isnull=True,
+        ).select_related("membership__user").order_by(
+            "membership__user__last_name", "membership__user__first_name",
+        )
+        self.fields["student"].queryset = students
+        self.fields["student"].label_from_instance = self._student_label
+        self.fields["group"].queryset = school_class.groups.order_by("name")
+        self.fields["group"].label_from_instance = self._group_label
+
+    def _student_label(self, student):
+        user = student.membership.user
+        name = user.get_full_name() or user.email
+        details = " · ".join(
+            value for value in (student.level, student.section) if value
+        )
+        return "%s — %s" % (name, details) if details else name
+
+    def _group_label(self, group):
+        total = group.students.count()
+        if group.capacity:
+            return "%s (%d/%d)" % (group.name, total, group.capacity)
+        return "%s (%d étudiant%s)" % (group.name, total, "" if total == 1 else "s")
+
+    def clean(self):
+        cleaned = super().clean()
+        student = cleaned.get("student")
+        group = cleaned.get("group")
+        if self.school_class is None:
+            return cleaned
+        if self.school_class.seats_left <= 0:
+            raise forms.ValidationError(
+                "La classe est complète (%d étudiants maximum)."
+                % MAX_STUDENTS_PER_CLASS
+            )
+        if group is not None and group.school_class_id != self.school_class.pk:
+            self.add_error("group", "Ce groupe n'appartient pas à cette classe.")
+        if student is not None and student.groups.exists():
+            self.add_error("student", "Cet étudiant appartient déjà à une classe.")
+        if group is not None and group.capacity:
+            if group.students.count() >= group.capacity:
+                self.add_error(
+                    "group",
+                    "Ce groupe est complet (%d/%d)." % (
+                        group.students.count(), group.capacity,
+                    ),
+                )
+        return cleaned
+
+
+# ---------------------------------------------------------------------------
+# Invitations
+# ---------------------------------------------------------------------------
+
+class InvitationForm(StyledFormMixin, forms.ModelForm):
+    placeholders = {
+        "email": "ex. prenom.nom@universite.fr",
+        "message": "ex. Bienvenue ! Voici votre accès à la plateforme.",
+    }
+
+    class Meta:
+        model = Invitation
+        fields = ("email", "role", "message", "expires_at")
+        widgets = {
+            "expires_at": forms.DateTimeInput(
+                attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M",
+            ),
+        }
+
+    def __init__(self, *args, university=None, can_invite_admins=False, **kwargs):
+        self.university = university
+        self.can_invite_admins = can_invite_admins
+        super().__init__(*args, **kwargs)
+        if not can_invite_admins:
+            self.fields["role"].choices = [
+                choice for choice in MEMBERSHIP_ROLES if choice[0] != Role.UNIVERSITY_ADMIN
+            ]
+        if not self.instance.pk:
+            self.fields["expires_at"].initial = (
+                timezone.now() + timedelta(days=7)
+            ).strftime("%Y-%m-%dT%H:%M")
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        pending = Invitation.objects.filter(
+            university=self.university, email__iexact=email, status=Invitation.STATUS_PENDING,
+        ).exclude(pk=self.instance.pk)
+        if pending.exists():
+            raise forms.ValidationError("Une invitation est déjà en attente pour cet e-mail.")
+        if Membership.objects.filter(
+            university=self.university, user__email__iexact=email, is_active=True,
+        ).exists():
+            raise forms.ValidationError("Cette personne est déjà membre active de l'université.")
+        return email
+
+
+class InvitationSignupForm(StyledFormMixin, SetPasswordForm):
+    """Création du compte depuis une invitation (e-mail imposé)."""
+
+    placeholders = {
+        "first_name": "ex. Awa",
+        "last_name": "ex. Diallo",
+    }
+
+    first_name = forms.CharField(label="Prénom", max_length=150)
+    last_name = forms.CharField(label="Nom", max_length=150)
+
+    field_order = ("first_name", "last_name", "new_password1", "new_password2")
+
+
+class PasswordChangeStyledForm(StyledFormMixin, PasswordChangeForm):
+    pass

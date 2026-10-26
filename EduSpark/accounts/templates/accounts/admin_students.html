@@ -1,0 +1,212 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Étudiants &amp; Inscriptions — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] w-full bg-surface px-4 py-5 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+<div class="flex flex-col gap-5 pb-2 xl:flex-row xl:items-center xl:justify-between">
+<div class="flex min-w-0 flex-col gap-2">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Étudiants &amp; Inscriptions Académiques</h1>
+<p class="max-w-4xl font-body-md text-body-md text-on-surface-variant">Supervision des comptes étudiants, affectations de cohortes et inscriptions de {{ portal_university.name|default:"l'université courante" }}.</p>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-5 py-2.5 font-label-md text-label-md text-primary shadow-sm transition-all duration-200 hover:bg-secondary-fixed focus:outline-none focus:ring-2 focus:ring-primary" href="{% url 'portal:admin_invitations' %}"><span class="material-symbols-outlined text-[20px] text-secondary">mark_email_read</span>Inviter</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 font-label-md text-label-md text-on-primary shadow-md transition-all duration-200 hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary-fixed" href="{% url 'portal:admin_student_create' %}"><span class="material-symbols-outlined text-[20px]">person_add</span>Inscrire un étudiant</a>
+</div>
+</div>
+<section aria-labelledby="kpis-title" class="flex flex-col gap-3">
+<h2 class="sr-only" id="kpis-title">Indicateurs clés d'inscription</h2>
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Total inscrits</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-primary">{{ stats.students }}</div>
+</div>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-fixed text-on-primary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">groups</span></div>
+</div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Membres actifs</span>
+<span class="font-data-metric text-data-metric font-bold text-primary">{{ stats.students }} comptes</span>
+</div>
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Comptes en attente</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-secondary">{{ stats.pending }}</div>
+</div>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-fixed text-on-secondary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">pending_actions</span></div>
+</div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Demandes à valider</span>
+<span class="inline-flex items-center gap-1 font-data-metric text-data-metric font-semibold text-secondary"><span class="material-symbols-outlined text-sm">bolt</span>{{ stats.pending }} en attente</span>
+</div>
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Filières</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-on-surface">{{ stats.programs }}</div>
+</div>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-high text-primary transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">account_tree</span></div>
+</div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Filières représentées</span>
+<span class="font-data-metric text-data-metric font-bold text-on-surface-variant">{{ stats.programs }} filières</span>
+</div>
+</article>
+<article class="group relative flex flex-col justify-between overflow-hidden rounded bg-surface-container-lowest p-5 shadow-sm transition-shadow hover:shadow-md">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Classes</span>
+<div class="mt-1 font-data-metric text-[20px] font-bold text-on-surface">{{ stats.classes }}</div>
+</div>
+<div class="flex h-12 w-12 items-center justify-center rounded-full bg-tertiary-fixed text-on-tertiary-fixed transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-[26px]">layers</span></div>
+</div>
+<div class="mt-4 flex items-center justify-between bg-surface-container-low -mx-6 -mb-6 px-6 py-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Classes avec étudiants</span>
+<a class="font-label-sm text-label-sm font-semibold text-primary underline hover:opacity-80" href="{% url 'portal:admin_classes' %}">Gérer ({{ stats.classes }})</a>
+</div>
+</article>
+</div>
+</section>
+<div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 lg:col-span-8">
+<section aria-labelledby="students-directory-title" class="overflow-hidden rounded bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 p-4">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div>
+<h2 class="text-lg font-semibold text-on-surface" id="students-directory-title">Annuaire des étudiants</h2>
+<p class="text-xs text-on-surface-variant">{% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ profiles|length }}{% endif %} étudiant{{ profiles|length|pluralize }} affiché{{ profiles|length|pluralize }}</p>
+</div>
+{% if is_filtered %}<a class="inline-flex h-8 items-center gap-1.5 rounded-full border border-outline-variant/60 px-3 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'portal:admin_students' %}"><span class="material-symbols-outlined text-[15px]">restart_alt</span>Réinitialiser</a>{% endif %}
+</div>
+<form class="mt-3 space-y-3 rounded-xl border border-outline-variant/40 bg-surface-container-low/40 p-3" method="get">
+<div class="flex flex-col gap-2 sm:flex-row">
+<div class="relative min-w-0 flex-1">
+<span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[19px] text-on-surface-variant">search</span>
+<input aria-label="Recherche d'étudiant" class="h-11 w-full rounded-lg border border-outline-variant/60 bg-surface-container-lowest pl-10 pr-3 text-sm text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary" name="q" placeholder="{{ search_placeholder }}" type="search" value="{{ q }}"/>
+</div>
+<button class="inline-flex h-11 items-center justify-center gap-1.5 rounded-lg bg-primary px-5 text-xs font-bold text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+</div>
+<div class="grid gap-2 sm:grid-cols-3">
+{% for filter in filters %}
+<label class="flex flex-col gap-1">
+<span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{{ filter.label }}</span>
+<select aria-label="Filtrer par {{ filter.label }}" class="h-10 w-full cursor-pointer rounded-lg border border-outline-variant/60 bg-surface-container-lowest px-3 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="{{ filter.param }}">
+<option value="">{{ filter.label }} — tous</option>
+{% for value, label in filter.choices %}<option value="{{ value }}" {% if filter.current == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+</select>
+</label>
+{% endfor %}
+</div>
+</form>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[880px] text-left" role="table">
+<thead class="bg-surface-container-high font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+<tr>
+<th class="py-2 pl-4 pr-3" scope="col">Étudiant &amp; Matricule</th>
+<th class="py-2 px-3" scope="col">Formation &amp; Cohorte</th>
+<th class="py-2 px-3" scope="col">Groupes</th>
+<th class="py-2 px-3" scope="col">Statut</th>
+<th class="py-2 pl-3 pr-4 text-right" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody class="text-body-sm font-body-sm text-on-surface">
+{% for profile in profiles %}
+<tr class="transition-colors hover:bg-surface-container-low">
+<td class="py-3 pl-4 pr-3">
+<div class="flex items-center gap-2.5">
+<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-fixed text-xs font-bold text-on-secondary-fixed">{{ profile.user.first_name|slice:":1"|upper }}{{ profile.user.last_name|slice:":1"|upper }}</div>
+<div class="flex min-w-0 flex-col">
+<span class="truncate text-sm font-semibold text-on-surface">{{ profile.user.get_full_name|default:profile.user.email }}</span>
+<div class="flex items-center gap-2">
+<span class="font-data-metric text-xs text-on-surface-variant">{% if profile.student_number %}{{ profile.student_number }}{% else %}Sans matricule{% endif %}</span>
+<span class="text-on-surface-variant/40">•</span>
+<span class="truncate text-xs text-on-surface-variant">{{ profile.user.email }}</span>
+</div>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-on-surface">{{ profile.program|default:"Filière non renseignée" }}</span>
+<span class="text-[11px] text-on-surface-variant">{{ profile.promotion|default:"Promotion non renseignée" }}</span>
+{% if profile.level %}<span class="text-[11px] text-on-surface-variant">Niveau : {{ profile.level }}{% if profile.section %} · Section {{ profile.section }}{% endif %}</span>{% endif %}
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex flex-wrap items-center gap-1">
+{% for group in profile.groups.all %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2 py-0.5 text-[10px] font-semibold text-primary">{{ group.school_class.name }}<span class="font-normal text-on-surface-variant">· {{ group.name }}</span></span>{% empty %}<span class="text-xs text-on-surface-variant">—</span>{% endfor %}
+</div>
+</td>
+<td class="py-3 px-3">
+{% if profile.membership.is_active %}<span class="inline-flex items-center gap-1 rounded-full bg-surface-container-high px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-primary"><span class="material-symbols-outlined text-sm">check_circle</span>Actif</span>{% else %}<span class="inline-flex items-center gap-1 rounded-full bg-tertiary-fixed px-2.5 py-0.5 font-label-sm text-label-sm font-semibold text-on-tertiary-fixed"><span class="material-symbols-outlined text-sm">schedule</span>En attente</span>{% endif %}
+</td>
+<td class="py-3 pl-3 pr-4 text-right">
+<div class="inline-flex items-center justify-end gap-0.5">
+<a class="flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary" href="{% url 'portal:admin_student_update' profile.pk %}" title="Modifier"><span class="material-symbols-outlined text-[16px]">edit</span></a>
+<a class="flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Retirer de l'université" href="{% url 'portal:admin_student_delete' profile.pk %}"><span class="material-symbols-outlined text-[16px]">person_remove</span></a>
+</div>
+</td>
+</tr>
+{% empty %}
+<tr><td class="px-6 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun étudiant ne correspond à votre recherche. <a class="font-bold text-primary hover:underline" href="{% url 'portal:admin_student_create' %}">Inscrire un étudiant</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% include "portal/_pagination.html" %}
+</section>
+</div>
+<aside class="flex flex-col gap-5 lg:col-span-4">
+<section class="rounded bg-surface-container-lowest shadow-sm">
+<div class="flex items-center justify-between rounded-t bg-surface-container-low p-5">
+<div class="flex items-center gap-2.5">
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-tertiary shadow-sm"><span class="material-symbols-outlined text-[20px]">how_to_reg</span></div>
+<div>
+<h2 class="font-title-md text-title-md text-on-surface">Inscriptions en attente</h2>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Validation des accès étudiants, regroupés par niveau</span>
+</div>
+</div>
+<span class="rounded-full bg-tertiary-fixed px-2 py-0.5 font-label-sm text-[11px] font-bold uppercase tracking-wider text-on-tertiary-fixed">{{ stats.pending }}</span>
+</div>
+<div class="flex flex-col gap-3 p-5">
+{% for group in pending_groups %}
+<div class="rounded bg-surface-container-low p-3">
+<p class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary">{{ group.level }}</p>
+<div class="mt-2 flex flex-col gap-2">
+{% for row in group.students %}
+<div class="rounded bg-surface-container-lowest p-3">
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0">
+<p class="truncate font-body-sm text-body-sm font-semibold text-on-surface">{{ row.membership.user.get_full_name|default:row.membership.user.email }}</p>
+<p class="truncate text-[11px] text-on-surface-variant">{{ row.membership.user.email }} · {{ row.membership.created_at|date:"d/m/Y" }}</p>
+<p class="text-[11px] font-semibold text-on-surface-variant">Section : {{ row.section|default:"non renseignée" }}</p>
+</div>
+</div>
+<div class="mt-2 flex gap-2">
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' row.membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="reject"/><button class="w-full rounded-full bg-surface-container-highest px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-surface-variant transition-colors hover:text-error" type="submit">Refuser</button></form>
+<form class="flex-1" method="post" action="{% url 'portal:admin_membership_decide' row.membership.pk %}">{% csrf_token %}<input type="hidden" name="decision" value="approve"/><button class="w-full rounded-full bg-primary px-3 py-1.5 font-label-sm text-label-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Valider</button></form>
+</div>
+</div>
+{% endfor %}
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-center font-body-sm text-body-sm text-on-surface-variant">Aucune inscription en attente. Les nouveaux comptes apparaîtront ici, regroupés par niveau.</p>
+{% endfor %}
+</div>
+</section>
+<section class="flex flex-col gap-3 rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Actions rapides</h2>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_invitations' %}">Gérer les invitations<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_classes' %}">Voir les classes<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'portal:admin_student_create' %}">Inscrire un étudiant<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+</section>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

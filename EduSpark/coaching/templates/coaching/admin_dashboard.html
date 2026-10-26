@@ -1,0 +1,158 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Tableau de bord administration — Suivi &amp; pilotage{% endblock %}
+{% block content %}
+<main class="min-h-[calc(100vh-4rem)] w-full bg-surface px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<div class="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+<span>Pilotage académique</span><span>·</span><span>{{ university.name }}</span><span>·</span><span>{{ academic_year }}</span>
+</div>
+<h1 class="mt-1 font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Tableau de bord de supervision</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
+  Données réelles de l'établissement : affectation des référents, assiduité, alertes de persévérance et actions de remédiation.
+</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ today_label }}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:admin_monitoring' %}">
+<span class="material-symbols-outlined text-[18px]">monitoring</span>Suivi &amp; alertes
+</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-4 py-2.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-highest" href="{% url 'coaching:admin_perseverance' %}">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>Attribution des référents
+</a>
+</div>
+</header>
+
+<section aria-label="Indicateurs clés" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+{% include "portal/_stat_card.html" with label="Étudiants" value=student_profiles icon="group" hint=students_hint %}
+{% include "portal/_stat_card.html" with label="Enseignants" value=professor_profiles icon="school" icon_class="bg-surface-container-high text-primary" hint="Profils professeurs actifs" %}
+{% include "portal/_stat_card.html" with label="Affectation référents" value=allocation_rate suffix=" %" icon="how_to_reg" icon_class="bg-secondary-fixed text-secondary" hint=allocation_hint %}
+{% include "portal/_stat_card.html" with label="Alertes actives" value=summary.active_alerts icon="warning" icon_class="bg-error-container text-on-error-container" hint=active_alerts_hint %}
+{% include "portal/_stat_card.html" with label="Persévérance" value=summary.perseverance_rate suffix=" %" icon="trending_up" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=perseverance_hint %}
+</section>
+
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 xl:col-span-8">
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cohortes suivies</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:admin_monitoring' %}">Voir le pilotage détaillé</a>
+</div>
+<div class="mt-3 overflow-x-auto">
+<table class="w-full min-w-[680px] text-left text-sm">
+<thead class="bg-surface-container-low text-[11px] uppercase tracking-wide text-on-surface-variant">
+<tr><th class="px-3 py-2">Classe</th><th class="px-3 py-2">Étudiants</th><th class="px-3 py-2">Alertes</th><th class="px-3 py-2">Vigilance haute</th><th class="px-3 py-2">Objectifs</th><th class="px-3 py-2">Assiduité</th><th class="px-3 py-2">Moyenne</th></tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+{% for cohort in summary.cohorts %}
+<tr class="hover:bg-surface-container-low/60">
+<td class="px-3 py-2.5 font-semibold text-on-surface">{{ cohort.school_class.name }}</td>
+<td class="px-3 py-2.5">{{ cohort.students }}</td>
+<td class="px-3 py-2.5">{{ cohort.alerts }}</td>
+<td class="px-3 py-2.5 font-bold text-error">{{ cohort.high }}</td>
+<td class="px-3 py-2.5">{{ cohort.goal_progress }} %</td>
+<td class="px-3 py-2.5">{{ cohort.attendance }} %</td>
+<td class="px-3 py-2.5">{% if cohort.average != None %}{{ cohort.average }}{% else %}—{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-3 py-6 text-center text-on-surface-variant" colspan="7">Aucune cohorte avec des étudiants pour cette année.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes de persévérance</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:admin_monitoring' %}">Traiter les alertes</a>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for row in alert_rows %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ row.alert.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.student_label }} · {{ row.class_label }} · {{ row.status_label }}</p>
+</div>
+<div class="flex shrink-0 items-center gap-2">
+<span class="rounded-full px-2.5 py-1 text-[11px] font-bold {% if row.alert.priority == 'high' %}bg-error-container text-on-error-container{% else %}bg-surface-container text-on-surface-variant{% endif %}">{{ row.priority_label }}</span>
+{% if row.is_open %}
+<a class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary hover:bg-primary-container" href="{% url 'coaching:admin_monitoring' %}">Prendre en charge</a>
+{% endif %}
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune alerte active. Les cohortes sont stables.</p>
+{% endfor %}
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Affectation des référents par classe</h2>
+<span class="text-xs text-on-surface-variant">{{ academic_year }} · {{ pending_invitations }} invitation(s) en attente</span>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for row in allocation %}
+<div class="rounded bg-surface-container-low p-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ row.school_class.name }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.assigned }}/{{ row.students }} étudiants affectés{% if row.referent_names %} · {{ row.referent_names|join:", " }}{% endif %}</p>
+</div>
+<span class="rounded-full px-2.5 py-1 text-[11px] font-bold {{ row.status_class }}">{{ row.status }}</span>
+</div>
+<div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-container">
+<div class="h-2 rounded-full {% if row.rate >= 90 %}bg-primary{% else %}bg-error{% endif %}" style="width: {{ row.rate }}%;"></div>
+</div>
+</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune classe pour cette année.</p>
+{% endfor %}
+</div>
+</section>
+
+</div>
+
+<aside class="flex min-w-0 flex-col gap-5 xl:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Activité récente</h2>
+<div class="mt-3 flex flex-col gap-3">
+{% for activity in activities %}
+<div class="border-l-2 {{ activity.border }} pl-3">
+<p class="text-xs font-bold {{ activity.tone }}">{{ activity.label }} <span class="font-normal text-outline">· {{ activity.when }}</span></p>
+<p class="mt-0.5 text-sm text-on-surface-variant">{{ activity.text }}</p>
+</div>
+{% empty %}
+<p class="text-sm text-on-surface-variant">Aucune activité récente.</p>
+{% endfor %}
+</div>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Remédiation</h2>
+<div class="mt-3 grid gap-2">
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Fiches ouvertes</span><span class="font-data-metric text-lg font-bold text-tertiary">{{ summary.open_sheets }}</span></div>
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Clôturées (30 j)</span><span class="font-data-metric text-lg font-bold text-primary">{{ summary.closed_recent }}</span></div>
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Étudiants suivis</span><span class="font-data-metric text-lg font-bold text-on-surface">{{ summary.followed }}</span></div>
+</div>
+<a class="mt-3 inline-flex rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary hover:bg-primary-container" href="{% url 'coaching:admin_perseverance_export' %}">Exporter l'attribution (CSV)</a>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Accès rapides</h2>
+<div class="mt-3 flex flex-col gap-2">
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:admin_perseverance' %}">Affecter un référent</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:admin_monitoring' %}">Pilotage &amp; alertes</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'portal:admin_students' %}">Étudiants &amp; inscriptions</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'portal:admin_teachers' %}">Enseignants</a>
+</div>
+</section>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

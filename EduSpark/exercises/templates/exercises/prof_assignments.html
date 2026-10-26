@@ -11,14 +11,14 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exercises:prof_rubrics' %}"><span class="material-symbols-outlined text-[18px]">checklist</span>Barèmes</a>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#assignment-create-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Créer un devoir</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Nouveau devoir en brouillon créé." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Créer un devoir</button>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Devoirs actifs" value=active_count icon="assignment" hint="Ouverts et en brouillon" %}
-{% include "portal/_stat_card.html" with label="Dépôts reçus" value=total_submissions icon="upload_file" icon_class="bg-surface-container text-secondary" hint="Total tous devoirs" %}
-{% include "portal/_stat_card.html" with label="Devoirs à corriger" value=to_correct icon="draw" icon_class="bg-error-container text-on-error-container" hint="En attente de correction" %}
-{% include "portal/_stat_card.html" with label="Taux de dépôt moyen" value=avg_rate suffix=" %" icon="task_alt" hint="Toutes classes confondues" %}
+{% include "portal/_stat_card.html" with label="Devoirs actifs" value="5" icon="assignment" hint="2 échéances cette semaine" %}
+{% include "portal/_stat_card.html" with label="Dépôts reçus" value="118" icon="upload_file" icon_class="bg-surface-container text-secondary" hint="Sur 146 attendus" %}
+{% include "portal/_stat_card.html" with label="Copies à corriger" value="34" icon="draw" icon_class="bg-error-container text-on-error-container" hint="Dont 14 urgentes" %}
+{% include "portal/_stat_card.html" with label="Taux de dépôt moyen" value="81" suffix=" %" icon="task_alt" hint="Toutes classes confondues" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
@@ -37,24 +37,24 @@
 <table class="w-full min-w-[960px] text-left">
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Devoir</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Échéance</th><th class="px-5 py-3 font-bold">Dépôts</th><th class="px-5 py-3 font-bold">Progression</th><th class="px-5 py-3 font-bold">Barème</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-{% for a in assignments %}
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ a.status }}">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ a.title }}</p><p class="text-xs text-on-surface-variant">{{ a.subject }}</p></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ a.school_class|default:"—" }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{% if a.deadline %}{{ a.deadline|date:"j M." }}{% else %}—{% endif %}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ a.submissions_count }} / {{ a.expected_count }}</td>
-<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:{{ a.submission_rate }}%"></div></div><span class="text-xs font-semibold text-on-surface-variant">{{ a.submission_rate }} %</span></div></td>
-<td class="px-5 py-3">{% if a.rubric %}<a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">{{ a.rubric.name|truncatechars:20 }}</a>{% else %}<span class="text-xs text-on-surface-variant">—</span>{% endif %}</td>
-<td class="px-5 py-3 text-right">
-  <div class="flex items-center justify-end gap-1">
-    {% include "portal/_badge.html" with label=a.get_status_display tone_class=a.status_badge_class %}
-    <a class="ml-1 rounded-full border border-outline-variant/60 px-2 py-1 text-xs font-bold text-primary transition-colors hover:bg-surface-container" href="{% url 'exercises:prof_assignment_edit' a.pk %}">Modifier</a>
-  </div>
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="7" class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucun devoir créé. Commencez par créer votre premier devoir !</td></tr>
-{% endfor %}
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="ouvert">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">TP 3 · Détection d'anomalies</p><p class="text-xs text-on-surface-variant">Réseaux de neurones profonds</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">Vendredi 25 oct.</td><td class="px-5 py-3 text-on-surface-variant">18 / 24</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:75%"></div></div><span class="text-xs font-semibold text-on-surface-variant">75 %</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">Grille TP</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Ouvert" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="ouvert">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Projet · Compilateur mini-langage</p><p class="text-xs text-on-surface-variant">Algorithmique avancée</p></td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">Dimanche 27 oct.</td><td class="px-5 py-3 text-on-surface-variant">31 / 38</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:82%"></div></div><span class="text-xs font-semibold text-on-surface-variant">82 %</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">Projet 40 %</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Ouvert" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="correction">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Examen blanc · Raft</p><p class="text-xs text-on-surface-variant">Systèmes distribués</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">Terminé le 18 oct.</td><td class="px-5 py-3 text-on-surface-variant">24 / 24</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:42%"></div></div><span class="text-xs font-semibold text-on-surface-variant">42 % corr.</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">Grille examen</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À corriger" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="correction">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Étude de cas · Biais algorithmique</p><p class="text-xs text-on-surface-variant">Éthique de l'IA</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">Terminé le 16 oct.</td><td class="px-5 py-3 text-on-surface-variant">18 / 18</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-tertiary-fixed-dim" style="width:61%"></div></div><span class="text-xs font-semibold text-on-surface-variant">61 % corr.</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">Rédaction</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À corriger" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="termine">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">TP 2 · Jointures SQL</p><p class="text-xs text-on-surface-variant">Bases de données avancées</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">Terminé le 9 oct.</td><td class="px-5 py-3 text-on-surface-variant">18 / 18</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:100%"></div></div><span class="text-xs font-semibold text-on-surface-variant">100 %</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">Grille TP</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Terminé" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="termine">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">QCM · Complexité</p><p class="text-xs text-on-surface-variant">Algorithmique avancée</p></td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">Terminé le 2 oct.</td><td class="px-5 py-3 text-on-surface-variant">36 / 38</td>
+<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="h-1.5 w-24 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full bg-primary" style="width:100%"></div></div><span class="text-xs font-semibold text-on-surface-variant">100 %</span></div></td><td class="px-5 py-3"><a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubrics' %}">QCM auto</a></td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Terminé" tone_class="bg-surface-container text-on-surface-variant" %}</td></tr>
 </tbody>
 </table>
 </div>
@@ -62,59 +62,4 @@
 </section>
 </div>
 </main>
-
-<!-- Modal Créer un devoir -->
-<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="assignment-create-modal">
-<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
-<div class="relative z-10 w-full max-w-2xl rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl max-h-[90vh] overflow-y-auto">
-<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4 sticky top-0 bg-surface-container-lowest">
-  <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Créer un devoir</h2></div>
-  <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
-</div>
-<form method="post" class="p-5 space-y-3">
-  {% csrf_token %}
-  {% for field in form %}
-  <div class="flex flex-col gap-1.5">
-    <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-    {{ field }}
-    {% if field.errors %}<p class="text-xs text-error">{{ field.errors|join:', ' }}</p>{% endif %}
-  </div>
-  {% endfor %}
-  <div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
-    <button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
-    <button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Créer le devoir</button>
-  </div>
-</form>
-</div>
-</div>
-
-{% endblock %}
-{% block page_scripts %}
-<script>
-(function () {
-  var chips = Array.prototype.slice.call(document.querySelectorAll('[data-filter-value]'));
-  var rows = Array.prototype.slice.call(document.querySelectorAll('[data-filter-item]'));
-  var count = document.querySelector('[data-filter-count]');
-  var empty = document.querySelector('[data-filter-empty]');
-  var activeType = 'all';
-  function apply() {
-    var shown = 0;
-    rows.forEach(function (row) {
-      var tags = (row.getAttribute('data-tags') || '').split(/\s+/);
-      var ok = activeType === 'all' || tags.indexOf(activeType) !== -1;
-      row.classList.toggle('hidden', !ok);
-      if (ok) shown++;
-    });
-    if (count) count.textContent = shown;
-    if (empty) empty.classList.toggle('hidden', shown !== 0);
-  }
-  chips.forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      activeType = chip.getAttribute('data-filter-value');
-      chips.forEach(function (c) { c.classList.toggle('is-active', c === chip); c.setAttribute('aria-pressed', String(c === chip)); });
-      apply();
-    });
-  });
-})();
-</script>
 {% endblock %}

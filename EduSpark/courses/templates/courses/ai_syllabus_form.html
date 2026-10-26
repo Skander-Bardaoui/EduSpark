@@ -1,0 +1,76 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Générer un plan de cours — {{ course.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">{{ eyebrow }}</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Générer un plan de cours</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ course.subject.code }} · {{ course.title }}</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ detail_url }}"><span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>Retour au cours</a>
+</header>
+<div class="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary-fixed/40 px-4 py-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">lock</span>
+<p>Vos supports sont analysés <strong class="text-on-surface">sur le serveur de l'université</strong> : seuls le titre, le niveau et une courte liste de thèmes sont envoyés à l'assistant qui rédige le plan. Vous relirez et modifierez la proposition ; rien n'est enregistré avant votre validation.</p>
+</div>
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<form class="flex flex-col gap-5 p-5 sm:p-6" method="post" novalidate data-syllabus-generate>
+{% csrf_token %}
+{% if form.non_field_errors %}
+<div class="rounded-lg bg-error-container px-4 py-3 text-sm text-on-error-container" role="alert">
+{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
+<div class="grid gap-4 sm:grid-cols-2">
+{% for field in form %}
+{% if field.name == "title" %}
+{% include "portal/_form_field.html" with field=field wrapper_class="sm:col-span-2" %}
+{% else %}
+{% include "portal/_form_field.html" with field=field %}
+{% endif %}
+{% endfor %}
+</div>
+<p class="hidden items-center gap-3 rounded-lg bg-surface-container-low px-4 py-3 text-sm text-on-surface" role="status" aria-live="polite" data-syllabus-status></p>
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+<p class="text-xs text-on-surface-variant">L'analyse de supports volumineux peut prendre jusqu'à deux minutes.</p>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'courses:prof_ai_syllabus_manual' course.pk %}">Saisir le plan à la main</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container disabled:cursor-wait disabled:opacity-70" type="submit" data-syllabus-submit>
+<span class="material-symbols-outlined text-[18px]" aria-hidden="true" data-syllabus-icon>auto_awesome</span><span data-syllabus-label>Générer un plan de cours</span>
+</button>
+</div>
+</div>
+</form>
+</section>
+</div>
+</main>
+<style>
+@keyframes syllabus-spin{to{transform:rotate(360deg)}}
+.syllabus-spin{animation:syllabus-spin 1s linear infinite}
+@media (prefers-reduced-motion: reduce){.syllabus-spin{animation:none}}
+</style>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var form = document.querySelector("[data-syllabus-generate]");
+  if (!form) return;
+  form.addEventListener("submit", function () {
+    var button = form.querySelector("[data-syllabus-submit]");
+    var status = form.querySelector("[data-syllabus-status]");
+    var icon = form.querySelector("[data-syllabus-icon]");
+    // Le bouton reste visible mais inactif : pas de double envoi pendant l'attente.
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    form.querySelector("[data-syllabus-label]").textContent = "Génération en cours…";
+    icon.textContent = "progress_activity";
+    icon.classList.add("syllabus-spin");
+    status.textContent = "Génération en cours… Lecture de vos supports puis rédaction du plan. Merci de patienter sans quitter la page.";
+    status.classList.remove("hidden");
+    status.classList.add("flex");
+  });
+})();
+</script>
+{% endblock %}

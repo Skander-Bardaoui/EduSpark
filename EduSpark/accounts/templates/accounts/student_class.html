@@ -1,0 +1,162 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Ma Classe &amp; Groupes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-5">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Vie académique</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Ma Classe &amp; Groupes</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Votre promotion, vos groupes de TD / TP et vos camarades à {{ portal_university.name }}.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:university_switch' %}"><span class="material-symbols-outlined text-[18px]">swap_horiz</span>Changer d'université</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'portal:student_profile' %}"><span class="material-symbols-outlined text-[18px]">person</span>Mon profil</a>
+</div>
+</header>
+{% if profile %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Filière" value=profile.program|default:"—" icon="school" hint="Parcours suivi" %}
+{% include "portal/_stat_card.html" with label="Promotion" value=profile.promotion|default:"—" icon="calendar_month" icon_class="bg-surface-container text-secondary" hint="Année d'entrée" %}
+{% include "portal/_stat_card.html" with label="Groupes" value=stats.groups icon="workspaces" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="TD / TP rejoints" %}
+{% include "portal/_stat_card.html" with label="Camarades" value=stats.classmates icon="groups" hint="Dans vos groupes" %}
+</div>
+<section class="grid gap-4 lg:grid-cols-3">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm lg:col-span-2">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">{{ primary_class.name|default:"Ma promotion" }}</h2>
+<p class="mt-1 font-body-sm text-body-sm text-on-surface-variant">{{ primary_class.program|default:profile.program|default:"Filière non renseignée" }}{% if primary_class.level %} · {{ primary_class.level }}{% endif %} · {{ portal_university.name }}</p>
+</div>
+{% if profile.promotion %}{% include "portal/_badge.html" with label=profile.promotion tone_class="bg-primary-fixed text-primary" dot=True %}{% endif %}
+</div>
+<dl class="mt-5 grid gap-4 sm:grid-cols-2">
+<div class="rounded bg-surface-container p-4">
+<dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Responsable pédagogique</dt>
+<dd class="mt-1 text-sm font-semibold text-on-surface">{% for professor in primary_class.professors.all %}{{ professor.user.get_full_name|default:professor.user.email }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</dd>
+</div>
+<div class="rounded bg-surface-container p-4">
+<dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Année universitaire</dt>
+<dd class="mt-1 text-sm font-semibold text-on-surface">{{ primary_class.academic_year|default:"—" }}</dd>
+</div>
+<div class="rounded bg-surface-container p-4">
+<dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt>
+<dd class="mt-1 text-sm font-semibold text-on-surface">{{ primary_class.level|default:"—" }}</dd>
+</div>
+<div class="rounded bg-surface-container p-4">
+<dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Section</dt>
+<dd class="mt-1 text-sm font-semibold text-on-surface">{{ primary_class.section|default:"—" }}</dd>
+</div>
+<div class="rounded bg-surface-container p-4">
+<dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Groupes de la classe</dt>
+<dd class="mt-1 text-sm font-semibold text-on-surface">{{ class_groups|length }}</dd>
+</div>
+</dl>
+{% if primary_class.description %}<p class="mt-4 border-t border-outline-variant/40 pt-4 text-sm leading-relaxed text-on-surface-variant">{{ primary_class.description|linebreaksbr }}</p>{% endif %}
+</div>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Mon identité étudiante</p>
+<p class="mt-2 font-headline-sm text-headline-sm text-white">{{ portal_user_name }}</p>
+<p class="mt-1 text-sm text-white/70">{{ profile.student_number|default:"Matricule non renseigné" }}</p>
+<div class="mt-4 rounded bg-white/10 p-4 ring-1 ring-white/15">
+<div class="flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Promotion</span><span>{{ profile.promotion|default:"—" }}</span></div>
+<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Filière</span><span class="truncate text-right">{{ profile.program|default:"—" }}</span></div>
+<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Classes</span><span>{{ stats.classes }}</span></div>
+</div>
+<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-label-md text-label-md font-bold text-primary transition-transform hover:scale-[1.01]" href="{% url 'portal:student_profile' %}">
+<span class="material-symbols-outlined text-[18px]">badge</span>Voir mon profil
+</a>
+</div>
+</section>
+<section class="grid gap-4 lg:grid-cols-3">
+{% for group in groups %}
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-2">
+<span class="flex h-10 w-10 items-center justify-center rounded {% cycle 'bg-surface-container text-primary' 'bg-surface-container text-secondary' 'bg-surface-container text-tertiary' %}"><span class="material-symbols-outlined text-[20px]">science</span></span>
+{% if group.school_class.level %}{% include "portal/_badge.html" with label=group.school_class.level tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+</div>
+<h3 class="mt-3 font-title-md text-title-md text-on-surface">{{ group.name }}</h3>
+<p class="mt-1 text-sm text-on-surface-variant">{{ group.school_class.name }} · {{ group.students.all|length }} étudiant{{ group.students.all|length|pluralize }}{% if group.capacity %} / {{ group.capacity }}{% endif %}</p>
+<div class="mt-4 flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<span class="truncate text-xs font-semibold text-on-surface-variant">Enseignant : {% for professor in group.school_class.professors.all|slice:":2" %}{{ professor.user.get_full_name|default:professor.user.email }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</span>
+<a class="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary hover:underline" href="#classmates">Voir les camarades<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+</div>
+</div>
+{% empty %}
+<div class="lg:col-span-3">
+{% url 'portal:university_switch' as switch_url %}
+{% include "portal/_empty_state.html" with icon="groups" title="Aucun groupe pour le moment" hint="Vous n'êtes affecté à aucun groupe de TD / TP dans cette université. L'administration de votre université peut vous y ajouter." url=switch_url label="Changer d'université" %}
+</div>
+{% endfor %}
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" id="classmates">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Mes camarades de promotion</h2>
+<p class="mt-0.5 text-xs text-on-surface-variant"><span data-classmate-count>{{ stats.classmates }}</span> étudiant{{ stats.classmates|pluralize }} affiché{{ stats.classmates|pluralize }}</p>
+</div>
+<div class="relative w-full max-w-xs">
+<span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input class="w-full rounded-full border border-outline-variant/60 bg-surface-container-lowest py-2 pl-9 pr-3 text-body-sm text-on-surface outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20" id="classmate-search" placeholder="Rechercher un étudiant..." type="search"/>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+<tr>
+<th class="px-5 py-3 font-bold">Étudiant</th>
+<th class="px-5 py-3 font-bold">Groupe(s)</th>
+<th class="px-5 py-3 font-bold">Classe</th>
+<th class="px-5 py-3 font-bold">Statut</th>
+<th class="px-5 py-3 text-right font-bold">Contact</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for student in classmates %}
+<tr class="transition-colors hover:bg-surface-container/40" data-classmate-row>
+<td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-full {% cycle 'bg-primary-fixed text-primary' 'bg-surface-container-high text-secondary' 'bg-tertiary-fixed text-on-tertiary-fixed' %} text-[11px] font-extrabold">{{ student.user.first_name|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}</span><div><p class="font-semibold text-on-surface">{{ student.user.get_full_name|default:student.user.email }}</p><p class="text-xs text-on-surface-variant">{{ student.user.email }}</p></div></div></td>
+<td class="px-5 py-3 text-on-surface-variant">{% for group in student.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% for group in student.groups.all %}{{ group.school_class.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+<td class="px-5 py-3">{% if student.membership.is_active %}{% include "portal/_badge.html" with label="Inscrit actif" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}</td>
+<td class="px-5 py-3 text-right"><a class="inline-flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="mailto:{{ student.user.email }}" aria-label="Envoyer un message à {{ student.user.get_full_name|default:student.user.email }}"><span class="material-symbols-outlined text-[18px]">mail</span></a></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-8 text-center text-sm text-on-surface-variant" colspan="5">Aucun camarade dans vos groupes pour le moment.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<p class="hidden px-5 py-8 text-center text-sm text-on-surface-variant" data-classmate-empty>Aucun étudiant ne correspond à votre recherche.</p>
+</section>
+{% else %}
+<div class="rounded border border-tertiary-fixed-dim/50 bg-tertiary-fixed/20 p-5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Profil étudiant indisponible</h2>
+<p class="mt-1 text-sm text-on-surface-variant">Votre appartenance à {{ portal_university.name }} n'a pas encore de profil étudiant. Si votre inscription est en attente, elle sera visible après validation par l'administration.</p>
+<a class="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'portal:university_switch' %}"><span class="material-symbols-outlined text-[16px]">swap_horiz</span>Voir mes universités</a>
+</div>
+{% endif %}
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var input = document.getElementById('classmate-search');
+  if (!input) return;
+  var rows = Array.prototype.slice.call(document.querySelectorAll('[data-classmate-row]'));
+  var count = document.querySelector('[data-classmate-count]');
+  var empty = document.querySelector('[data-classmate-empty]');
+  input.addEventListener('input', function () {
+    var query = (input.value || '').toLowerCase();
+    var shown = 0;
+    rows.forEach(function (row) {
+      var match = row.textContent.toLowerCase().indexOf(query) !== -1;
+      row.classList.toggle('hidden', !match);
+      if (match) shown += 1;
+    });
+    if (count) count.textContent = String(shown);
+    if (empty) empty.classList.toggle('hidden', shown !== 0 || rows.length === 0);
+  });
+})();
+</script>
+{% endblock %}

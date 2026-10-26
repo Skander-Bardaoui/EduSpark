@@ -1,0 +1,118 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Journal de progression étudiants — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Journal de progression étudiants</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Consultez les entrées de journal, l'évolution de la confiance et les alertes de vos étudiants référents.</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:prof_followup' %}"><span class="material-symbols-outlined text-[18px]">monitoring</span>Tableau de bord suivi</a>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Étudiants référents" value=student_count icon="supervisor_account" hint=students_hint %}
+{% include "portal/_stat_card.html" with label="Entrées cette semaine" value=entries_this_week icon="edit_note" icon_class="bg-surface-container text-secondary" hint="Sur la semaine en cours" %}
+{% include "portal/_stat_card.html" with label="Confiance moyenne" value=average_confidence suffix=" /10" icon="sentiment_satisfied" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Auto-évaluation moyenne" %}
+{% include "portal/_stat_card.html" with label="Alertes ouvertes" value=alert_count icon="warning" hint=alerts_hint %}
+</div>
+<section class="grid grid-cols-1 gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 p-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Étudiants suivis</h2>
+<label class="relative mt-3 block"><span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span><input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none focus:border-primary" id="journal-search" maxlength="100" placeholder="Rechercher un étudiant…" type="search"/></label>
+</div>
+<div class="max-h-[560px] overflow-y-auto" id="journal-students">
+{% for row in panel_rows %}
+<button class="flex w-full items-center gap-3 border-b border-outline-variant/30 px-4 py-3.5 text-left transition-colors hover:bg-surface-container/60{% if row.student.pk|stringformat:'s' == selected_id %} bg-primary-fixed/30{% endif %}" data-journal-student="{{ row.student.pk }}" type="button">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">{{ row.initials }}</span>
+<span class="min-w-0 flex-1"><span class="flex items-center justify-between gap-2"><span class="truncate text-body-sm font-bold text-on-surface">{{ row.name }}</span><span class="shrink-0 text-[11px] font-semibold {{ row.confidence_tone }}">{{ row.confidence_label }}/10</span></span><span class="mt-0.5 block text-xs text-on-surface-variant">{{ row.program }}{% if row.class_name %} · {{ row.class_name }}{% endif %} · Dernière entrée {{ row.last_entry_label }}{% if row.has_today_entry %}<span class="ml-1 inline-flex items-center rounded-full bg-secondary-fixed px-2 py-0.5 text-[10px] font-bold text-on-secondary-fixed">Nouvelle entrée</span>{% endif %}</span></span>
+</button>
+{% empty %}
+<p class="px-4 py-8 text-center text-sm text-on-surface-variant">Aucun étudiant dans votre portefeuille.</p>
+{% endfor %}
+</div>
+</div>
+<div class="flex flex-col gap-4">
+{% for row in panel_rows %}
+<div class="{% if row.student.pk|stringformat:'s' == selected_id %}flex{% else %}hidden{% endif %} flex-col gap-4" data-journal-detail="{{ row.student.pk }}">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div class="flex items-center gap-3"><span class="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-on-primary">{{ row.initials }}</span><div><h2 class="font-headline-sm text-headline-sm text-on-surface">{{ row.name }}</h2><p class="text-xs text-on-surface-variant">{{ row.program }}{% if row.class_name %} · {{ row.class_name }}{% endif %}</p></div></div>
+<div class="flex flex-wrap items-center gap-2">
+{% if row.alert_count %}<span class="inline-flex items-center gap-1.5 rounded-full bg-error-container px-3 py-1 text-[11px] font-bold text-on-error-container"><span class="h-1.5 w-1.5 rounded-full bg-error"></span>{{ row.alert_count }} alerte{{ row.alert_count|pluralize }}</span>{% endif %}
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{{ tutoring_url }}"><span class="material-symbols-outlined text-[16px]">event</span>Proposer un rendez-vous</a>
+</div>
+</div>
+<div class="mt-4 grid gap-3 sm:grid-cols-3">
+<div class="rounded bg-surface-container p-3"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Confiance</p><p class="mt-1 text-lg font-bold text-on-surface">{{ row.confidence_label }} / 10</p></div>
+<div class="rounded bg-surface-container p-3"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Assiduité</p><p class="mt-1 text-lg font-bold text-on-surface">{{ row.attendance_label }}</p></div>
+<div class="rounded bg-surface-container p-3"><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Moyenne S1</p><p class="mt-1 text-lg font-bold text-on-surface">{{ row.average_label }}</p></div>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h3 class="font-title-md text-title-md text-on-surface">Objectifs du semestre</h3>
+<div class="mt-4 space-y-3">
+{% for item in row.goals %}
+<div><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">{{ item.goal.title }}</span><span class="text-on-surface-variant">{{ item.goal.progress }} %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full {{ item.meta.progress }}" style="width:{{ item.goal.progress }}%"></div></div></div>
+{% empty %}
+<p class="text-xs text-on-surface-variant">Aucun objectif renseigné.</p>
+{% endfor %}
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h3 class="font-title-md text-title-md text-on-surface">Dernières entrées</h3>
+<ul class="mt-3 space-y-3">
+{% for item in row.entries %}
+<li class="border-l-2 {{ item.meta.border }} pl-3"><p class="text-xs font-bold uppercase tracking-wide {{ item.meta.date }}">{{ item.when_label }} · {{ item.entry.title }}</p><p class="mt-1 text-sm leading-relaxed text-on-surface-variant">{{ item.entry.reflection }}</p>
+{% if item.entry.feedback %}
+<div class="mt-2 rounded border border-outline-variant/40 bg-surface-container-low px-3 py-2"><p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary"><span class="material-symbols-outlined text-[15px]">forum</span>Retour de {{ item.feedback_name }}{% if item.feedback_when %} · {{ item.feedback_when }}{% endif %}</p><p class="mt-1 text-xs leading-relaxed text-on-surface-variant">{{ item.entry.feedback|linebreaksbr }}</p></div>
+{% endif %}
+<form action="{{ item.feedback_url }}" class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start" data-validate-form method="post" novalidate>
+{% csrf_token %}
+<div class="min-w-0 flex-1" data-field-wrap><textarea aria-label="Retour sur l'entrée {{ item.entry.title }}" class="min-h-11 w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-xs text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Rédigez un retour pour l'étudiant." maxlength="2000" minlength="5" name="feedback" placeholder="Écrire un retour à l'étudiant…" required rows="2"></textarea></div>
+<button class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[15px]">send</span>{% if item.entry.feedback %}Mettre à jour{% else %}Publier{% endif %}</button>
+</form>
+</li>
+{% empty %}
+<li class="text-xs text-on-surface-variant">Aucune entrée de journal.</li>
+{% endfor %}
+</ul>
+</section>
+</div>
+{% endfor %}
+</div>
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-journal-student]'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('[data-journal-detail]'));
+  function openStudent(key) {
+    buttons.forEach(function (btn) {
+      var on = btn.getAttribute('data-journal-student') === key;
+      btn.classList.toggle('bg-primary-fixed/30', on);
+    });
+    panels.forEach(function (panel) {
+      var on = panel.getAttribute('data-journal-detail') === key;
+      panel.classList.toggle('hidden', !on);
+      panel.classList.toggle('flex', on);
+    });
+  }
+  buttons.forEach(function (btn) { btn.addEventListener('click', function () { openStudent(btn.getAttribute('data-journal-student')); }); });
+  var initial = '{{ selected_id|escapejs }}';
+  if (initial) openStudent(initial);
+
+  var search = document.getElementById('journal-search');
+  if (search) search.addEventListener('input', function () {
+    var q = (search.value || '').toLowerCase();
+    buttons.forEach(function (btn) { btn.classList.toggle('hidden', btn.textContent.toLowerCase().indexOf(q) === -1); });
+  });
+})();
+</script>
+{% endblock %}

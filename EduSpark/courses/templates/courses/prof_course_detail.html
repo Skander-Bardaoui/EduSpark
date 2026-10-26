@@ -1,0 +1,122 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}{{ course.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% url 'courses:prof_chapter_create' course.pk as chapter_create_url %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
+<div class="min-w-0 space-y-2">
+<div class="flex flex-wrap items-center gap-2">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ course.title }}</h1>
+{% if published_total %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+</div>
+<div class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-on-surface">
+<span class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container-high px-2.5"><span class="material-symbols-outlined text-[16px] text-primary">auto_stories</span>{{ course.subject.code }} · {{ course.subject.name }}</span>
+<span class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container-high px-2.5"><span class="material-symbols-outlined text-[16px] text-primary">school</span>{{ course.subject.program.name }}</span>
+<span class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container-high px-2.5"><span class="material-symbols-outlined text-[16px] text-secondary">date_range</span>{{ course.subject.semester_label }}</span>
+<span class="inline-flex h-7 items-center gap-1 rounded-full bg-surface-container-high px-2.5"><span class="material-symbols-outlined text-[16px] text-tertiary-container">workspace_premium</span>{{ course.subject.credits }} ECTS · coef. {{ course.subject.coefficient|floatformat:"-2" }}</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_course' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Mes cours</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_course_update' course.pk %}"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-error/30 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-error shadow-sm transition-colors hover:bg-error-container" href="{% url 'courses:prof_course_delete' course.pk %}"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary-fixed/40 px-4 py-2.5 font-label-md text-label-md text-primary shadow-sm transition-colors hover:bg-primary-fixed" href="{% url 'courses:prof_ai_syllabus_generate' course.pk %}" data-ai-syllabus><span class="material-symbols-outlined text-[18px]" aria-hidden="true">auto_awesome</span>Générer un plan de cours</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:prof_chapter_create' course.pk %}"><span class="material-symbols-outlined text-[18px]">add</span>Chapitre</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}"><span class="material-symbols-outlined text-[18px]">upload_file</span>Support</a>
+</div>
+</header>
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+<div class="flex flex-col gap-5 xl:col-span-8">
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="mb-3 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+<div>
+<h2 class="text-[16px] font-bold text-on-surface">Plan du cours et supports</h2>
+<p class="mt-0.5 text-[12px] text-on-surface-variant">{{ chapters|length }} chapitre{{ chapters|length|pluralize }} · {{ material_total }} support{{ material_total|pluralize }}. Ordonnez les chapitres avec les flèches ; les supports suivent leur chapitre.</p>
+</div>
+<a class="inline-flex items-center gap-1.5 self-start text-xs font-bold text-primary hover:underline sm:self-auto" href="{% url 'courses:prof_chapter_create' course.pk %}"><span class="material-symbols-outlined text-[16px]">add_circle</span>Ajouter un chapitre</a>
+</div>
+{% for chapter in chapters %}
+<article class="mt-3 rounded bg-surface-container-low p-3">
+<div class="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+<div class="flex min-w-0 items-start gap-3 md:items-center">
+<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-on-primary shadow-sm">{{ forloop.counter }}</div>
+<div class="min-w-0">
+<h3 class="text-[14px] font-semibold text-on-surface">{{ chapter.title }}{% if chapter.duration_hours %} <span class="ml-1 text-[11px] font-semibold text-on-surface-variant">· {{ chapter.duration_hours }} h</span>{% endif %}</h3>
+{% if chapter.summary %}<p class="text-[12px] text-on-surface-variant">{{ chapter.summary|truncatechars:180 }}</p>{% endif %}
+{% if chapter.objectives %}<ul class="mt-1 list-disc pl-4 text-[12px] text-on-surface-variant">{% for objective in chapter.objectives.splitlines %}<li>{{ objective }}</li>{% endfor %}</ul>{% endif %}
+</div>
+</div>
+<div class="flex shrink-0 items-center gap-1 self-end md:self-auto">
+<form method="post" action="{% url 'courses:prof_chapter_up' course.pk chapter.pk %}">{% csrf_token %}<button class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container-lowest hover:text-primary disabled:opacity-30" type="submit" title="Monter" aria-label="Monter le chapitre {{ chapter.title }}"{% if forloop.first %} disabled{% endif %}><span class="material-symbols-outlined text-[18px]">arrow_upward</span></button></form>
+<form method="post" action="{% url 'courses:prof_chapter_down' course.pk chapter.pk %}">{% csrf_token %}<button class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container-lowest hover:text-primary disabled:opacity-30" type="submit" title="Descendre" aria-label="Descendre le chapitre {{ chapter.title }}"{% if forloop.last %} disabled{% endif %}><span class="material-symbols-outlined text-[18px]">arrow_downward</span></button></form>
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container-lowest hover:text-primary" href="{% url 'courses:prof_chapter_update' course.pk chapter.pk %}" title="Modifier le chapitre" aria-label="Modifier le chapitre {{ chapter.title }}"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+<a class="icon-action rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" href="{% url 'courses:prof_chapter_delete' course.pk chapter.pk %}" title="Supprimer le chapitre" aria-label="Supprimer le chapitre {{ chapter.title }}"><span class="material-symbols-outlined text-[18px]">delete</span></a>
+</div>
+</div>
+{% with items=chapter.materials.all %}
+{% if items %}<div class="mt-2 rounded bg-surface-container-lowest px-3">{% include "courses/_materials_list.html" with perspective="prof" %}</div>{% endif %}
+{% endwith %}
+<a class="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:underline" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}&amp;chapitre={{ chapter.pk }}"><span class="material-symbols-outlined text-[16px]">upload_file</span>Ajouter un support à ce chapitre</a>
+</article>
+{% empty %}
+{% include "portal/_empty_state.html" with icon="view_agenda" title="Aucun chapitre" hint="Structurez votre cours en chapitres, puis rattachez-y vos supports (PDF, présentations, documents Word, vidéos, audios)." url=chapter_create_url label="Ajouter un chapitre" %}
+{% endfor %}
+</section>
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="mb-2 flex items-center justify-between gap-2">
+<div>
+<h2 class="text-[16px] font-bold text-on-surface">Supports généraux du cours</h2>
+<p class="text-[12px] text-on-surface-variant">Documents qui ne dépendent d'aucun chapitre (plan, bibliographie, annales…).</p>
+</div>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}"><span class="material-symbols-outlined text-[16px]">upload_file</span>Déposer</a>
+</div>
+{% if general_materials %}{% include "courses/_materials_list.html" with items=general_materials perspective="prof" %}{% else %}<p class="py-4 text-center text-sm text-on-surface-variant">Aucun support général.</p>{% endif %}
+</section>
+</div>
+<aside class="flex flex-col gap-5 xl:col-span-4 xl:sticky xl:top-20">
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<h2 class="text-[16px] font-bold text-on-surface">Publication par classe</h2>
+<p class="mt-0.5 text-[12px] text-on-surface-variant">Le cours n'est visible que des étudiants des classes pour lesquelles il est publié. Vous ne pouvez publier que pour les classes où vous enseignez cette matière.</p>
+<ul class="mt-3 divide-y divide-outline-variant/30">
+{% for row in class_rows %}
+<li class="flex items-center justify-between gap-3 py-3">
+<div class="min-w-0">
+<p class="truncate text-sm font-semibold text-on-surface">{{ row.school_class.name }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.school_class.academic_year|default:"—" }} · {{ row.school_class.student_total }} étudiant{{ row.school_class.student_total|pluralize }}{% if row.is_published %} · publié le {{ row.publication.published_at|date:"d/m/Y" }}{% endif %}</p>
+</div>
+<form method="post" action="{% url 'courses:prof_course_publication' course.pk row.school_class.pk %}">
+{% csrf_token %}
+{% if row.is_published %}
+<input name="action" type="hidden" value="retirer"/>
+<button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/70 px-3.5 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit"><span class="material-symbols-outlined text-[16px]">visibility_off</span>Retirer</button>
+{% else %}
+<input name="action" type="hidden" value="publier"/>
+<button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">publish</span>Publier</button>
+{% endif %}
+</form>
+</li>
+{% empty %}
+<li class="py-4 text-sm text-on-surface-variant">Aucune classe : l'administration ne vous a affecté cette matière dans aucune classe.</li>
+{% endfor %}
+</ul>
+</section>
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<h2 class="text-[16px] font-bold text-on-surface">Présentation</h2>
+<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">{{ course.description|default:"Aucune présentation. Modifiez le cours pour ajouter objectifs, prérequis et modalités d'évaluation."|linebreaksbr }}</p>
+</section>
+<section class="rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between gap-2"><h2 class="text-[16px] font-bold text-on-surface">Séances planifiées</h2><a class="text-xs font-bold text-primary hover:underline" href="{% url 'courses:prof_timetable' %}">Emploi du temps</a></div>
+<ul class="mt-3 space-y-2 text-sm">
+{% for slot in slots %}
+<li class="flex flex-wrap items-center justify-between gap-2 rounded bg-surface-container px-3 py-2"><span class="font-semibold text-on-surface">{{ slot.get_weekday_display }} · {{ slot.time_label }}</span><span class="text-xs text-on-surface-variant">{{ slot.type_label }} · {{ slot.assignment.school_class.name }}{% if slot.room %} · {{ slot.room }}{% endif %}</span></li>
+{% empty %}
+<li class="text-sm text-on-surface-variant">Aucune séance n'est encore planifiée pour cette matière.</li>
+{% endfor %}
+</ul>
+</section>
+</aside>
+</div>
+</div>
+</main>
+{% endblock %}

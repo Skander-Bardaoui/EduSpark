@@ -1,0 +1,33 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const BASE = 'http://127.0.0.1:8000';
+const CDP = 'http://127.0.0.1:9222';
+const SHOTS = path.join(process.cwd(), 'shots');
+fs.mkdirSync(SHOTS, { recursive: true });
+const sessions = JSON.parse(fs.readFileSync('sessions.json', 'utf8'));
+const PAGES = [['cours','/prof/cours/'],['suivi','/prof/suivi/']];
+const list = await fetch(CDP + '/json/list').then(r => r.json());
+const target = list.find(t => t.type === 'page');
+const ws = new WebSocket(target.webSocketDebuggerUrl);
+await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
+let seq = 0; const pending = new Map();
+ws.onmessage = (ev) => { const m = JSON.parse(ev.data); if (m.id && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.error ? p.reject(new Error(JSON.stringify(m.error))) : p.resolve(m.result); } };
+const send = (m, p = {}) => new Promise((resolve, reject) => { const id = ++seq; pending.set(id, { resolve, reject }); ws.send(JSON.stringify({ id, method: m, params: p })); });
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+await send('Page.enable'); await send('Network.enable'); await send('Runtime.enable');
+for (const [name,url] of PAGES) {
+  for (const [w,h] of [[1440,900],[390,844]]) {
+    await send('Network.clearBrowserCookies');
+    await send('Network.setCookie', { name: 'sessionid', value: sessions.prof.sessionid, domain: '127.0.0.1', path: '/', httpOnly: true });
+    await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: w < 500 });
+    await send('Page.navigate', { url: BASE + url });
+    await sleep(1800);
+    if (w === 1440) {
+      const shot = await send('Page.captureScreenshot', { format: 'png' });
+      fs.writeFileSync(path.join(SHOTS, `${name}__1440.png`), Buffer.from(shot.data, 'base64'));
+    }
+    const r = await send('Runtime.evaluate', { expression: `JSON.stringify({w:${w}, doc: document.documentElement.scrollWidth, h1: parseFloat(getComputedStyle(document.querySelector('h1')).fontSize)})`, returnByValue: true });
+    console.log(name, r.result.value);
+  }
+}
+ws.close(); process.exit(0);

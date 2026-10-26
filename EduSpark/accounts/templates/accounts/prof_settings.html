@@ -1,0 +1,96 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Paramètres du compte — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Compte</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Paramètres du compte</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Informations professionnelles et sécurité de connexion de votre compte enseignant.</p>
+</header>
+<div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+<div class="flex flex-col gap-6">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Profil enseignant</h2>
+<p class="text-xs text-on-surface-variant">Ces informations apparaissent sur vos pages de cours et vos supports.</p>
+</div>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'portal:prof_profile' %}#profile-edit"><span class="material-symbols-outlined text-[16px]">edit</span>Modifier mes informations</a>
+</div>
+<div class="grid gap-4 p-5 sm:grid-cols-2">
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nom complet</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ portal_user_name }}</p></div>
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">E-mail professionnel</span><p class="break-all rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ portal_user_email }}</p></div>
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Rôle</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ portal_scope_label }}</p></div>
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Université courante</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ portal_university.name|default:"—" }}</p></div>
+{% if profile %}
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Département</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ profile.department|default:"—" }}</p></div>
+<div class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Spécialité</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ profile.speciality|default:"—" }}</p></div>
+<div class="flex flex-col gap-1.5 sm:col-span-2"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Grade</span><p class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface">{{ profile.get_grade_display|default:"—" }}</p></div>
+{% endif %}
+</div>
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 px-5 py-4">
+<p class="text-xs text-on-surface-variant">Pour changer de nom ou d'e-mail, contactez l'administration de votre université.</p>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" href="{% url 'portal:prof_profile' %}#profile-edit"><span class="material-symbols-outlined text-[18px]">person</span>Ouvrir mon profil</a>
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Rattachements</h2>
+<p class="text-xs text-on-surface-variant">Vos universités et le contexte dans lequel vous travaillez actuellement.</p>
+</div>
+<ul class="divide-y divide-outline-variant/30">
+{% for membership in memberships %}
+<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+<div class="min-w-0">
+<p class="truncate text-sm font-semibold text-on-surface">{{ membership.university.name }}</p>
+<p class="text-xs text-on-surface-variant">{{ membership.get_role_display }}{% if membership.is_active %} · Actif{% else %} · En attente de validation{% endif %}</p>
+</div>
+<div class="flex items-center gap-2">
+{% if membership.university_id == portal_university.pk %}{% include "portal/_badge.html" with label="Contexte courant" tone_class="bg-primary-fixed text-primary" dot=True %}{% endif %}
+{% if membership.is_active %}{% include "portal/_badge.html" with label="Actif" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% else %}{% include "portal/_badge.html" with label="En attente" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+</div>
+</li>
+{% empty %}
+<li class="px-5 py-4 text-sm text-on-surface-variant">Aucune université rattachée.</li>
+{% endfor %}
+</ul>
+<div class="border-t border-outline-variant/40 px-5 py-4 text-right">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:prof_universities' %}"><span class="material-symbols-outlined text-[16px]">account_balance</span>Gérer mes universités</a>
+</div>
+</section>
+</div>
+<div class="flex flex-col gap-6">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Sécurité</h2>
+<p class="text-xs text-on-surface-variant">Utilisez au moins 8 caractères, pas uniquement numériques.</p>
+</div>
+<form class="flex flex-col gap-3 p-5" method="post" novalidate>
+{% csrf_token %}
+{% for field in form.visible_fields %}{% include "portal/_form_field.html" with field=field %}{% endfor %}
+{% for error in form.non_field_errors %}<div class="rounded border border-error/30 bg-error-container/40 px-4 py-3 text-sm text-on-error-container">{{ error }}</div>{% endfor %}
+<button class="mt-1 inline-flex items-center justify-center gap-2 rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" type="submit"><span class="material-symbols-outlined text-[16px]">lock_reset</span>Modifier le mot de passe</button>
+</form>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Session</h2>
+<p class="text-xs text-on-surface-variant">Terminez votre session sur cet appareil.</p>
+</div>
+<div class="flex items-center gap-3 p-5">
+<span class="material-symbols-outlined text-[20px] text-primary">laptop_mac</span>
+<div class="min-w-0">
+<p class="font-semibold text-on-surface">Navigateur actuel</p>
+<p class="text-xs text-on-surface-variant">Session ouverte · {{ portal_user_email }}</p>
+</div>
+</div>
+<div class="border-t border-outline-variant/40 px-5 py-4">
+<a class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-error/30 px-4 py-2 text-xs font-bold text-error transition-colors hover:bg-error-container/40" href="{% url 'accounts:logout' %}"><span class="material-symbols-outlined text-[16px]">logout</span>Se déconnecter</a>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Relevé de présences — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi Référent</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Relevé de présences</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">{{ session.title }} · {{ session.school_class.name }} · {{ session.get_kind_display }} · {{ date_label }}{% if session.slot_id %}{% if session.slot.room %} · {{ session.slot.room }}{% endif %}{% if session.student_group_id %} · {{ session.student_group.name }}{% endif %}{% endif %}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+{% if session.slot_id %}<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_timetable' %}"><span class="material-symbols-outlined text-[18px]">calendar_month</span>Emploi du temps</a>{% endif %}
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:prof_attendance' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Toutes les séances</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Étudiants" value=rows|length icon="group" hint="Concernés par la séance" %}
+{% include "portal/_stat_card.html" with label="Présents" value=present_count icon="check_circle" icon_class="bg-primary-fixed text-primary" hint="Présents et retards" %}
+{% include "portal/_stat_card.html" with label="Absents" value=absent_count icon="cancel" icon_class="bg-error-container text-on-error-container" hint="Absences non justifiées" %}
+{% include "portal/_stat_card.html" with label="Justifiées" value=excused_count icon="verified_user" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Exclues du taux" %}
+</div>
+{% if not session.school_class_id %}
+<div class="rounded border border-error/40 bg-error-container/30 px-5 py-4 text-sm text-on-error-container">Cette séance n'est rattachée à aucune classe.</div>
+{% endif %}
+<form class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" method="post" action="{% url 'coaching:prof_attendance_save' session.pk %}">
+{% csrf_token %}
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Feuille de présence</h2>
+<span class="text-xs text-on-surface-variant">Le taux est recalculé à l'enregistrement.</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[900px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Étudiant</th><th class="px-5 py-3 font-bold">Matricule</th><th class="px-5 py-3 font-bold">Présence</th><th class="px-5 py-3 font-bold">Commentaire</th><th class="px-5 py-3 font-bold">Taux actuel</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for row in rows %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3 font-semibold text-on-surface">{{ row.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.number }}</td>
+<td class="px-5 py-3"><div class="flex flex-wrap gap-1.5">{% for value, label in status_choices %}<label class="inline-flex cursor-pointer items-center gap-1 rounded-full border border-outline-variant/70 px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant transition-colors hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary-fixed has-[:checked]:text-primary"><input class="sr-only" name="status_{{ row.student.pk }}" type="radio" value="{{ value }}"{% if row.status == value %} checked{% endif %}/>{{ label }}</label>{% endfor %}</div></td>
+<td class="px-5 py-3"><input class="w-full min-w-[180px] rounded border border-outline-variant/70 bg-surface px-3 py-1.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="200" name="note_{{ row.student.pk }}" placeholder="Optionnel" type="text" value="{{ row.note }}"/></td>
+<td class="px-5 py-3 font-bold {% if row.rate is not None and row.rate < 75 %}text-error{% elif row.rate is not None and row.rate < 85 %}text-tertiary{% else %}text-primary{% endif %}">{% if row.rate is not None %}{{ row.rate }} % <span class="text-[11px] font-normal text-on-surface-variant">({{ row.attended }}/{{ row.counted }})</span>{% else %}—{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun étudiant rattaché à cette classe. Ajoutez des étudiants au groupe ou affectez-les à un tuteur.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 px-5 py-4">
+<p class="text-xs text-on-surface-variant">Les absences justifiées sont exclues du calcul. Les retards comptent comme présences.</p>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">save</span>Enregistrer et recalculer</button>
+</div>
+</form>
+</div>
+</main>
+{% endblock %}

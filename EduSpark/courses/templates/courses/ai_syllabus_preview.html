@@ -1,0 +1,153 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Plan de cours — {{ course.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1000px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<div class="min-w-0 space-y-2">
+<p class="font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">{{ eyebrow }}</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{% if mode == "manual" %}Saisir le plan du cours{% else %}Aperçu du plan proposé{% endif %}</h1>
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[12px] font-bold {% if mode == 'local+api' %}bg-primary-fixed text-primary{% elif mode == 'api_only' %}bg-secondary-fixed text-on-secondary-fixed{% else %}bg-surface-container-high text-on-surface{% endif %}" data-mode="{{ mode }}">
+<span class="material-symbols-outlined text-[16px]" aria-hidden="true">{% if mode == "local+api" %}lock{% elif mode == "api_only" %}auto_awesome{% else %}edit_note{% endif %}</span>
+<span class="sr-only">Mode : </span>{{ mode_label }}
+</span>
+<span class="text-[12px] text-on-surface-variant">{{ course.subject.code }} · {{ course.title }}</span>
+</div>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ detail_url }}"><span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>Annuler</a>
+</header>
+
+{% if mode != "manual" %}
+<div class="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary-fixed/40 px-4 py-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">info</span>
+<p>Proposition de l'assistant : modifiez, ajoutez, retirez ou réordonnez les chapitres. <strong class="text-on-surface">Rien n'est enregistré</strong> tant que vous ne cliquez pas sur « Enregistrer le plan ».</p>
+</div>
+{% endif %}
+{% if local_notice %}
+<div class="flex items-start gap-3 rounded-2xl border border-outline-variant/50 bg-surface-container-low px-4 py-3 text-sm text-on-surface" role="status">
+<span class="material-symbols-outlined text-[20px] text-tertiary" aria-hidden="true">warning</span>
+<p>{{ local_notice }}</p>
+</div>
+{% endif %}
+{% if topics %}
+<section class="rounded-2xl bg-surface-container-lowest p-4 shadow-sm" aria-labelledby="topics-title">
+<h2 class="text-[13px] font-bold text-on-surface" id="topics-title">Thèmes relevés dans vos supports (analyse locale)</h2>
+<ul class="mt-2 flex flex-wrap gap-1.5">
+{% for topic in topics %}<li class="rounded-full bg-surface-container-high px-2.5 py-1 text-[12px] font-semibold text-on-surface">{{ topic }}</li>{% endfor %}
+</ul>
+</section>
+{% endif %}
+
+<form class="flex flex-col gap-4" method="post" action="{% url 'courses:prof_ai_syllabus_save' course.pk %}" novalidate data-syllabus-preview>
+{% csrf_token %}
+{{ formset.management_form }}
+<input type="hidden" name="mode" value="{{ mode }}">
+{% for topic in topics %}<input type="hidden" name="topics" value="{{ topic }}">{% endfor %}
+{% if formset.non_form_errors %}
+<div class="rounded-lg bg-error-container px-4 py-3 text-sm text-on-error-container" role="alert">
+{% for error in formset.non_form_errors %}<p>{{ error }}</p>{% endfor %}
+</div>
+{% endif %}
+<ol class="flex flex-col gap-3" data-chapter-list>
+{% for form in formset %}
+{% include "courses/_chapter_draft.html" with form=form number=forloop.counter %}
+{% endfor %}
+</ol>
+<template data-chapter-template>{% include "courses/_chapter_draft.html" with form=formset.empty_form number="__number__" %}</template>
+<p class="sr-only" aria-live="polite" data-chapter-announce></p>
+<div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-container-lowest p-4 shadow-sm">
+<button class="hidden items-center gap-2 rounded-full border border-primary/40 px-4 py-2.5 text-xs font-bold text-primary transition-colors hover:bg-primary-fixed/40" type="button" data-chapter-add>
+<span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>Ajouter un chapitre
+</button>
+<div class="ml-auto flex flex-wrap gap-2">
+<a class="inline-flex items-center rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{{ detail_url }}">Annuler</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">
+<span class="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>Enregistrer le plan
+</button>
+</div>
+</div>
+</form>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var form = document.querySelector("[data-syllabus-preview]");
+  if (!form) return;
+  var list = form.querySelector("[data-chapter-list]");
+  var template = form.querySelector("[data-chapter-template]");
+  var total = form.querySelector("input[name$='-TOTAL_FORMS']");
+  var announce = form.querySelector("[data-chapter-announce]");
+  var addButton = form.querySelector("[data-chapter-add]");
+
+  function say(text) { announce.textContent = ""; window.setTimeout(function () { announce.textContent = text; }, 50); }
+
+  // Numérote les chapitres dans l'ordre affiché et recopie cette position
+  // dans le champ ORDER envoyé au serveur.
+  function renumber() {
+    var items = list.querySelectorAll("[data-chapter]");
+    items.forEach(function (item, index) {
+      item.querySelector("[data-chapter-number]").textContent = index + 1;
+      item.querySelector("[data-chapter-legend]").textContent = index + 1;
+      var order = item.querySelector("input[name$='-ORDER']");
+      if (order) order.value = index + 1;
+      item.querySelector("[data-chapter-up]").disabled = index === 0;
+      item.querySelector("[data-chapter-down]").disabled = index === items.length - 1;
+    });
+  }
+
+  function titleOf(item) {
+    var input = item.querySelector("input[name$='-title']");
+    return (input && input.value) || "sans titre";
+  }
+
+  function syncDeleted(item) {
+    var box = item.querySelector("[data-chapter-delete]");
+    item.classList.toggle("opacity-50", box && box.checked);
+  }
+
+  list.addEventListener("click", function (event) {
+    var button = event.target.closest("[data-chapter-up], [data-chapter-down]");
+    if (!button) return;
+    var item = button.closest("[data-chapter]");
+    var up = button.hasAttribute("data-chapter-up");
+    var sibling = up ? item.previousElementSibling : item.nextElementSibling;
+    if (!sibling) return;
+    list.insertBefore(item, up ? sibling : sibling.nextElementSibling);
+    renumber();
+    var again = item.querySelector(up ? "[data-chapter-up]" : "[data-chapter-down]");
+    (again.disabled ? item.querySelector(up ? "[data-chapter-down]" : "[data-chapter-up]") : again).focus();
+    say("Chapitre « " + titleOf(item) + " » déplacé en position " + item.querySelector("[data-chapter-number]").textContent + ".");
+  });
+
+  list.addEventListener("change", function (event) {
+    if (!event.target.matches("[data-chapter-delete]")) return;
+    var item = event.target.closest("[data-chapter]");
+    syncDeleted(item);
+    say(event.target.checked ? "Chapitre « " + titleOf(item) + " » sera retiré." : "Chapitre « " + titleOf(item) + " » conservé.");
+  });
+
+  addButton.addEventListener("click", function () {
+    var index = parseInt(total.value, 10);
+    var html = template.innerHTML.replace(/__prefix__/g, index).replace(/__number__/g, index + 1);
+    list.insertAdjacentHTML("beforeend", html);
+    total.value = index + 1;
+    var move = list.lastElementChild.querySelector("[data-chapter-move]");
+    move.classList.remove("hidden");
+    move.classList.add("flex");
+    renumber();
+    list.lastElementChild.querySelector("input[name$='-title']").focus();
+    say("Chapitre ajouté en position " + list.children.length + ".");
+  });
+
+  // Les contrôles qui demandent JavaScript ne sont montrés que s'il est actif.
+  addButton.classList.remove("hidden");
+  addButton.classList.add("inline-flex");
+  form.querySelectorAll("[data-chapter-move]").forEach(function (group) { group.classList.remove("hidden"); group.classList.add("flex"); });
+  list.querySelectorAll("[data-chapter]").forEach(syncDeleted);
+  renumber();
+})();
+</script>
+{% endblock %}

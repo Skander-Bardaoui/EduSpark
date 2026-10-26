@@ -1,0 +1,184 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Tableau de bord de suivi — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi &amp; Pilotage</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Tableau de bord de suivi</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Pilotage de la persévérance : cohortes, alertes et actions de remédiation.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:admin_perseverance' %}"><span class="material-symbols-outlined text-[18px]">how_to_reg</span>Attribution des tuteurs</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{{ report_url }}"><span class="material-symbols-outlined text-[18px]">summarize</span>Générer le rapport</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Étudiants suivis" value=summary.followed icon="groups" hint=followed_hint %}
+{% include "portal/_stat_card.html" with label="Alertes actives" value=summary.active_alerts icon="warning" icon_class="bg-error-container text-on-error-container" hint=alerts_hint %}
+{% include "portal/_stat_card.html" with label="Taux de persévérance" value=summary.perseverance_rate suffix=" %" icon="trending_up" icon_class="bg-surface-container text-secondary" hint=perseverance_hint %}
+{% include "portal/_stat_card.html" with label="Actions de remédiation" value=summary.open_sheets icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=remediation_hint %}
+</div>
+<section class="grid gap-4 lg:grid-cols-3">
+{% for cohort in cohorts %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between gap-3"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">{{ cohort.school_class.name }}</h2><p class="text-xs text-on-surface-variant">{{ cohort.students }} étudiant{{ cohort.students|pluralize }} · {{ cohort.alerts }} alerte{{ cohort.alerts|pluralize }}</p></div><span class="rounded-full px-2.5 py-1 text-[11px] font-bold {{ cohort.status_class }}">{{ cohort.status }}</span></div>
+<div class="mt-4"><div class="flex items-center justify-between text-xs"><span class="font-semibold text-on-surface">Progression des objectifs</span><span class="text-on-surface-variant">{{ cohort.goal_progress }} %</span></div><div class="mt-1 h-2 overflow-hidden rounded-full bg-surface-container-high"><div class="h-full rounded-full {% if cohort.high %}bg-error{% elif cohort.alerts %}bg-tertiary-fixed-dim{% else %}bg-primary{% endif %}" style="width:{{ cohort.goal_progress }}%"></div></div></div>
+<ul class="mt-4 space-y-1.5 text-xs text-on-surface-variant"><li>Assiduité : {{ cohort.attendance }} % · moyenne {{ cohort.average|default:"—" }}</li><li>{{ cohort.high }} étudiant{{ cohort.high|pluralize }} en suivi renforcé</li></ul>
+</article>
+{% empty %}
+<article class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest p-5 text-center text-sm text-on-surface-variant lg:col-span-3">Aucune cohorte ne dispose encore d'étudiants référents pour {{ year }}.</article>
+{% endfor %}
+</section>
+<div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_400px]">
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes de persévérance</h2>
+<span class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface">{{ open_alert_rows|length }}</span> ouverte{{ open_alert_rows|length|pluralize }} · <span class="font-bold text-on-surface">{{ taken_alert_rows|length }}</span> prise{{ taken_alert_rows|length|pluralize }} en charge</span>
+</div>
+<form class="flex flex-col gap-3 border-b border-outline-variant/40 px-4 py-4 lg:flex-row lg:items-end" method="get">
+<label class="flex min-w-0 flex-1 flex-col gap-1"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Rechercher un étudiant</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="100" name="q" placeholder="Nom, prénom ou matricule" type="search" value="{{ query }}"/></label>
+<label class="flex flex-col gap-1 lg:w-44"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Du</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="date_from" type="date" value="{{ date_from_value }}"/></label>
+<label class="flex flex-col gap-1 lg:w-44"><span class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Au</span><input class="w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="date_to" type="date" value="{{ date_to_value }}"/></label>
+<div class="flex flex-wrap items-end gap-2">
+<button class="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">filter_alt</span>Filtrer</button>
+{% if has_alert_filters %}<a class="inline-flex h-10 items-center rounded-full border border-outline-variant/70 px-4 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'coaching:admin_monitoring' %}">Réinitialiser</a>{% endif %}
+</div>
+</form>
+<div class="grid gap-4 p-4 md:grid-cols-2">
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-low/40">
+<div class="flex items-center justify-between gap-2 border-b border-outline-variant/40 px-4 py-3">
+<div><h3 class="font-title-md text-title-md text-on-surface">Alertes ouvertes</h3><p class="text-[11px] text-on-surface-variant">À prendre en charge</p></div>
+<span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-tertiary-fixed px-2 text-xs font-bold text-on-tertiary-fixed">{{ open_alert_rows|length }}</span>
+</div>
+<ul class="divide-y divide-outline-variant/30" id="monitoring-alerts">
+{% for row in open_alert_rows %}
+<li class="px-4 py-4" data-alert-item>
+<div class="flex min-w-0 items-start gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span>
+<div class="min-w-0 flex-1">
+<p class="break-words text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p>
+<p class="mt-0.5 break-words text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>
+{% if row.handling_note %}<p class="mt-1 break-words text-xs italic text-on-surface-variant">Note : {{ row.handling_note }}</p>{% endif %}
+</div>
+</div>
+<div class="mt-3 flex justify-end">
+<button class="w-full rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high sm:w-auto" data-form-action="{% url 'coaching:admin_alert_take' row.alert.pk %}" data-modal-open="#alert-take-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Prendre en charge</button>
+</div>
+</li>
+{% empty %}
+<li class="px-4 py-10 text-center text-sm text-on-surface-variant">Aucune alerte ouverte.</li>
+{% endfor %}
+</ul>
+</section>
+<section class="min-w-0 rounded border border-outline-variant/40 bg-surface-container-low/40">
+<div class="flex items-center justify-between gap-2 border-b border-outline-variant/40 px-4 py-3">
+<div><h3 class="font-title-md text-title-md text-on-surface">Prises en charge</h3><p class="text-[11px] text-on-surface-variant">Suivi en cours</p></div>
+<span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-primary-fixed px-2 text-xs font-bold text-primary">{{ taken_alert_rows|length }}</span>
+</div>
+<ul class="divide-y divide-outline-variant/30">
+{% for row in taken_alert_rows %}
+<li class="px-4 py-4" data-alert-item>
+<div class="flex min-w-0 items-start gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ row.meta.circle }}"><span class="material-symbols-outlined text-[18px]">{{ row.meta.icon }}</span></span>
+<div class="min-w-0 flex-1">
+<p class="break-words text-sm font-semibold text-on-surface">{{ row.alert.title }} · {{ row.student_name }}</p>
+<p class="mt-0.5 break-words text-xs text-on-surface-variant">{{ row.class_name }} · {{ row.alert.detail }} · {{ row.priority_label }} · {{ row.detected_label }}{% if row.reported_by_name %} · Signalé par {{ row.reported_by_name }}{% endif %}</p>
+{% if row.taken_label %}<p class="mt-1 text-[11px] font-bold text-tertiary">Prise en charge le {{ row.taken_label }}</p>{% endif %}
+{% if row.handling_note %}<p class="mt-1 break-words text-xs italic text-on-surface-variant">Note : {{ row.handling_note }}</p>{% endif %}
+</div>
+</div>
+<div class="mt-3 flex justify-end">
+<button class="w-full rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container sm:w-auto" data-form-action="{% url 'coaching:admin_alert_close' row.alert.pk %}" data-modal-open="#alert-close-modal" data-alert-label="{{ row.alert.title }}" data-student-name="{{ row.student_name }}" type="button">Clôturer</button>
+</div>
+</li>
+{% empty %}
+<li class="px-4 py-10 text-center text-sm text-on-surface-variant">Aucune alerte prise en charge.</li>
+{% endfor %}
+</ul>
+</section>
+</div>
+</section>
+<aside class="flex flex-col gap-4">
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Activité récente</h2>
+<ol class="mt-4 space-y-4">
+{% for activity in activities %}
+<li class="relative border-l-2 {% if activity.first %}border-primary/30{% else %}border-outline-variant/40{% endif %} pl-4"><span class="absolute -left-[5px] top-1 h-2 w-2 rounded-full {% if activity.first %}bg-primary{% else %}bg-outline-variant{% endif %}"></span><p class="text-xs font-bold uppercase tracking-wide {% if activity.first %}text-primary{% else %}text-on-surface-variant{% endif %}">{{ activity.when }}{% if activity.time %} · {{ activity.time }}{% endif %}</p><p class="mt-1 text-sm text-on-surface-variant">{{ activity.label }} — {{ activity.text }}</p></li>
+{% empty %}
+<li class="text-sm text-on-surface-variant">Aucune activité récente dans le module de suivi.</li>
+{% endfor %}
+</ol>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Actions rapides</h2>
+<div class="mt-3 flex flex-col gap-2">
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'coaching:admin_perseverance' %}">Attribuer des tuteurs<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'coaching:prof_followup' %}">Suivi des enseignants<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+<a class="inline-flex items-center justify-between gap-2 rounded bg-surface-container px-3.5 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'exams:admin_statistics' %}">Statistiques de réussite<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+</div>
+</section>
+</aside>
+</div>
+</div>
+<!-- Modal : prise en charge d'alerte -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-take-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Prendre en charge l'alerte</h2><p class="text-xs text-on-surface-variant"><span id="take-alert-label">Alerte</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-take-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Note de prise en charge (facultatif)</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus id="take-handling-note" maxlength="2000" name="handling_note" placeholder="Référent assigné, premières démarches…" rows="3"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Confirmer la prise en charge</button></div>
+</form>
+</div>
+</div>
+<!-- Modal : clôture d'alerte -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-close-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Clôturer l'alerte</h2><p class="text-xs text-on-surface-variant"><span id="close-alert-label">Alerte</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-close-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Note de résolution</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-required-message="Rédigez une note de résolution pour clôturer l'alerte." data-words-min="2" id="close-resolution-note" maxlength="2000" minlength="5" name="resolution_note" placeholder="Issue du dossier, actions réalisées, retour à la normale…" required rows="3"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Clôturer l'alerte</button></div>
+</form>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var takeForm = document.getElementById('alert-take-form');
+  var closeForm = document.getElementById('alert-close-form');
+  if (!takeForm && !closeForm) return;
+  function fill(trigger) {
+    var target = trigger.getAttribute('data-modal-open');
+    var label = [trigger.getAttribute('data-alert-label'), trigger.getAttribute('data-student-name')]
+      .filter(Boolean).join(' · ');
+    if (target === '#alert-take-modal' && takeForm) {
+      takeForm.setAttribute('action', trigger.getAttribute('data-form-action') || takeForm.getAttribute('action'));
+      var takeLabel = document.getElementById('take-alert-label');
+      if (takeLabel) takeLabel.textContent = label;
+    } else if (target === '#alert-close-modal' && closeForm) {
+      closeForm.setAttribute('action', trigger.getAttribute('data-form-action') || closeForm.getAttribute('action'));
+      var closeLabel = document.getElementById('close-alert-label');
+      if (closeLabel) closeLabel.textContent = label;
+    }
+  }
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-form-action][data-modal-open]');
+    if (trigger) fill(trigger);
+  });
+})();
+</script>
+{% endblock %}

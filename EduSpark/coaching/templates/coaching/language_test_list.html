@@ -1,0 +1,74 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Test de langue orale — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi &amp; progression</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Test de langue orale</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Passez un examen blanc d’expression orale (IELTS ou Cambridge B2), puis consultez votre bilan détaillé.</p>
+</div>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{{ setup_url }}">
+<span class="material-symbols-outlined text-[18px]">record_voice_over</span>Nouveau test
+</a>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Tests réalisés" value=test_count icon="record_voice_over" hint="Sessions lancées depuis votre espace" %}
+{% include "portal/_stat_card.html" with label="Tests terminés" value=completed_count icon="task_alt" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Bilans disponibles" %}
+{% include "portal/_stat_card.html" with label="Score moyen" value=average_label suffix=" /9" icon="insights" icon_class="bg-surface-container text-secondary" hint="Moyenne des quatre compétences" %}
+{% include "portal/_stat_card.html" with label="Dernier test" value=last_level_label icon="school" hint=last_test_label %}
+</div>
+{% if active_row %}
+<section class="flex flex-col gap-3 rounded border border-primary/30 bg-primary-fixed/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+<div class="flex items-start gap-3">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary"><span class="material-symbols-outlined text-[20px]">mic</span></span>
+<div><p class="font-title-md text-title-md text-on-surface">Une session est en cours</p><p class="text-xs text-on-surface-variant">Démarrée le {{ active_row.when_label }} · {{ active_row.exam_name }} · {{ active_row.language_label }}</p></div>
+</div>
+<a class="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:student_language_test_session' active_row.session.pk %}">Reprendre la session<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+</section>
+{% endif %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Historique de mes tests</h2>
+<span class="text-xs font-semibold text-on-surface-variant">{{ row_count }} session{{ row_count|pluralize }}</span>
+</div>
+<div class="hidden border-b border-outline-variant/40 bg-surface-container-low px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant sm:grid sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.6fr)_auto] sm:gap-4">
+<span>Date</span><span>Examen</span><span>Statut</span><span>Score</span><span class="text-right">Action</span>
+</div>
+<div class="divide-y divide-outline-variant/30">
+{% for row in rows %}
+<div class="grid gap-2 px-5 py-4 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.6fr)_auto] sm:items-center sm:gap-4">
+<div class="min-w-0">
+<p class="text-sm font-bold text-on-surface">{{ row.when_label }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.exercise_label }}</p>
+</div>
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ row.exam_name }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.language_label }} · {{ row.level_label }}</p>
+</div>
+<div>{% include "portal/_badge.html" with label=row.status_label tone_class=row.status_style dot=True %}</div>
+<div class="font-data-metric text-sm font-bold text-on-surface">{% if row.has_feedback %}{{ row.score_label }}<span class="text-xs font-normal text-outline">/9</span>{% else %}—{% endif %}</div>
+<div class="sm:text-right">
+{% if row.has_feedback %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_language_test_feedback' row.session.pk %}">Voir le bilan<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+{% elif row.session.status == "active" %}
+<a class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" href="{% url 'coaching:student_language_test_session' row.session.pk %}">Reprendre<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+{% else %}
+<span class="text-xs text-on-surface-variant">Aucun bilan</span>
+{% endif %}
+</div>
+</div>
+{% empty %}
+<div class="px-5 py-14 text-center">
+<span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[28px]">record_voice_over</span></span>
+<p class="mt-3 font-title-md text-title-md text-on-surface">Aucun test pour le moment</p>
+<p class="mx-auto mt-1 max-w-md text-sm text-on-surface-variant">Lancez votre premier test de langue orale pour obtenir un bilan de votre aisance, de votre vocabulaire, de votre grammaire et de votre prononciation.</p>
+<a class="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{{ setup_url }}"><span class="material-symbols-outlined text-[18px]">add</span>Démarrer un test</a>
+</div>
+{% endfor %}
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

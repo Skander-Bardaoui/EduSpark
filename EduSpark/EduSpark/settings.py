@@ -10,22 +10,56 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
+from datetime import timedelta
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Charge les variables d'environnement depuis .env (fichier situé à côté de
+# manage.py). Ce fichier porte les secrets et n'est pas versionné ;
+# .env.example sert de modèle. Les variables déjà définies dans
+# l'environnement du système restent prioritaires sur .env.
+load_dotenv(BASE_DIR / '.env')
+
+
+def env_bool(name, default=False):
+    """Lit un booléen depuis l'environnement : 1/true/yes/on -> True."""
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def env_list(name, default=''):
+    """Lit une liste de valeurs séparées par des virgules."""
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qd#y7h99+&hppzih$aq4b&$#(vb=f$@f*zp%yr)d2f(*a0#)-6'
+# Aucun secret n'est écrit dans ce fichier : la clé est lue dans .env
+# (DJANGO_SECRET_KEY). Si elle manque, on refuse de démarrer plutôt que de
+# retomber sur une clé de développement codée en dur.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '').strip()
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY est absent. Copiez .env.example en .env puis "
+        "générez une clé : python -c \"from django.core.management.utils import "
+        "get_random_secret_key; print(get_random_secret_key())\""
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Défaut False : c'est .env qui active explicitement le debug en local.
+DEBUG = env_bool('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env_list('DJANGO_ALLOWED_HOSTS', '')
 
 
 # Application definition
@@ -37,8 +71,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'landing',
     'accounts',
+    'courses',
+    'exercises',
+    'exams',
+    'community',
+    'coaching',
 ]
 
 MIDDLEWARE = [
@@ -47,16 +88,20 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'accounts.tenancy.TenantMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Modèle tenant utilisé par le socle multi-universités.
+TENANT_MODEL = 'accounts.University'
 
 ROOT_URLCONF = 'EduSpark.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,6 +109,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.portal_context',
             ],
         },
     },
@@ -73,12 +119,22 @@ WSGI_APPLICATION = 'EduSpark.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# PostgreSQL : comme pour la clé secrète, aucun identifiant n'est écrit ici.
+# Tout vient de .env (voir .env.example) : DJANGO_DB_NAME, DJANGO_DB_USER,
+# DJANGO_DB_PASSWORD, DJANGO_DB_HOST, DJANGO_DB_PORT.
+# Le moteur a besoin du driver psycopg 3 (cf. requirements.txt) ; Django 5.2
+# exige psycopg >= 3.1.8.
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DJANGO_DB_NAME', 'eduspark'),
+        'USER': os.environ.get('DJANGO_DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD', ''),
+        'HOST': os.environ.get('DJANGO_DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DJANGO_DB_PORT', '5432'),
     }
 }
 
@@ -105,9 +161,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = os.environ.get('DJANGO_LANGUAGE_CODE', 'en-us')
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.environ.get('DJANGO_TIME_ZONE', 'Europe/Paris')
 
 USE_I18N = True
 
@@ -118,6 +174,127 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Fichiers téléversés (copies d'examen numérisées...).
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Supports de cours (PDF, présentations, vidéos, audios) : stockés hors de
+# MEDIA_ROOT, donc sans URL publique. Ils ne sont servis que par la vue
+# courses:material_file, qui vérifie les droits de l'utilisateur.
+PROTECTED_MEDIA_ROOT = BASE_DIR / 'protected_media'
+
+# Dépôts de projets : limites de sécurité pour les archives ZIP.
+EXAM_PROJECT_MAX_ZIP_BYTES = 50 * 1024 * 1024
+EXAM_PROJECT_MAX_UNCOMPRESSED_BYTES = 150 * 1024 * 1024
+EXAM_PROJECT_MAX_FILES = 250
+EXAM_PROJECT_MAX_TEXT_CHARS = 40000
+
+# Authentification : pages du projet.
+LOGIN_URL = '/accounts/connexion/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# E-mails : console en développement. En production, configurer un
+# backend SMTP (host, port, user, password, TLS) via variables
+# d'environnement (.env) — aucun identifiant n'est écrit ici.
+EMAIL_BACKEND = os.environ.get(
+    'DJANGO_EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DJANGO_DEFAULT_FROM_EMAIL', 'EduSpark <no-reply@eduspark.local>')
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env_bool('DJANGO_EMAIL_USE_TLS', True)
+
+def project_path(value):
+    """Résout un chemin relatif depuis la racine du projet Django."""
+    if not value:
+        return value
+    path = Path(value)
+    return str(path if path.is_absolute() else BASE_DIR / path)
+
+
+# Liens de visioconférence générés pour les rendez-vous de tutorat.
+# provider = jitsi (par défaut, aucune configuration)
+# provider = google (API Google Calendar + OAuth ou compte de service)
+VIDEO_MEETING_PROVIDER = os.environ.get('VIDEO_MEETING_PROVIDER', 'jitsi')
+VIDEO_MEETING_BASE_URL = os.environ.get(
+    'VIDEO_MEETING_BASE_URL', 'https://meet.jit.si',
+).rstrip('/')
+GOOGLE_SERVICE_ACCOUNT_FILE = project_path(
+    os.environ.get('GOOGLE_SERVICE_ACCOUNT_FILE', ''),
+)
+GOOGLE_CALENDAR_ID = os.environ.get('GOOGLE_CALENDAR_ID', '')
+GOOGLE_CALENDAR_TIMEZONE = os.environ.get('GOOGLE_CALENDAR_TIMEZONE', TIME_ZONE)
+GOOGLE_IMPERSONATE_USER = os.environ.get('GOOGLE_IMPERSONATE_USER', '')
+# Autorisation OAuth personnelle (recommandée avec un compte Gmail).
+GOOGLE_OAUTH_CLIENT_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_CLIENT_FILE', 'secrets/google-oauth-client.json',
+))
+GOOGLE_OAUTH_TOKEN_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_TOKEN_FILE', 'secrets/google-meet-token.json',
+))
+
+# API : JWT (access court + refresh) en authentification par défaut.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# IA du module cours : génération d'un plan de cours (voir courses/services/ai.py).
+# Étape 1 « lecteur » : modèle local Ollama (les documents restent sur le serveur).
+# Étape 2 « rédacteur » : API Groq, Gemini ou Anthropic, qui ne reçoit que
+# titre, niveau et thèmes. AI_PROVIDER : groq | gemini | anthropic | fake (plan
+# fixe sans appel réseau, pour les tests et le travail hors ligne).
+AI_PROVIDER = os.environ.get('AI_PROVIDER', 'groq').strip().lower()
+AI_API_TIMEOUT = float(os.environ.get('AI_API_TIMEOUT', '60'))
+# Clé Groq propre au module cours : distincte de GROQ_API_KEY (test de langue du
+# module coaching), pour que chaque module ait sa clé et son quota.
+COURSES_GROQ_API_KEY = os.environ.get('COURSES_GROQ_API_KEY', '').strip()
+COURSES_GROQ_MODEL = os.environ.get('COURSES_GROQ_MODEL', 'openai/gpt-oss-120b').strip()
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '').strip()
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-5-5')
+ANTHROPIC_EFFORT = os.environ.get('ANTHROPIC_EFFORT', 'medium')
+# Repli côté serveur si le modèle décline la demande (Claude API uniquement).
+ANTHROPIC_FALLBACKS = env_bool('ANTHROPIC_FALLBACKS', True)
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:3b')
+OLLAMA_KEEP_ALIVE = os.environ.get('OLLAMA_KEEP_ALIVE', '30m')
+AI_LOCAL_TIMEOUT = float(os.environ.get('AI_LOCAL_TIMEOUT', '120'))
+AI_LOCAL_TEXT_LIMIT = int(os.environ.get('AI_LOCAL_TEXT_LIMIT', '4000'))
+AI_RATE_LIMIT_PER_HOUR = int(os.environ.get('AI_RATE_LIMIT_PER_HOUR', '10'))
+# --- Intelligence artificielle (module coaching) ---------------------------
+# Aucune clé n'est écrite ici : tout vient de .env (voir .env.example).
+# GROQ sert au plan d'étude IA, à l'examinateur du test de langue, à
+# l'évaluation du bilan et à la génération des QCM d'examen. ELEVENLABS fournit la transcription temps réel et
+# OPENAI la voix de l'examinateur; si elles manquent, le navigateur prend le
+# relais (Web Speech API).
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '').strip()
+GROQ_MODEL = (
+    os.environ.get('GROQ_MODEL', '').strip()
+    or 'openai/gpt-oss-120b'
+)
+ELEVENLABS_API_KEY = os.environ.get('ELEVENLABS_API_KEY', '').strip()
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
+# Le plan d'étude reste proposé dans l'interface; il renvoie un message clair
+# quand la clé manque au lieu d'échouer silencieusement.
+AI_STUDY_PLANNER_ENABLED = bool(GROQ_API_KEY)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

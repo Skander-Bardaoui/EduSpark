@@ -15,51 +15,60 @@
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Catégories" value=active_count|add:archived_count icon="tune" hint="Actives et archivées" %}
+{% include "portal/_stat_card.html" with label="Catégories" value="8" icon="tune" hint="6 actives · 2 archivées" %}
 {% include "portal/_stat_card.html" with label="Niveaux de difficulté" value="4" icon="signal_cellular_alt" icon_class="bg-surface-container text-secondary" hint="Facile à expert" %}
-{% include "portal/_stat_card.html" with label="Exercices classifiés" value=total_exercises icon="quiz" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Dans vos banques" %}
-{% include "portal/_stat_card.html" with label="Catégories actives" value=active_count icon="sell" hint="Disponibles aux profs" %}
+{% include "portal/_stat_card.html" with label="Exercices classifiés" value="1 284" icon="quiz" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="100 % du catalogue" %}
+{% include "portal/_stat_card.html" with label="Tags transverses" value="26" icon="sell" hint="Compétences et notions" %}
 </div>
 <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" id="category-grid">
-{% for cat in categories %}
-<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm {% if not cat.is_active %}opacity-80{% endif %}">
-<div class="flex items-start justify-between gap-3">
-  <span class="flex h-10 w-10 items-center justify-center rounded {% if cat.is_active %}bg-primary text-on-primary{% else %}bg-surface-container text-on-surface-variant{% endif %}"><span class="material-symbols-outlined text-[20px]">{{ cat.icon }}</span></span>
-  {% if cat.is_active %}{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}
-  {% else %}{% include "portal/_badge.html" with label="Archivée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
-</div>
-<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">{{ cat.name }}</h2>
-<p class="text-xs text-on-surface-variant">{{ cat.description|default:cat.department|default:"Aucune description" }}</p>
-<div class="mt-3 flex gap-2">
-  {% if cat.is_active %}
-  <form method="post" style="display:inline">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="toggle">
-    <input type="hidden" name="category_id" value="{{ cat.pk }}">
-    <button class="text-xs font-bold text-primary hover:underline" type="submit">Archiver</button>
-  </form>
-  {% else %}
-  <form method="post" style="display:inline">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="toggle">
-    <input type="hidden" name="category_id" value="{{ cat.pk }}">
-    <button class="text-xs font-bold text-primary hover:underline" type="submit">Restaurer</button>
-  </form>
-  {% endif %}
-  <span class="text-on-surface-variant">·</span>
-  <form method="post" style="display:inline" onsubmit="return confirm('Supprimer cette catégorie ?')">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="delete">
-    <input type="hidden" name="category_id" value="{{ cat.pk }}">
-    <button class="text-xs font-bold text-error hover:underline" type="submit">Supprimer</button>
-  </form>
-</div>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[20px]">code</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Programmation</h2>
+<p class="text-xs text-on-surface-variant">286 exercices · Python, C, SQL</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Programmation ouverte en édition." type="button">Gérer la catégorie</button>
 </article>
-{% empty %}
-<div class="sm:col-span-2 xl:col-span-4 py-10 text-center text-sm text-on-surface-variant">
-  Aucune catégorie créée. Ajoutez votre première catégorie !
-</div>
-{% endfor %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-secondary text-on-secondary"><span class="material-symbols-outlined text-[20px]">functions</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Mathématiques</h2>
+<p class="text-xs text-on-surface-variant">214 exercices · Analyse, probabilités</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Mathématiques ouverte en édition." type="button">Gérer la catégorie</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-tertiary-fixed text-on-tertiary-fixed"><span class="material-symbols-outlined text-[20px]">psychology</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Intelligence artificielle</h2>
+<p class="text-xs text-on-surface-variant">198 exercices · ML, deep learning</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Intelligence artificielle ouverte en édition." type="button">Gérer la catégorie</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[20px]">hub</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Réseaux &amp; systèmes</h2>
+<p class="text-xs text-on-surface-variant">164 exercices · RPC, consensus</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Réseaux &amp; systèmes ouverte en édition." type="button">Gérer la catégorie</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[20px]">database</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Bases de données</h2>
+<p class="text-xs text-on-surface-variant">142 exercices · SQL, transactions</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Bases de données ouverte en édition." type="button">Gérer la catégorie</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-surface-container-high text-on-surface"><span class="material-symbols-outlined text-[20px]">gavel</span></span>{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Éthique &amp; droit</h2>
+<p class="text-xs text-on-surface-variant">96 exercices · Études de cas</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Éthique &amp; droit ouverte en édition." type="button">Gérer la catégorie</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm opacity-80">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">auto_awesome</span></span>{% include "portal/_badge.html" with label="Archivée" tone_class="bg-surface-container text-on-surface-variant" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">IA générative</h2>
+<p class="text-xs text-on-surface-variant">62 exercices · Fusionnée avec IA</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie IA générative restaurée." type="button">Restaurer</button>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm opacity-80">
+<div class="flex items-start justify-between gap-3"><span class="flex h-10 w-10 items-center justify-center rounded bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">biotech</span></span>{% include "portal/_badge.html" with label="Archivée" tone_class="bg-surface-container text-on-surface-variant" %}</div>
+<h2 class="font-headline-sm text-headline-sm mt-3 text-on-surface">Bio-informatique</h2>
+<p class="text-xs text-on-surface-variant">34 exercices · Ancienne filière</p>
+<button class="mt-3 text-xs font-bold text-primary hover:underline" data-toast="Catégorie Bio-informatique restaurée." type="button">Restaurer</button>
+</article>
 </section>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
@@ -70,16 +79,10 @@
 <table class="w-full min-w-[860px] text-left">
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Niveau</th><th class="px-5 py-3 font-bold">Description</th><th class="px-5 py-3 font-bold">Temps conseillé</th><th class="px-5 py-3 font-bold">Exercices</th><th class="px-5 py-3 font-bold">Classes concernées</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-{% for stat in difficulty_stats %}
-<tr class="hover:bg-surface-container/40">
-  <td class="px-5 py-3 font-semibold text-on-surface">{{ stat.label }}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{% if stat.key == 'facile' %}Application directe du cours{% elif stat.key == 'moyen' %}Mobilise plusieurs notions{% elif stat.key == 'difficile' %}Résolution non guidée{% else %}Problème ouvert, niveau recherche{% endif %}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{% if stat.key == 'facile' %}5 – 15 min{% elif stat.key == 'moyen' %}15 – 30 min{% elif stat.key == 'difficile' %}30 – 60 min{% else %}1 – 3 h{% endif %}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{{ stat.count }}</td>
-  <td class="px-5 py-3 text-on-surface-variant">{% if stat.key == 'facile' %}L1 – L3{% elif stat.key == 'moyen' %}L3 – M1{% elif stat.key == 'difficile' %}M1 – M2{% else %}M2 · doctorat{% endif %}</td>
-  <td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td>
-</tr>
-{% endfor %}
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Facile</td><td class="px-5 py-3 text-on-surface-variant">Application directe du cours</td><td class="px-5 py-3 text-on-surface-variant">5 – 15 min</td><td class="px-5 py-3 text-on-surface-variant">412</td><td class="px-5 py-3 text-on-surface-variant">L1 – L3</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Moyen</td><td class="px-5 py-3 text-on-surface-variant">Mobilise plusieurs notions</td><td class="px-5 py-3 text-on-surface-variant">15 – 30 min</td><td class="px-5 py-3 text-on-surface-variant">524</td><td class="px-5 py-3 text-on-surface-variant">L3 – M1</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Difficile</td><td class="px-5 py-3 text-on-surface-variant">Résolution non guidée</td><td class="px-5 py-3 text-on-surface-variant">30 – 60 min</td><td class="px-5 py-3 text-on-surface-variant">268</td><td class="px-5 py-3 text-on-surface-variant">M1 – M2</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3 font-semibold text-on-surface">Expert</td><td class="px-5 py-3 text-on-surface-variant">Problème ouvert, niveau recherche</td><td class="px-5 py-3 text-on-surface-variant">1 – 3 h</td><td class="px-5 py-3 text-on-surface-variant">80</td><td class="px-5 py-3 text-on-surface-variant">M2 · doctorat</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}</td></tr>
 </tbody>
 </table>
 </div>
@@ -92,20 +95,14 @@
 <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Ajouter une catégorie</h2><p class="text-xs text-on-surface-variant">Une icône par défaut sera appliquée.</p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
-<form class="space-y-3 p-5" id="category-form" method="post" action="{% url 'exercises:admin_categories' %}">
-  {% csrf_token %}
-  <input type="hidden" name="action" value="create">
-  {% for field in cat_form %}
-  <div class="flex flex-col gap-1.5">
-    <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant" for="{{ field.id_for_label }}">{{ field.label }}</label>
-    {{ field }}
-    {% if field.errors %}<p class="text-xs text-error">{{ field.errors|join:', ' }}</p>{% endif %}
-  </div>
-  {% endfor %}
-  <div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
-    <button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
-    <button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Créer la catégorie</button>
-  </div>
+<form class="space-y-3 p-5" id="category-form">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Nom de la catégorie</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus placeholder="Ex. Systèmes embarqués" required type="text"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Département</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary"><option>Informatique &amp; IA</option><option>Mathématiques appliquées</option><option>Réseaux &amp; Télécoms</option><option>Sciences des données</option></select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Description</span><textarea class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" rows="2"></textarea></label>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Créer la catégorie</button>
+</div>
 </form>
 </div>
 </div>

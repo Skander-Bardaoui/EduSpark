@@ -1,0 +1,89 @@
+from django.urls import path
+
+from . import admin_views as admin
+from . import ai_views as ai
+from . import file_views, prof_views as prof, student_views as student
+
+app_name = "courses"
+
+urlpatterns = [
+    # --- Étudiant --------------------------------------------------------
+    path("etudiant/cours/", student.CatalogueView.as_view(), name="student_catalogue"),
+    path("etudiant/cours/<int:pk>/", student.CourseDetailView.as_view(), name="student_course_detail"),
+    path("etudiant/emploi-du-temps/", student.TimetableView.as_view(), name="student_timetable"),
+    path("etudiant/supports-de-cours/", student.MaterialListView.as_view(), name="student_course_materials"),
+
+    # --- Professeur ------------------------------------------------------
+    path("prof/cours/", prof.CourseListView.as_view(), name="prof_course"),
+    path("prof/cours/nouveau/", prof.CourseCreateView.as_view(), name="prof_course_create"),
+    path("prof/cours/<int:pk>/", prof.CourseDetailView.as_view(), name="prof_course_detail"),
+    path("prof/cours/<int:pk>/modifier/", prof.CourseUpdateView.as_view(), name="prof_course_update"),
+    path("prof/cours/<int:pk>/supprimer/", prof.CourseDeleteView.as_view(), name="prof_course_delete"),
+    path("prof/cours/<int:pk>/publication/<int:class_pk>/", prof.course_publication,
+         name="prof_course_publication"),
+    path("prof/cours/<int:pk>/chapitres/nouveau/", prof.ChapterCreateView.as_view(),
+         name="prof_chapter_create"),
+    path("prof/cours/<int:pk>/chapitres/<int:chapter_pk>/modifier/", prof.ChapterUpdateView.as_view(),
+         name="prof_chapter_update"),
+    path("prof/cours/<int:pk>/chapitres/<int:chapter_pk>/supprimer/", prof.ChapterDeleteView.as_view(),
+         name="prof_chapter_delete"),
+    path("prof/cours/<int:pk>/chapitres/<int:chapter_pk>/monter/", prof.chapter_move,
+         {"direction": "monter"}, name="prof_chapter_up"),
+    path("prof/cours/<int:pk>/chapitres/<int:chapter_pk>/descendre/", prof.chapter_move,
+         {"direction": "descendre"}, name="prof_chapter_down"),
+    path("prof/cours/<int:pk>/plan-ia/", ai.SyllabusGenerateView.as_view(),
+         name="prof_ai_syllabus_generate"),
+    path("prof/cours/<int:pk>/plan-ia/manuel/", ai.SyllabusManualView.as_view(),
+         name="prof_ai_syllabus_manual"),
+    path("prof/cours/<int:pk>/plan-ia/enregistrer/", ai.SyllabusSaveView.as_view(),
+         name="prof_ai_syllabus_save"),
+    path("prof/matieres/", prof.SubjectsView.as_view(), name="prof_subjects"),
+    path("prof/emploi-du-temps/", prof.TimetableView.as_view(), name="prof_timetable"),
+    path("prof/supports-de-cours/", prof.MaterialListView.as_view(), name="prof_course_materials"),
+    path("prof/supports-de-cours/nouveau/", prof.MaterialCreateView.as_view(), name="prof_material_create"),
+    path("prof/supports-de-cours/<int:pk>/modifier/", prof.MaterialUpdateView.as_view(),
+         name="prof_material_update"),
+    path("prof/supports-de-cours/<int:pk>/supprimer/", prof.MaterialDeleteView.as_view(),
+         name="prof_material_delete"),
+
+    # --- Administration de l'université ---------------------------------
+    path("administration/offre-de-formation/", admin.ProgramOfferView.as_view(), name="admin_program_offer"),
+    path("administration/offre-de-formation/departements/nouveau/", admin.DepartmentCreateView.as_view(),
+         name="admin_department_create"),
+    path("administration/offre-de-formation/departements/<int:pk>/modifier/",
+         admin.DepartmentUpdateView.as_view(), name="admin_department_update"),
+    path("administration/offre-de-formation/departements/<int:pk>/supprimer/",
+         admin.DepartmentDeleteView.as_view(), name="admin_department_delete"),
+    path("administration/offre-de-formation/filieres/nouvelle/", admin.ProgramCreateView.as_view(),
+         name="admin_program_create"),
+    path("administration/offre-de-formation/filieres/<int:pk>/modifier/", admin.ProgramUpdateView.as_view(),
+         name="admin_program_update"),
+    path("administration/offre-de-formation/filieres/<int:pk>/supprimer/", admin.ProgramDeleteView.as_view(),
+         name="admin_program_delete"),
+    path("administration/matieres/", admin.SubjectListView.as_view(), name="admin_subjects"),
+    path("administration/matieres/nouvelle/", admin.SubjectCreateView.as_view(), name="admin_subject_create"),
+    path("administration/matieres/<int:pk>/modifier/", admin.SubjectUpdateView.as_view(),
+         name="admin_subject_update"),
+    path("administration/matieres/<int:pk>/supprimer/", admin.SubjectDeleteView.as_view(),
+         name="admin_subject_delete"),
+    path("administration/affectations/", admin.AssignmentListView.as_view(), name="admin_assignments"),
+    path("administration/affectations/nouvelle/", admin.AssignmentCreateView.as_view(),
+         name="admin_assignment_create"),
+    path("administration/affectations/<int:pk>/modifier/", admin.AssignmentUpdateView.as_view(),
+         name="admin_assignment_update"),
+    path("administration/affectations/<int:pk>/supprimer/", admin.AssignmentDeleteView.as_view(),
+         name="admin_assignment_delete"),
+    path("administration/emploi-du-temps/", admin.TimetableView.as_view(), name="admin_timetable"),
+    path("administration/emploi-du-temps/seances/nouvelle/", admin.SlotCreateView.as_view(),
+         name="admin_slot_create"),
+    path("administration/emploi-du-temps/seances/<int:pk>/modifier/", admin.SlotUpdateView.as_view(),
+         name="admin_slot_update"),
+    path("administration/emploi-du-temps/seances/<int:pk>/supprimer/", admin.SlotDeleteView.as_view(),
+         name="admin_slot_delete"),
+    path("administration/cours/", admin.CourseListView.as_view(), name="admin_courses"),
+    path("administration/cours/<int:pk>/", admin.CourseDetailView.as_view(), name="admin_course_detail"),
+
+    # --- Supports de cours (accès contrôlé, tous rôles) -----------------
+    path("cours/supports/<int:pk>/", file_views.material_view, name="material_view"),
+    path("cours/supports/<int:pk>/fichier/", file_views.material_file, name="material_file"),
+]

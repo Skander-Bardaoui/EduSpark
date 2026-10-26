@@ -1,0 +1,83 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Mes Classes &amp; Groupes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Enseignement</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Classes &amp; Groupes</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">{% if profile %}Promotions suivies à {{ portal_university.name }}{% if profile.department %} · {{ profile.department }}{% endif %}, effectifs et groupes de TP.{% else %}Aucun profil professeur pour l'université courante.{% endif %}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:university_switch' %}"><span class="material-symbols-outlined text-[18px]">swap_horiz</span>Changer d'université</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'portal:prof_profile' %}"><span class="material-symbols-outlined text-[18px]">person</span>Mon profil</a>
+</div>
+</header>
+{% if profile %}
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Classes suivies" value=stats.classes icon="groups" hint=portal_university.name %}
+{% include "portal/_stat_card.html" with label="Étudiants encadrés" value=stats.students icon="group" icon_class="bg-surface-container text-secondary" hint="Étudiants affectés à vos groupes" %}
+{% include "portal/_stat_card.html" with label="Groupes de TP" value=stats.groups icon="workspaces" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Groupes rattachés à vos classes" %}
+{% include "portal/_stat_card.html" with label="Département" value=profile.department|default:"—" icon="apartment" hint="Rattachement pédagogique" %}
+</div>
+{% endif %}
+<section>
+<div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Classes actives</h2>
+<span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant">{{ classes|length }} classe{{ classes|length|pluralize }}</span>
+</div>
+<div class="grid gap-4 lg:grid-cols-3">
+{% for school_class in classes %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-start justify-between gap-3">
+<span class="flex h-11 w-11 items-center justify-center rounded bg-primary text-on-primary"><span class="material-symbols-outlined text-[22px]">school</span></span>
+{% if school_class.academic_year %}{% include "portal/_badge.html" with label=school_class.academic_year tone_class="bg-primary-fixed text-primary" %}{% endif %}
+</div>
+<h3 class="mt-3 font-title-md text-title-md text-on-surface">{{ school_class.name }}</h3>
+<p class="text-xs text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }}{% if school_class.level %} · {{ school_class.level }}{% endif %}{% if school_class.section %} · Section {{ school_class.section }}{% endif %}</p>
+<div class="mt-4 grid grid-cols-3 gap-2 text-center">
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">{{ school_class.groups.all|length }}</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Groupes</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">{{ school_class.student_total }}</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Étudiants</p></div>
+<div class="rounded bg-surface-container p-2.5"><p class="text-lg font-bold text-on-surface">{{ school_class.professors.all|length }}</p><p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Profs</p></div>
+</div>
+<div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'portal:prof_universities' %}"><span class="material-symbols-outlined text-[16px]">account_balance</span>Universitaire</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary" href="{% url 'portal:prof_profile' %}"><span class="material-symbols-outlined text-[16px]">badge</span>Mon profil</a>
+</div>
+</article>
+{% empty %}
+<div class="lg:col-span-3">
+{% url 'portal:prof_universities' as universities_url %}
+{% include "portal/_empty_state.html" with icon="layers" title="Aucune classe pour le moment" hint="Les classes où vous êtes rattaché apparaîtront ici. Contactez l'administration de l'université pour être affecté." url=universities_url label="Voir mes universités" %}
+</div>
+{% endfor %}
+</div>
+</section>
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Groupes &amp; effectifs</h2>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'portal:prof_universities' %}"><span class="material-symbols-outlined text-[16px]">account_balance</span>Mes universités</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[760px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Groupe</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Effectif</th><th class="px-5 py-3 font-bold">Capacité</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for group in groups %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3 font-semibold text-on-surface">{{ group.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ group.school_class.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ group.students.all|length }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ group.capacity|default:"—" }}</td>
+<td class="px-5 py-3 text-right">{% if group.capacity and group.students.all|length >= group.capacity %}{% include "portal/_badge.html" with label="Complet" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% else %}{% include "portal/_badge.html" with label="Places disponibles" tone_class="bg-primary-fixed text-primary" %}{% endif %}</td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun groupe rattaché à vos classes.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}

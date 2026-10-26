@@ -11,14 +11,14 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exercises:prof_assignments' %}"><span class="material-symbols-outlined text-[18px]">assignment</span>Devoirs créés</a>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#exercise-create-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Nouvel exercice</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Formulaire de création d'exercice ouvert." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Nouvel exercice</button>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Exercices disponibles" value=total icon="quiz" hint="Dans votre banque" %}
-{% include "portal/_stat_card.html" with label="Utilisations ce semestre" value=usages icon="rebase_edit" icon_class="bg-surface-container text-secondary" hint="Dans vos devoirs" %}
-{% include "portal/_stat_card.html" with label="QCM & calculs" value=qcm_count icon="checklist" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Correction automatique" %}
-{% include "portal/_stat_card.html" with label="Exercices de code" value=code_count icon="terminal" hint="Python · C · SQL" %}
+{% include "portal/_stat_card.html" with label="Exercices disponibles" value="128" icon="quiz" hint="12 ajoutés ce mois-ci" %}
+{% include "portal/_stat_card.html" with label="Utilisations ce semestre" value="47" icon="rebase_edit" icon_class="bg-surface-container text-secondary" hint="Dans 9 devoirs différents" %}
+{% include "portal/_stat_card.html" with label="QCM &amp; calculs" value="76" icon="checklist" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Correction automatique" %}
+{% include "portal/_stat_card.html" with label="Exercices de code" value="31" icon="terminal" hint="Python · C · SQL" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
 <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
@@ -46,30 +46,18 @@
 <table class="w-full min-w-[900px] text-left">
 <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Exercice</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Difficulté</th><th class="px-5 py-3 font-bold">Durée</th><th class="px-5 py-3 font-bold">Utilisations</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm" id="exercise-rows">
-{% for exercise in exercises %}
-<tr class="hover:bg-surface-container/40" data-difficulty="{{ exercise.difficulty }}" data-filter-item data-search="{{ exercise.title|lower }} {{ exercise.subject|lower }} {{ exercise.tags|lower }}" data-tags="{{ exercise.exercise_type }}">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ exercise.title }}</p><p class="text-xs text-on-surface-variant">{{ exercise.subject }}{% if exercise.level %} · {{ exercise.level }}{% endif %}</p></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ exercise.subject|default:"—" }}</td>
-<td class="px-5 py-3">{% include "portal/_badge.html" with label=exercise.get_exercise_type_display tone_class=exercise.get_type_display_class %}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ exercise.get_difficulty_display }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ exercise.duration_minutes }} min</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ exercise.usage_count }}</td>
-<td class="px-5 py-3 text-right">
-  <div class="flex justify-end gap-1">
-    <button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="{{ exercise.get_difficulty_display }}" data-exercise-title="{{ exercise.title }}" data-exercise-type="{{ exercise.get_exercise_type_display }}" data-modal-open="#exercise-modal" type="button">Aperçu</button>
-    <a class="rounded-full border border-outline-variant/60 px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-surface-container" href="{% url 'exercises:prof_exercise_edit' exercise.pk %}">Modifier</a>
-    <form method="post" style="display:inline" onsubmit="return confirm('Supprimer cet exercice ?')">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="delete">
-      <input type="hidden" name="exercise_id" value="{{ exercise.pk }}">
-      <button class="rounded-full border border-error/40 px-3 py-1.5 text-xs font-bold text-error transition-colors hover:bg-error-container" type="submit">Suppr.</button>
-    </form>
-  </div>
-</td>
-</tr>
-{% empty %}
-<tr><td colspan="7" class="px-5 py-10 text-center text-sm text-on-surface-variant">Aucun exercice dans votre banque. Créez votre premier exercice !</td></tr>
-{% endfor %}
+<tr class="hover:bg-surface-container/40" data-difficulty="moyen" data-filter-item data-search="graphes parcours algorithme" data-tags="qcm">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Parcours en largeur et profondeur</p><p class="text-xs text-on-surface-variant">Algorithmique avancée · L3</p></td><td class="px-5 py-3 text-on-surface-variant">Algorithmique</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="QCM" tone_class="bg-primary-fixed text-primary" %}</td><td class="px-5 py-3 text-on-surface-variant">Moyen</td><td class="px-5 py-3 text-on-surface-variant">15 min</td><td class="px-5 py-3 text-on-surface-variant">8</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Moyen" data-exercise-title="Parcours en largeur et profondeur" data-exercise-type="QCM · 5 questions" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
+<tr class="hover:bg-surface-container/40" data-difficulty="difficile" data-filter-item data-search="consensus raft distribués" data-tags="code">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Implémenter Raft en Python</p><p class="text-xs text-on-surface-variant">Systèmes distribués · M1</p></td><td class="px-5 py-3 text-on-surface-variant">Systèmes distribués</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Code" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td><td class="px-5 py-3 text-on-surface-variant">Difficile</td><td class="px-5 py-3 text-on-surface-variant">90 min</td><td class="px-5 py-3 text-on-surface-variant">4</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Difficile" data-exercise-title="Implémenter Raft en Python" data-exercise-type="Code · projet guidé" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
+<tr class="hover:bg-surface-container/40" data-difficulty="moyen" data-filter-item data-search="rétropropagation gradient" data-tags="qcm">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Rétropropagation pas à pas</p><p class="text-xs text-on-surface-variant">Réseaux de neurones · M1</p></td><td class="px-5 py-3 text-on-surface-variant">IA</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="QCM" tone_class="bg-primary-fixed text-primary" %}</td><td class="px-5 py-3 text-on-surface-variant">Moyen</td><td class="px-5 py-3 text-on-surface-variant">20 min</td><td class="px-5 py-3 text-on-surface-variant">11</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Moyen" data-exercise-title="Rétropropagation pas à pas" data-exercise-type="QCM · 8 questions" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
+<tr class="hover:bg-surface-container/40" data-difficulty="facile" data-filter-item data-search="sql jointures bases de données" data-tags="code">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Jointures SQL progressives</p><p class="text-xs text-on-surface-variant">Bases de données · M2</p></td><td class="px-5 py-3 text-on-surface-variant">Bases de données</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Code" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td><td class="px-5 py-3 text-on-surface-variant">Facile</td><td class="px-5 py-3 text-on-surface-variant">30 min</td><td class="px-5 py-3 text-on-surface-variant">14</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Facile" data-exercise-title="Jointures SQL progressives" data-exercise-type="Code · 6 requêtes" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
+<tr class="hover:bg-surface-container/40" data-difficulty="difficile" data-filter-item data-search="étude de cas éthique ia" data-tags="redaction">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Étude de cas : biais algorithmique</p><p class="text-xs text-on-surface-variant">Éthique de l'IA · M2</p></td><td class="px-5 py-3 text-on-surface-variant">Éthique</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="Rédaction" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td><td class="px-5 py-3 text-on-surface-variant">Difficile</td><td class="px-5 py-3 text-on-surface-variant">45 min</td><td class="px-5 py-3 text-on-surface-variant">6</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Difficile" data-exercise-title="Étude de cas : biais algorithmique" data-exercise-type="Rédaction · 1 500 mots" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
+<tr class="hover:bg-surface-container/40" data-difficulty="facile" data-filter-item data-search="complexité algorithmique" data-tags="qcm">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">Calcul de complexité</p><p class="text-xs text-on-surface-variant">Algorithmique avancée · L3</p></td><td class="px-5 py-3 text-on-surface-variant">Algorithmique</td><td class="px-5 py-3">{% include "portal/_badge.html" with label="QCM" tone_class="bg-primary-fixed text-primary" %}</td><td class="px-5 py-3 text-on-surface-variant">Facile</td><td class="px-5 py-3 text-on-surface-variant">10 min</td><td class="px-5 py-3 text-on-surface-variant">4</td><td class="px-5 py-3 text-right"><button class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-exercise-difficulty="Facile" data-exercise-title="Calcul de complexité" data-exercise-type="QCM · 5 questions" data-modal-open="#exercise-modal" type="button">Aperçu</button></td></tr>
 </tbody>
 </table>
 </div>
@@ -99,41 +87,6 @@
 </div>
 </div>
 </main>
-
-<!-- Modal Création Exercice -->
-<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="exercise-create-modal">
-<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
-<div class="relative z-10 w-full max-w-2xl rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl max-h-[90vh] overflow-y-auto">
-<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4 sticky top-0 bg-surface-container-lowest">
-  <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvel exercice</h2><p class="text-xs text-on-surface-variant">Remplissez les informations ou utilisez l'IA pour pré-remplir.</p></div>
-  <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
-</div>
-{% if groq_enabled %}
-<div class="px-5 pt-4">
-  <button class="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2.5 text-xs font-bold text-on-secondary transition-colors hover:opacity-95" id="ai-generate-btn" type="button">
-    <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>Générer avec l'IA
-  </button>
-  <div class="mt-3 hidden rounded bg-surface-container p-3 text-xs text-on-surface-variant" id="ai-result-preview"></div>
-</div>
-{% endif %}
-<form action="{% url 'exercises:prof_exercise_bank' %}" method="post" enctype="multipart/form-data" class="p-5 space-y-3">
-  {% csrf_token %}
-  <input type="hidden" name="action" value="create">
-  {% for field in form %}
-  <div class="flex flex-col gap-1.5">
-    <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-    {{ field }}
-    {% if field.errors %}<p class="text-xs text-error">{{ field.errors|join:', ' }}</p>{% endif %}
-  </div>
-  {% endfor %}
-  <div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
-    <button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
-    <button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Créer l'exercice</button>
-  </div>
-</form>
-</div>
-</div>
-
 {% endblock %}
 {% block page_scripts %}
 <script>

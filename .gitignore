@@ -23,11 +23,27 @@ ENV/
 *.log
 db.sqlite3
 db.sqlite3-journal
+# Export de l'ancienne base SQLite (voir README : reprise des données) :
+# contient des hachés de mots de passe et des e-mails, donc hors versionnement.
+backup_sqlite.json
 /staticfiles/
 /media/
+# Supports de cours téléversés (stockage protégé, voir PROTECTED_MEDIA_ROOT).
+protected_media/
 *.mo
 *.po~
 local_settings.py
+
+# Secrets Google Meet (ne jamais versionner)
+google-credentials*.json
+*service-account*.json
+.google-meet-token.json
+*oauth-client*.json
+*meet-token*.json
+
+# --- Exécution locale (dev server) ---
+*.pid
+runserver*.log
 
 # --- Tests / tooling ---
 .coverage

@@ -1,0 +1,193 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}{{ school_class }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1400px] flex-col gap-4 px-4 py-4 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+<div class="min-w-0">
+<a class="mb-2 inline-flex items-center gap-1 text-xs font-bold text-primary transition-colors hover:text-primary-container" href="{% url 'portal:admin_classes' %}"><span class="material-symbols-outlined text-[16px]">arrow_back</span>Classes</a>
+<div class="flex flex-wrap items-center gap-2">
+<h1 class="text-2xl font-bold tracking-tight text-on-surface">{{ school_class.name }}</h1>
+{% if school_class.academic_year %}{% include "portal/_badge.html" with label=school_class.academic_year tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if school_class.level %}{% include "portal/_badge.html" with label=school_class.level tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+{% if school_class.section %}{% include "portal/_badge.html" with label="Section "|add:school_class.section tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}
+</div>
+<p class="mt-1 text-sm text-on-surface-variant">{{ school_class.program|default:"Filière non renseignée" }} · {{ school_class.university.name }}</p>
+</div>
+<div class="flex flex-wrap items-center gap-1.5">
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-3 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'portal:admin_class_update' school_class.pk %}"><span class="material-symbols-outlined text-[16px]">edit</span>Modifier</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full border border-error/30 bg-surface-container-lowest px-3 text-xs font-bold text-error transition-colors hover:bg-error-container" href="{% url 'portal:admin_class_delete' school_class.pk %}"><span class="material-symbols-outlined text-[16px]">delete</span>Supprimer</a>
+{% if can_assign_student %}<button class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-xs font-bold text-primary transition-colors hover:bg-surface-container-highest" data-modal-open="#assign-student-modal" type="button"><span class="material-symbols-outlined text-[16px]">person_add</span>Affecter un étudiant</button>{% endif %}
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-3 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'portal:admin_group_create' school_class.pk %}"><span class="material-symbols-outlined text-[16px]">group_add</span>Nouveau groupe</a>
+</div>
+</header>
+<div class="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5 text-xs text-on-surface-variant shadow-sm">
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">group</span><strong class="text-on-surface">{{ students|length }}</strong> étudiant{{ students|length|pluralize }}</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-secondary">workspaces</span><strong class="text-on-surface">{{ groups|length }}</strong> groupe{{ groups|length|pluralize }}</span>
+<span class="inline-flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-tertiary">school</span><strong class="text-on-surface">{{ professors|length }}</strong> professeur{{ professors|length|pluralize }}</span>
+<span class="inline-flex items-center gap-1.5 {% if seats_left == 0 %}font-semibold text-error{% endif %}"><span class="material-symbols-outlined text-[16px]">event_seat</span>Places : <strong class="{% if seats_left == 0 %}text-error{% else %}text-on-surface{% endif %}">{{ seats_left }}/{{ max_students }}</strong></span>
+</div>
+<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+<div class="flex flex-col gap-4">
+<section class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="text-lg font-semibold text-on-surface">Groupes de la classe</h2>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'portal:admin_group_create' school_class.pk %}"><span class="material-symbols-outlined text-[16px]">add</span>Ajouter un groupe</a>
+</div>
+<div class="mt-3 flex flex-col gap-2">
+{% for group in groups %}
+{% with members=group.students.all %}
+<article class="rounded-lg border border-outline-variant/40 bg-surface p-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div class="min-w-0">
+<h3 class="text-sm font-semibold text-on-surface">{{ group.name }}</h3>
+<p class="text-[11px] text-on-surface-variant">{{ members|length }} étudiant{{ members|length|pluralize }}{% if group.capacity %} · capacité {{ group.capacity }}{% endif %}</p>
+</div>
+<div class="flex items-center gap-0.5">
+<a class="inline-flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary" href="{% url 'portal:admin_group_update' school_class.pk group.pk %}" title="Modifier le groupe"><span class="material-symbols-outlined text-[16px]">edit</span></a>
+<a class="inline-flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" href="{% url 'portal:admin_group_delete' school_class.pk group.pk %}" title="Supprimer le groupe"><span class="material-symbols-outlined text-[16px]">delete</span></a>
+</div>
+</div>
+<div class="mt-2 flex flex-wrap gap-1">
+{% for student in members|slice:":8" %}
+<span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5 text-[10px] font-semibold text-on-surface-variant">
+<span class="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary-fixed text-[7px] font-extrabold text-primary">{{ student.user.first_name|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}</span>
+{{ student.user.get_full_name|default:student.user.email }}
+</span>
+{% empty %}<span class="text-[11px] text-on-surface-variant">Aucun étudiant dans ce groupe.</span>{% endfor %}
+{% if members|length > 8 %}<span class="inline-flex items-center rounded-full bg-surface-container px-2 py-0.5 text-[10px] font-bold text-primary">+{{ members|length|add:"-8" }} autres</span>{% endif %}
+</div>
+</article>
+{% endwith %}
+{% empty %}
+<div class="rounded-lg border border-dashed border-outline-variant/60 px-4 py-6 text-center text-sm text-on-surface-variant">Aucun groupe. Créez un premier groupe de TD / TP pour cette classe.</div>
+{% endfor %}
+</div>
+</section>
+<section class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-3">
+<h2 class="text-lg font-semibold text-on-surface">Matières et enseignants</h2>
+<div class="flex flex-wrap items-center gap-3">
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:admin_timetable' %}?classe={{ school_class.pk }}"><span class="material-symbols-outlined text-[16px]">calendar_month</span>Emploi du temps</a>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:admin_assignment_create' %}?classe={{ school_class.pk }}"><span class="material-symbols-outlined text-[16px]">add</span>Affecter une matière</a>
+</div>
+</div>
+<ul class="mt-3 divide-y divide-outline-variant/30">
+{% for assignment in school_class.teaching_assignments.all %}
+<li class="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+<span class="min-w-0 font-semibold text-on-surface"><span class="font-data-metric text-[11px] text-primary">{{ assignment.subject.code }}</span> · {{ assignment.subject.name }}</span>
+<span class="text-xs text-on-surface-variant">{{ assignment.professor_name }}</span>
+</li>
+{% empty %}
+<li class="py-2 text-sm text-on-surface-variant">Aucune matière affectée. Affectez des matières et leurs professeurs pour pouvoir planifier l'emploi du temps de la classe.</li>
+{% endfor %}
+</ul>
+</section>
+{% if ungrouped %}
+<section class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+<h2 class="text-lg font-semibold text-on-surface">Étudiants sans groupe</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Étudiants actifs sans groupe dans l'université. Utilisez « Affecter un étudiant » pour les rattacher à cette classe.</p>
+<div class="mt-3 flex flex-wrap gap-1.5">
+{% for student in ungrouped %}
+<span class="inline-flex items-center gap-1.5 rounded-full bg-surface-container px-2.5 py-1 text-[11px] font-semibold text-on-surface-variant">{{ student.user.get_full_name|default:student.user.email }}<span class="font-normal text-outline">· {{ student.level|default:"Niveau ?" }}{% if student.section %} · {{ student.section }}{% endif %}</span></span>
+{% empty %}
+<p class="text-xs text-on-surface-variant">Aucun étudiant sans groupe.</p>
+{% endfor %}
+</div>
+</section>
+{% endif %}
+</div>
+<div class="flex flex-col gap-4">
+<section class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+<h2 class="text-lg font-semibold text-on-surface">Encadrement</h2>
+<ul class="mt-3 space-y-2">
+{% for professor in professors %}
+<li class="flex items-center gap-2.5">
+<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-on-primary">{{ professor.user.first_name|slice:":1"|upper }}{{ professor.user.last_name|slice:":1"|upper }}</span>
+<div class="min-w-0"><p class="truncate text-sm font-semibold text-on-surface">{{ professor.user.get_full_name|default:professor.user.email }}</p><p class="truncate text-[11px] text-on-surface-variant">{{ professor.department|default:"Département non renseigné" }}{% if professor.grade %} · {{ professor.get_grade_display }}{% endif %}</p></div>
+</li>
+{% empty %}<li class="text-sm text-on-surface-variant">Aucun professeur rattaché. Modifiez la classe pour en ajouter.</li>{% endfor %}
+</ul>
+</section>
+<section class="rounded-xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+<h2 class="text-lg font-semibold text-on-surface">Informations</h2>
+<dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Niveau</dt><dd class="font-semibold text-on-surface">{{ school_class.level|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Section</dt><dd class="font-semibold text-on-surface">{{ school_class.section|default:"—" }}</dd></div>
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Filière</dt><dd class="font-semibold text-on-surface">{{ school_class.program|default:"—" }}</dd></div>
+{% if school_class.study_program %}<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Département</dt><dd class="font-semibold text-on-surface">{{ school_class.study_program.department.name }}</dd></div>{% endif %}
+<div><dt class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Année universitaire</dt><dd class="font-semibold text-on-surface">{{ school_class.academic_year|default:"—" }}</dd></div>
+</dl>
+{% if school_class.description %}<p class="mt-3 border-t border-outline-variant/40 pt-3 text-sm leading-relaxed text-on-surface-variant">{{ school_class.description|linebreaksbr }}</p>{% endif %}
+</section>
+</div>
+</div>
+</div>
+</main>
+<div aria-labelledby="assign-student-title" aria-modal="true" class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="assign-student-modal" role="dialog">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="text-lg font-semibold text-on-surface" id="assign-student-title">Affecter un étudiant</h2><p class="text-xs text-on-surface-variant">Ajoutez directement un étudiant sans groupe à cette classe.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="grid gap-3 p-5" action="{% url 'portal:admin_class_assign_student' school_class.pk %}" data-validate-form method="post" novalidate>
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Rechercher un étudiant</span><input autocomplete="off" class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors placeholder:text-outline focus:border-primary" data-modal-focus data-student-search placeholder="Nom, prénom, e-mail ou matricule…" type="search"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Étudiant</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Sélectionnez un étudiant." data-student-select name="student" required><option disabled selected value="">Sélectionner un étudiant</option>{% for student in assignable_students %}<option data-search="{{ student.user.get_full_name|default:student.user.email }} {{ student.user.email }} {{ student.student_number }} {{ student.level }} {{ student.section }}" value="{{ student.pk }}">{{ student.user.get_full_name|default:student.user.email }}{% if student.level or student.section %} — {{ student.level|default:"Niveau ?" }}{% if student.section %} · {{ student.section }}{% endif %}{% endif %}</option>{% empty %}<option disabled value="">Aucun étudiant disponible</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Groupe de la classe</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Sélectionnez un groupe." name="group" required><option disabled selected value="">Sélectionner un groupe</option>{% for group in groups %}<option value="{{ group.pk }}">{{ group.name }}</option>{% empty %}<option disabled value="">Aucun groupe disponible</option>{% endfor %}</select></label>
+<p class="rounded bg-surface-container px-3.5 py-3 text-[11px] leading-relaxed text-on-surface-variant"><span class="material-symbols-outlined mr-1 align-[-3px] text-[15px] text-primary">info</span>L'étudiant sera ajouté au groupe choisi. Un étudiant ne peut appartenir qu'à une seule classe : ceux qui ont déjà un groupe dans une autre classe ne sont pas proposés.</p>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">person_add</span>Affecter à la classe</button>
+</div>
+</form>
+</div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var modal = document.getElementById('assign-student-modal');
+  if (!modal) return;
+  var search = modal.querySelector('[data-student-search]');
+  var select = modal.querySelector('[data-student-select]');
+  if (!search || !select) return;
+  var allOptions = Array.prototype.slice.call(select.querySelectorAll('option')).filter(function (option) {
+    return option.value;
+  });
+  var emptyOption = select.querySelector('option[value=""]');
+
+  function normalize(value) {
+    return (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  function applyFilter() {
+    var query = normalize(search.value.trim());
+    var selected = select.value;
+    allOptions.forEach(function (option) { option.remove(); });
+    var matches = allOptions.filter(function (option) {
+      var haystack = normalize(option.getAttribute('data-search') || option.textContent || '');
+      return !query || haystack.indexOf(query) !== -1;
+    });
+    matches.forEach(function (option) { select.appendChild(option); });
+    if (emptyOption) {
+      emptyOption.textContent = matches.length ? 'Sélectionner un étudiant' : 'Aucun étudiant trouvé';
+      emptyOption.disabled = matches.length === 0;
+    }
+    if (selected && !matches.some(function (option) { return option.value === selected; })) {
+      select.value = '';
+    }
+  }
+
+  search.addEventListener('input', applyFilter);
+
+  document.addEventListener('click', function (event) {
+    if (event.target.closest('[data-modal-open="#assign-student-modal"]')) {
+      search.value = '';
+      applyFilter();
+    }
+  });
+})();
+</script>
+{% endblock %}

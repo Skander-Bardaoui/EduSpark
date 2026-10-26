@@ -1,0 +1,887 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Objectifs &amp; Plans — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col">
+<!-- Dynamic Top Bar & Hero Section -->
+<header class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg mb-space-xl">
+<div class="flex flex-col gap-space-xs max-w-2xl">
+<div class="flex items-center gap-space-xs text-secondary font-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">monitoring</span>
+<span>Tableau de Bord Pédagogique • Semestre 1</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+        Mon Suivi &amp; Planification Académique
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Définissez vos objectifs d'apprentissage semestriels, planifiez vos sessions de révision et mesurez vos progrès en temps réel.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="group flex items-center gap-space-sm px-space-lg py-space-sm bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary hover:text-on-secondary rounded-full font-label-md text-label-md transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" id="toggle-ia-panel" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary group-hover:text-on-secondary transition-colors" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span>Générer mon plan d'étude avec l'IA</span>
+</button>
+<a class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface rounded-full font-label-md text-label-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="{% url 'coaching:student_progress_export' %}">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Rapport Synthèse</span>
+</a>
+</div>
+</header>
+<!-- Metrics Grid -->
+<section aria-label="Indicateurs clés de progression" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-xl">
+<!-- Metric 1: Objectifs -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Objectifs atteints</span>
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ goal_stats.achieved }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ goal_stats.total }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-primary bg-primary-fixed px-2 py-0.5 rounded-full font-semibold">{{ goal_stats.percent }}%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: {{ goal_stats.percent }}%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary">trending_up</span>
+<span>{{ achieved_hint }}</span>
+</p>
+</div>
+<!-- Metric 2: Heures de révision -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Révision Semaine</span>
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">hourglass_top</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ completed_hours }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ target_hours }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-secondary font-bold">{{ revision_percent }}%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full transition-all duration-500" style="width: {{ revision_percent }}%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary">schedule</span>
+<span>{{ revision_hint }}</span>
+</p>
+</div>
+<!-- Metric 3: Tâches d'études -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Tâches terminées</span>
+<div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+</div>
+<div class="flex items-baseline gap-space-xs mb-space-sm">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ task_counts.done }}</span>
+<span class="font-title-md text-title-md text-outline">/ {{ task_counts.total }}</span>
+<span class="ml-auto font-data-metric text-data-metric text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-semibold">{{ task_counts.progress }}%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-surface-tint h-2 rounded-full transition-all duration-500" style="width: {{ task_counts.progress }}%;"></div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-space-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-tertiary">assignment_late</span>
+<span>{{ task_urgent_hint }}</span>
+</p>
+</div>
+<!-- Metric 4: Prochain jalon critique -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Jalon critique</span>
+<div class="w-9 h-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+</div>
+</div>
+<div class="flex flex-col mb-space-xs">
+{% if exam %}
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">{{ exam.title }}</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">{{ exam.course_code }}{% if exam.location %} • {{ exam.location }}{% endif %}</span>
+{% else %}
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">Aucun jalon à venir</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Planifiez vos prochaines échéances.</span>
+{% endif %}
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+{% if exam %}
+<span class="px-2.5 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-data-metric text-data-metric rounded-full font-bold">{{ exam_countdown|default:"À venir" }}</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ exam_when_label }}</span>
+{% else %}
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant font-data-metric text-data-metric rounded-full font-bold">—</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Aucune date</span>
+{% endif %}
+</div>
+</div>
+</section>
+<!-- Main Canvas: Two Columns Layout (Wide Main Content + Normalized Right AI Panel) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-xl items-start">
+<!-- Left / Center Main Core Flow (8 Cols) -->
+<div class="xl:col-span-8 flex flex-col gap-space-xl">
+<!-- Section: Mes Objectifs Académiques -->
+<section aria-labelledby="section-objectifs-title" class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between flex-wrap gap-space-sm">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-objectifs-title">
+              Mes Objectifs Académiques
+            </h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full">Semestre 1</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest hover:bg-surface-container text-primary font-label-md text-label-md rounded-full shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary" data-modal-open="#goal-create-modal" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Ajouter un objectif</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-md">
+{% for item in goal_items %}
+{% with goal=item.goal %}
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-lg">
+<div class="flex-1 flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-sm text-label-sm uppercase tracking-wider font-bold">
+{{ goal.semester }}
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 {{ item.meta.badge }} font-label-sm text-label-sm rounded-full font-semibold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">{{ item.meta.icon }}</span>
+<span>{{ item.meta.label }}</span>
+</span>
+{% if goal.course_code %}
+<span class="font-data-metric text-data-metric text-on-surface-variant">{{ goal.course_code }}</span>
+{% endif %}
+</div>
+<h3 class="font-title-md text-title-md text-on-surface{% if goal.status == 'achieved' %} line-through text-outline{% endif %}">
+{{ goal.title }}
+</h3>
+{% if goal.description %}
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+{{ goal.description }}
+</p>
+{% endif %}
+<div class="flex items-center gap-space-md pt-space-xs text-on-surface-variant font-body-sm text-body-sm">
+{% if item.skills_label %}
+<span class="flex items-center gap-1 font-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>{{ item.skills_label }}</span>
+</span>
+{% endif %}
+{% if goal.status == 'achieved' %}
+<span class="flex items-center gap-1 font-label-sm text-primary">
+<span class="material-symbols-outlined text-[16px]">workspace_premium</span>
+<span>{% if item.grade_label %}Objectif validé · Note : {{ item.grade_label }}/20{% else %}Objectif validé{% endif %}</span>
+</span>
+{% else %}
+<span class="flex items-center gap-1 font-label-sm{% if goal.status == 'at_risk' %} text-error{% endif %}">
+<span class="material-symbols-outlined text-[16px]{% if goal.status != 'at_risk' %} text-outline{% endif %}">{% if goal.status == 'at_risk' %}schedule{% else %}event{% endif %}</span>
+<span>{% if goal.status == 'at_risk' %}Échéance critique :{% else %}Échéance :{% endif %} {{ item.target_label }}</span>
+</span>
+{% endif %}
+</div>
+</div>
+<div class="md:w-48 flex flex-col items-end gap-space-xs">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-sm text-headline-sm font-bold {{ item.meta.value }}">{{ goal.progress }}%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{% if goal.status == 'achieved' %}complété{% else %}avancement{% endif %}</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2.5 overflow-hidden">
+<div class="{{ item.meta.progress }} h-2.5 rounded-full" style="width: {{ goal.progress }}%;"></div>
+</div>
+{% if goal.status == 'at_risk' %}
+<form class="mt-space-xs flex justify-end" method="post" action="{% url 'coaching:student_goal_postpone' goal.pk %}">
+{% csrf_token %}
+<button class="font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="submit">
+<span>Reprogrammer</span>
+<span class="material-symbols-outlined text-sm">schedule_send</span>
+</button>
+</form>
+{% elif goal.status == 'achieved' %}
+<span class="font-label-sm text-label-sm text-outline mt-space-xs">Archivé au relevé</span>
+{% else %}
+<form class="mt-space-xs flex items-center justify-end gap-1.5" method="post" action="{% url 'coaching:student_goal_progress' goal.pk %}">
+{% csrf_token %}
+<label class="sr-only" for="goal-progress-{{ goal.pk }}">Avancement de {{ goal.title }}</label>
+<input class="w-16 rounded border border-outline-variant/70 bg-surface px-2 py-1 text-right text-xs font-bold text-on-surface outline-none focus:border-primary" id="goal-progress-{{ goal.pk }}" max="100" min="0" name="progress" type="number" value="{{ goal.progress }}"/>
+<span class="text-[11px] text-on-surface-variant">%</span>
+{% if goal.skills_total %}
+<input class="w-14 rounded border border-outline-variant/70 bg-surface px-2 py-1 text-right text-xs font-bold text-on-surface outline-none focus:border-primary" max="{{ goal.skills_total }}" min="0" name="skills_acquired" title="Compétences acquises" type="number" value="{{ goal.skills_acquired }}"/>
+<span class="text-[11px] text-on-surface-variant">/{{ goal.skills_total }}</span>
+{% endif %}
+<button class="font-label-sm text-label-sm text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" type="submit">
+<span>Mettre à jour</span>
+<span class="material-symbols-outlined text-sm">save</span>
+</button>
+</form>
+{% endif %}
+</div>
+</article>
+{% endwith %}
+{% empty %}
+<div class="bg-surface-container-lowest p-space-lg rounded shadow-sm text-center font-body-md text-body-md text-on-surface-variant">
+Aucun objectif défini pour ce semestre.
+</div>
+{% endfor %}
+</div>
+</section>
+<!-- Section: Mon Plan d'étude & Planning hebdomadaire -->
+<section aria-labelledby="section-planning-title" class="flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-planning-title">
+              Mon Plan d'étude &amp; Planning hebdomadaire
+            </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Semaine {{ week_number }} • {{ week_start }} au {{ week_end }}
+            </p>
+</div>
+<!-- Accessible View Switcher (WCAG Compliant) -->
+<div aria-label="Format d'affichage du planning" class="inline-flex p-1 bg-surface-container rounded-full self-start" role="radiogroup">
+<button aria-checked="false" aria-controls="planning-panel-calendar" class="px-space-md py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-1.5" id="view-mode-calendar" role="radio" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_view_week</span>
+<span>Vue Calendrier</span>
+</button>
+<button aria-checked="true" aria-controls="planning-panel-list" class="px-space-md py-1.5 rounded-full font-label-md text-label-md bg-surface-container-lowest text-primary shadow-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary flex items-center gap-1.5" id="view-mode-list" role="radio" type="button">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+<span>Vue Liste accessible</span>
+</button>
+</div>
+</div>
+<!-- Planning: list and calendar views -->
+<div class="bg-surface-container-lowest rounded p-space-lg shadow-sm">
+<div class="flex flex-col gap-space-lg" data-planning-panel="list" id="planning-panel-list" role="region" aria-label="Planning en vue liste">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<span class="font-title-md text-title-md font-bold text-on-surface">Sessions de travail programmées</span>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ sessions_hint }}</span>
+<button class="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 font-label-sm text-label-sm text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#session-create-modal" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>Planifier une session</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+{% for item in session_items %}
+{% with session=item.session %}
+<div class="p-space-md bg-surface-container-low rounded flex flex-col justify-between gap-space-sm hover:shadow-xs transition-shadow">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 {{ item.meta.variant }} rounded-full font-data-metric text-data-metric font-semibold">{{ session.course_code|default:session.get_kind_display }}</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm {{ item.meta.tone }} font-semibold">
+{% if item.meta.icon %}
+<span class="material-symbols-outlined text-sm">{{ item.meta.icon }}</span>
+{% else %}
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+{% endif %}
+<span>{{ item.meta.label }}</span>
+</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md font-bold text-on-surface">{{ session.title }}</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">{{ session.get_kind_display }}{% if session.location %} · {{ session.location }}{% endif %}</p>
+</div>
+<div class="pt-space-xs text-on-surface-variant font-label-sm text-label-sm flex items-center justify-between gap-2">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>{{ item.when_label }}</span>
+</span>
+<form method="post" action="{% url 'coaching:student_session_toggle' session.pk %}">
+{% csrf_token %}
+<button class="font-label-sm text-label-sm font-semibold text-primary hover:text-secondary" type="submit">
+{% if session.status == 'completed' %}Rouvrir{% else %}Marquer terminée{% endif %}
+</button>
+</form>
+</div>
+</div>
+{% endwith %}
+{% empty %}
+<p class="p-space-md bg-surface-container-low rounded font-body-sm text-body-sm text-on-surface-variant md:col-span-3">Aucune session planifiée cette semaine.</p>
+{% endfor %}
+</div>
+<!-- Associated Tasks with WCAG Compliant Hitboxes (>=44px) -->
+<div class="flex flex-col gap-space-sm pt-space-md">
+<span class="font-title-md text-title-md font-bold text-on-surface">Tâches prioritaires associées</span>
+<div class="flex flex-col gap-space-xs">
+{% for item in task_items %}
+<form class="flex items-center gap-space-md p-space-sm rounded hover:bg-surface-container transition-colors min-h-[44px]" data-progress-task method="post" action="{% url 'coaching:student_task_toggle' item.task.pk %}">
+{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.path }}"/>
+<input class="w-5 h-5 rounded text-primary focus:ring-primary focus:ring-offset-2 border-outline-variant" type="checkbox"/>
+<div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+<span class="font-body-md text-body-md text-on-surface font-medium">{{ item.task.title }}</span>
+<span class="font-data-metric text-data-metric text-outline">{{ item.detail }}</span>
+</div>
+</form>
+{% empty %}
+<p class="p-space-sm font-body-sm text-body-sm text-on-surface-variant">Aucune tâche prioritaire en attente.</p>
+{% endfor %}
+</div>
+</div>
+</div>
+<div class="hidden" data-planning-panel="calendar" id="planning-panel-calendar" role="region" aria-label="Planning en vue calendrier">
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+<div>
+<span class="font-title-md text-title-md font-bold text-on-surface">Vue calendrier de la semaine</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Semaine {{ week_number }} · {{ week_start }} au {{ week_end }}</p>
+</div>
+<div class="flex flex-wrap items-center gap-3 font-label-sm text-label-sm text-on-surface-variant">
+<span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span>Séance</span>
+<span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>Tâche</span>
+<span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>Aujourd'hui</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-space-sm">
+<div class="rounded bg-primary-fixed/40 p-space-sm">
+<p class="font-data-metric text-data-metric text-primary font-bold">{{ calendar_session_count }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">séance(s) cette semaine</p>
+</div>
+<div class="rounded bg-tertiary-fixed/40 p-space-sm">
+<p class="font-data-metric text-data-metric text-tertiary font-bold">{{ calendar_task_count }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">tâche(s) à échéance</p>
+</div>
+<div class="rounded bg-secondary-fixed/40 p-space-sm">
+<p class="font-data-metric text-data-metric text-secondary font-bold">{{ calendar_minutes_label }}</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">de travail planifié</p>
+</div>
+</div>
+<div aria-label="Calendrier hebdomadaire, faites défiler horizontalement si nécessaire" class="overflow-x-auto pb-1" tabindex="0">
+<div class="grid grid-cols-7 gap-space-sm min-w-[900px]">
+{% for day in calendar_days %}
+<section aria-label="{{ day.full_label }}" class="flex flex-col gap-space-sm rounded p-space-sm min-h-[220px] border {% if day.is_today %}bg-primary-container/15 border-primary/40 ring-1 ring-primary/20{% elif day.is_weekend %}bg-surface-container/70 border-outline-variant/20{% else %}bg-surface-container-low border-transparent{% endif %}">
+<header class="flex items-start justify-between gap-1 border-b border-outline-variant/30 pb-2">
+<div>
+<p class="font-label-sm text-label-sm uppercase tracking-wide {% if day.is_today %}text-primary font-bold{% else %}text-on-surface-variant{% endif %}">{{ day.weekday }}</p>
+<div class="flex items-baseline gap-1">
+<p class="font-headline-sm text-title-md font-bold text-on-surface">{{ day.day_number }}</p>
+<span class="font-label-sm text-label-sm text-on-surface-variant">{{ day.month_label }}</span>
+</div>
+</div>
+{% if day.is_today %}
+<span class="px-1.5 py-0.5 bg-primary text-on-primary rounded-full font-label-sm text-[10px] font-bold">Aujourd'hui</span>
+{% endif %}
+</header>
+<p class="font-label-sm text-[11px] text-on-surface-variant">
+{{ day.session_count }} séance(s) · {{ day.task_count }} tâche(s)
+{% if day.session_minutes %}· {{ day.session_minutes }} min{% endif %}
+</p>
+{% for item in day.sessions %}
+<article class="rounded bg-surface-container-lowest p-2.5 shadow-xs border-l-4 border-primary hover:shadow-sm transition-shadow">
+<div class="flex items-center justify-between gap-1">
+<span class="font-data-metric text-[10px] font-bold text-primary bg-primary-fixed/50 rounded px-1.5 py-0.5">{{ item.time_label }}</span>
+</div>
+<p class="mt-1 font-label-md text-label-md font-semibold text-on-surface leading-tight">{{ item.session.title }}</p>
+<p class="font-label-sm text-[11px] text-on-surface-variant">{{ item.session.course_code|default:item.session.get_kind_display }}{% if item.session.location %} · {{ item.session.location }}{% endif %}</p>
+<span class="mt-1 inline-flex items-center gap-1 font-label-sm text-[10px] {{ item.meta.tone }} font-semibold">
+{% if item.meta.icon %}
+<span class="material-symbols-outlined text-[12px]">{{ item.meta.icon }}</span>
+{% endif %}
+<span>{{ item.meta.label }}</span>
+</span>
+</article>
+{% endfor %}
+{% for item in day.tasks %}
+<div class="rounded bg-surface-container-lowest p-2.5 shadow-xs border-l-4 border-tertiary">
+<div class="flex items-center gap-1 font-label-sm text-[10px] text-tertiary font-bold uppercase tracking-wide">
+<span class="material-symbols-outlined text-[12px]">task_alt</span>
+<span>Tâche prioritaire</span>
+</div>
+<p class="mt-1 font-label-md text-label-md font-semibold text-on-surface leading-tight">{{ item.task.title }}</p>
+<p class="font-label-sm text-[11px] text-on-surface-variant">{{ item.detail }}</p>
+</div>
+{% endfor %}
+{% if not day.sessions and not day.tasks %}
+<div class="m-auto flex flex-col items-center gap-1 py-3 text-center">
+<span class="material-symbols-outlined text-[20px] text-outline">event_available</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Journée libre</p>
+</div>
+{% endif %}
+</section>
+{% endfor %}
+</div>
+</div>
+{% if unscheduled_task_items %}
+<div class="rounded bg-surface-container-low p-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary">playlist_add</span>
+<p class="font-title-md text-title-md font-bold text-on-surface">Tâches à planifier</p>
+</div>
+<ul class="mt-2 flex flex-col gap-1.5">
+{% for item in unscheduled_task_items %}
+<li class="flex flex-col gap-0.5 rounded bg-surface-container-lowest px-2 py-1.5 sm:flex-row sm:items-center sm:justify-between">
+<span class="font-body-sm text-body-sm text-on-surface">{{ item.task.title }}</span>
+<span class="font-data-metric text-data-metric text-outline">{{ item.due_label }}</span>
+</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</section>
+<!-- Section: Journal de Réflexion & Progression -->
+<section aria-labelledby="section-journal-title" class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="section-journal-title">
+              Journal de Réflexion &amp; Progression
+            </h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm rounded-full">Partage tuteur</span>
+</div>
+<a class="font-label-md text-label-md text-primary hover:text-secondary font-semibold flex items-center gap-1 focus:outline-none" href="{{ journal_add_url }}">
+<span class="material-symbols-outlined text-[18px]">rate_review</span>
+<span>Nouvelle réflexion</span>
+</a>
+</div>
+<div class="space-y-space-md">
+{% if tutor_notification %}
+<div class="flex items-start gap-space-md p-space-md bg-secondary-fixed/30 rounded">
+<span class="material-symbols-outlined shrink-0 text-[20px] text-secondary">notifications_active</span>
+<div class="flex-1">
+<div class="flex flex-wrap items-center justify-between gap-2"><p class="font-label-md text-label-md font-bold text-on-surface">Notification ENT{% if tutor_notification.tutor_name %} · {{ tutor_notification.tutor_name }}{% endif %}</p><span class="font-data-metric text-data-metric text-xs text-outline">{{ tutor_notification.when_label }}</span></div>
+<p class="mt-1 font-body-sm text-body-sm text-on-surface-variant">{{ tutor_notification.notification.message }}</p>
+<a class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-secondary hover:underline" href="{% url 'coaching:student_notifications' %}">Voir toutes mes notifications<span class="material-symbols-outlined text-[14px]">arrow_forward</span></a>
+</div>
+</div>
+{% endif %}
+{% if entry_view %}
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary font-bold">
+{{ entry_view.initials }}
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">{{ entry_view.entry.title }}</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Posté le {{ entry_view.when_label }}</span>
+</div>
+</div>
+<div aria-label="Auto-évaluation : {{ entry_view.score }} étoiles sur 5" class="flex items-center gap-1 text-tertiary-container">
+{% for filled in entry_view.stars %}
+{% if filled %}
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span>
+{% else %}
+<span class="material-symbols-outlined text-[20px] text-surface-container-high">star</span>
+{% endif %}
+{% endfor %}
+<span class="ml-1 font-data-metric text-data-metric text-on-surface font-bold">{{ entry_view.score }}</span>
+</div>
+</div>
+<blockquote class="p-space-md bg-surface-container-low rounded font-body-md text-body-md text-on-surface-variant italic">
+« {{ entry_view.entry.reflection }} »
+</blockquote>
+{% if entry_view.tutor_name %}
+<div class="flex items-start gap-space-md p-space-md bg-surface-container rounded">
+<span class="w-11 h-11 rounded-full bg-primary-fixed text-primary flex items-center justify-center font-bold shrink-0">{{ entry_view.tutor_initials }}</span>
+<div class="flex flex-col gap-space-xs flex-1">
+<div class="flex items-center justify-between flex-wrap gap-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">{{ entry_view.tutor_name }}</span>
+<span class="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full font-label-sm text-[11px] font-bold uppercase">Professeur Référent</span>
+</div>
+<span class="font-data-metric text-data-metric text-outline text-xs">{{ entry_view.feedback_when }}</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+{{ entry_view.entry.feedback }}
+</p>
+</div>
+</div>
+{% endif %}
+</article>
+{% else %}
+<article class="bg-surface-container-lowest p-space-lg rounded shadow-sm text-center font-body-md text-body-md text-on-surface-variant">
+Aucune entrée de journal pour le moment. <a class="font-semibold text-primary hover:underline" href="{{ journal_add_url }}">Rédiger ma première réflexion</a>.
+</article>
+{% endif %}
+</div>
+</section>
+</div>
+<!-- Right Column: Reusable Normalized AI Study Plan Assistant Panel (4 Cols) -->
+<aside aria-label="Assistant Plan d'Étude IA" class="xl:col-span-4 flex flex-col gap-space-lg" id="ia-study-panel">
+<!-- Normalized AI Container Card -->
+<div class="bg-surface-container-lowest rounded p-space-lg shadow-md flex flex-col gap-space-md sticky top-28">
+<!-- Header Panel with BETA Multimodale Badge -->
+<div class="flex items-center justify-between border-b pb-space-sm" style="border-color: #dde1ff;">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[24px] text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-headline-sm text-title-md font-bold text-on-surface">Assistant Plan d'Étude IA</span>
+</div>
+<span class="px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold uppercase tracking-wider rounded-full">
+            BETA MULTIMODALE
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Optimisez votre charge mentale en générant une proposition de planning adaptative basée sur vos jalons d'examens et vos objectifs actifs.
+        </p>
+<!-- Framing Form -->
+<form class="flex flex-col gap-space-md" data-apply-url="{% url 'coaching:student_ai_plan_apply' %}" data-generate-url="{% url 'coaching:student_ai_plan' %}" id="ai-plan-form" onsubmit="event.preventDefault();">
+{% csrf_token %}
+<!-- Selection des objectifs cibles -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="ai-target-objectives">
+              Objectifs prioritaires à intégrer
+            </label>
+<select class="w-full px-space-md py-2.5 bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded outline-none focus:ring-2 focus:ring-secondary transition-all" id="ai-target-objectives">
+<option value="">Tous les objectifs actifs</option>
+{% for goal in ai_goal_options %}
+<option value="{{ goal.id }}">{{ goal.title }}{% if goal.target %} · {{ goal.target }}{% endif %}</option>
+{% endfor %}
+</select>
+</div>
+<!-- Disponibilité Hebdomadaire -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="ai-hours-slider">
+                Disponibilité de révision
+              </label>
+<span class="font-data-metric text-data-metric text-secondary font-bold" id="hours-display">15 heures</span>
+</div>
+<input class="w-full accent-secondary cursor-pointer" id="ai-hours-slider" max="30" min="5" oninput="document.getElementById('hours-display').innerText = this.value + ' heures';" step="1" type="range" value="15"/>
+<div class="flex justify-between font-label-sm text-[11px] text-outline">
+<span>5h (Légère)</span>
+<span>15h (Équilibrée)</span>
+<span>30h (Intensive)</span>
+</div>
+</div>
+<!-- Priorisation -->
+<fieldset class="flex flex-col gap-2">
+<legend class="font-label-md text-label-md text-on-surface font-semibold mb-1">Stratégie de priorisation</legend>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-xs">
+<label class="flex items-center gap-2 p-2 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container transition-colors">
+<input checked="" class="text-secondary focus:ring-secondary" name="ai-priority" type="radio" value="deadlines"/>
+<span class="font-label-sm text-label-sm text-on-surface">Échéances imminentes</span>
+</label>
+<label class="flex items-center gap-2 p-2 bg-surface-container-low rounded cursor-pointer hover:bg-surface-container transition-colors">
+<input class="text-secondary focus:ring-secondary" name="ai-priority" type="radio" value="balance"/>
+<span class="font-label-sm text-label-sm text-on-surface">Équilibre de travail</span>
+</label>
+</div>
+</fieldset>
+<!-- Bouton Générer la planification -->
+<button class="w-full flex items-center justify-center gap-space-sm px-space-md py-3 bg-secondary text-on-secondary rounded-full font-label-md text-label-md hover:bg-secondary-container transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 disabled:opacity-60 disabled:cursor-wait" id="ai-generate" type="button"{% if not ai_available %} disabled title="Ajoutez GROQ_API_KEY dans EduSpark/.env"{% endif %}>
+<span class="material-symbols-outlined text-[18px]">auto_mode</span>
+<span>Générer la planification</span>
+</button>
+</form>
+<!-- Dynamic AI plan -->
+<div class="hidden p-space-md bg-surface-container-low rounded flex-col gap-space-sm" id="ai-plan-card">
+<div class="flex items-center justify-between gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded-full font-label-sm text-label-sm font-bold uppercase">
+<span class="material-symbols-outlined text-sm">psychology_alt</span>
+<span>Suggestion IA</span>
+</span>
+<div class="flex items-center gap-1 font-data-metric text-data-metric text-primary bg-surface-container-lowest px-2 py-0.5 rounded-full font-semibold shadow-xs">
+<span class="material-symbols-outlined text-sm text-primary">analytics</span>
+<span>Viabilité : <span id="ai-plan-viability">--</span>%</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant" id="ai-plan-summary"></p>
+<div class="flex flex-col gap-space-xs" id="ai-plan-blocks"></div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-space-xs pt-space-xs">
+<button class="px-2 py-2 bg-primary text-on-primary hover:bg-primary-container rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60" id="ai-plan-keep" title="Sauvegarder et injecter au planning" type="button">
+<span class="material-symbols-outlined text-[16px]">check</span>
+<span>Garder</span>
+</button>
+<button class="px-2 py-2 bg-surface-container-high text-on-surface hover:bg-surface-variant rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-primary" id="ai-plan-edit" title="Modifier le cadrage" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Modifier</span>
+</button>
+<button class="px-2 py-2 bg-surface-container-lowest text-error hover:bg-error-container rounded-full font-label-sm text-label-sm font-semibold flex items-center justify-center gap-1 transition-all focus:outline-none focus:ring-2 focus:ring-error" id="ai-plan-dismiss" title="Rejeter la suggestion" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>Refuser</span>
+</button>
+</div>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded" id="ai-plan-empty">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Choisissez vos objectifs et votre disponibilité, puis générez une proposition de planning personnalisée.</p>
+</div>
+<!-- Statut de résilience WCAG obligatoire -->
+<div aria-live="polite" class="flex items-start gap-space-sm p-space-sm bg-surface-container rounded text-on-surface-variant" id="ai-plan-status" role="status">
+<span class="material-symbols-outlined text-outline text-[18px] shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-xs leading-tight">{% if ai_available %}L'assistant utilise Groq ({{ ai_model }}). En cas d'indisponibilité, votre planning manuel reste accessible.{% else %}Clé IA absente : ajoutez <strong>GROQ_API_KEY</strong> dans <code>EduSpark/.env</code> puis redémarrez. Le planning manuel reste disponible.{% endif %}</p>
+</div>
+</div>
+</aside>
+</div>
+</div>
+<script>
+  // Simple micro-interactions: view mode toggles & hours slider feedback
+  const btnCalendar = document.getElementById('view-mode-calendar');
+  const btnList = document.getElementById('view-mode-list');
+  const planningButtons = { calendar: btnCalendar, list: btnList };
+  const planningPanels = {
+    calendar: document.getElementById('planning-panel-calendar'),
+    list: document.getElementById('planning-panel-list'),
+  };
+
+  function setPlanningView(mode) {
+    Object.keys(planningButtons).forEach((key) => {
+      const btn = planningButtons[key];
+      if (!btn) return;
+      const selected = key === mode;
+      btn.setAttribute('aria-checked', selected ? 'true' : 'false');
+      btn.classList.toggle('bg-surface-container-lowest', selected);
+      btn.classList.toggle('text-primary', selected);
+      btn.classList.toggle('shadow-xs', selected);
+      btn.classList.toggle('font-semibold', selected);
+      btn.classList.toggle('text-on-surface-variant', !selected);
+    });
+    Object.keys(planningPanels).forEach((key) => {
+      const panel = planningPanels[key];
+      if (!panel) return;
+      const selected = key === mode;
+      panel.classList.toggle('hidden', !selected);
+      panel.hidden = !selected;
+    });
+  }
+
+  if (btnCalendar && btnList) {
+    btnCalendar.addEventListener('click', () => setPlanningView('calendar'));
+    btnList.addEventListener('click', () => setPlanningView('list'));
+    [btnCalendar, btnList].forEach((btn) => {
+      btn.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const next = btn === btnCalendar ? btnList : btnCalendar;
+        next.focus();
+        next.click();
+      });
+    });
+  }
+
+  // Planifier / marquer une tâche prioritaire via son formulaire POST
+  document.querySelectorAll('[data-progress-task] input[type="checkbox"]').forEach((box) => {
+    box.addEventListener('change', () => {
+      if (box.form) box.form.requestSubmit();
+    });
+  });
+
+  // Assistant Plan d'Étude IA (Groq)
+  const aiForm = document.getElementById('ai-plan-form');
+  if (aiForm) {
+    const generateBtn = document.getElementById('ai-generate');
+    const generateLabel = generateBtn ? generateBtn.querySelector('span:last-child') : null;
+    const goalSelect = document.getElementById('ai-target-objectives');
+    const hoursSlider = document.getElementById('ai-hours-slider');
+    const planCard = document.getElementById('ai-plan-card');
+    const planEmpty = document.getElementById('ai-plan-empty');
+    const planSummary = document.getElementById('ai-plan-summary');
+    const planBlocks = document.getElementById('ai-plan-blocks');
+    const planViability = document.getElementById('ai-plan-viability');
+    const keepBtn = document.getElementById('ai-plan-keep');
+    const editBtn = document.getElementById('ai-plan-edit');
+    const dismissBtn = document.getElementById('ai-plan-dismiss');
+    const statusEl = document.getElementById('ai-plan-status');
+    const statusText = statusEl ? statusEl.querySelector('p') : null;
+    const statusIcon = statusEl ? statusEl.querySelector('.material-symbols-outlined') : null;
+    const csrfToken = aiForm.querySelector('[name="csrfmiddlewaretoken"]').value;
+    const generateUrl = aiForm.dataset.generateUrl;
+    const applyUrl = aiForm.dataset.applyUrl;
+    let aiPlan = null;
+
+    function setAiStatus(message, tone) {
+      if (!statusText || !statusIcon || !statusEl) return;
+      statusText.textContent = message;
+      statusText.className = 'font-body-sm text-body-sm text-xs leading-tight' + (
+        tone === 'error' ? ' text-error' : tone === 'success' ? ' text-primary' : ''
+      );
+      statusIcon.textContent = tone === 'error' ? 'error' : tone === 'success' ? 'check_circle' : 'info';
+    }
+
+    function formatDay(iso) {
+      const date = new Date(iso + 'T00:00:00');
+      if (Number.isNaN(date.getTime())) return iso;
+      return date.toLocaleDateString('fr-FR', {
+        weekday: 'short', day: 'numeric', month: 'short',
+      });
+    }
+
+    function durationLabel(minutes) {
+      const value = Number(minutes) || 60;
+      const hours = Math.floor(value / 60);
+      const rest = value % 60;
+      if (!hours) return rest + ' min';
+      return hours + 'h' + (rest ? String(rest).padStart(2, '0') : '');
+    }
+
+    function renderPlan(plan) {
+      aiPlan = plan;
+      planViability.textContent = plan.viabilite;
+      planSummary.textContent = plan.resume || '';
+      planBlocks.replaceChildren();
+      (plan.blocs || []).forEach((block) => {
+        const row = document.createElement('div');
+        row.className = 'flex flex-col gap-1 p-2 bg-surface-container-lowest rounded';
+        const top = document.createElement('div');
+        top.className = 'flex items-start justify-between gap-2';
+        const title = document.createElement('span');
+        title.className = 'font-semibold text-on-surface text-body-sm';
+        title.textContent = block.titre;
+        const when = document.createElement('span');
+        when.className = 'font-data-metric text-[11px] text-primary bg-primary-fixed/50 rounded px-1.5 py-0.5 whitespace-nowrap';
+        when.textContent = formatDay(block.jour) + ' · ' + block.debut + ' · ' + durationLabel(block.duree_minutes);
+        top.append(title, when);
+        row.append(top);
+        if (block.raison) {
+          const reason = document.createElement('p');
+          reason.className = 'font-body-sm text-[11px] text-on-surface-variant';
+          reason.textContent = block.raison;
+          row.append(reason);
+        }
+        planBlocks.append(row);
+      });
+      planEmpty.classList.add('hidden');
+      planCard.classList.remove('hidden');
+      planCard.classList.add('flex');
+    }
+
+    if (generateBtn) {
+      generateBtn.addEventListener('click', async () => {
+        generateBtn.disabled = true;
+        if (generateLabel) generateLabel.textContent = 'Génération en cours…';
+        setAiStatus('Analyse de vos objectifs et génération du planning…', 'info');
+        const priority = document.querySelector('input[name="ai-priority"]:checked');
+        const body = new URLSearchParams({
+          goal_id: goalSelect ? goalSelect.value : '',
+          hours: hoursSlider ? hoursSlider.value : '15',
+          priority: priority ? priority.value : 'deadlines',
+        });
+        try {
+          const response = await fetch(generateUrl, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            body,
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || !data.plan) {
+            throw new Error(data.error || 'La génération a échoué.');
+          }
+          renderPlan(data.plan);
+          setAiStatus('Proposition générée. Gardez-la pour l’ajouter au planning.', 'success');
+        } catch (error) {
+          setAiStatus(error.message || 'L’IA est momentanément indisponible.', 'error');
+        } finally {
+          generateBtn.disabled = false;
+          if (generateLabel) generateLabel.textContent = 'Générer la planification';
+        }
+      });
+    }
+
+    if (keepBtn) {
+      keepBtn.addEventListener('click', async () => {
+        if (!aiPlan) return;
+        keepBtn.disabled = true;
+        setAiStatus('Ajout des blocs au planning…', 'info');
+        try {
+          const response = await fetch(applyUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ blocs: aiPlan.blocs }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || 'Ajout impossible.');
+          setAiStatus(data.created + ' bloc(s) ajouté(s) au planning. Actualisation…', 'success');
+          window.setTimeout(() => window.location.reload(), 650);
+        } catch (error) {
+          setAiStatus(error.message || 'Impossible d’ajouter les blocs.', 'error');
+          keepBtn.disabled = false;
+        }
+      });
+    }
+
+    if (editBtn) {
+      editBtn.addEventListener('click', () => {
+        if (goalSelect) goalSelect.focus();
+        setAiStatus('Modifiez le cadrage puis relancez la génération.', 'info');
+      });
+    }
+
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        aiPlan = null;
+        planBlocks.replaceChildren();
+        planCard.classList.add('hidden');
+        planCard.classList.remove('flex');
+        planEmpty.classList.remove('hidden');
+        setAiStatus('Proposition refusée. Votre planning reste inchangé.', 'info');
+      });
+    }
+  }
+
+  // Smooth scroll or focus to IA panel when clicking hero button
+  const toggleIaBtn = document.getElementById('toggle-ia-panel');
+  const iaPanel = document.getElementById('ia-study-panel');
+  if (toggleIaBtn && iaPanel) {
+    toggleIaBtn.addEventListener('click', () => {
+      iaPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const select = iaPanel.querySelector('select');
+      if (select) select.focus();
+    });
+  }
+</script></main>
+<!-- Modale : nouvel objectif -->
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="goal-create-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Nouvel objectif</h2><p class="text-xs text-on-surface-variant">L'objectif sera suivi dans votre progression et proposé à l'assistant IA.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="grid gap-3 p-5" method="post" action="{% url 'coaching:student_goal_add' %}">
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Intitulé</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus maxlength="200" minlength="3" name="title" placeholder="ex. Valider l'UE de bases de données" required type="text"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Description (facultative)</span><textarea class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="2000" name="description" rows="2"></textarea></label>
+<div class="grid gap-3 sm:grid-cols-2">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Code UE</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="20" name="course_code" placeholder="ex. INFO303" type="text"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Semestre</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="30" name="semester" required type="text" value="{{ goal_semester_default }}"/></label>
+</div>
+<div class="grid gap-3 sm:grid-cols-2">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Échéance</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" min="{{ session_today_value }}" name="target_date" type="date"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Compétences visées</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="50" min="0" name="skills_total" type="number" value="0"/></label>
+</div>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">flag</span>Créer l'objectif</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Modale : nouvelle session de travail -->
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="session-create-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Planifier une session</h2><p class="text-xs text-on-surface-variant">Ajoutez manuellement un bloc de travail à votre semaine.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form class="grid gap-3 p-5" method="post" action="{% url 'coaching:student_session_add' %}">
+{% csrf_token %}
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Intitulé</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" data-modal-focus maxlength="200" minlength="3" name="title" placeholder="ex. Réviser les jointures SQL" required type="text"/></label>
+<div class="grid gap-3 sm:grid-cols-2">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Code UE</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="20" name="course_code" placeholder="ex. INFO303" type="text"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Type</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="kind"><option value="revision">Révision</option><option value="course">Cours</option><option value="exam">Examen</option></select></label>
+</div>
+<div class="grid gap-3 sm:grid-cols-3">
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Date</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="{{ session_max_date_value }}" min="{{ session_today_value }}" name="date" required type="date" value="{{ session_today_value }}"/></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Heure</span><select class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" name="time">{% for clock in session_time_choices %}<option value="{{ clock }}">{{ clock }}</option>{% endfor %}</select></label>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Durée (min)</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" max="240" min="15" name="duration_minutes" step="15" type="number" value="60"/></label>
+</div>
+<label class="flex flex-col gap-1.5"><span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">Lieu (facultatif)</span><input class="rounded border border-outline-variant/70 bg-surface px-3.5 py-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary" maxlength="120" name="location" placeholder="Bibliothèque, salle 204…" type="text"/></label>
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/60 px-4 py-2.5 text-sm font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">calendar_add_on</span>Ajouter au planning</button>
+</div>
+</form>
+</div>
+</div>
+{% endblock %}

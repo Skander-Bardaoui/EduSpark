@@ -1,0 +1,50 @@
+{% extends portal_base_template|default:"portal/base.html" %}
+{% load courses_extras %}
+{% block title %}{{ material.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1300px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">{{ course.subject.code }} · {{ course.title }}</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ material.title }}</h1>
+<p class="mt-1 font-body-md text-body-md text-on-surface-variant">{{ material.get_material_type_display }}{% if material.extension_label != material.get_material_type_display %} ({{ material.extension_label }}){% endif %} · {{ material.size|size_fr }}{% if material.chapter %} · Chapitre : {{ material.chapter.title }}{% endif %}</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ back_url }}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Retour au cours</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{{ download_url }}"><span class="material-symbols-outlined text-[18px]">download</span>Télécharger</a>
+</div>
+</header>
+<section class="overflow-hidden rounded-2xl border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+{% if material.material_type == "video" %}
+<video class="max-h-[75vh] w-full bg-black" controls preload="metadata" src="{{ file_url }}">
+Votre navigateur ne sait pas lire cette vidéo. <a href="{{ download_url }}">Téléchargez-la</a> pour la regarder.
+</video>
+{% elif material.material_type == "audio" %}
+<div class="flex flex-col items-center gap-4 px-6 py-12">
+<span class="flex h-16 w-16 items-center justify-center rounded-full bg-primary-fixed text-primary"><span class="material-symbols-outlined text-[32px]">headphones</span></span>
+<audio class="w-full max-w-2xl" controls preload="metadata" src="{{ file_url }}">
+Votre navigateur ne sait pas lire cet audio. <a href="{{ download_url }}">Téléchargez-le</a> pour l'écouter.
+</audio>
+</div>
+{% elif material.material_type == "pdf" %}
+<iframe class="h-[78vh] w-full" src="{{ file_url }}" title="{{ material.title }}"></iframe>
+{% else %}
+<div class="flex flex-col items-center gap-3 px-6 py-14 text-center">
+<span class="flex h-16 w-16 items-center justify-center rounded-full {{ material.tone_class }}"><span class="material-symbols-outlined text-[32px]">{{ material.icon }}</span></span>
+<p class="text-sm font-semibold text-on-surface">Aperçu indisponible pour ce format</p>
+<p class="max-w-md text-xs text-on-surface-variant">Les présentations et documents Word s'ouvrent dans votre logiciel (PowerPoint, Word, LibreOffice…). Téléchargez le fichier pour le consulter.</p>
+<a class="mt-1 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{{ download_url }}"><span class="material-symbols-outlined text-[18px]">download</span>Télécharger {{ material.original_name }}</a>
+</div>
+{% endif %}
+</section>
+{% if material.description %}
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Description</h2>
+<p class="mt-2 text-sm leading-relaxed text-on-surface-variant">{{ material.description|linebreaksbr }}</p>
+</section>
+{% endif %}
+<p class="text-xs text-on-surface-variant">Déposé le {{ material.created_at|date:"d/m/Y" }} par {{ course.professor.user.get_full_name|default:course.professor.user.email }}. Ce support est réservé aux membres autorisés de l'université.</p>
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,540 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Tableau de bord étudiants — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full bg-surface min-h-[calc(100vh-4rem)]" id="main-content"><div class="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 xl:px-8">
+<div class="flex flex-col gap-5">
+<!-- En-tête Pédagogique Référent -->
+<header class="flex flex-col gap-3">
+<!-- Badge promotion -->
+<div class="flex flex-wrap items-center justify-between gap-2">
+<span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-fixed px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-on-secondary-fixed shadow-sm">
+<span class="h-2 w-2 rounded-full bg-secondary"></span>
+          Année universitaire en cours
+        </span>
+</div>
+<!-- Titre principal, sous-titre & actions d'arbitrage -->
+<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+<div class="max-w-3xl space-y-1.5">
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">
+            Suivi des Étudiants, Tutorat &amp; Persévérance Académique
+          </h1>
+<p class="text-[13px] leading-relaxed text-on-surface-variant">
+            Supervisez vos tutorés, identifiez les signaux précoces de fragilité méthodologique, organisez vos entretiens individuels et coordonnez l'aide par les pairs.
+          </p>
+</div>
+<div class="flex min-w-0 flex-wrap items-center gap-2">
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-low px-3.5 text-[13px] font-semibold text-primary shadow-sm transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" href="{{ tutoring_url }}">
+<span class="material-symbols-outlined text-[18px]">calendar_add_on</span>
+<span>Planifier une permanence</span>
+</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface-container-low px-3.5 text-[13px] font-semibold text-on-surface-variant shadow-sm transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary" href="{{ export_url }}">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Exporter le bilan (CSV)</span>
+</a>
+<a class="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-[13px] font-semibold text-on-primary shadow-md transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary-fixed" href="{{ tutoring_url }}">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>Nouvel entretien individuel</span>
+</a>
+</div>
+</div>
+</header>
+<!-- Métriques Clés & Surveillance de Cohorte (4 Colonnes Bento) -->
+<section aria-labelledby="kpi-heading" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+<h2 class="sr-only" id="kpi-heading">Indicateurs clés du tutorat enseignant</h2>
+<!-- Card 1: Étudiants sous tutorat -->
+<article class="flex flex-col justify-between gap-3 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Étudiants sous tutorat</span>
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[18px]">diversity_3</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ caseload_count }}</span>
+<span class="text-[12px] text-on-surface-variant">étudiant{{ caseload_count|pluralize }} assigné{{ caseload_count|pluralize }}</span>
+</div>
+<p class="mt-1 text-[12px] text-on-surface-variant">{{ class_hint }}</p>
+</div>
+<div class="flex items-center gap-1.5 pt-1 text-[12px] text-primary">
+<span class="material-symbols-outlined text-[16px]">shield_person</span>
+<span>{{ vigilance_count }} en vigilance active</span>
+</div>
+</article>
+<!-- Card 2: Alertes de vigilance -->
+<article class="relative flex flex-col justify-between gap-3 overflow-hidden rounded bg-error-container/40 p-4 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-on-error-container">Vigilance Décrochage</span>
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-error text-on-error shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-error-container">{{ alert_count }}</span>
+<span class="text-[12px] font-semibold text-on-error-container">signalement{{ alert_count|pluralize }} actif{{ alert_count|pluralize }}</span>
+</div>
+<p class="mt-1 text-[12px] text-on-surface-variant">{{ high_alerts }} alerte{{ high_alerts|pluralize }} prioritaire{{ high_alerts|pluralize }} · {{ risk_counts.high }} risque{{ risk_counts.high|pluralize }} élevé{{ risk_counts.high|pluralize }}</p>
+</div>
+<div class="flex items-center gap-1.5 pt-1 text-[12px] text-error">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span class="font-bold">{% if high_alerts %}Intervention recommandée sous 48h{% else %}Aucune alerte prioritaire{% endif %}</span>
+</div>
+</article>
+<!-- Card 3: Entretiens réalisés -->
+<article class="flex flex-col justify-between gap-3 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Entretiens Réalisés</span>
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-low text-secondary">
+<span class="material-symbols-outlined text-[18px]">forum</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ completed_interviews }}<span class="text-[13px] font-medium text-outline">/{{ total_rows }}</span></span>
+<span class="font-data-metric text-[12px] font-bold text-secondary">{{ completion_rate }}%</span>
+</div>
+<div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-container-high">
+<div class="h-full rounded-full bg-secondary" style="width: {{ completion_rate }}%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between gap-2 pt-1">
+<span class="text-[12px] text-on-surface-variant">Prochain créneau :</span>
+<span class="text-[12px] font-bold text-primary">{{ next_slot_label }}</span>
+</div>
+</article>
+<!-- Card 4: Moyenne générale cohorte -->
+<article class="flex flex-col justify-between gap-3 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Moyenne Cohorte Suivie</span>
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</div>
+</div>
+<div>
+<div class="flex items-baseline gap-2">
+<span class="font-data-metric text-[20px] font-bold text-on-surface">{{ average }}<span class="text-[13px] font-normal text-outline">/20</span></span>
+<span class="text-[12px] text-on-surface-variant">CC + Devoirs</span>
+</div>
+<p class="mt-1 text-[12px] text-on-surface-variant">Dispersion écart-type : ±{{ dispersion }} pts</p>
+</div>
+<div class="flex items-center gap-1.5 pt-1 text-[12px] {{ average_delta_tone }}">
+<span class="material-symbols-outlined text-[16px]">{{ average_delta_icon }}</span>
+<span>{{ average_delta_label }} depuis la rentrée</span>
+</div>
+</article>
+</section>
+<!-- Grille Principale : Répertoire Étudiants (8 cols) + Volet IA & Sécurisation (4 cols) -->
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+<!-- Colonne Gauche : Répertoire Interactif et Filtres (8 colonnes) -->
+<section aria-labelledby="repertoire-heading" class="flex flex-col gap-4 xl:col-span-8">
+<div class="flex flex-col gap-4 rounded bg-surface-container-lowest p-4 shadow-sm">
+<!-- Filtres de recherche & statuts -->
+<form class="flex flex-col items-stretch justify-between gap-2 md:flex-row md:items-center" id="student-filters" method="get">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input aria-label="Rechercher un étudiant assigné" class="h-9 w-full rounded-full bg-surface-container-low pl-10 pr-4 text-[13px] text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary" maxlength="100" name="q" placeholder="Rechercher par nom, prénom, numéro INE (ex: 0834190...)" type="search" value="{{ query }}"/>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+<select aria-label="Filtrer par cohorte" class="h-9 cursor-pointer rounded-full bg-surface-container-low px-3 text-[13px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary" name="cohort">
+<option value="">Toutes les cohortes</option>
+{% for option in cohort_options %}
+<option {% if cohort == option.pk|stringformat:"s" %}selected{% endif %} value="{{ option.pk }}">{{ option.name }}</option>
+{% endfor %}
+</select>
+{% if focus %}<input name="risk" type="hidden" value="{{ focus }}"/>{% endif %}
+</div>
+</form>
+<!-- Onglets de tri rapides / Pill filters -->
+<div class="flex flex-wrap items-center gap-1.5">
+<a class="inline-flex h-7 items-center rounded-full px-3 text-[12px] font-semibold {% if focus %}bg-surface-container text-on-surface transition-colors hover:bg-surface-container-high{% else %}bg-primary text-on-primary shadow-sm{% endif %}" href="?{% if query %}q={{ query|urlencode }}{% endif %}{% if cohort %}{% if query %}&amp;{% endif %}cohort={{ cohort }}{% endif %}">
+              Tous mes tutorés ({{ total_rows }})
+            </a>
+<a class="inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold {% if focus == 'high' %}bg-error-container text-on-error-container{% else %}bg-surface-container text-on-surface transition-colors hover:bg-surface-container-high{% endif %}" href="?risk=high{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if cohort %}&amp;cohort={{ cohort }}{% endif %}">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">error</span>
+              Signalement vigilance ({{ vigilance_count }})
+            </a>
+<a class="inline-flex h-7 items-center rounded-full px-3 text-[12px] font-semibold {% if focus == 'pending' %}bg-primary text-on-primary shadow-sm{% else %}bg-surface-container text-on-surface transition-colors hover:bg-surface-container-high{% endif %}" href="?risk=pending{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if cohort %}&amp;cohort={{ cohort }}{% endif %}">
+              Entretiens à planifier ({{ pending_interviews }})
+            </a>
+<a class="inline-flex h-7 items-center rounded-full px-3 text-[12px] font-semibold {% if focus == 'progress' %}bg-primary text-on-primary shadow-sm{% else %}bg-surface-container text-on-surface transition-colors hover:bg-surface-container-high{% endif %}" href="?risk=progress{% if query %}&amp;q={{ query|urlencode }}{% endif %}{% if cohort %}&amp;cohort={{ cohort }}{% endif %}">
+              En progression constante ({{ progress_count }})
+            </a>
+</div>
+<h2 class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[16px] font-bold text-on-surface" id="repertoire-heading">
+<span>Dossiers de tutorat actif</span>
+<span class="font-data-metric text-[12px] font-normal text-on-surface-variant">Affichage de {{ row_count }} sur {{ total_rows }} étudiant{{ total_rows|pluralize }} suivi{{ total_rows|pluralize }}</span>
+</h2>
+<!-- Liste des cartes de suivi individuel -->
+<div class="space-y-3">
+{% for row in rows %}
+{% with assignment=row.assignment meta=row.meta %}
+<article class="flex flex-col gap-3 rounded bg-surface-container-low p-3 shadow-sm transition-colors hover:bg-surface-container md:p-4">
+<div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
+<div class="flex items-start gap-2.5">
+<div class="relative shrink-0">
+<span class="flex h-11 w-11 items-center justify-center rounded-full text-[12px] font-extrabold {{ meta.badge }} shadow-sm">{{ meta.initials }}</span>
+<span class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full {{ meta.box_icon }}" title="{{ meta.label }}">
+<span class="material-symbols-outlined text-[14px]">{{ meta.icon }}</span>
+</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="text-[14px] font-semibold text-on-surface">{{ meta.student_name }}</h3>
+<span class="font-data-metric text-[11px] text-outline">INE: {{ meta.student_number }}</span>
+<span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase {{ meta.badge }}">
+<span class="material-symbols-outlined text-[14px]">{{ meta.icon }}</span>
+                        {{ meta.label }}
+                      </span>
+{% if meta.alerts_count %}
+<span class="inline-flex items-center gap-1 rounded-full bg-error-container px-2 py-0.5 text-[11px] font-bold text-on-error-container">
+<span class="material-symbols-outlined text-[14px]">notifications_active</span>
+                        {{ meta.alerts_count }} alerte{{ meta.alerts_count|pluralize }}
+                      </span>
+{% endif %}
+<a class="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed-dim" href="{{ meta.sheets_url }}">
+<span class="material-symbols-outlined text-[14px]">note_alt</span>
+                        {% if meta.sheet_count %}{{ meta.sheet_count }} fiche{{ meta.sheet_count|pluralize }}{% else %}Créer une fiche{% endif %}
+                      </a>
+</div>
+<p class="text-[12px] text-on-surface-variant">{{ meta.program }} • {{ meta.class_name }}</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:flex-col sm:items-end sm:justify-start">
+<div class="flex items-baseline gap-1">
+<span class="text-[16px] font-bold {{ meta.tone }}">{{ meta.average_label }}</span>
+<span class="text-[12px] text-outline">/20</span>
+</div>
+<span class="flex items-center gap-0.5 text-[11px] {{ meta.delta_tone }}">
+<span class="material-symbols-outlined text-[16px]">{{ meta.delta_icon }}</span>
+                    {{ meta.delta_label }}
+                  </span>
+</div>
+</div>
+<!-- Cartouche de diagnostic méthodologique & alerte -->
+<div class="flex flex-col items-start gap-2 rounded p-3 sm:flex-row {{ meta.box }}">
+<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ meta.box_icon }}">
+<span class="material-symbols-outlined text-[16px]">{{ meta.icon }}</span>
+</div>
+<div class="flex-1 space-y-1">
+<h4 class="text-[13px] font-bold {{ meta.tone }}">
+                    {{ meta.label }} · {{ meta.risk_reason }}
+                  </h4>
+<p class="text-[12px] text-on-surface-variant">
+                    Assiduité : <strong class="text-on-surface">{{ meta.attendance_label }}</strong> · Devoirs rendus : <strong class="text-on-surface">{{ meta.assignments_label }}</strong>{% if meta.next_session_label %} · Prochain entretien : <strong class="text-on-surface">{{ meta.next_session_label }}</strong>{% endif %}
+                  </p>
+<div class="flex flex-wrap items-center gap-2.5 pt-1 font-data-metric text-[11px] text-outline">
+<span>Dernier échange : {{ meta.last_contact_label }}</span>
+<span>•</span>
+<span class="font-medium {{ meta.tone }}">{{ meta.short }}</span>
+</div>
+{% if meta.relance or meta.engagement_alert %}
+<div class="flex flex-wrap items-center gap-2 pt-0.5">
+{% if meta.relance %}
+<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {% if meta.relance_read %}bg-surface-container text-on-surface-variant{% else %}bg-primary-fixed text-primary{% endif %}" title="Dernière relance envoyée à {{ meta.relance_read_label|default:'non lue' }}">
+<span class="material-symbols-outlined text-[14px]">{% if meta.relance_read %}mark_email_read{% else %}schedule_send{% endif %}</span>Relance · {% if meta.relance_read %}lue{% else %}non lue{% endif %}{% if meta.relance_when %} · {{ meta.relance_when }}{% endif %}
+                  </span>
+{% endif %}
+{% if meta.relance_reply %}
+<span class="inline-flex max-w-full items-center gap-1 rounded-full bg-secondary-fixed px-2.5 py-1 text-[11px] font-bold text-on-secondary-fixed" title="{{ meta.relance_reply }}">
+<span class="material-symbols-outlined text-[14px]">reply</span><span class="max-w-[220px] truncate">Réponse : {{ meta.relance_reply }}</span>
+                  </span>
+{% endif %}
+{% if meta.engagement_alert %}
+<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ meta.alert_status_class }}" title="{{ meta.alert_priority_label }}{% if meta.alert_reported_by %} · signalé par {{ meta.alert_reported_by }}{% endif %}">
+<span class="material-symbols-outlined text-[14px]">warning</span>Scolarité · {{ meta.alert_status_label }}{% if meta.alert_when %} · {{ meta.alert_when }}{% endif %}
+                  </span>
+{% endif %}
+</div>
+{% endif %}
+</div>
+</div>
+<!-- Actions Enseignant -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="flex flex-wrap items-center gap-1.5">
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" data-form-action="{% url 'coaching:prof_student_relance' assignment.student_id %}" data-modal-open="#relance-modal" data-prefill-message="{{ meta.relance_prefill_message }}" data-prefill-subject="{{ meta.relance_prefill_subject }}" data-student-name="{{ meta.student_name }}" type="button">
+<span class="material-symbols-outlined text-[16px]">send</span>
+                    Relancer l'étudiant
+                  </button>
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" data-form-action="{% url 'coaching:prof_student_alert' assignment.student_id %}" data-modal-open="#alert-modal" data-prefill-detail="{{ meta.alert_prefill_detail }}" data-prefill-priority="{% if assignment.risk_level == 'high' %}high{% else %}normal{% endif %}" data-student-name="{{ meta.student_name }}" type="button">
+<span class="material-symbols-outlined text-[16px]">contact_phone</span>
+                    Alerter référent scolarité
+                  </button>
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" href="{{ journal_url }}?student={{ assignment.student_id }}">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+                  Consulter journal
+                </a>
+</div>
+<a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-primary px-3 text-[12px] font-semibold text-on-primary transition-colors hover:bg-primary/90" href="{{ tutoring_url }}">
+<span class="material-symbols-outlined text-[16px]">calendar_month</span>
+                  Planifier entretien méthodologique
+                </a>
+</div>
+</article>
+{% endwith %}
+{% empty %}
+<div class="flex flex-col items-center gap-2 rounded bg-surface-container-low px-4 py-10 text-center">
+<span class="material-symbols-outlined text-[32px] text-outline">person_search</span>
+<p class="text-[14px] font-semibold text-on-surface">Aucun étudiant ne correspond à cette recherche</p>
+<p class="text-[12px] text-on-surface-variant">Ajustez la recherche ou le filtre de cohorte pour retrouver vos tutorés.</p>
+<a class="mt-1 inline-flex h-8 items-center rounded-full bg-surface-container-high px-3 text-[12px] font-semibold text-on-surface" href="{% url 'coaching:prof_followup' %}">Réinitialiser les filtres</a>
+</div>
+{% endfor %}
+</div>
+</div>
+</section>
+<!-- Colonne Droite : Assistant Pédagogique IA Référent & Souveraineté (4 colonnes) -->
+<aside aria-labelledby="assistant-ia-heading" class="flex flex-col gap-4 xl:col-span-4 xl:sticky xl:top-20">
+<!-- Panneau Assistant IA Référent (conseil, non automatisé) -->
+<div class="relative flex flex-col gap-3 overflow-hidden rounded bg-surface-container-lowest p-4 shadow-sm">
+<!-- En-tête Assistant -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div>
+<h3 class="text-[14px] font-semibold text-on-surface" id="assistant-ia-heading">Assistant Tuteur IA</h3>
+<span class="text-[11px] font-bold uppercase tracking-wider text-outline">Modèle Pédagogique v2.2</span>
+</div>
+</div>
+<span class="rounded-full bg-secondary-fixed px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-on-secondary-fixed">
+              BÊTA
+            </span>
+</div>
+<!-- Contexte d'analyse multimodal -->
+<div class="space-y-1 rounded bg-surface-container-low p-3 text-[12px] text-on-surface-variant">
+<div class="flex items-center gap-1.5 text-[12px] font-semibold text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-primary">dataset</span>
+<span>Objectif d'analyse prédictive</span>
+</div>
+<p>
+              Croisement assiduité, notes de contrôles continus, requêtes d'aide sur forums académiques et temps de travail déclaré.
+            </p>
+</div>
+<!-- Synthèse indicative de la cohorte -->
+<div class="space-y-3 rounded bg-surface-container p-3">
+<div class="flex items-center justify-between">
+<span class="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-error">
+<span class="material-symbols-outlined text-[16px]">psychology_alt</span>
+                Synthèse de vigilance
+              </span>
+<span class="font-data-metric text-[12px] font-bold text-on-surface">{{ vigilance_count }} étudiant{{ vigilance_count|pluralize }}</span>
+</div>
+<!-- Jauge de probabilité -->
+<div class="space-y-1.5">
+<div class="flex justify-between text-[12px]">
+<span class="text-on-surface-variant">Part de la cohorte en vigilance :</span>
+<span class="font-bold text-error">{{ vigilance_share }}%</span>
+</div>
+<div class="h-2 w-full overflow-hidden rounded-full bg-surface-container-high">
+<div class="h-full rounded-full bg-error" style="width: {{ vigilance_share }}%;"></div>
+</div>
+<p class="text-[11px] text-outline">
+                Signaux fondés sur les snapshots d'assiduité et de devoirs tenus à jour par le module de suivi.
+              </p>
+</div>
+<!-- Recommandation IA formulée -->
+<div class="space-y-2 pt-1">
+<div class="flex items-center gap-1.5 text-[12px] font-bold text-primary">
+<span class="material-symbols-outlined text-[16px]">lightbulb</span>
+                Recommandation d'action :
+              </div>
+<p class="rounded bg-surface-container-lowest p-3 text-[12px] leading-relaxed text-on-surface">
+                1. <strong>Prioriser les entretiens</strong> des étudiants en vigilance haute et sans rendez-vous planifié.<br/>
+                2. <strong>Relancer les échanges</strong> au-delà de 14 jours et consigner le suivi dans le journal de progression.
+              </p>
+</div>
+<!-- Boutons d'Arbitrage (liaisons vers les espaces dédiés) -->
+<div class="flex flex-col gap-2 pt-1">
+<a class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-primary px-4 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" href="{{ tutoring_url }}">
+<span class="material-symbols-outlined text-[16px]">task_alt</span>
+<span>Planifier les entretiens prioritaires</span>
+</a>
+<a class="inline-flex h-9 w-full items-center justify-center gap-2 rounded-full bg-surface-container-high px-4 text-[13px] font-semibold text-on-surface transition-colors hover:bg-surface-dim" href="{{ journal_url }}">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>Consulter les journaux étudiants</span>
+</a>
+</div>
+</div>
+<!-- Notification d'éthique et continuité pédagogique -->
+<div class="flex items-start gap-2.5 rounded bg-surface-container-low p-3">
+<span class="material-symbols-outlined mt-0.5 shrink-0 text-[18px] text-primary">policy</span>
+<div class="space-y-1">
+<span class="block text-[12px] font-semibold text-on-surface">Garantie &amp; Souveraineté de l'Enseignant</span>
+<p class="text-[11px] leading-relaxed text-on-surface-variant">
+                L'attribution des notes, l'évaluation et les dispenses demeurent sous la responsabilité exclusive de {{ portal_user_name }}. Le portail garantit un fonctionnement complet hors-ligne ou sans assistance algorithmique.
+              </p>
+</div>
+</div>
+</div>
+<!-- Fiche Référent & Statut des permanences -->
+<div class="flex flex-col gap-2 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-primary">meeting_room</span>
+<div>
+<h4 class="text-[14px] font-bold text-on-surface">Permanence Référent</h4>
+<p class="text-[12px] text-on-surface-variant">Bâtiment Sophie Germain • Bureau 412A</p>
+</div>
+</div>
+<div class="space-y-1 pt-1 text-[12px] text-on-surface-variant">
+<div class="flex justify-between py-1">
+<span>Créneaux hebdos réservés :</span>
+<strong class="font-data-metric text-on-surface">{{ week_booked }} / {{ week_total }} places</strong>
+</div>
+<div class="flex justify-between py-1">
+<span>Accès distanciel sécurisé :</span>
+<strong class="font-medium text-secondary">BigBlueButton</strong>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Section Basse : Agenda des Entretiens Hebdomadaires de Tutorat -->
+<section aria-labelledby="agenda-heading" class="flex flex-col gap-3 rounded bg-surface-container-lowest p-4 shadow-sm">
+<div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+<div class="flex items-center gap-2.5">
+<div class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-low text-primary">
+<span class="material-symbols-outlined text-[18px]">calendar_view_week</span>
+</div>
+<div>
+<h2 class="text-[16px] font-bold text-on-surface" id="agenda-heading">
+              Permanence Tutorat de la Semaine • {{ today_label }}
+            </h2>
+<p class="text-[12px] text-on-surface-variant">
+              {{ week_label }} (Bureau 412A Sophie Germain ou Visio BigBlueButton)
+            </p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="rounded-full bg-surface-container px-3 py-1 text-[12px] text-on-surface">
+            {{ week_booked }} créneau{{ week_booked|pluralize }} réservé{{ week_booked|pluralize }} sur {{ week_total }}
+          </span>
+<a class="inline-flex h-9 items-center rounded-full bg-primary px-4 text-[13px] font-semibold text-on-primary shadow-sm transition-colors hover:bg-primary/90" href="{{ tutoring_url }}">
+            Ajouter un créneau
+          </a>
+</div>
+</div>
+<!-- Grille des créneaux d'entretien de la semaine -->
+<div class="grid grid-cols-1 gap-3 pt-1 md:grid-cols-2 xl:grid-cols-4">
+{% for item in agenda %}
+<article class="flex flex-col justify-between gap-2 rounded p-3 {% if item.is_priority %}bg-error-container/20{% elif item.session %}bg-surface-container-low{% else %}border-2 border-dashed border-outline-variant bg-surface-container-lowest opacity-90{% endif %}">
+<div class="flex items-center justify-between gap-2">
+<span class="flex items-center gap-1 font-data-metric text-[12px] font-bold {% if item.is_priority %}text-error{% elif item.session %}text-secondary{% else %}text-outline{% endif %}">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+              {{ item.time_label }}
+            </span>
+{% if item.is_priority %}
+<span class="rounded-full bg-error px-2 py-0.5 text-[11px] font-bold uppercase text-on-error">Priorité</span>
+{% elif item.session %}
+<span class="rounded-full bg-secondary-fixed px-2 py-0.5 text-[11px] font-bold uppercase text-on-secondary-fixed">{{ item.priority_label }}</span>
+{% else %}
+<span class="rounded-full bg-surface-container-high px-2 py-0.5 text-[11px] font-bold uppercase text-outline">Disponible</span>
+{% endif %}
+</div>
+<div>
+<h3 class="text-[13px] font-semibold {% if item.session %}text-on-surface{% else %}text-outline{% endif %}">{% if item.session %}{{ item.student_name }}{% else %}Créneau sans assignation{% endif %}</h3>
+<p class="mt-0.5 text-[12px] text-on-surface-variant">{% if item.session %}Canal : {{ item.mode_label }} · {{ item.place }}{% else %}Réservation ouverte aux étudiants sur leur portail ENT.{% endif %}</p>
+</div>
+<div class="flex items-center justify-between gap-2 pt-1">
+<span class="flex items-center gap-1 text-[11px] {% if item.is_priority %}text-on-surface-variant{% elif item.session %}text-secondary{% else %}text-outline{% endif %}">
+<span class="material-symbols-outlined text-[16px]">{{ item.mode_icon }}</span>
+              {% if item.session %}{{ item.place }}{% else %}En attente{% endif %}
+            </span>
+<a class="text-[12px] font-semibold text-primary hover:underline" href="{{ tutoring_url }}">{% if item.session %}Préparer{% else %}Attribuer{% endif %}</a>
+</div>
+</article>
+{% empty %}
+<div class="col-span-full rounded border border-dashed border-outline-variant bg-surface-container-lowest p-6 text-center">
+<p class="text-[13px] font-semibold text-on-surface">Aucun créneau de permanence cette semaine</p>
+<p class="mt-1 text-[12px] text-on-surface-variant">Créez un créneau depuis la page Tutorat pour ouvrir vos réservations.</p>
+</div>
+{% endfor %}
+</div>
+</section>
+</div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterForm = document.getElementById('student-filters');
+    if (!filterForm) return;
+    const cohort = filterForm.querySelector('select[name="cohort"]');
+    if (cohort) cohort.addEventListener('change', () => filterForm.submit());
+  });
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterForm = document.getElementById('student-filters');
+    if (!filterForm) return;
+    const cohort = filterForm.querySelector('select[name="cohort"]');
+    if (cohort) cohort.addEventListener('change', () => filterForm.submit());
+  });
+</script>
+<!-- Modal : relance manuelle -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="relance-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Relancer l'étudiant</h2><p class="text-xs text-on-surface-variant">Message personnalisé envoyé dans l'espace de <span id="relance-student-name">l'étudiant</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="relance-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Objet</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-require-alnum data-required-message="Saisissez un objet." id="relance-subject" maxlength="200" minlength="5" name="subject" placeholder="Ex. Faire le point sur ta progression" required type="text"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Message</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Rédigez votre message." data-words-min="3" id="relance-message" maxlength="2000" minlength="20" name="message" placeholder="Expliquez le motif de la relance et l'attendu…" required rows="5"></textarea></label>
+<p class="rounded bg-surface-container-low px-3 py-2 text-[11px] text-on-surface-variant">L'étudiant recevra ce message dans « Mes notifications » et pourra vous répondre.</p>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer la relance</button></div>
+</form>
+</div>
+</div>
+<!-- Modal : alerte scolarité manuelle -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Alerter le référent scolarité</h2><p class="text-xs text-on-surface-variant">Signalement de <span id="alert-student-name">l'étudiant</span> remonté à la scolarité</p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Motif du signalement</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Décrivez le signalement." data-words-min="2" id="alert-detail" maxlength="2000" minlength="20" name="detail" placeholder="Situation observée, actions déjà tentées, accompagnement souhaité…" required rows="5"></textarea></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Priorité</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Choisissez une priorité." id="alert-priority" name="priority" required><option value="low">Basse</option><option value="normal">Normale</option><option value="high">Haute</option></select></label>
+<p class="rounded bg-surface-container-low px-3 py-2 text-[11px] text-on-surface-variant">Le référent scolarité suivra le signalement dans le tableau de bord de suivi.</p>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-error px-4 py-2 text-xs font-bold text-on-error transition-colors hover:bg-error/90" type="submit">Transmettre le signalement</button></div>
+</form>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var relanceForm = document.getElementById('relance-form');
+  var alertForm = document.getElementById('alert-form');
+  if (!relanceForm && !alertForm) return;
+
+  function fill(trigger) {
+    var target = trigger.getAttribute('data-modal-open');
+    var name = trigger.getAttribute('data-student-name') || '';
+    if (target === '#relance-modal' && relanceForm) {
+      relanceForm.setAttribute('action', trigger.getAttribute('data-form-action') || relanceForm.getAttribute('action'));
+      document.getElementById('relance-subject').value = trigger.getAttribute('data-prefill-subject') || '';
+      document.getElementById('relance-message').value = trigger.getAttribute('data-prefill-message') || '';
+      var relanceName = document.getElementById('relance-student-name');
+      if (relanceName) relanceName.textContent = name;
+    } else if (target === '#alert-modal' && alertForm) {
+      alertForm.setAttribute('action', trigger.getAttribute('data-form-action') || alertForm.getAttribute('action'));
+      document.getElementById('alert-detail').value = trigger.getAttribute('data-prefill-detail') || '';
+      document.getElementById('alert-priority').value = trigger.getAttribute('data-prefill-priority') || 'normal';
+      var alertName = document.getElementById('alert-student-name');
+      if (alertName) alertName.textContent = name;
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-form-action][data-modal-open]');
+    if (trigger) fill(trigger);
+  });
+})();
+</script>
+{% endblock %}

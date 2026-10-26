@@ -1,0 +1,14 @@
+{% if is_paginated %}
+<nav aria-label="Pagination" class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 px-5 py-3">
+<p class="text-xs text-on-surface-variant">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} élément{{ page_obj.paginator.count|pluralize }}</p>
+<div class="flex items-center gap-1.5">
+{% if page_obj.has_previous %}
+<a class="inline-flex items-center gap-1 rounded-full border border-outline-variant/60 px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"><span class="material-symbols-outlined text-[16px]">chevron_left</span>Précédent</a>
+{% endif %}
+<span class="rounded-full bg-primary-fixed px-3 py-1.5 text-xs font-bold text-primary">{{ page_obj.number }}</span>
+{% if page_obj.has_next %}
+<a class="inline-flex items-center gap-1 rounded-full border border-outline-variant/60 px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Suivant<span class="material-symbols-outlined text-[16px]">chevron_right</span></a>
+{% endif %}
+</div>
+</nav>
+{% endif %}

@@ -1,0 +1,79 @@
+{# Zone de dépôt d'un champ fichier : bouton de sélection + glisser-déposer. Contexte : field. #}
+<div class="flex flex-col gap-1.5 sm:col-span-2" data-dropzone>
+<span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}{% if field.field.required %}<span class="text-error"> *</span>{% endif %}</span>
+<label class="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant bg-surface-container-low px-6 py-8 text-center transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/30 hover:border-primary hover:bg-primary-fixed/30" data-dropzone-area for="{{ field.id_for_label }}">
+<span class="flex h-12 w-12 items-center justify-center rounded-full bg-surface-container-highest text-primary transition-transform group-hover:scale-110"><span class="material-symbols-outlined text-[24px]">cloud_upload</span></span>
+<span class="text-sm font-semibold text-on-surface">Glissez-déposez {% if field.field.widget.allow_multiple_selected %}vos fichiers{% else %}votre fichier{% endif %} ici</span>
+<span class="text-xs text-on-surface-variant">ou</span>
+<span class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors group-hover:bg-primary-container"><span class="material-symbols-outlined text-[18px]">upload_file</span>{% if field.field.widget.allow_multiple_selected %}Choisir des fichiers{% else %}Choisir un fichier{% endif %}</span>
+{{ field }}
+</label>
+<ul class="flex flex-col gap-1.5" data-dropzone-list></ul>
+{% if field.help_text %}<p class="text-xs text-on-surface-variant">{{ field.help_text }}</p>{% endif %}
+{% for error in field.errors %}<p class="text-xs font-semibold text-error">{{ error }}</p>{% endfor %}
+</div>
+<script>
+(function () {
+  if (window.__courseDropzones) return;
+  window.__courseDropzones = true;
+
+  function size(bytes) {
+    if (bytes < 1024) return bytes + ' o';
+    var units = ['Ko', 'Mo', 'Go'], value = bytes, unit = '';
+    for (var i = 0; i < units.length; i++) { value /= 1024; unit = units[i]; if (value < 1024) break; }
+    return value.toFixed(1).replace('.', ',').replace(',0', '') + ' ' + unit;
+  }
+
+  function setup(zone) {
+    var area = zone.querySelector('[data-dropzone-area]');
+    var input = zone.querySelector('input[type=file]');
+    var list = zone.querySelector('[data-dropzone-list]');
+    if (!area || !input || !list) return;
+    var accepted = (input.getAttribute('accept') || '').toLowerCase().split(',').filter(Boolean);
+
+    function render() {
+      list.innerHTML = '';
+      Array.prototype.forEach.call(input.files, function (file) {
+        var dot = file.name.lastIndexOf('.');
+        var ext = dot >= 0 ? file.name.slice(dot).toLowerCase() : '';
+        var ok = !accepted.length || accepted.indexOf(ext) !== -1;
+        var item = document.createElement('li');
+        item.className = 'flex items-center justify-between gap-3 rounded-lg bg-surface-container-low px-3 py-2 text-sm';
+        item.innerHTML = '<span class="flex min-w-0 items-center gap-2"><span class="material-symbols-outlined text-[18px] ' +
+          (ok ? 'text-primary">description' : 'text-error">error') + '</span><span class="truncate font-semibold text-on-surface"></span></span>' +
+          '<span class="shrink-0 text-xs ' + (ok ? 'text-on-surface-variant' : 'text-error') + '"></span>';
+        item.querySelector('.truncate').textContent = file.name;
+        item.querySelector('.shrink-0').textContent = ok ? size(file.size) : 'format non accepté';
+        list.appendChild(item);
+      });
+    }
+
+    function highlight(on) {
+      area.classList.toggle('border-primary', on);
+      area.classList.toggle('bg-primary-fixed/30', on);
+    }
+
+    ['dragenter', 'dragover'].forEach(function (name) {
+      area.addEventListener(name, function (e) { e.preventDefault(); highlight(true); });
+    });
+    ['dragleave', 'dragend'].forEach(function (name) {
+      area.addEventListener(name, function () { highlight(false); });
+    });
+    area.addEventListener('drop', function (e) {
+      e.preventDefault();
+      highlight(false);
+      var dropped = e.dataTransfer && e.dataTransfer.files;
+      if (!dropped || !dropped.length) return;
+      var transfer = new DataTransfer();
+      var limit = input.multiple ? dropped.length : 1;
+      for (var i = 0; i < limit; i++) transfer.items.add(dropped[i]);
+      input.files = transfer.files;
+      render();
+    });
+    input.addEventListener('change', render);
+  }
+
+  function init() { document.querySelectorAll('[data-dropzone]').forEach(setup); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>

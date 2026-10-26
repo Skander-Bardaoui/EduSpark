@@ -1,0 +1,151 @@
+{% for error in form.non_field_errors %}
+<p class="rounded-xl border border-error/20 bg-error-container px-3 py-2 text-[12px] font-semibold text-on-error-container">{{ error }}</p>
+{% endfor %}
+<div class="space-y-3.5">
+  <section class="session-form-step">
+    <div class="flex items-start gap-3">
+      <span class="session-step-badge">1</span>
+      <div class="min-w-0">
+        <h3 class="text-sm font-bold text-on-surface">Cadre de l'épreuve</h3>
+        <p class="mt-0.5 text-[11px] leading-4 text-on-surface-variant">Type, matière et consignes communes à toutes les classes.</p>
+      </div>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div>{% include "exams/_session_form_field.html" with field=form.exam_type %}</div>
+      <div>
+        {% include "exams/_session_form_field.html" with field=form.course_subject %}
+        {% if form.is_multi %}
+        <span class="mt-1 block text-[11px] font-semibold text-primary" id="subject-class-hint"></span>
+        {% endif %}
+      </div>
+      <div class="sm:col-span-2">{% include "exams/_session_form_field.html" with field=form.title %}</div>
+      <div class="sm:col-span-2">{% include "exams/_session_form_field.html" with field=form.instructions %}</div>
+    </div>
+  </section>
+
+  {% if form.is_multi %}
+  <section class="session-form-step" data-audience-picker>
+    <div class="flex items-start gap-3">
+      <span class="session-step-badge">2</span>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-on-surface">Public ciblé</h3>
+            <p class="mt-0.5 text-[11px] leading-4 text-on-surface-variant">Choisissez les niveaux et sections, puis sélectionnez les classes concernées.</p>
+          </div>
+          <span class="rounded-full border border-primary/15 bg-primary/5 px-2.5 py-1 text-[10px] font-bold text-primary">
+            <span data-selected-count>0</span> classe(s) sélectionnée(s)
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 space-y-3">
+      <div>
+        <div class="mb-1.5 flex items-center justify-between gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant">Niveaux</span>
+          <span class="text-[10px] text-outline">Cliquez pour filtrer</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          {% for level in form.class_level_options %}
+          <button type="button" class="audience-chip" data-class-level-chip="{{ level.value }}">
+            <span class="material-symbols-outlined text-[14px]">stairs</span>
+            <span>{{ level.value }}</span>
+            <span class="audience-count">{{ level.count }}</span>
+          </button>
+          {% empty %}
+          <span class="text-[11px] text-on-surface-variant">Aucun niveau renseigné.</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <div class="mb-1.5 flex items-center justify-between gap-2">
+          <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant">Sections</span>
+          <span class="text-[10px] text-outline">Filtres combinables</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          {% for section in form.class_section_options %}
+          <button type="button" class="audience-chip" data-class-section-chip="{{ section.value }}">
+            <span class="material-symbols-outlined text-[14px]">group_work</span>
+            <span>Section {{ section.value }}</span>
+            <span class="audience-count">{{ section.count }}</span>
+          </button>
+          {% empty %}
+          <span class="text-[11px] text-on-surface-variant">Aucune section renseignée.</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <label class="relative min-w-0 flex-1">
+          <span class="material-symbols-outlined pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+          <input type="search" data-class-search placeholder="Rechercher une classe…" class="w-full rounded-xl border border-outline-variant/70 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary">
+        </label>
+        <button type="button" data-clear-filters class="hidden rounded-xl border border-outline-variant/70 bg-surface px-3 py-2 text-[11px] font-bold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary">
+          Effacer les filtres
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/10 bg-primary/[0.04] px-3 py-2">
+        <p class="text-[11px] font-semibold text-on-surface-variant">
+          <span data-class-visible-count>0</span> classe(s) affichée(s)
+          <span class="mx-1 text-outline">·</span>
+          <span data-selected-count>0</span> sélectionnée(s)
+        </p>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" data-select-visible class="rounded-lg bg-primary px-2.5 py-1.5 text-[10px] font-bold text-on-primary shadow-sm transition-transform hover:-translate-y-0.5">
+            Sélectionner les classes affichées
+          </button>
+          <button type="button" data-clear-classes class="rounded-lg border border-outline-variant/70 bg-surface px-2.5 py-1.5 text-[10px] font-bold text-on-surface-variant transition-colors hover:border-error/40 hover:text-error">
+            Tout décocher
+          </button>
+        </div>
+      </div>
+
+      <div class="grid max-h-64 gap-2 overflow-y-auto rounded-xl border border-outline-variant/50 bg-surface-container-low p-2 sm:grid-cols-2" data-class-list>
+        {% for checkbox in form.school_classes %}
+        <label class="class-option{% if checkbox.data.selected %} is-selected{% endif %}" data-class-option data-level="{{ checkbox.data.level }}" data-section="{{ checkbox.data.section }}" data-program="{{ checkbox.data.program }}">
+          {{ checkbox.tag }}
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-[13px] font-semibold text-on-surface">{{ checkbox.choice_label }}</span>
+          </span>
+          <span class="material-symbols-outlined class-check text-[18px] text-primary">check_circle</span>
+        </label>
+        {% endfor %}
+      </div>
+      <p class="hidden text-[11px] text-on-surface-variant" data-class-empty>Aucune classe ne correspond à votre recherche.</p>
+      {% for error in form.school_classes.errors %}
+      <p class="text-[11px] font-semibold text-error">{{ error }}</p>
+      {% endfor %}
+    </div>
+  </section>
+  {% else %}
+  <section class="session-form-step">
+    <div class="flex items-start gap-3">
+      <span class="session-step-badge">2</span>
+      <div class="min-w-0">
+        <h3 class="text-sm font-bold text-on-surface">Classe de la session</h3>
+        <p class="mt-0.5 text-[11px] leading-4 text-on-surface-variant">La session est rattachée à une seule classe.</p>
+      </div>
+    </div>
+    <div class="mt-4">
+      {% include "exams/_session_form_field.html" with field=form.school_class %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="session-form-step">
+    <div class="flex items-start gap-3">
+      <span class="session-step-badge">3</span>
+      <div class="min-w-0">
+        <h3 class="text-sm font-bold text-on-surface">Fenêtre d'épreuve</h3>
+        <p class="mt-0.5 text-[11px] leading-4 text-on-surface-variant">La même fenêtre s'applique à toutes les classes sélectionnées.</p>
+      </div>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div>{% include "exams/_session_form_field.html" with field=form.opens_at %}</div>
+      <div>{% include "exams/_session_form_field.html" with field=form.closes_at %}</div>
+    </div>
+  </section>
+</div>

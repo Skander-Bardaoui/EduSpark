@@ -1,0 +1,94 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Départements & Filières — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Cours &amp; Catalogue</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Départements &amp; Filières</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Structure académique de {{ portal_university.name }} : départements, filières et responsables pédagogiques. Les matières et les classes s'y rattachent.</p>
+</div>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:admin_department_create' %}"><span class="material-symbols-outlined text-[18px]">add</span>Nouveau département</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:admin_program_create' %}"><span class="material-symbols-outlined text-[18px]">add</span>Nouvelle filière</a>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Départements" value=stats.departments icon="account_tree" hint="Structures académiques" %}
+{% include "portal/_stat_card.html" with label="Filières" value=stats.programs icon="workspace_premium" icon_class="bg-secondary-fixed text-on-secondary" hint="Licences, masters, cycles" %}
+{% include "portal/_stat_card.html" with label="Matières" value=stats.subjects icon="auto_stories" icon_class="bg-surface-container text-secondary" hint="Au catalogue" %}
+{% include "portal/_stat_card.html" with label="Classes rattachées" value=stats.classes icon="layers" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Classes liées à une filière" %}
+</div>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" id="departements">
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Départements</h2>
+<p class="text-xs text-on-surface-variant">{{ departments|length }} département{{ departments|length|pluralize }}</p>
+</div>
+<a class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline" href="{% url 'courses:admin_department_create' %}"><span class="material-symbols-outlined text-[16px]">add</span>Ajouter un département</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[820px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Département</th><th class="px-5 py-3 font-bold">Chef de département</th><th class="px-5 py-3 font-bold">Filières</th><th class="px-5 py-3 font-bold">Matières</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for department in departments %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ department.name }}{% if department.code %} <span class="ml-1 font-data-metric text-[11px] font-semibold text-primary">{{ department.code }}</span>{% endif %}</p>{% if department.description %}<p class="text-xs text-on-surface-variant">{{ department.description|truncatechars:110 }}</p>{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% if department.head %}{{ department.head.user.get_full_name|default:department.head.user.email }}{% else %}—{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant"><a class="font-semibold hover:text-primary" href="?departement={{ department.pk }}#filieres">{{ department.program_count }}</a></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ department.subject_count }}</td>
+<td class="px-5 py-3"><div class="flex items-center justify-end gap-3">
+<a class="text-xs font-bold text-primary transition-colors hover:text-primary-container" href="{% url 'courses:admin_department_update' department.pk %}">Modifier</a>
+<a class="text-xs font-bold text-on-surface-variant transition-colors hover:text-error" href="{% url 'courses:admin_department_delete' department.pk %}">Supprimer</a>
+</div></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="5">Aucun département pour le moment. <a class="font-bold text-primary hover:underline" href="{% url 'courses:admin_department_create' %}">Créer le premier département</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" id="filieres">
+<div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Filières</h2>
+<p class="text-xs text-on-surface-variant">{{ programs|length }} filière{{ programs|length|pluralize }} affichée{{ programs|length|pluralize }}</p>
+</div>
+<nav aria-label="Filtrer par département" class="flex flex-wrap gap-2">
+<a class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors {% if not selected_department %}is-active{% else %}text-on-surface-variant hover:border-primary/40 hover:text-primary{% endif %}" href="{% url 'courses:admin_program_offer' %}#filieres">Tous</a>
+{% for department in departments %}
+<a class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors {% if selected_department == department.pk %}is-active{% else %}text-on-surface-variant hover:border-primary/40 hover:text-primary{% endif %}" href="?departement={{ department.pk }}#filieres">{{ department.name }}</a>
+{% endfor %}
+</nav>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[980px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Filière</th><th class="px-5 py-3 font-bold">Département</th><th class="px-5 py-3 font-bold">Diplôme</th><th class="px-5 py-3 font-bold">Responsable</th><th class="px-5 py-3 font-bold">Matières</th><th class="px-5 py-3 font-bold">Classes</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<tbody class="divide-y divide-outline-variant/30 text-sm">
+{% for program in programs %}
+<tr class="hover:bg-surface-container/40">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ program.name }}{% if program.code %} <span class="ml-1 font-data-metric text-[11px] font-semibold text-primary">{{ program.code }}</span>{% endif %}</p>{% if program.description %}<p class="text-xs text-on-surface-variant">{{ program.description|truncatechars:110 }}</p>{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ program.department.name }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ program.get_degree_display }} · {{ program.duration_years }} an{{ program.duration_years|pluralize }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% if program.coordinator %}{{ program.coordinator.user.get_full_name|default:program.coordinator.user.email }}{% else %}—{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant"><a class="font-semibold hover:text-primary" href="{% url 'courses:admin_subjects' %}?filiere={{ program.pk }}">{{ program.subject_count }}</a></td>
+<td class="px-5 py-3 text-on-surface-variant">{{ program.class_count }}</td>
+<td class="px-5 py-3"><div class="flex items-center justify-end gap-3">
+<a class="text-xs font-bold text-primary transition-colors hover:text-primary-container" href="{% url 'courses:admin_program_update' program.pk %}">Modifier</a>
+<a class="text-xs font-bold text-on-surface-variant transition-colors hover:text-error" href="{% url 'courses:admin_program_delete' program.pk %}">Supprimer</a>
+</div></td>
+</tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="7">{% if departments %}Aucune filière{% if selected_department %} dans ce département{% endif %}. <a class="font-bold text-primary hover:underline" href="{% url 'courses:admin_program_create' %}">Créer une filière</a>{% else %}Créez d'abord un département : chaque filière en dépend.{% endif %}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+{% endblock %}
