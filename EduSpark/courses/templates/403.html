@@ -1,0 +1,6 @@
+{% extends "courses/error_page.html" %}
+{% block title %}Accès refusé{% endblock %}
+{% block code %}403{% endblock %}
+{% block heading %}Accès refusé{% endblock %}
+{% block lead %}Vous n'avez pas les droits nécessaires pour ouvrir cette page.{% endblock %}
+{% block detail %}{% if exception %}<p class="detail">{{ exception }}</p>{% endif %}{% endblock %}
