@@ -224,25 +224,38 @@
 <span>•</span>
 <span class="font-medium {{ meta.tone }}">{{ meta.short }}</span>
 </div>
+{% if meta.relance or meta.engagement_alert %}
+<div class="flex flex-wrap items-center gap-2 pt-0.5">
+{% if meta.relance %}
+<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {% if meta.relance_read %}bg-surface-container text-on-surface-variant{% else %}bg-primary-fixed text-primary{% endif %}" title="Dernière relance envoyée à {{ meta.relance_read_label|default:'non lue' }}">
+<span class="material-symbols-outlined text-[14px]">{% if meta.relance_read %}mark_email_read{% else %}schedule_send{% endif %}</span>Relance · {% if meta.relance_read %}lue{% else %}non lue{% endif %}{% if meta.relance_when %} · {{ meta.relance_when }}{% endif %}
+                  </span>
+{% endif %}
+{% if meta.relance_reply %}
+<span class="inline-flex max-w-full items-center gap-1 rounded-full bg-secondary-fixed px-2.5 py-1 text-[11px] font-bold text-on-secondary-fixed" title="{{ meta.relance_reply }}">
+<span class="material-symbols-outlined text-[14px]">reply</span><span class="max-w-[220px] truncate">Réponse : {{ meta.relance_reply }}</span>
+                  </span>
+{% endif %}
+{% if meta.engagement_alert %}
+<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold {{ meta.alert_status_class }}" title="{{ meta.alert_priority_label }}{% if meta.alert_reported_by %} · signalé par {{ meta.alert_reported_by }}{% endif %}">
+<span class="material-symbols-outlined text-[14px]">warning</span>Scolarité · {{ meta.alert_status_label }}{% if meta.alert_when %} · {{ meta.alert_when }}{% endif %}
+                  </span>
+{% endif %}
+</div>
+{% endif %}
 </div>
 </div>
 <!-- Actions Enseignant -->
 <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
 <div class="flex flex-wrap items-center gap-1.5">
-<form class="inline-flex" method="post" action="{% url 'coaching:prof_student_relance' assignment.student_id %}">
-{% csrf_token %}
-<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" type="submit">
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" data-form-action="{% url 'coaching:prof_student_relance' assignment.student_id %}" data-modal-open="#relance-modal" data-prefill-message="{{ meta.relance_prefill_message }}" data-prefill-subject="{{ meta.relance_prefill_subject }}" data-student-name="{{ meta.student_name }}" type="button">
 <span class="material-symbols-outlined text-[16px]">send</span>
-                    Relancer par notification ENT
+                    Relancer l'étudiant
                   </button>
-</form>
-<form class="inline-flex" method="post" action="{% url 'coaching:prof_student_alert' assignment.student_id %}">
-{% csrf_token %}
-<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" type="submit">
+<button class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" data-form-action="{% url 'coaching:prof_student_alert' assignment.student_id %}" data-modal-open="#alert-modal" data-prefill-detail="{{ meta.alert_prefill_detail }}" data-prefill-priority="{% if assignment.risk_level == 'high' %}high{% else %}normal{% endif %}" data-student-name="{{ meta.student_name }}" type="button">
 <span class="material-symbols-outlined text-[16px]">contact_phone</span>
                     Alerter référent scolarité
                   </button>
-</form>
 <a class="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-container-high px-3 text-[12px] text-on-surface transition-colors hover:bg-surface-dim" href="{{ journal_url }}?student={{ assignment.student_id }}">
 <span class="material-symbols-outlined text-[16px]">menu_book</span>
                   Consulter journal
@@ -444,5 +457,80 @@
     const cohort = filterForm.querySelector('select[name="cohort"]');
     if (cohort) cohort.addEventListener('change', () => filterForm.submit());
   });
-</script></main>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterForm = document.getElementById('student-filters');
+    if (!filterForm) return;
+    const cohort = filterForm.querySelector('select[name="cohort"]');
+    if (cohort) cohort.addEventListener('change', () => filterForm.submit());
+  });
+</script>
+<!-- Modal : relance manuelle -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="relance-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Relancer l'étudiant</h2><p class="text-xs text-on-surface-variant">Message personnalisé envoyé dans l'espace de <span id="relance-student-name">l'étudiant</span></p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="relance-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Objet</span><input class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-modal-focus data-require-alnum data-required-message="Saisissez un objet." id="relance-subject" maxlength="200" minlength="5" name="subject" placeholder="Ex. Faire le point sur ta progression" required type="text"/></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Message</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Rédigez votre message." data-words-min="3" id="relance-message" maxlength="2000" minlength="20" name="message" placeholder="Expliquez le motif de la relance et l'attendu…" required rows="5"></textarea></label>
+<p class="rounded bg-surface-container-low px-3 py-2 text-[11px] text-on-surface-variant">L'étudiant recevra ce message dans « Mes notifications » et pourra vous répondre.</p>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Envoyer la relance</button></div>
+</form>
+</div>
+</div>
+<!-- Modal : alerte scolarité manuelle -->
+<div class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="alert-modal">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative w-full max-w-lg rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Alerter le référent scolarité</h2><p class="text-xs text-on-surface-variant">Signalement de <span id="alert-student-name">l'étudiant</span> remonté à la scolarité</p></div>
+<button aria-label="Fermer" class="flex h-8 w-8 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<form action="" class="space-y-4 p-5" data-validate-form id="alert-form" method="post" novalidate>
+{% csrf_token %}
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Motif du signalement</span><textarea class="mt-1 w-full resize-y rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Décrivez le signalement." data-words-min="2" id="alert-detail" maxlength="2000" minlength="20" name="detail" placeholder="Situation observée, actions déjà tentées, accompagnement souhaité…" required rows="5"></textarea></label>
+<label class="block"><span class="text-xs font-bold text-on-surface-variant">Priorité</span><select class="mt-1 w-full rounded border border-outline-variant/60 bg-surface-container-lowest px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" data-required-message="Choisissez une priorité." id="alert-priority" name="priority" required><option value="low">Basse</option><option value="normal">Normale</option><option value="high">Haute</option></select></label>
+<p class="rounded bg-surface-container-low px-3 py-2 text-[11px] text-on-surface-variant">Le référent scolarité suivra le signalement dans le tableau de bord de suivi.</p>
+<div class="flex flex-wrap justify-end gap-2"><button class="rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" data-modal-close="" type="button">Annuler</button><button class="rounded-full bg-error px-4 py-2 text-xs font-bold text-on-error transition-colors hover:bg-error/90" type="submit">Transmettre le signalement</button></div>
+</form>
+</div>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+<script>
+(function () {
+  var relanceForm = document.getElementById('relance-form');
+  var alertForm = document.getElementById('alert-form');
+  if (!relanceForm && !alertForm) return;
+
+  function fill(trigger) {
+    var target = trigger.getAttribute('data-modal-open');
+    var name = trigger.getAttribute('data-student-name') || '';
+    if (target === '#relance-modal' && relanceForm) {
+      relanceForm.setAttribute('action', trigger.getAttribute('data-form-action') || relanceForm.getAttribute('action'));
+      document.getElementById('relance-subject').value = trigger.getAttribute('data-prefill-subject') || '';
+      document.getElementById('relance-message').value = trigger.getAttribute('data-prefill-message') || '';
+      var relanceName = document.getElementById('relance-student-name');
+      if (relanceName) relanceName.textContent = name;
+    } else if (target === '#alert-modal' && alertForm) {
+      alertForm.setAttribute('action', trigger.getAttribute('data-form-action') || alertForm.getAttribute('action'));
+      document.getElementById('alert-detail').value = trigger.getAttribute('data-prefill-detail') || '';
+      document.getElementById('alert-priority').value = trigger.getAttribute('data-prefill-priority') || 'normal';
+      var alertName = document.getElementById('alert-student-name');
+      if (alertName) alertName.textContent = name;
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-form-action][data-modal-open]');
+    if (trigger) fill(trigger);
+  });
+})();
+</script>
 {% endblock %}

@@ -45,6 +45,7 @@
 <a class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm leading-tight transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 {% if item.active %}bg-primary-fixed font-semibold text-primary shadow-sm ring-1 ring-primary/10{% else %}font-medium text-on-surface-variant hover:bg-primary-fixed/50 hover:text-primary{% endif %}" data-nav-label="{{ item.label }}" data-nav-link="" data-nav-section="{{ section.label }}" href="{% url item.url_name %}" {% if item.active %}aria-current="page"{% endif %}>
 <span class="material-symbols-outlined shrink-0 text-[20px] {% if item.active %}text-primary{% else %}text-primary/50 group-hover:text-primary{% endif %}">{{ item.icon }}</span>
 <span class="truncate">{{ item.label }}</span>
+{% if item.badge_count %}<span class="ml-auto flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-error px-1.5 font-label-sm text-[11px] font-bold leading-none text-on-error">{{ item.badge_count }}</span>{% endif %}
 </a>
 {% endfor %}
 </div>
