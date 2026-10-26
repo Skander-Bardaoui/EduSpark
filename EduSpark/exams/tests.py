@@ -25,6 +25,7 @@ from .models import (
     QuizQuestion, StudentGrade,
 )
 from .services.ai_insights import generate_quiz_analysis, generate_student_feedback
+from .services.ai_project import ProjectEvaluationError, evaluate_project
 
 
 class ExamFixtureMixin:
@@ -814,6 +815,148 @@ class ProjectOralExamTests(ExamFixtureMixin, TestCase):
         self.assertEqual(submission.ai_score, Decimal("16.50"))
         self.assertEqual(submission.ai_model, "test-model")
         self.assertEqual(submission.status, ProjectSubmission.STATUS_AI_EVALUATED)
+
+    @mock.patch("exams.services.ai_project.ai_quiz_available", return_value=True)
+    @mock.patch("exams.services.ai_project._request_json")
+    def test_ai_evaluation_parses_scores_and_weights(self, request_json, _available):
+        self._submit_project()
+        submission = ProjectSubmission.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        ProjectCriterion.objects.create(
+            session=self.project_session, label="Documentation", weight=1, order=2,
+        )
+        request_json.return_value = {
+            "summary": "Projet globalement solide.",
+            "overall_comment": "Ajoutez une documentation plus détaillée.",
+            "criteria": [
+                {
+                    "criterion_id": self.criterion.pk,
+                    "met": "oui",
+                    "score": "15/20",
+                    "comment": "Fonctionnalités correctes.",
+                },
+                {
+                    "criterion_id": "absent",
+                    "label": "Documentation",
+                    "met": "non",
+                    "score": "50%",
+                    "comment": "Documentation incomplète.",
+                },
+            ],
+        }
+
+        result = evaluate_project(submission)
+
+        self.assertEqual(result["criteria"][0]["score"], 15.0)
+        self.assertTrue(result["criteria"][0]["met"])
+        self.assertEqual(result["criteria"][1]["score"], 10.0)
+        self.assertFalse(result["criteria"][1]["met"])
+        self.assertEqual(result["score_20"], 13.33)
+        self.assertIn("Détail par critère", result["feedback"])
+        self.assertIn("Fonctionnalités", result["feedback"])
+        self.assertIn("Documentation", result["feedback"])
+
+    @mock.patch("exams.services.ai_project.ai_quiz_available", return_value=True)
+    @mock.patch("exams.services.ai_project._request_json")
+    def test_ai_evaluation_rejects_missing_criterion_scores(
+        self, request_json, _available,
+    ):
+        self._submit_project()
+        submission = ProjectSubmission.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        request_json.return_value = {"criteria": []}
+
+        with self.assertRaises(ProjectEvaluationError):
+            evaluate_project(submission)
+
+    def test_professor_ai_feedback_is_prefilled_in_grade_form(self):
+        self._submit_project()
+        submission = ProjectSubmission.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        submission.ai_score = Decimal("12.00")
+        submission.ai_result = {
+            "score_20": 12.0,
+            "feedback": "Synthèse : projet correct.\n- Fonctionnalités : 12/20.",
+            "criteria": [{"label": "Fonctionnalités", "score": 12}],
+        }
+        submission.status = ProjectSubmission.STATUS_AI_EVALUATED
+        submission.save(update_fields=["ai_score", "ai_result", "status", "updated_at"])
+        self.client.force_login(self.prof_user)
+
+        response = self.client.get(
+            reverse("exams:prof_project_submission", args=[submission.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["grade_form"].initial["score"], Decimal("12.00"),
+        )
+        self.assertIn(
+            "Fonctionnalités", response.context["grade_form"].initial["feedback"],
+        )
+        self.assertContains(response, "Appliquer et publier")
+
+    def test_professor_applies_ai_score_and_publishes_grade(self):
+        self._submit_project()
+        submission = ProjectSubmission.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        submission.ai_score = Decimal("14.25")
+        submission.ai_result = {
+            "score_20": 14.25,
+            "feedback": "Détail IA prêt pour l'étudiant.",
+            "criteria": [{"label": "Fonctionnalités", "score": 14.25}],
+        }
+        submission.status = ProjectSubmission.STATUS_AI_EVALUATED
+        submission.save(update_fields=["ai_score", "ai_result", "status", "updated_at"])
+        self.client.force_login(self.prof_user)
+
+        response = self.client.post(
+            reverse("exams:prof_project_submission", args=[submission.pk]),
+            {"action": "apply_ai"},
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("exams:prof_project_submission", args=[submission.pk]),
+        )
+        submission.refresh_from_db()
+        self.assertEqual(submission.final_score, Decimal("14.25"))
+        self.assertEqual(submission.status, ProjectSubmission.STATUS_GRADED)
+        self.assertEqual(submission.feedback, "Détail IA prêt pour l'étudiant.")
+        grade = StudentGrade.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        self.assertEqual(grade.score, Decimal("14.25"))
+        self.assertEqual(grade.status, StudentGrade.STATUS_PUBLISHED)
+        self.assertEqual(grade.comment, "Détail IA prêt pour l'étudiant.")
+
+    def test_student_sees_ai_feedback_while_waiting_for_validation(self):
+        self._submit_project()
+        submission = ProjectSubmission.objects.get(
+            session=self.project_session, student=self.student_profile,
+        )
+        submission.ai_score = Decimal("13.00")
+        submission.ai_result = {
+            "score_20": 13.0,
+            "feedback": "Synthèse : bon projet.\n- Fonctionnalités : 13/20.",
+            "criteria": [{"label": "Fonctionnalités", "score": 13}],
+        }
+        submission.status = ProjectSubmission.STATUS_AI_EVALUATED
+        submission.save(update_fields=["ai_score", "ai_result", "status", "updated_at"])
+        self.client.force_login(self.student_user)
+
+        response = self.client.get(
+            reverse("exams:student_project_exam", args=[self.project_session.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Proposition IA")
+        self.assertContains(response, "Voir l’explication de la proposition IA")
+        self.assertContains(response, "Synthèse : bon projet.")
 
     def test_professor_grades_project_and_syncs_grade(self):
         self._submit_project()

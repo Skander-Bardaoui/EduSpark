@@ -36,7 +36,9 @@ from .permissions import (
     professor_classes, professor_courses, professor_teaches, student_classes,
 )
 from .services.ai_insights import generate_quiz_analysis, generate_student_feedback
-from .services.ai_project import ProjectEvaluationError, evaluate_project
+from .services.ai_project import (
+    ProjectEvaluationError, evaluate_project, format_evaluation_feedback,
+)
 from .services.ai_quiz import (
     QuizGenerationError, ai_quiz_available, generate_quiz_questions,
     save_generated_quiz,
@@ -677,6 +679,15 @@ def student_project_exam(request, pk):
     submission = ProjectSubmission.objects.filter(
         session=session, student=student,
     ).first()
+    ai_result = (
+        submission.ai_result
+        if submission and isinstance(submission.ai_result, dict)
+        else {}
+    )
+    ai_feedback = (
+        ai_result.get("feedback")
+        or format_evaluation_feedback(ai_result)
+    )
     form = ProjectSubmissionForm(
         request.POST or None, request.FILES or None, instance=submission,
     )
@@ -720,6 +731,7 @@ def student_project_exam(request, pk):
         "session": session,
         "submission": submission,
         "form": form,
+        "ai_feedback": ai_feedback,
         "criteria": session.project_criteria.all(),
         "grade": StudentGrade.objects.filter(
             session=session, student=student,
@@ -1123,9 +1135,19 @@ def prof_project_submission(request, pk):
         messages.error(request, "Ce dépôt ne relève pas de vos enseignements.")
         return redirect("exams:prof_exam_sessions")
 
+    ai_result = submission.ai_result if isinstance(submission.ai_result, dict) else {}
+    ai_feedback = (
+        ai_result.get("feedback")
+        or format_evaluation_feedback(ai_result)
+    )
+    initial_score = (
+        submission.final_score
+        if submission.final_score is not None
+        else submission.ai_score
+    )
     grade_form = ProjectGradeForm(initial={
-        "score": submission.final_score or submission.ai_score,
-        "feedback": submission.feedback,
+        "score": initial_score,
+        "feedback": submission.feedback or ai_feedback,
     })
     if request.method == "POST":
         action = request.POST.get("action")
@@ -1148,8 +1170,37 @@ def prof_project_submission(request, pk):
                 ])
                 messages.success(
                     request,
-                    "Évaluation IA terminée : note proposée %s/20."
+                    "Évaluation IA terminée : note proposée %s/20. "
+                    "L'explication selon la grille est préremplie ci-dessous."
                     % _format_decimal(submission.ai_score),
+                )
+            return redirect("exams:prof_project_submission", pk=submission.pk)
+        if action == "apply_ai":
+            if submission.ai_score is None:
+                messages.error(request, "Lancez d'abord l'évaluation IA.")
+            else:
+                feedback = (
+                    (submission.ai_result or {}).get("feedback")
+                    or format_evaluation_feedback(submission.ai_result or {})
+                    or "Note proposée par l'évaluation IA selon la grille."
+                )
+                with transaction.atomic():
+                    submission.final_score = submission.ai_score
+                    submission.feedback = feedback
+                    submission.status = ProjectSubmission.STATUS_GRADED
+                    submission.graded_by = request.user
+                    submission.graded_at = timezone.now()
+                    submission.save(update_fields=[
+                        "final_score", "feedback", "status", "graded_by",
+                        "graded_at", "updated_at",
+                    ])
+                    _sync_exam_grade(
+                        session, submission.student, submission.ai_score,
+                        comment=feedback, graded_by=request.user,
+                    )
+                messages.success(
+                    request,
+                    "Note IA appliquée et publiée pour l'étudiant.",
                 )
             return redirect("exams:prof_project_submission", pk=submission.pk)
         if action == "grade":
@@ -1189,7 +1240,6 @@ def prof_project_submission(request, pk):
             return redirect("exams:prof_project_submission", pk=submission.pk)
 
     criteria = list(session.project_criteria.all())
-    ai_result = submission.ai_result or {}
     return render(request, "exams/prof_project_submission.html", {
         "submission": submission,
         "session": session,
@@ -1197,6 +1247,7 @@ def prof_project_submission(request, pk):
         "grade_form": grade_form,
         "ai_result": ai_result,
         "ai_rows": ai_result.get("criteria", []),
+        "ai_feedback": ai_feedback,
         "can_evaluate": ai_quiz_available(),
         "is_graded": submission.is_graded,
     })

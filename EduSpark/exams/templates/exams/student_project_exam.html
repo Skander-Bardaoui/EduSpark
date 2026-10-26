@@ -49,6 +49,12 @@
 {% if submission.feedback %}<p class="mt-1">{{ submission.feedback|linebreaksbr }}</p>{% endif %}
 {% elif submission.ai_score is not None %}
 <p class="mt-2">Proposition IA : {{ submission.score_label }}/20 — en attente de validation du professeur.</p>
+{% if ai_feedback %}
+<details class="mt-2 rounded bg-surface-container-lowest p-3">
+<summary class="cursor-pointer text-xs font-bold text-primary">Voir l’explication de la proposition IA</summary>
+<p class="mt-2 text-xs text-on-surface-variant">{{ ai_feedback|linebreaksbr }}</p>
+</details>
+{% endif %}
 {% endif %}
 </div>
 {% endif %}

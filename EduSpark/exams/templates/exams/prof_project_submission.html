@@ -55,6 +55,23 @@
 {% endfor %}
 </div>
 {% endif %}
+{% if submission.ai_score is not None %}
+<div class="mt-4 rounded-xl border border-primary/15 bg-primary/[0.04] p-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div>
+<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Note proposée</p>
+<p class="text-lg font-black text-on-surface">{{ submission.ai_score|floatformat:2 }}/20</p>
+{% if ai_result.weighted_points is not None and ai_result.max_points %}
+<p class="text-[10px] text-on-surface-variant">Calcul pondéré : {{ ai_result.weighted_points|floatformat:1 }} / {{ ai_result.max_points|floatformat:1 }} points.</p>
+{% endif %}
+</div>
+{% if not is_graded %}
+<form method="post">{% csrf_token %}<input name="action" type="hidden" value="apply_ai"><button class="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">task_alt</span>Appliquer et publier</button></form>
+{% endif %}
+</div>
+{% if ai_feedback %}<p class="mt-2 text-[10px] leading-4 text-on-surface-variant">L’explication détaillée selon la grille est préremplie dans le commentaire de la note finale.</p>{% endif %}
+</div>
+{% endif %}
 {% else %}
 <p class="mt-2 text-sm text-on-surface-variant">Aucune évaluation IA pour ce dépôt. Lancez l’analyse ou notez manuellement.</p>
 {% endif %}
