@@ -1,4 +1,4 @@
-"""Types de supports de cours acceptés (PDF, présentations, vidéos, audios)
+"""Types de supports de cours acceptés (PDF, présentations, documents Word, vidéos, audios)
 et validation des fichiers téléversés."""
 
 import os
@@ -9,12 +9,14 @@ MB = 1024 * 1024
 
 PDF = "pdf"
 PRESENTATION = "presentation"
+DOCUMENT = "document"
 VIDEO = "video"
 AUDIO = "audio"
 
 TYPE_CHOICES = (
     (PDF, "PDF"),
     (PRESENTATION, "Présentation"),
+    (DOCUMENT, "Document Word"),
     (VIDEO, "Vidéo"),
     (AUDIO, "Audio"),
 )
@@ -31,6 +33,12 @@ TYPE_RULES = {
         "max_size": 100 * MB,
         "icon": "slideshow",
         "tone": "bg-tertiary-fixed text-on-tertiary-fixed",
+    },
+    DOCUMENT: {
+        "extensions": (".doc", ".docx", ".odt"),
+        "max_size": 50 * MB,
+        "icon": "description",
+        "tone": "bg-surface-container-high text-primary",
     },
     VIDEO: {
         "extensions": (".mp4", ".webm", ".ogv", ".mov", ".m4v"),
@@ -55,6 +63,9 @@ MIME_TYPES = {
     ".pps": "application/vnd.ms-powerpoint",
     ".ppsx": "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
     ".odp": "application/vnd.oasis.opendocument.presentation",
+    ".doc": "application/msword",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".odt": "application/vnd.oasis.opendocument.text",
     ".mp4": "video/mp4",
     ".webm": "video/webm",
     ".ogv": "video/ogg",
@@ -70,11 +81,11 @@ MIME_TYPES = {
 }
 
 # Types que le navigateur sait afficher : ils sont servis « inline » (aperçu
-# dans la page) ; les présentations sont toujours proposées en téléchargement.
+# dans la page) ; présentations et documents Word sont proposés en téléchargement.
 INLINE_TYPES = (PDF, VIDEO, AUDIO)
 
 ACCEPTED_LABEL = (
-    "PDF (.pdf), présentations (.ppt, .pptx, .pps, .ppsx, .odp), "
+    "PDF (.pdf), PowerPoint (.ppt, .pptx, .pps, .ppsx, .odp), Word (.doc, .docx, .odt), "
     "vidéos (.mp4, .webm, .ogv, .mov, .m4v) et audios "
     "(.mp3, .wav, .ogg, .m4a, .aac, .flac)"
 )

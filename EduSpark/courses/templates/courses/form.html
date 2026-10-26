@@ -28,7 +28,9 @@
 {% endif %}
 <div class="grid gap-4 sm:grid-cols-2">
 {% for field in form.visible_fields %}
-{% if field.widget_type == "textarea" or field.widget_type == "fileinput" or field.widget_type == "clearablefileinput" or field.widget_type == "checkboxselectmultiple" or field.name == "title" or field.name == "name" or field.name == "assignment" or field.name == "subject" or field.name == "course" or field.name == "chapter" %}
+{% if field.widget_type == "file" or field.widget_type == "clearablefile" or field.widget_type == "multiplefile" %}
+{% include "courses/_dropzone.html" with field=field %}
+{% elif field.widget_type == "textarea" or field.widget_type == "checkboxselectmultiple" or field.name == "title" or field.name == "name" or field.name == "assignment" or field.name == "subject" or field.name == "course" or field.name == "chapter" %}
 {% include "portal/_form_field.html" with field=field wrapper_class="sm:col-span-2" %}
 {% else %}
 {% include "portal/_form_field.html" with field=field %}

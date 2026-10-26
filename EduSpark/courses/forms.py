@@ -10,7 +10,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 
-from accounts.forms import StyledFormMixin
+from accounts.forms import CHECKBOX_CLASS, FIELD_CLASS, StyledFormMixin
 from accounts.models import ProfessorProfile, SchoolClass, StudentGroup
 
 from . import files
@@ -236,15 +236,46 @@ class ScheduleSlotForm(_UniversityForm):
 # Cours, chapitres, supports (professeur)
 # ---------------------------------------------------------------------------
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """Champ fichier acceptant plusieurs fichiers ; ``clean`` renvoie une liste."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        if not data:
+            return [] if not self.required else super().clean(data, initial)
+        uploads = data if isinstance(data, (list, tuple)) else [data]
+        return [super(MultipleFileField, self).clean(upload, initial) for upload in uploads]
+
+
+# Le champ fichier est masqué : la zone de dépôt (bouton + glisser-déposer) le pilote.
+FILE_INPUT_ATTRS = {"class": "sr-only", "accept": files.ACCEPT_ATTRIBUTE}
+
+
 class CourseForm(StyledFormMixin, forms.ModelForm):
     placeholders = {
         "title": "ex. Cours magistral 1",
         "description": "ex. Introduction au module, objectifs et plan…",
     }
 
+    files = MultipleFileField(
+        label="Fichiers du cours", required=False,
+        widget=MultipleFileInput(attrs=dict(FILE_INPUT_ATTRS)),
+        help_text=(
+            "PDF, PowerPoint, Word, vidéos ou audios ; plusieurs fichiers possibles. "
+            "Ils sont ajoutés aux supports du cours."
+        ),
+    )
+
     class Meta:
         model = Course
-        fields = ("subject", "title", "description")
+        fields = ("subject", "title", "files", "description")
 
     def __init__(self, *args, professor, **kwargs):
         self.professor = professor
@@ -271,6 +302,25 @@ class CourseForm(StyledFormMixin, forms.ModelForm):
                 self.add_error("title", "Vous avez déjà un cours portant ce titre pour cette matière.")
         return cleaned
 
+    def clean_files(self):
+        uploads = self.cleaned_data.get("files") or []
+        errors = []
+        for upload in uploads:
+            try:
+                files.validate_upload(upload)
+            except ValidationError as error:
+                errors.append("%s : %s" % (upload.name, error.messages[0]))
+        if errors:
+            raise ValidationError(errors)
+        return uploads
+
+    def save_materials(self, course, user):
+        """Crée un support général du cours pour chaque fichier déposé ; renvoie leur nombre."""
+        uploads = self.cleaned_data.get("files") or []
+        for upload in uploads:
+            CourseMaterial.objects.create(course=course, file=upload, uploaded_by=user)
+        return len(uploads)
+
 
 class ChapterForm(StyledFormMixin, forms.ModelForm):
     placeholders = {
@@ -280,7 +330,7 @@ class ChapterForm(StyledFormMixin, forms.ModelForm):
 
     class Meta:
         model = Chapter
-        fields = ("title", "summary")
+        fields = ("title", "summary", "objectives", "duration_hours")
         labels = {"summary": "Résumé du chapitre"}
 
     def __init__(self, *args, course, **kwargs):
@@ -288,6 +338,71 @@ class ChapterForm(StyledFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.instance.course = course
         self.fields["summary"].widget.attrs["rows"] = 4
+        self.fields["objectives"].widget.attrs["rows"] = 4
+
+
+# ---------------------------------------------------------------------------
+# Plan de cours assisté par IA (professeur)
+# ---------------------------------------------------------------------------
+
+class SyllabusRequestForm(StyledFormMixin, forms.Form):
+    """Options envoyées au pipeline IA « Générer un plan de cours »."""
+
+    LANGUAGE_CHOICES = (("fr", "Français"), ("en", "Anglais"), ("ar", "Arabe"))
+    STYLE_CHOICES = (
+        ("equilibre", "Équilibré"),
+        ("theorique", "Plutôt théorique"),
+        ("pratique", "Plutôt pratique"),
+    )
+
+    title = forms.CharField(label="Titre du cours", max_length=200)
+    level = forms.CharField(
+        label="Niveau", max_length=100, required=False, help_text="ex. Licence 3, Master 1",
+    )
+    chapter_count = forms.IntegerField(label="Nombre de chapitres", min_value=1, max_value=20, initial=6)
+    total_hours = forms.IntegerField(
+        label="Durée totale (heures)", min_value=1, max_value=300, required=False,
+    )
+    language = forms.ChoiceField(label="Langue", choices=LANGUAGE_CHOICES, initial="fr")
+    style = forms.ChoiceField(label="Style", choices=STYLE_CHOICES, initial="equilibre")
+
+    def options(self):
+        data = self.cleaned_data
+        return {key: data.get(key) for key in ("chapter_count", "total_hours", "language", "style")}
+
+
+class ChapterDraftForm(StyledFormMixin, forms.Form):
+    """Un chapitre de l'aperçu, modifiable avant enregistrement."""
+
+    title = forms.CharField(label="Titre du chapitre", max_length=200)
+    objectives = forms.CharField(
+        label="Objectifs", required=False, widget=forms.Textarea(attrs={"rows": 3}),
+        help_text="Un objectif par ligne.",
+    )
+    duration_hours = forms.IntegerField(label="Durée (heures)", min_value=1, max_value=500, required=False)
+
+    def clean_objectives(self):
+        lines = (" ".join(line.split()) for line in self.cleaned_data["objectives"].splitlines())
+        return "\n".join(line for line in lines if line)
+
+
+class BaseChapterDraftFormSet(forms.BaseFormSet):
+    """Champs « Position » et « Retirer » libellés et stylés comme le reste du formulaire."""
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        order = form.fields["ORDER"]
+        order.label = "Position"
+        order.widget.attrs.update({"class": FIELD_CLASS, "min": 1})
+        delete = form.fields["DELETE"]
+        delete.label = "Retirer ce chapitre"
+        delete.widget.attrs.update({"class": CHECKBOX_CLASS, "data-chapter-delete": ""})
+
+
+ChapterDraftFormSet = forms.formset_factory(
+    ChapterDraftForm, formset=BaseChapterDraftFormSet, extra=0, can_order=True, can_delete=True,
+    min_num=1, validate_min=True, max_num=30, validate_max=True,
+)
 
 
 class MaterialForm(StyledFormMixin, forms.ModelForm):
@@ -299,7 +414,7 @@ class MaterialForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = CourseMaterial
         fields = ("course", "chapter", "title", "description", "file")
-        widgets = {"file": forms.FileInput()}
+        widgets = {"file": forms.FileInput(attrs=dict(FILE_INPUT_ATTRS))}
 
     def __init__(self, *args, professor, course=None, **kwargs):
         self.professor = professor
@@ -323,10 +438,9 @@ class MaterialForm(StyledFormMixin, forms.ModelForm):
         chapter_field.empty_label = "Support général du cours"
         chapter_field.label_from_instance = lambda item: "%s — %s" % (item.course.title, item.title)
         self.fields["title"].required = False
-        self.fields["title"].help_text = "Par défaut : le nom du fichier."
+
         file_field = self.fields["file"]
         file_field.required = not self.instance.pk
-        file_field.widget.attrs["accept"] = files.ACCEPT_ATTRIBUTE
         if self.instance.pk:
             file_field.help_text = "Fichier actuel : %s (%s). Laissez vide pour le conserver." % (
                 self.instance.original_name, self.instance.size_label,

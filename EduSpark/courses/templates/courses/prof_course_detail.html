@@ -21,6 +21,7 @@
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_course' %}"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Mes cours</a>
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'courses:prof_course_update' course.pk %}"><span class="material-symbols-outlined text-[18px]">edit</span>Modifier</a>
 <a class="inline-flex items-center gap-2 rounded-full border border-error/30 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-error shadow-sm transition-colors hover:bg-error-container" href="{% url 'courses:prof_course_delete' course.pk %}"><span class="material-symbols-outlined text-[18px]">delete</span>Supprimer</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary-fixed/40 px-4 py-2.5 font-label-md text-label-md text-primary shadow-sm transition-colors hover:bg-primary-fixed" href="{% url 'courses:prof_ai_syllabus_generate' course.pk %}" data-ai-syllabus><span class="material-symbols-outlined text-[18px]" aria-hidden="true">auto_awesome</span>Générer un plan de cours</a>
 <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:prof_chapter_create' course.pk %}"><span class="material-symbols-outlined text-[18px]">add</span>Chapitre</a>
 <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}"><span class="material-symbols-outlined text-[18px]">upload_file</span>Support</a>
 </div>
@@ -41,8 +42,9 @@
 <div class="flex min-w-0 items-start gap-3 md:items-center">
 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-on-primary shadow-sm">{{ forloop.counter }}</div>
 <div class="min-w-0">
-<h3 class="text-[14px] font-semibold text-on-surface">{{ chapter.title }}</h3>
+<h3 class="text-[14px] font-semibold text-on-surface">{{ chapter.title }}{% if chapter.duration_hours %} <span class="ml-1 text-[11px] font-semibold text-on-surface-variant">· {{ chapter.duration_hours }} h</span>{% endif %}</h3>
 {% if chapter.summary %}<p class="text-[12px] text-on-surface-variant">{{ chapter.summary|truncatechars:180 }}</p>{% endif %}
+{% if chapter.objectives %}<ul class="mt-1 list-disc pl-4 text-[12px] text-on-surface-variant">{% for objective in chapter.objectives.splitlines %}<li>{{ objective }}</li>{% endfor %}</ul>{% endif %}
 </div>
 </div>
 <div class="flex shrink-0 items-center gap-1 self-end md:self-auto">
@@ -58,7 +60,7 @@
 <a class="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:underline" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}&amp;chapitre={{ chapter.pk }}"><span class="material-symbols-outlined text-[16px]">upload_file</span>Ajouter un support à ce chapitre</a>
 </article>
 {% empty %}
-{% include "portal/_empty_state.html" with icon="view_agenda" title="Aucun chapitre" hint="Structurez votre cours en chapitres, puis rattachez-y vos supports (PDF, présentations, vidéos, audios)." url=chapter_create_url label="Ajouter un chapitre" %}
+{% include "portal/_empty_state.html" with icon="view_agenda" title="Aucun chapitre" hint="Structurez votre cours en chapitres, puis rattachez-y vos supports (PDF, présentations, documents Word, vidéos, audios)." url=chapter_create_url label="Ajouter un chapitre" %}
 {% endfor %}
 </section>
 <section class="rounded bg-surface-container-lowest p-4 shadow-sm">
