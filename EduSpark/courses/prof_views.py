@@ -3,6 +3,7 @@ et supports) et la publication de chaque cours pour chacune de ses classes."""
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -230,6 +231,16 @@ class _CourseFormView(ProfessorMixin, FormPageMixin, SuccessMessageMixin):
         kwargs["professor"] = self.professor
         return kwargs
 
+    def form_valid(self, form):
+        with transaction.atomic():
+            response = super().form_valid(form)
+            added = form.save_materials(self.object, self.request.user)
+        if added:
+            messages.success(self.request, "%d fichier%s ajouté%s aux supports du cours." % (
+                added, "s" if added > 1 else "", "s" if added > 1 else "",
+            ))
+        return response
+
 
 class CourseCreateView(_CourseFormView, CreateView):
     model = Course
@@ -237,7 +248,10 @@ class CourseCreateView(_CourseFormView, CreateView):
     page_title = "Nouveau cours"
     submit_label = "Créer le cours"
     success_message = "Cours créé : ajoutez vos chapitres et vos supports, puis publiez-le pour vos classes."
-    page_hint = "Le cours est lié à une matière qui vous est affectée ; vous le publierez ensuite classe par classe."
+    page_hint = (
+        "Le cours est lié à une matière qui vous est affectée. Joignez vos fichiers (PDF, PowerPoint, Word…) "
+        "avec le bouton ou par glisser-déposer, puis publiez le cours classe par classe."
+    )
 
     def get(self, request, *args, **kwargs):
         if not TeachingAssignment.objects.filter(professor=self.professor).exists():

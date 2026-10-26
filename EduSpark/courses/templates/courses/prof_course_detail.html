@@ -58,7 +58,7 @@
 <a class="mt-2 inline-flex items-center gap-1 text-[12px] font-bold text-primary hover:underline" href="{% url 'courses:prof_material_create' %}?cours={{ course.pk }}&amp;chapitre={{ chapter.pk }}"><span class="material-symbols-outlined text-[16px]">upload_file</span>Ajouter un support à ce chapitre</a>
 </article>
 {% empty %}
-{% include "portal/_empty_state.html" with icon="view_agenda" title="Aucun chapitre" hint="Structurez votre cours en chapitres, puis rattachez-y vos supports (PDF, présentations, vidéos, audios)." url=chapter_create_url label="Ajouter un chapitre" %}
+{% include "portal/_empty_state.html" with icon="view_agenda" title="Aucun chapitre" hint="Structurez votre cours en chapitres, puis rattachez-y vos supports (PDF, présentations, documents Word, vidéos, audios)." url=chapter_create_url label="Ajouter un chapitre" %}
 {% endfor %}
 </section>
 <section class="rounded bg-surface-container-lowest p-4 shadow-sm">
