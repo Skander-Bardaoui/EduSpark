@@ -236,15 +236,46 @@ class ScheduleSlotForm(_UniversityForm):
 # Cours, chapitres, supports (professeur)
 # ---------------------------------------------------------------------------
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """Champ fichier acceptant plusieurs fichiers ; ``clean`` renvoie une liste."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        if not data:
+            return [] if not self.required else super().clean(data, initial)
+        uploads = data if isinstance(data, (list, tuple)) else [data]
+        return [super(MultipleFileField, self).clean(upload, initial) for upload in uploads]
+
+
+# Le champ fichier est masqué : la zone de dépôt (bouton + glisser-déposer) le pilote.
+FILE_INPUT_ATTRS = {"class": "sr-only", "accept": files.ACCEPT_ATTRIBUTE}
+
+
 class CourseForm(StyledFormMixin, forms.ModelForm):
     placeholders = {
         "title": "ex. Cours magistral 1",
         "description": "ex. Introduction au module, objectifs et plan…",
     }
 
+    files = MultipleFileField(
+        label="Fichiers du cours", required=False,
+        widget=MultipleFileInput(attrs=dict(FILE_INPUT_ATTRS)),
+        help_text=(
+            "PDF, PowerPoint, Word, vidéos ou audios ; plusieurs fichiers possibles. "
+            "Ils sont ajoutés aux supports du cours."
+        ),
+    )
+
     class Meta:
         model = Course
-        fields = ("subject", "title", "description")
+        fields = ("subject", "title", "files", "description")
 
     def __init__(self, *args, professor, **kwargs):
         self.professor = professor
@@ -270,6 +301,25 @@ class CourseForm(StyledFormMixin, forms.ModelForm):
             if clash.exists():
                 self.add_error("title", "Vous avez déjà un cours portant ce titre pour cette matière.")
         return cleaned
+
+    def clean_files(self):
+        uploads = self.cleaned_data.get("files") or []
+        errors = []
+        for upload in uploads:
+            try:
+                files.validate_upload(upload)
+            except ValidationError as error:
+                errors.append("%s : %s" % (upload.name, error.messages[0]))
+        if errors:
+            raise ValidationError(errors)
+        return uploads
+
+    def save_materials(self, course, user):
+        """Crée un support général du cours pour chaque fichier déposé ; renvoie leur nombre."""
+        uploads = self.cleaned_data.get("files") or []
+        for upload in uploads:
+            CourseMaterial.objects.create(course=course, file=upload, uploaded_by=user)
+        return len(uploads)
 
 
 class ChapterForm(StyledFormMixin, forms.ModelForm):
@@ -299,7 +349,7 @@ class MaterialForm(StyledFormMixin, forms.ModelForm):
     class Meta:
         model = CourseMaterial
         fields = ("course", "chapter", "title", "description", "file")
-        widgets = {"file": forms.FileInput()}
+        widgets = {"file": forms.FileInput(attrs=dict(FILE_INPUT_ATTRS))}
 
     def __init__(self, *args, professor, course=None, **kwargs):
         self.professor = professor
@@ -323,10 +373,9 @@ class MaterialForm(StyledFormMixin, forms.ModelForm):
         chapter_field.empty_label = "Support général du cours"
         chapter_field.label_from_instance = lambda item: "%s — %s" % (item.course.title, item.title)
         self.fields["title"].required = False
-        self.fields["title"].help_text = "Par défaut : le nom du fichier."
+
         file_field = self.fields["file"]
         file_field.required = not self.instance.pk
-        file_field.widget.attrs["accept"] = files.ACCEPT_ATTRIBUTE
         if self.instance.pk:
             file_field.help_text = "Fichier actuel : %s (%s). Laissez vide pour le conserver." % (
                 self.instance.original_name, self.instance.size_label,
