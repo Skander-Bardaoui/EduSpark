@@ -142,7 +142,7 @@ def student_exams(request):
     }
     session_rows = []
     for session in upcoming:
-        copy = copies.get(session.pk)
+        copy = copies.get(session.pk) if session.is_convoked else None
         pages = list(copy.pages.all()) if copy else []
         convocation_hash = None
         if session.is_convoked:
@@ -874,7 +874,15 @@ def admin_exam_session_toggle_convocation(request, pk):
     if session.is_convoked:
         session.status = ExamSession.STATUS_PLANNED
         session.convoked_at = None
+        copies = session.copies.prefetch_related("pages")
+        copy_count = copies.count()
+        for copy in copies:
+            for page in copy.pages.all():
+                page.file.delete(save=False)
+        copies.delete()
         message = "Convocation annulée pour « %s »." % session.title
+        if copy_count:
+            message += " %s copie(s) déposée(s) supprimée(s)." % copy_count
     else:
         session.status = ExamSession.STATUS_CONVOKED
         session.convoked_at = timezone.now()
@@ -1190,7 +1198,10 @@ def _deposit_locked_message(session):
     """Message d'erreur si le dépôt est fermé, sinon None."""
     status = session.deposit_status
     if status == "convocation":
-        return "Le dépôt de copie est ouvert uniquement après l'envoi de la convocation."
+        return (
+            "Le dépôt de copie n'est pas encore ouvert : la convocation n'a pas "
+            "été envoyée par l'administration."
+        )
     if status == "before":
         return "Le dépôt de copie s'ouvre au début de l'épreuve, le %s à %s." % (
             session.date_label, session.start_time.strftime("%H:%M"),

@@ -15,7 +15,8 @@ from accounts.models import Membership, SchoolClass, StudentGroup, University
 from accounts.tenancy import Role
 
 from .models import (
-    ExamCopy, ExamSession, ExamSubject, GradeRecord, JuryMember, StudentGrade,
+    ExamCopy, ExamCopyPage, ExamSession, ExamSubject, GradeRecord, JuryMember,
+    StudentGrade,
 )
 
 
@@ -167,6 +168,26 @@ class AdminExamModuleTests(TestCase):
         self.client.post(url)
         self.session.refresh_from_db()
         self.assertEqual(self.session.status, ExamSession.STATUS_PLANNED)
+
+    def test_revoke_convocation_deletes_copies(self):
+        self.session.status = ExamSession.STATUS_CONVOKED
+        self.session.convoked_at = timezone.now()
+        self.session.save(update_fields=["status", "convoked_at"])
+        copy = ExamCopy.objects.create(
+            university=self.university, session=self.session,
+            student=self.student_membership.ensure_profile(),
+        )
+        page = ExamCopyPage.objects.create(
+            copy=copy, file=SimpleUploadedFile(
+                "page1.png", _png_bytes(), content_type="image/png",
+            ),
+        )
+        url = reverse("exams:admin_exam_session_toggle_convocation", args=[self.session.pk])
+        self.client.post(url)
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.status, ExamSession.STATUS_PLANNED)
+        self.assertFalse(ExamCopy.objects.filter(session=self.session).exists())
+        self.assertFalse(page.file.storage.exists(page.file.name))
 
     def test_sessions_page_shows_subject_status(self):
         subject = ExamSubject.objects.create(
@@ -577,10 +598,15 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
                 "page1.png", _png_bytes(), content_type="image/png",
             )},
         )
-        self.assertRedirects(response, reverse("exams:student_exams"))
+        self.assertRedirects(
+            response, reverse("exams:student_exams"), fetch_redirect_response=False,
+        )
         self.assertFalse(ExamCopy.objects.filter(
             session=self.session, student=self.student_profile,
         ).exists())
+        page = self.client.get(reverse("exams:student_exams"))
+        self.assertContains(page, "la convocation n'a pas été envoyée", html=True)
+        self.assertContains(page, "s'ouvrira au début de l'épreuve", html=True)
 
     def test_student_copy_upload_locked_before_exam_starts(self):
         response = self.client.post(
@@ -644,6 +670,27 @@ class StudentExamModuleTests(_ExamFlowMixin, TestCase):
 
             response = self.client.get(reverse("exams:student_exams"))
             self.assertContains(response, "Copie soumise")
+
+    def test_student_exams_hides_copy_without_convocation(self):
+        with self._deposit_now():
+            self.client.post(
+                reverse("exams:student_copy_upload", args=[self.session.pk]),
+                {"file": SimpleUploadedFile(
+                    "page1.png", _png_bytes(), content_type="image/png",
+                )},
+                follow=True,
+            )
+            self.client.post(
+                reverse("exams:student_copy_submit", args=[self.session.pk]),
+                follow=True,
+            )
+        self.session.status = ExamSession.STATUS_PLANNED
+        self.session.convoked_at = None
+        self.session.save(update_fields=["status", "convoked_at"])
+        response = self.client.get(reverse("exams:student_exams"))
+        self.assertContains(response, "Convocation en attente d'envoi")
+        self.assertNotContains(response, "Copie soumise")
+        self.assertNotContains(response, "Pages numérisées")
 
     def test_student_copy_submit_requires_pages(self):
         with self._deposit_now():

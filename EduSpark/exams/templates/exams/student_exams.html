@@ -291,7 +291,7 @@
 {% else %}
 <div class="p-space-md rounded bg-surface-container-highest flex items-center gap-space-sm">
 <span aria-hidden="true" class="material-symbols-outlined text-[20px] text-on-surface-variant">lock_clock</span>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Le dépôt de copie s'ouvre dès l'envoi de la convocation par l'administration.</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Le dépôt de copie s'ouvrira au début de l'épreuve, le {{ session.date_label }} à {{ session.start_time|time:"H\hi" }}.</p>
 </div>
 {% endif %}
 </div>
