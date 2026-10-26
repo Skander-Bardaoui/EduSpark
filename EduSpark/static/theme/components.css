@@ -63,6 +63,24 @@
   :root[data-theme="dark"] video,
   :root[data-theme="dark"] iframe { color-scheme: dark; background-color: rgb(var(--md-surface-dim)); }
 
+  /* Formulaires : autoremplissage du navigateur, champs désactivés ou en erreur. */
+  :root[data-theme="dark"] :is(input, textarea, select):-webkit-autofill {
+    -webkit-text-fill-color: rgb(var(--text));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--surface-1)) inset;
+    caret-color: rgb(var(--text));
+  }
+  :root[data-theme="dark"] :is(input, textarea, select):disabled {
+    background-color: rgb(var(--surface-1));
+    border-color: rgb(var(--border));
+    color: rgb(var(--text-muted));
+    cursor: not-allowed;
+  }
+  :root[data-theme="dark"] :is(input, textarea, select)[aria-invalid="true"]:not(:focus-visible) {
+    outline: 1px solid rgb(var(--danger));
+    outline-offset: -1px;
+  }
+  :root[data-theme="dark"] ::placeholder { color: rgb(var(--md-outline)); opacity: 1; }
+
   /* Images de contenu : légèrement atténuées, jamais inversées. */
   :root[data-theme="dark"] main img:not([data-theme-keep]) { filter: brightness(0.92); }
 }
