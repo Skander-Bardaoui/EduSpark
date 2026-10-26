@@ -12,10 +12,6 @@
 <div class="flex flex-wrap gap-2">
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'coaching:admin_monitoring' %}"><span class="material-symbols-outlined text-[18px]">monitoring</span>Tableau de bord</a>
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ export_url }}"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</a>
-<form class="inline-flex" method="post" action="{% url 'coaching:admin_auto_assign' %}">
-{% csrf_token %}
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">auto_awesome</span>Attribution automatique</button>
-</form>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -29,6 +25,7 @@
 <div>
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Suivi par classe</h2>
 <p class="text-xs text-on-surface-variant"><span data-filter-count>{{ row_count }}</span> classe{{ row_count|pluralize }} affichée{{ row_count|pluralize }} · année {{ academic_year }}</p>
+<p class="mt-1 text-[11px] text-on-surface-variant">La population inclut les étudiants des groupes et ceux rattachés par une affectation de tutorat active.</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Toutes</button>
@@ -43,7 +40,7 @@
 <th class="px-5 py-3 font-bold">Classe</th>
 <th class="px-5 py-3 font-bold">Niveau</th>
 <th class="px-5 py-3 font-bold">Étudiants</th>
-<th class="px-5 py-3 font-bold">Référents</th>
+<th class="px-5 py-3 font-bold">Référent</th>
 <th class="px-5 py-3 font-bold">Taux d'attribution</th>
 <th class="px-5 py-3 font-bold">Statut</th>
 <th class="px-5 py-3 text-right font-bold">Actions</th>
@@ -57,8 +54,8 @@
 <p class="text-xs text-on-surface-variant">{{ row.school_class.program|default:"Filière non renseignée" }}</p>
 </td>
 <td class="px-5 py-3 text-on-surface-variant">{{ row.school_class.level|default:"—" }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ row.students }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{% if row.referent_names %}<p class="font-semibold text-on-surface">{{ row.referent_names|join:", " }}</p><p class="text-xs">{{ row.tutors }} référent{{ row.tutors|pluralize }}</p>{% else %}—{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.students }}{% if row.outside_group %}<p class="text-[11px] text-tertiary">dont {{ row.outside_group }} hors groupe</p>{% endif %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{% if row.referent_names %}<p class="font-semibold text-on-surface">{{ row.referent_names|join:", " }}</p><p class="text-xs {% if row.tutors > 1 %}font-bold text-error{% endif %}">{% if row.tutors > 1 %}Plusieurs référents · à harmoniser{% else %}Référent unique{% endif %}</p>{% else %}—{% endif %}</td>
 <td class="px-5 py-3">
 <div class="flex items-center gap-3">
 <span class="w-10 text-right font-semibold text-on-surface">{{ row.rate }} %</span>

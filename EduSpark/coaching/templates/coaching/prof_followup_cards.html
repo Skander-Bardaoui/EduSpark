@@ -23,10 +23,16 @@
 </div>
 <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
 <section class="flex flex-col gap-4 xl:col-span-8" data-fiche-scope>
+{% if focus_name %}
+<div class="flex flex-wrap items-center justify-between gap-2 rounded border border-primary/30 bg-primary-fixed/30 px-4 py-3 text-sm text-on-surface">
+<span>Vue ciblée sur <strong>{{ focus_name }}</strong>.</span>
+<a class="font-bold text-primary hover:underline" href="{% url 'coaching:prof_followup_cards' %}">Voir tous les étudiants</a>
+</div>
+{% endif %}
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 <div>
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Fiches de difficulté</h2>
-<p class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface" data-fiche-count>{{ sheet_rows|length }}</span> fiches affichées · promotion 2026 – 2027</p>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Étudiants suivis</h2>
+<p class="text-xs text-on-surface-variant"><span class="font-bold text-on-surface" data-fiche-student-count>{{ student_count }}</span> étudiant{{ student_count|pluralize }} · <span class="font-bold text-on-surface" data-fiche-count>{{ displayed_sheet_count }}</span> fiche{{ displayed_sheet_count|pluralize }} active{{ displayed_sheet_count|pluralize }}</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-fiche-chip="all" type="button">Toutes</button>
@@ -37,28 +43,100 @@
 </div>
 </div>
 <div class="grid gap-4 md:grid-cols-2">
-{% for row in sheet_rows %}
-<article class="flex flex-col gap-3 rounded border {{ row.severity.border }} bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="{{ row.category_tags }}">
+{% for row in rows %}
+<article class="flex flex-col gap-3 rounded border {{ row.meta.border }} bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="{{ row.category_tags }}">
 <div class="flex items-start justify-between gap-3">
-<div class="flex items-start gap-3"><span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ row.severity.badge }} text-sm font-extrabold">{{ row.initials }}</span><div><h3 class="font-title-md text-title-md text-on-surface">{{ row.student_name }}</h3><p class="text-xs text-on-surface-variant">INE {{ row.student_number }} · {{ row.student_program }}</p></div></div>
-{% include "portal/_badge.html" with label=row.severity.label tone_class=row.severity.badge %}
+<div class="flex items-start gap-3">
+<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ row.meta.badge }} text-sm font-extrabold">{{ row.initials }}</span>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface">{{ row.student_name }}</h3>
+<p class="text-xs text-on-surface-variant">INE {{ row.student_number }} · {{ row.student_program }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.class_name }}</p>
 </div>
-<p class="text-sm leading-relaxed text-on-surface-variant">{{ row.sheet.observation }}</p>
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 rounded {{ row.severity.box }} p-3 text-center">
-<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.average_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
-<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.attendance_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
-<div><p class="font-data-metric text-base font-bold {{ row.severity.tone }}">{{ row.assignments_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
 </div>
-<div class="flex items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
-<span class="text-[11px] text-on-surface-variant">{{ row.sheet.get_status_display }} · {{ row.category_label }} · {{ row.last_contact_label }}</span>
-<div class="flex gap-1.5"><button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-modal-open="#fiche-detail-modal" data-note-url="{{ row.note_url }}" data-fiche-name="{{ row.student_name }}" data-fiche-info="{{ row.student_program }} · INE {{ row.student_number }}" data-fiche-issue="{{ row.sheet.observation }}" data-fiche-plan="{{ row.sheet.action_plan|default:'Aucun plan d’action consigné.' }}" type="button">Ouvrir la fiche</button><button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-fiche-plan-open data-modal-open="#fiche-plan-modal" data-plan-url="{{ row.plan_url }}" data-plan-name="{{ row.student_name }}" data-plan-value="{{ row.sheet.action_plan }}" type="button">Plan d'action</button></div>
+<div class="flex flex-col items-end gap-1">
+{% include "portal/_badge.html" with label=row.meta.label tone_class=row.meta.badge %}
+<span class="flex items-center gap-0.5 text-[11px] {{ row.meta.delta_tone }}"><span class="material-symbols-outlined text-[15px]">{{ row.meta.delta_icon }}</span>{{ row.meta.delta_label }}</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 rounded {{ row.meta.box }} p-3 text-center">
+<div><p class="font-data-metric text-base font-bold {{ row.meta.tone }}">{{ row.meta.average_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Moyenne</p></div>
+<div><p class="font-data-metric text-base font-bold {{ row.meta.tone }}">{{ row.meta.attendance_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Assiduité</p></div>
+<div><p class="font-data-metric text-base font-bold {{ row.meta.tone }}">{{ row.meta.assignments_label }}</p><p class="text-[11px] uppercase tracking-wide text-on-surface-variant">Devoirs rendus</p></div>
+</div>
+<p class="text-sm leading-relaxed text-on-surface-variant">{{ row.meta.risk_reason }}</p>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 pt-3">
+<p class="text-[11px] text-on-surface-variant">Dernier échange : {{ row.meta.last_contact_label }}</p>
+<button class="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-3 py-1 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed-dim" data-fiche-create data-student-id="{{ row.assignment.student_id }}" data-modal-open="#new-fiche-modal" type="button"><span class="material-symbols-outlined text-[14px]">note_add</span>Nouvelle fiche</button>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between gap-2">
+<p class="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Fiches de difficulté · {{ row.active_sheet_count }} active{{ row.active_sheet_count|pluralize }}</p>
+</div>
+{% for item in row.sheets %}
+<div class="rounded border {{ item.severity.border }} bg-surface-container-low p-3" data-active="{% if item.is_closed %}0{% else %}1{% endif %}" data-fiche-sheet data-tags="{{ item.category_tags }}">
+<div class="flex flex-wrap items-start justify-between gap-2">
+<div>
+<p class="text-sm font-bold text-on-surface">{{ item.category_label }}</p>
+<p class="text-[11px] text-on-surface-variant">{{ item.status_label }} · ouvert le {{ item.opened_label }}{% if item.notes_count %} · {{ item.notes_count }} note{{ item.notes_count|pluralize }}{% endif %}</p>
+</div>
+<span class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold {{ item.severity.badge }}">{{ item.severity.label }}</span>
+</div>
+<p class="mt-1 text-xs leading-relaxed text-on-surface-variant">{{ item.observation }}</p>
+<div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+<span class="text-[11px] text-on-surface-variant">{{ item.last_contact_label }}</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-modal-open="#fiche-detail-modal" data-note-url="{{ item.note_url }}" data-fiche-name="{{ row.student_name }}" data-fiche-info="{{ row.student_program }} · INE {{ row.student_number }}" data-fiche-issue="{{ item.observation }}" data-fiche-plan="{{ item.action_plan|default:'Aucun plan d’action consigné.' }}" type="button">Ouvrir</button>
+<button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-fiche-plan-open data-modal-open="#fiche-plan-modal" data-plan-url="{{ item.plan_url }}" data-plan-name="{{ row.student_name }}" data-plan-value="{{ item.action_plan }}" type="button">Plan</button>
+<form class="inline" data-confirm-detail="Supprimer la fiche {{ item.category_label }} de {{ row.student_name }} ?" method="post" action="{% url 'coaching:prof_sheet_delete' item.sheet.pk %}">{% csrf_token %}<input name="student" type="hidden" value="{{ row.assignment.student_id }}"/><button class="inline-flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Supprimer la fiche" aria-label="Supprimer la fiche {{ item.category_label }}" type="submit"><span class="material-symbols-outlined text-[16px]">delete</span></button></form>
+</div>
+</div>
+</div>
+{% empty %}
+<p class="rounded border border-dashed border-outline-variant/60 px-3 py-4 text-center text-xs text-on-surface-variant">Aucune fiche ouverte pour cet étudiant.</p>
+{% endfor %}
 </div>
 </article>
 {% empty %}
-<article class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest p-5 text-center text-sm text-on-surface-variant md:col-span-2">Aucune fiche de difficulté pour le moment.</article>
+<article class="rounded border border-dashed border-outline-variant/60 bg-surface-container-lowest p-5 text-center text-sm text-on-surface-variant md:col-span-2">Aucun étudiant suivi pour le moment.</article>
 {% endfor %}
 </div>
 <p class="hidden rounded border border-dashed border-outline-variant/60 px-5 py-10 text-center text-sm text-on-surface-variant" data-fiche-empty>Aucune fiche ne correspond à ce type de difficulté.</p>
+{% if legacy_rows %}
+<section class="mt-2 flex flex-col gap-3 border-t border-outline-variant/40 pt-4">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Anciens suivis</h2>
+<p class="text-xs text-on-surface-variant">Fiches d'étudiants qui ne sont plus dans votre portefeuille actif.</p>
+</div>
+<div class="grid gap-4 md:grid-cols-2">
+{% for row in legacy_rows %}
+<article class="flex flex-col gap-3 rounded border border-outline-variant/50 bg-surface-container-lowest p-5 shadow-sm" data-fiche-item data-tags="{{ row.category_tags }}">
+<div class="flex items-start gap-3">
+<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-container text-sm font-extrabold text-on-surface-variant">{{ row.initials }}</span>
+<div><h3 class="font-title-md text-title-md text-on-surface">{{ row.student_name }}</h3><p class="text-xs text-on-surface-variant">INE {{ row.student_number }} · {{ row.student_program }}</p><p class="text-xs text-on-surface-variant">{{ row.class_name }}</p></div>
+</div>
+{% for item in row.sheets %}
+<div class="rounded border {{ item.severity.border }} bg-surface-container-low p-3" data-active="{% if item.is_closed %}0{% else %}1{% endif %}" data-fiche-sheet data-tags="{{ item.category_tags }}">
+<div class="flex flex-wrap items-start justify-between gap-2">
+<div><p class="text-sm font-bold text-on-surface">{{ item.category_label }}</p><p class="text-[11px] text-on-surface-variant">{{ item.status_label }} · ouvert le {{ item.opened_label }}</p></div>
+<span class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold {{ item.severity.badge }}">{{ item.severity.label }}</span>
+</div>
+<p class="mt-1 text-xs leading-relaxed text-on-surface-variant">{{ item.observation }}</p>
+<div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+<span class="text-[11px] text-on-surface-variant">{{ item.last_contact_label }}</span>
+<div class="flex gap-1.5">
+<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-fiche-open data-modal-open="#fiche-detail-modal" data-note-url="{{ item.note_url }}" data-fiche-name="{{ row.student_name }}" data-fiche-info="{{ row.student_program }} · INE {{ row.student_number }}" data-fiche-issue="{{ item.observation }}" data-fiche-plan="{{ item.action_plan|default:'Aucun plan d’action consigné.' }}" type="button">Ouvrir</button>
+<button class="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-on-primary transition-colors hover:bg-primary-container" data-fiche-plan-open data-modal-open="#fiche-plan-modal" data-plan-url="{{ item.plan_url }}" data-plan-name="{{ row.student_name }}" data-plan-value="{{ item.action_plan }}" type="button">Plan</button>
+<form class="inline" data-confirm-detail="Supprimer la fiche {{ item.category_label }} de {{ row.student_name }} ?" method="post" action="{% url 'coaching:prof_sheet_delete' item.sheet.pk %}">{% csrf_token %}<input name="student" type="hidden" value="{{ row.student.pk }}"/><button class="inline-flex h-7 w-7 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-error-container hover:text-error" title="Supprimer la fiche" aria-label="Supprimer la fiche {{ item.category_label }}" type="submit"><span class="material-symbols-outlined text-[16px]">delete</span></button></form>
+</div>
+</div>
+</div>
+{% endfor %}
+</article>
+{% endfor %}
+</div>
+</section>
+{% endif %}
 </section>
 <aside class="flex flex-col gap-4 xl:col-span-4">
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
@@ -152,19 +230,37 @@
   var items = Array.prototype.slice.call(document.querySelectorAll('[data-fiche-item]'));
   var chips = Array.prototype.slice.call(document.querySelectorAll('[data-fiche-chip]'));
   var count = document.querySelector('[data-fiche-count]');
+  var studentCount = document.querySelector('[data-fiche-student-count]');
   var empty = document.querySelector('[data-fiche-empty]');
   var current = 'all';
 
   function apply() {
-    var shown = 0;
-    items.forEach(function (item) {
-      var tags = (item.getAttribute('data-tags') || '').split(/\s+/);
-      var match = current === 'all' || tags.indexOf(current) !== -1;
-      item.classList.toggle('hidden', !match);
-      if (match) shown += 1;
+    var shownStudents = 0;
+    var shownSheets = 0;
+    items.forEach(function (card) {
+      var sheets = Array.prototype.slice.call(card.querySelectorAll('[data-fiche-sheet]'));
+      if (!sheets.length) {
+        var cardMatch = current === 'all';
+        card.classList.toggle('hidden', !cardMatch);
+        if (cardMatch) shownStudents += 1;
+        return;
+      }
+      var any = false;
+      sheets.forEach(function (sheet) {
+        var tags = (sheet.getAttribute('data-tags') || '').split(/\s+/);
+        var match = current === 'all' || tags.indexOf(current) !== -1;
+        sheet.classList.toggle('hidden', !match);
+        if (match) {
+          any = true;
+          if (sheet.getAttribute('data-active') !== '0') shownSheets += 1;
+        }
+      });
+      card.classList.toggle('hidden', !any);
+      if (any) shownStudents += 1;
     });
-    if (count) count.textContent = String(shown);
-    if (empty) empty.classList.toggle('hidden', shown !== 0);
+    if (studentCount) studentCount.textContent = String(shownStudents);
+    if (count) count.textContent = String(shownSheets);
+    if (empty) empty.classList.toggle('hidden', shownSheets !== 0);
   }
 
   chips.forEach(function (chip) {
@@ -176,6 +272,15 @@
         other.setAttribute('aria-pressed', String(on));
       });
       apply();
+    });
+  });
+
+  var newFicheModal = document.getElementById('new-fiche-modal');
+  document.querySelectorAll('[data-fiche-create]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!newFicheModal) return;
+      var select = newFicheModal.querySelector('select[name="student"]');
+      if (select) select.value = btn.getAttribute('data-student-id') || '';
     });
   });
 

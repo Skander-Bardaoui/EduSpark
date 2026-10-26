@@ -120,7 +120,7 @@
   </form>
 
   {% for question in questions %}
-  <form action="{% url 'exams:prof_quiz_edit' quiz.pk %}" id="delete-question-{{ question.pk }}" method="post" onsubmit="return confirm('Supprimer cette question ?');">
+  <form action="{% url 'exams:prof_quiz_edit' quiz.pk %}" data-confirm-detail="Supprimer cette question ?" id="delete-question-{{ question.pk }}" method="post">
     {% csrf_token %}
     <input type="hidden" name="action" value="delete"/>
     <input type="hidden" name="question" value="{{ question.pk }}"/>

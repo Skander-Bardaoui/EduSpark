@@ -1,13 +1,16 @@
 """Classes et groupes de l'université courante (admin université)."""
 
+from django.contrib import messages
+from django.db import transaction
 from django.db.models import Count
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
-from .forms import SchoolClassForm, StudentGroupForm
+from .forms import ClassStudentAssignForm, SchoolClassForm, StudentGroupForm
 from .models import MAX_STUDENTS_PER_CLASS, SchoolClass, StudentGroup, StudentProfile
-from .tenancy import Role, TenantRequiredMixin, TenantScopedMixin
+from .tenancy import Role, TenantRequiredMixin, TenantScopedMixin, tenant_required
 from .view_mixins import (
     GenericDeleteMixin, GenericFormMixin, SearchFilterMixin, SuccessMessageMixin, distinct_choices,
 )
@@ -91,25 +94,78 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
         context = super().get_context_data(**kwargs)
         school_class = self.object
         groups = list(school_class.groups.all())
-        ungrouped_filters = {
-            "university": school_class.university,
-            "membership__is_active": True,
-            "level__iexact": school_class.level,
-            "groups__isnull": True,
-        }
-        if school_class.section:
-            ungrouped_filters["section__iexact"] = school_class.section
+        assignable_students = (
+            StudentProfile.objects.filter(
+                university=school_class.university,
+                membership__is_active=True,
+                groups__isnull=True,
+            )
+            .select_related("membership__user")
+            .order_by(
+                "membership__user__last_name",
+                "membership__user__first_name",
+            )
+        )
         context.update({
             "groups": groups,
             "professors": school_class.professors.all(),
             "students": school_class.student_queryset().select_related("membership__user"),
-            "ungrouped": StudentProfile.objects.filter(
-                **ungrouped_filters,
-            ).select_related("membership__user").distinct(),
+            "ungrouped": assignable_students,
+            "assignable_students": assignable_students,
+            "can_assign_student": bool(
+                groups and school_class.seats_left > 0 and assignable_students.exists()
+            ),
             "max_students": MAX_STUDENTS_PER_CLASS,
             "seats_left": school_class.seats_left,
         })
         return context
+
+
+@tenant_required(Role.UNIVERSITY_ADMIN)
+@require_POST
+def assign_class_student(request, pk):
+    school_class = get_object_or_404(
+        SchoolClass, pk=pk, university=request.university,
+    )
+    form = ClassStudentAssignForm(request.POST, school_class=school_class)
+    if not form.is_valid():
+        errors = [
+            error
+            for field_errors in form.errors.values()
+            for error in field_errors
+        ]
+        messages.error(
+            request,
+            errors[0] if errors else "Vérifiez l'étudiant et le groupe sélectionnés.",
+        )
+        return redirect("portal:admin_class_detail", pk=school_class.pk)
+    student = form.cleaned_data["student"]
+    group = form.cleaned_data["group"]
+    with transaction.atomic():
+        group.students.add(student)
+        updates = []
+        if not student.level:
+            student.level = school_class.level
+            updates.append("level")
+        if not student.section:
+            student.section = school_class.section
+            updates.append("section")
+        if not student.program:
+            student.program = school_class.program
+            updates.append("program")
+        if updates:
+            student.save(update_fields=updates)
+    messages.success(
+        request,
+        "%s a été affecté à %s · %s."
+        % (
+            student.membership.user.get_full_name()
+            or student.membership.user.email,
+            school_class.name,
+            group.name,
+        ),
+    )
+    return redirect("portal:admin_class_detail", pk=school_class.pk)
 
 
 class SchoolClassCreateView(TenantScopedMixin, GenericFormMixin, SuccessMessageMixin, CreateView):
@@ -186,10 +242,44 @@ class _GroupMixin(TenantRequiredMixin):
 
 
 class _GroupFormMixin:
+    template_name = "accounts/admin_group_form.html"
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["school_class"] = self.get_school_class()
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = context["form"]
+        school_class = self.get_school_class()
+        if form.is_bound:
+            selected_ids = {
+                str(pk) for pk in form.data.getlist(form.add_prefix("students"))
+            }
+        elif getattr(self, "object", None) is not None:
+            selected_ids = {
+                str(pk) for pk in self.object.students.values_list("pk", flat=True)
+            }
+        else:
+            selected_ids = set()
+        students = (
+            form.fields["students"].queryset
+            .select_related("membership__user")
+            .order_by(
+                "membership__user__last_name",
+                "membership__user__first_name",
+            )
+        )
+        context.update({
+            "school_class": school_class,
+            "student_options": [
+                {"student": student, "checked": str(student.pk) in selected_ids}
+                for student in students
+            ],
+            "selected_student_count": len(selected_ids),
+        })
+        return context
 
 
 class StudentGroupCreateView(_GroupFormMixin, _GroupMixin, GenericFormMixin, SuccessMessageMixin, CreateView):

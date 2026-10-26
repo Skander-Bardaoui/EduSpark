@@ -208,6 +208,35 @@ EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = env_bool('DJANGO_EMAIL_USE_TLS', True)
 
+def project_path(value):
+    """Résout un chemin relatif depuis la racine du projet Django."""
+    if not value:
+        return value
+    path = Path(value)
+    return str(path if path.is_absolute() else BASE_DIR / path)
+
+
+# Liens de visioconférence générés pour les rendez-vous de tutorat.
+# provider = jitsi (par défaut, aucune configuration)
+# provider = google (API Google Calendar + OAuth ou compte de service)
+VIDEO_MEETING_PROVIDER = os.environ.get('VIDEO_MEETING_PROVIDER', 'jitsi')
+VIDEO_MEETING_BASE_URL = os.environ.get(
+    'VIDEO_MEETING_BASE_URL', 'https://meet.jit.si',
+).rstrip('/')
+GOOGLE_SERVICE_ACCOUNT_FILE = project_path(
+    os.environ.get('GOOGLE_SERVICE_ACCOUNT_FILE', ''),
+)
+GOOGLE_CALENDAR_ID = os.environ.get('GOOGLE_CALENDAR_ID', '')
+GOOGLE_CALENDAR_TIMEZONE = os.environ.get('GOOGLE_CALENDAR_TIMEZONE', TIME_ZONE)
+GOOGLE_IMPERSONATE_USER = os.environ.get('GOOGLE_IMPERSONATE_USER', '')
+# Autorisation OAuth personnelle (recommandée avec un compte Gmail).
+GOOGLE_OAUTH_CLIENT_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_CLIENT_FILE', 'secrets/google-oauth-client.json',
+))
+GOOGLE_OAUTH_TOKEN_FILE = project_path(os.environ.get(
+    'GOOGLE_OAUTH_TOKEN_FILE', 'secrets/google-meet-token.json',
+))
+
 # API : JWT (access court + refresh) en authentification par défaut.
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -226,6 +255,30 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+# IA du module cours : génération d'un plan de cours (voir courses/services/ai.py).
+# Étape 1 « lecteur » : modèle local Ollama (les documents restent sur le serveur).
+# Étape 2 « rédacteur » : API Groq, Gemini ou Anthropic, qui ne reçoit que
+# titre, niveau et thèmes. AI_PROVIDER : groq | gemini | anthropic | fake (plan
+# fixe sans appel réseau, pour les tests et le travail hors ligne).
+AI_PROVIDER = os.environ.get('AI_PROVIDER', 'groq').strip().lower()
+AI_API_TIMEOUT = float(os.environ.get('AI_API_TIMEOUT', '60'))
+# Clé Groq propre au module cours : distincte de GROQ_API_KEY (test de langue du
+# module coaching), pour que chaque module ait sa clé et son quota.
+COURSES_GROQ_API_KEY = os.environ.get('COURSES_GROQ_API_KEY', '').strip()
+COURSES_GROQ_MODEL = os.environ.get('COURSES_GROQ_MODEL', 'openai/gpt-oss-120b').strip()
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '').strip()
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-5-5')
+ANTHROPIC_EFFORT = os.environ.get('ANTHROPIC_EFFORT', 'medium')
+# Repli côté serveur si le modèle décline la demande (Claude API uniquement).
+ANTHROPIC_FALLBACKS = env_bool('ANTHROPIC_FALLBACKS', True)
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:3b')
+OLLAMA_KEEP_ALIVE = os.environ.get('OLLAMA_KEEP_ALIVE', '30m')
+AI_LOCAL_TIMEOUT = float(os.environ.get('AI_LOCAL_TIMEOUT', '120'))
+AI_LOCAL_TEXT_LIMIT = int(os.environ.get('AI_LOCAL_TEXT_LIMIT', '4000'))
+AI_RATE_LIMIT_PER_HOUR = int(os.environ.get('AI_RATE_LIMIT_PER_HOUR', '10'))
 # --- Intelligence artificielle (module coaching) ---------------------------
 # Aucune clé n'est écrite ici : tout vient de .env (voir .env.example).
 # GROQ sert au plan d'étude IA, à l'examinateur du test de langue, à

@@ -34,6 +34,13 @@ protected_media/
 *.po~
 local_settings.py
 
+# Secrets Google Meet (ne jamais versionner)
+google-credentials*.json
+*service-account*.json
+.google-meet-token.json
+*oauth-client*.json
+*meet-token*.json
+
 # --- Exécution locale (dev server) ---
 *.pid
 runserver*.log

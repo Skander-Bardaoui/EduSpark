@@ -691,11 +691,12 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
         if school_class.section:
             matching &= Q(section__iexact=school_class.section)
         students = students.filter(
-            matching | Q(groups__school_class=school_class)
+            (matching & Q(groups__isnull=True))
+            | Q(groups__school_class=school_class)
         ).distinct()
         self.fields["students"].queryset = students
         self.fields["students"].help_text = (
-            "Seuls les étudiants du niveau et de la section de la classe sont proposés. "
+            "Les étudiants déjà affectés à une autre classe ne sont pas proposés. "
             "La classe ne peut pas dépasser %d étudiants." % MAX_STUDENTS_PER_CLASS
         )
 
@@ -730,6 +731,81 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
                 "students",
                 "Le groupe dépasse sa capacité (%s / %s)." % (len(students), capacity),
             )
+        return cleaned
+
+
+class ClassStudentAssignForm(forms.Form):
+    """Affecte directement un étudiant sans groupe à un groupe de la classe."""
+
+    student = forms.ModelChoiceField(
+        label="Étudiant",
+        queryset=StudentProfile.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un étudiant.",
+            "invalid_choice": "Sélectionnez un étudiant valide.",
+        },
+    )
+    group = forms.ModelChoiceField(
+        label="Groupe",
+        queryset=StudentGroup.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un groupe.",
+            "invalid_choice": "Sélectionnez un groupe valide.",
+        },
+    )
+
+    def __init__(self, *args, school_class=None, **kwargs):
+        self.school_class = school_class
+        super().__init__(*args, **kwargs)
+        students = StudentProfile.objects.filter(
+            university=school_class.university,
+            membership__is_active=True,
+            groups__isnull=True,
+        ).select_related("membership__user").order_by(
+            "membership__user__last_name", "membership__user__first_name",
+        )
+        self.fields["student"].queryset = students
+        self.fields["student"].label_from_instance = self._student_label
+        self.fields["group"].queryset = school_class.groups.order_by("name")
+        self.fields["group"].label_from_instance = self._group_label
+
+    def _student_label(self, student):
+        user = student.membership.user
+        name = user.get_full_name() or user.email
+        details = " · ".join(
+            value for value in (student.level, student.section) if value
+        )
+        return "%s — %s" % (name, details) if details else name
+
+    def _group_label(self, group):
+        total = group.students.count()
+        if group.capacity:
+            return "%s (%d/%d)" % (group.name, total, group.capacity)
+        return "%s (%d étudiant%s)" % (group.name, total, "" if total == 1 else "s")
+
+    def clean(self):
+        cleaned = super().clean()
+        student = cleaned.get("student")
+        group = cleaned.get("group")
+        if self.school_class is None:
+            return cleaned
+        if self.school_class.seats_left <= 0:
+            raise forms.ValidationError(
+                "La classe est complète (%d étudiants maximum)."
+                % MAX_STUDENTS_PER_CLASS
+            )
+        if group is not None and group.school_class_id != self.school_class.pk:
+            self.add_error("group", "Ce groupe n'appartient pas à cette classe.")
+        if student is not None and student.groups.exists():
+            self.add_error("student", "Cet étudiant appartient déjà à une classe.")
+        if group is not None and group.capacity:
+            if group.students.count() >= group.capacity:
+                self.add_error(
+                    "group",
+                    "Ce groupe est complet (%d/%d)." % (
+                        group.students.count(), group.capacity,
+                    ),
+                )
         return cleaned
 
 

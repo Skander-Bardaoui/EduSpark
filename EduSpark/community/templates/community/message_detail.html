@@ -12,7 +12,7 @@
 {% if not is_recipient and message.read_at %}· lu le {{ message.read_at|date:"d/m/Y à H:i" }}{% endif %}</p>
 <div class="mt-5 whitespace-pre-line text-body-md leading-relaxed text-on-surface">{{ message.body }}</div>
 <div class="mt-6 flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4 text-xs font-bold">
-<form method="post" action="{% url 'community:message_delete' message.pk %}" onsubmit="return confirm('Supprimer ce message de votre boîte ?');">{% csrf_token %}
+<form method="post" data-confirm-detail="Supprimer ce message de votre boîte ?" action="{% url 'community:message_delete' message.pk %}">{% csrf_token %}
 <button class="rounded-full border border-error/40 px-4 py-2.5 text-error hover:bg-error-container" type="submit">Supprimer</button></form>
 <a class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-on-primary hover:bg-primary-container" href="{% url 'community:message_create' %}?a={{ other.pk }}&amp;sujet=Re : {{ message.subject|urlencode }}"><span class="material-symbols-outlined text-[18px]">reply</span>Répondre</a>
 </div>

@@ -12,7 +12,7 @@ from django.utils import timezone
 from accounts.models import SchoolClass
 from accounts.tenancy import Role
 
-from .models import Course, CoursePublication, ScheduleSlot, TeachingAssignment
+from ..models import Course, CoursePublication, ScheduleSlot, TeachingAssignment
 
 WEEKDAY_LABELS = ("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
 MONTH_LABELS = (
@@ -110,6 +110,7 @@ def build_week_grid(slots, today=None):
             "date": day,
             "date_label": format_date(day),
             "is_today": day == today,
+            "is_future": day > today,
             "slots": day_slots,
         })
     total = sum(slot.duration_minutes for slot in slots)

@@ -15,5 +15,14 @@ psycopg[binary]==3.3.6
 reportlab==5.1.0
 # Traitement des pages de copies numérisées (rotation, recadrage).
 Pillow==13.0.0
+# IA du module cours : rédaction du plan (API Anthropic) et lecture locale
+# des supports (texte des PDF et des présentations PowerPoint).
+anthropic==2.3.0
+pypdf==6.17.0
+python-pptx==1.0.2
 # Extraction du texte des supports PDF pour la génération de QCM par IA.
 pypdf==5.1.0
+# Génération de vrais liens Google Meet via l'API Google Calendar.
+google-api-python-client==2.201.0
+google-auth==2.62.0
+google-auth-oauthlib==1.5.0

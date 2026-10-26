@@ -13,5 +13,12 @@
 <p class="mt-1 text-xs font-bold leading-tight text-on-surface">{{ assignment.subject.code }} · {{ assignment.subject.name }}</p>
 <p class="mt-1 text-[11px] text-on-surface-variant">{{ slot.type_label }}{% if slot.room %} · {{ slot.room }}{% endif %}{% if slot.group %} · {{ slot.group.name }}{% endif %}</p>
 <p class="mt-0.5 text-[11px] text-on-surface-variant">{% if mode == "prof" %}{{ assignment.school_class.name }}{% else %}{{ assignment.professor_name }}{% endif %}</p>
+{% if mode == "prof" and not day.is_future %}
+<form class="mt-2" method="post" action="{% url 'coaching:prof_attendance_from_slot' slot.pk %}">
+{% csrf_token %}
+<input name="date" type="hidden" value="{{ day.date|date:'Y-m-d' }}"/>
+<button class="inline-flex w-full items-center justify-center gap-1 rounded-full bg-surface-container-lowest px-2.5 py-1.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" type="submit"><span class="material-symbols-outlined text-[14px]">fact_check</span>Appel</button>
+</form>
+{% endif %}
 </article>
 {% endwith %}
