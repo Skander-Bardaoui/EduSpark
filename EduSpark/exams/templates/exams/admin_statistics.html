@@ -1,9 +1,10 @@
 {% extends "portal/base_admin.html" %}
 {% block title %}Statistiques &amp; réussite — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
-<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
 <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Statistiques &amp; réussite</h1>
@@ -19,6 +20,11 @@
 {% include "portal/_stat_card.html" with label="Étudiants admis" value=admitted_total icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Sur les étudiants inscrits" %}
 {% include "portal/_stat_card.html" with label="Moyenne générale" value=average_label suffix=" /20" icon="grade" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Toutes classes confondues" %}
 {% include "portal/_stat_card.html" with label="Classes évaluées" value=class_count icon="groups" hint=semester %}
+</div>
+<div class="grid gap-4 sm:grid-cols-3">
+{% include "portal/_stat_card.html" with label="Sessions QCM" value=qcm_count icon="quiz" hint="Questionnaires en ligne" %}
+{% include "portal/_stat_card.html" with label="Sessions projet" value=project_count icon="upload_file" hint="Dépôts ZIP" %}
+{% include "portal/_stat_card.html" with label="Sessions oral" value=oral_count icon="record_voice_over" hint="Tirages au sort" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="border-b border-outline-variant/40 px-5 py-4">

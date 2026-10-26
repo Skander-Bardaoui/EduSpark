@@ -89,6 +89,7 @@ SLOTS = (
     (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local", "cm", 0, "08:30", "10:00", "Amphi A", ""),
     (PARIS, "Licence 3 Informatique", "INF504", "m.traore@u-paris.fr", "cm", 1, "10:15", "11:45", "Salle 204", ""),
     (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local", "td", 2, "13:30", "15:00", "Salle 105", "TD A"),
+    (PARIS, "Licence 3 Informatique", "INF501", "prof.test@eduspark.local", "tp", 2, "15:15", "16:45", "Salle machine B204", "TP B"),
     (PARIS, "Licence 3 Informatique", "INF504", "m.traore@u-paris.fr", "td", 3, "08:30", "10:00", "Salle 204", "TD A"),
     (PARIS, "Licence 3 Informatique", "LAN301", "m.traore@u-paris.fr", "cm", 4, "14:00", "16:00", "Salle D12", ""),
     (PARIS, "Master 1 Génie Logiciel", "GEN401", "prof.test@eduspark.local", "cm", 0, "10:15", "11:45", "Amphi B", ""),
@@ -291,8 +292,9 @@ class Command(BaseCommand):
             )
             slot, created = ScheduleSlot.objects.get_or_create(
                 assignment=assignment, weekday=weekday, start_time=time.fromisoformat(start),
+                group=group, session_type=kind,
                 defaults={
-                    "end_time": time.fromisoformat(end), "session_type": kind, "room": room, "group": group,
+                    "end_time": time.fromisoformat(end), "room": room,
                 },
             )
             if created:

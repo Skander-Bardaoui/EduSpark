@@ -1,0 +1,12 @@
+<div class="flex flex-col gap-1.5">
+  <label class="text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant" for="{{ field.id_for_label }}">
+    {{ field.label }}{% if field.field.required %}<span class="text-error"> *</span>{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}
+  <span class="text-[11px] leading-4 text-on-surface-variant">{{ field.help_text }}</span>
+  {% endif %}
+  {% for error in field.errors %}
+  <span class="text-[11px] font-semibold text-error">{{ error }}</span>
+  {% endfor %}
+</div>

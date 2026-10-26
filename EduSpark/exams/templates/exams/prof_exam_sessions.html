@@ -1,23 +1,25 @@
 {% extends "portal/base_prof.html" %}
-{% block title %}Sessions d'examen — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Sessions d’examen — Hub Éducatif Multimodal{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
-<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
 <div class="min-w-0">
 <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Examens &amp; Notes</p>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Sessions d'examen</h1>
-<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves planifiées par l'administration : générez le QCM de chaque épreuve depuis le cours, relisez-le puis publiez-le pour vos étudiants.</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Sessions d’examen</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves planifiées par l’administration : préparez les QCM, gérez les dépôts de projets et les sujets d’oral de vos classes.</p>
 </div>
 <div class="flex flex-wrap gap-2">
-<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_corrections' %}"><span class="material-symbols-outlined text-[18px]">draw</span>Copies à corriger</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:exam_dashboard' %}"><span class="material-symbols-outlined text-[18px]">space_dashboard</span>Tableau de bord</a>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:prof_exam_history' %}"><span class="material-symbols-outlined text-[18px]">history</span>Historique</a>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Sessions à venir" value=session_count icon="event_available" hint="Dont {{ convocation_count }} convoquée(s)" %}
-{% include "portal/_stat_card.html" with label="Étudiants convoqués" value=student_count icon="group" icon_class="bg-surface-container text-secondary" hint="Sessions envoyées" %}
-{% include "portal/_stat_card.html" with label="QCM publiés" value=published_quiz_count icon="quiz" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint="Ouverts aux étudiants" %}
-{% include "portal/_stat_card.html" with label="Salles réservées" value=room_count icon="meeting_room" hint=conflict_hint %}
+{% include "portal/_stat_card.html" with label="Sessions" value=session_count icon="event_available" hint=semester %}
+{% include "portal/_stat_card.html" with label="QCM" value=qcm_count icon="quiz" hint="Questionnaires en ligne" %}
+{% include "portal/_stat_card.html" with label="Projets" value=project_count icon="upload_file" icon_class="bg-secondary-fixed text-on-secondary-fixed" hint=project_pending_count|stringformat:"s"|add:" dépôt(s) à corriger" %}
+{% include "portal/_stat_card.html" with label="Oraux" value=oral_count icon="record_voice_over" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=oral_pending_count|stringformat:"s"|add:" tirage(s) à noter" %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
@@ -27,29 +29,51 @@
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Toutes</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="ecrit" type="button">Écrits</button>
-<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="oral" type="button">Oraux</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="qcm" type="button">QCM</button>
 <button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="projet" type="button">Projets</button>
+<button aria-pressed="false" class="filter-chip rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:border-primary/40 hover:text-primary" data-filter-value="oral" type="button">Oraux</button>
 </div>
 </div>
 <div class="overflow-x-auto">
-<table class="w-full min-w-[1120px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Horaire</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 font-bold">QCM</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<table class="w-full min-w-[980px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Matière</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 font-bold">Type</th><th class="px-5 py-3 font-bold">Suivi</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for session in sessions %}
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.exam_type }}">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{% if session.code %}{{ session.code }} · {% endif %}{{ session.school_class.name }} · {{ session.school_class.level }}</p></td>
-<td class="px-5 py-3">{% if session.course_subject %}<p class="font-semibold text-on-surface">{{ session.course_subject.code }} · {{ session.course_subject.name }}</p>{% else %}<p class="text-on-surface-variant">Matière non rattachée</p>{% endif %}<p class="text-xs text-on-surface-variant">{{ session.get_exam_type_display }} · {{ session.semester }}</p></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.date_label }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.time_label }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.room }}</td>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{% if session.is_project %}projet{% elif session.is_oral %}oral{% else %}qcm{% endif %}">
+<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{% if session.code %}{{ session.code }} · {% endif %}{{ session.school_class.name }}{% if session.school_class.level %} · {{ session.school_class.level }}{% endif %}</p></td>
+<td class="px-5 py-3">{% if session.course_subject %}<p class="font-semibold text-on-surface">{{ session.course_subject.code }} · {{ session.course_subject.name }}</p>{% else %}<p class="text-on-surface-variant">Matière non rattachée</p>{% endif %}<p class="text-xs text-on-surface-variant">{{ session.semester }}</p></td>
+<td class="px-5 py-3 text-on-surface-variant"><p>{{ session.date_label }}</p><p class="text-xs">{{ session.time_label }}</p></td>
+<td class="px-5 py-3">{% include "portal/_badge.html" with label=session.get_exam_type_display tone_class="bg-surface-container text-on-surface-variant" %}</td>
 <td class="px-5 py-3">
+{% if not session.teaching_ok %}
+<div class="flex flex-col items-start gap-1.5">{% include "portal/_badge.html" with label="Matière non enseignée" tone_class="bg-surface-container text-on-surface-variant" %}<p class="text-[10px] text-on-surface-variant">Vous n’enseignez pas cette matière dans cette classe.</p></div>
+{% elif session.is_project %}
+<div class="flex flex-col items-start gap-1.5">
+{% if session.project_submission_count %}
+{% include "portal/_badge.html" with label=session.project_submission_count|stringformat:"s"|add:" dépôt(s)" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+<p class="text-[10px] text-on-surface-variant">{{ session.project_graded_count }} noté(s) · {{ session.project_pending_count }} à corriger</p>
+{% else %}
+{% include "portal/_badge.html" with label="Aucun dépôt" tone_class="bg-surface-container text-on-surface-variant" %}
+{% endif %}
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" href="{% url 'exams:prof_project_exam' session.pk %}">Gérer le projet</a>
+</div>
+{% elif session.is_oral %}
+<div class="flex flex-col items-start gap-1.5">
+{% if session.oral_attempt_count %}
+{% include "portal/_badge.html" with label=session.oral_attempt_count|stringformat:"s"|add:" tirage(s)" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+<p class="text-[10px] text-on-surface-variant">{{ session.oral_graded_count }} noté(s) · {{ session.oral_pending_count }} à noter</p>
+{% else %}
+{% include "portal/_badge.html" with label="Aucun tirage" tone_class="bg-surface-container text-on-surface-variant" %}
+{% endif %}
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" href="{% url 'exams:prof_oral_exam' session.pk %}">Gérer l’oral</a>
+</div>
+{% else %}
 {% if session.quiz %}
 <div class="flex flex-col items-start gap-1.5">
-{% if session.quiz.is_published %}
-{% include "portal/_badge.html" with label="Publié" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
-{% elif session.quiz.access_status == "after" or session.quiz.access_status == "closed" %}
+{% if session.quiz.access_status == "after" or session.quiz.access_status == "closed" %}
 {% include "portal/_badge.html" with label="Terminé" tone_class="bg-surface-container text-on-surface-variant" %}
+{% elif session.quiz.is_published %}
+{% include "portal/_badge.html" with label="Publié" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
 {% else %}
 {% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}
 {% endif %}
@@ -61,16 +85,33 @@
 </div>
 </div>
 {% else %}
-<a aria-label="Générer le QCM de {{ session.title }}" class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:prof_quiz_generate' session.pk %}">
+<div class="flex flex-col items-start gap-1.5">
+{% if not session.course_subject %}
+{% include "portal/_badge.html" with label="Matière non rattachée" tone_class="bg-error-container text-on-error-container" %}
+<p class="text-[10px] text-on-surface-variant">L’administration doit compléter la session.</p>
+{% elif not session.has_course %}
+{% include "portal/_badge.html" with label="Aucun cours rattaché" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}
+<p class="text-[10px] text-on-surface-variant">Rattachez un cours de cette matière à la classe.</p>
+<a class="rounded-full px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed" href="{% url 'courses:prof_course' %}">Gérer mes cours</a>
+{% else %}
+<div class="flex flex-wrap items-center gap-1.5">
+<a aria-label="Générer le QCM de {{ session.title }} avec l'IA" class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:prof_quiz_generate' session.pk %}">
 <span class="material-symbols-outlined text-[15px]">auto_awesome</span>
-<span>Générer le QCM</span>
+<span>Générer avec l'IA</span>
 </a>
+<a aria-label="Créer manuellement le QCM de {{ session.title }}" class="inline-flex items-center gap-1 rounded-full border border-outline-variant/70 px-3 py-1.5 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:prof_quiz_create' session.pk %}">
+<span class="material-symbols-outlined text-[15px]">edit_note</span>
+<span>Créer manuellement</span>
+</a>
+</div>
+{% endif %}
+</div>
+{% endif %}
 {% endif %}
 </td>
-<td class="px-5 py-3 text-right">{% if session.is_convoked %}{% include "portal/_badge.html" with label="Convocation envoyée" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Planifiée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
 </tr>
 {% empty %}
-<tr><td class="px-5 py-10 text-center text-on-surface-variant" colspan="7">Aucune session pour vos enseignements. Les sessions sont planifiées par l'administration de votre établissement.</td></tr>
+<tr><td class="px-5 py-10 text-center text-on-surface-variant" colspan="5">Aucune session pour vos enseignements. Les sessions sont planifiées par l’administration de votre établissement.</td></tr>
 {% endfor %}
 </tbody>
 </table>

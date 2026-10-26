@@ -1,9 +1,10 @@
 {% extends "portal/base_prof.html" %}
 {% block title %}Résultats du QCM — {{ session.title }}{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
-  <header class="flex flex-col gap-3">
+  <header class="exam-page-header flex flex-col gap-3">
     <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
       <a class="hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Sessions d'examen</a>
       <span class="material-symbols-outlined text-[16px]">chevron_right</span>
@@ -17,7 +18,7 @@
     </div>
   </header>
 
-  <div class="grid gap-3 sm:grid-cols-4">
+  <div class="grid gap-3 sm:grid-cols-5">
     <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
       <p class="text-xs uppercase tracking-wider text-on-surface-variant">Tentatives</p>
       <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ attempts|length }}</p>
@@ -25,6 +26,10 @@
     <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
       <p class="text-xs uppercase tracking-wider text-on-surface-variant">Soumises</p>
       <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ submitted_count }}</p>
+    </div>
+    <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
+      <p class="text-xs uppercase tracking-wider text-on-surface-variant">Absents</p>
+      <p class="mt-1 font-data-metric text-2xl font-bold {% if absent_count %}text-error{% else %}text-on-surface{% endif %}">{{ absent_count }}</p>
     </div>
     <div class="rounded border border-outline-variant/40 bg-surface-container-lowest p-4">
       <p class="text-xs uppercase tracking-wider text-on-surface-variant">Moyenne /20</p>
@@ -35,6 +40,41 @@
       <p class="mt-1 font-data-metric text-2xl font-bold text-on-surface">{{ passed_count }}</p>
     </div>
   </div>
+
+  {% if analysis %}
+  <section class="rounded border border-secondary/30 bg-secondary-fixed/30 p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <span class="material-symbols-outlined text-[22px] text-secondary">insights</span>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Analyse pédagogique</p>
+          <p class="mt-1 text-sm text-on-surface">{{ analysis.summary }}</p>
+          <p class="mt-1 text-[11px] text-on-surface-variant">Difficulté : {{ analysis.difficulty }} · {% if analysis.source == "ia" %}Généré par IA{% else %}Analyse locale{% endif %}</p>
+        </div>
+      </div>
+      <form method="post" action="{% url 'exams:prof_quiz_analysis' quiz.pk %}">
+        {% csrf_token %}
+        <button class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:bg-surface-container" type="submit">
+          <span class="material-symbols-outlined text-[16px]">refresh</span>Actualiser
+        </button>
+      </form>
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Points de vigilance</p>
+        <ul class="mt-1 list-disc space-y-1 pl-4 text-sm text-on-surface">
+          {% for item in analysis.issues %}<li>{{ item }}</li>{% empty %}<li>Aucun point critique.</li>{% endfor %}
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Recommandations</p>
+        <ul class="mt-1 list-disc space-y-1 pl-4 text-sm text-on-surface">
+          {% for item in analysis.recommendations %}<li>{{ item }}</li>{% empty %}<li>Poursuivre le suivi habituel.</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+  {% endif %}
 
   <section class="overflow-hidden rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
     <div class="overflow-x-auto">
@@ -55,7 +95,9 @@
             <td class="px-5 py-3 text-on-surface-variant">{{ attempt.student.student_number|default:"—" }}</td>
             <td class="px-5 py-3 text-on-surface-variant">{{ attempt.started_at|date:"d/m/Y H:i" }}</td>
             <td class="px-5 py-3">
-              {% if attempt.is_submitted %}
+              {% if attempt.is_absent %}
+              <span class="inline-flex rounded-full bg-error-container px-2.5 py-0.5 text-[11px] font-bold text-error">Absent</span>
+              {% elif attempt.is_submitted %}
               <span class="inline-flex rounded-full bg-primary-fixed px-2.5 py-0.5 text-[11px] font-bold text-primary">Soumise</span>
               {% elif attempt.is_expired %}
               <span class="inline-flex rounded-full bg-error-container px-2.5 py-0.5 text-[11px] font-bold text-error">Expirée</span>

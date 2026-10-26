@@ -1,0 +1,85 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Examen oral — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-background px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+<header class="exam-page-header flex flex-col gap-3">
+<a class="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-primary hover:underline" href="{% url 'exams:student_exams' %}">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>Retour à mes examens
+</a>
+<div class="flex flex-wrap items-center gap-2">
+<span class="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-primary">{{ session.get_exam_type_display }}</span>
+<span class="text-xs text-on-surface-variant">{{ session.school_class.name }} · {{ session.date_label }}</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ session.title }}</h1>
+<p class="text-sm text-on-surface-variant">{% if session.course_subject %}{{ session.course_subject.code }} · {{ session.course_subject.name }}{% endif %}</p>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-3">
+{% include "portal/_stat_card.html" with label="Ouverture" value=session.opens_at|date:"d/m H:i" icon="lock_clock" hint=session.opens_at|date:"d/m/Y" %}
+{% include "portal/_stat_card.html" with label="Fermeture" value=session.closes_at|date:"d/m H:i" icon="event_busy" hint=session.closes_at|date:"d/m/Y" %}
+{% include "portal/_stat_card.html" with label="Sujets" value=topics_count icon="casino" hint="Sujets actifs" %}
+</div>
+
+{% if session.instructions %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Consignes</h2>
+<p class="mt-2 text-sm text-on-surface-variant">{{ session.instructions|linebreaksbr }}</p>
+</section>
+{% endif %}
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+{% if attempt %}
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Votre sujet</h2>
+<p class="text-xs text-on-surface-variant">Le sujet a été tiré au sort. Préparez votre présentation pendant le temps indiqué.</p>
+</div>
+{% include "portal/_badge.html" with label=attempt.get_status_display tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+</div>
+<div class="mt-4 rounded bg-surface-container-low p-4">
+<p class="text-lg font-bold text-on-surface">{{ attempt.topic.title|default:"Sujet non disponible" }}</p>
+{% if attempt.topic.instructions %}<p class="mt-1 text-sm text-on-surface-variant">{{ attempt.topic.instructions|linebreaksbr }}</p>{% endif %}
+<p class="mt-3 text-sm text-on-surface-variant"><span class="font-semibold text-on-surface">Tirage :</span> {{ attempt.drawn_at|date:"d/m/Y à H:i" }}</p>
+{% if attempt.preparation_deadline %}<p class="text-sm text-on-surface-variant"><span class="font-semibold text-on-surface">Fin de préparation :</span> {{ attempt.preparation_deadline|date:"d/m/Y à H:i" }}</p>{% endif %}
+{% if attempt.is_graded %}<p class="mt-3 text-xl font-bold text-primary">Note : {{ attempt.score_label }}/20</p>{% endif %}
+{% if attempt.feedback %}<p class="mt-2 text-sm text-on-surface-variant">{{ attempt.feedback|linebreaksbr }}</p>{% endif %}
+</div>
+{% else %}
+<div class="flex flex-wrap items-start justify-between gap-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Tirage au sort</h2>
+<p class="text-xs text-on-surface-variant">Un seul tirage par étudiant. Le sujet ne peut plus être changé après validation.</p>
+</div>
+{% if can_draw %}{% include "portal/_badge.html" with label="Tirage ouvert" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+</div>
+{% if can_draw %}
+<form class="mt-4" method="post">
+{% csrf_token %}
+<input name="action" type="hidden" value="draw">
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit" onclick="return confirm('Tirer un sujet au sort ? Ce choix sera définitif.');">
+<span class="material-symbols-outlined text-[18px]">casino</span>
+Tirer mon sujet
+</button>
+</form>
+{% else %}
+<p class="mt-4 rounded bg-surface-container-low px-4 py-3 text-sm text-on-surface-variant">
+{% if session.access_status == "before" %}Le tirage ouvrira le {{ session.opens_at|date:"d/m/Y à H:i" }}.
+{% elif topics_count == 0 %}Aucun sujet n’est encore disponible. Contactez votre enseignant.
+{% else %}La fenêtre de tirage est fermée.{% endif %}
+</p>
+{% endif %}
+{% endif %}
+</section>
+
+{% if grade %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Note officielle</h2>
+<p class="mt-2 text-2xl font-bold text-primary">{{ grade.score_label }}/20</p>
+{% if grade.comment %}<p class="mt-1 text-sm text-on-surface-variant">{{ grade.comment|linebreaksbr }}</p>{% endif %}
+</section>
+{% endif %}
+</div>
+</main>
+{% endblock %}

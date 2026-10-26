@@ -1,9 +1,10 @@
 {% extends "portal/base_prof.html" %}
 {% block title %}Relire le QCM — {{ session.title }}{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
-  <header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <header class="exam-page-header flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
     <div>
       <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
         <a class="hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Sessions d'examen</a>

@@ -1,9 +1,10 @@
 {% extends "portal/base_prof.html" %}
 {% block title %}Générer le QCM — {{ session.title }}{% endblock %}
 {% block content %}
-<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+{% include "exams/_module_style.html" %}
+<main class="exam-page w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
 <div class="mx-auto flex w-full max-w-[1100px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
-  <header class="flex flex-col gap-3">
+  <header class="exam-page-header flex flex-col gap-3">
     <nav class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-on-surface-variant">
       <a class="hover:text-primary" href="{% url 'exams:prof_exam_sessions' %}">Sessions d'examen</a>
       <span class="material-symbols-outlined text-[16px]">chevron_right</span>
@@ -15,6 +16,9 @@
       <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
         {{ session.title }} · {{ session.school_class.name }} · {{ session.date_label }} ({{ session.time_label }})
       </p>
+      {% if session.course_subject %}
+      <p class="mt-1 text-xs text-on-surface-variant">Matière : {{ session.course_subject.code }} · {{ session.course_subject.name }}{% if session.school_class.study_program %} · {{ session.school_class.study_program.name }}{% endif %}</p>
+      {% endif %}
     </div>
   </header>
 
@@ -26,9 +30,18 @@
   {% endif %}
 
   {% if course_count == 0 %}
-  <div class="flex items-start gap-3 rounded border border-outline-variant/50 bg-surface-container-low px-4 py-3">
-    <span class="material-symbols-outlined text-[20px] text-primary">info</span>
-    <p class="text-sm text-on-surface-variant">Aucun cours ne correspond à cette matière. Créez d'abord un cours (avec chapitres ou PDF) depuis votre espace cours.</p>
+  <div class="flex flex-col gap-3 rounded border border-outline-variant/50 bg-surface-container-low px-4 py-3">
+    <div class="flex items-start gap-3">
+      <span class="material-symbols-outlined text-[20px] text-primary">info</span>
+      <p class="text-sm text-on-surface-variant">
+        Aucun cours disponible pour la matière « {{ session.course_subject.name }} »
+        dans la classe « {{ session.school_class.name }} ». Créez un cours pour cette
+        matière puis publiez-le pour cette classe depuis votre espace cours.
+      </p>
+    </div>
+    <a class="inline-flex w-fit items-center gap-1.5 rounded-full border border-outline-variant/70 px-3.5 py-2 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'courses:prof_course' %}">
+      <span class="material-symbols-outlined text-[18px]">menu_book</span>Gérer mes cours
+    </a>
   </div>
   {% endif %}
 
@@ -41,6 +54,21 @@
     <a class="inline-flex items-center gap-1.5 rounded-full bg-secondary-container px-3.5 py-2 text-sm font-semibold text-on-secondary-container hover:bg-secondary-fixed" href="{% url 'exams:prof_quiz_edit' quiz.pk %}">
       <span class="material-symbols-outlined text-[18px]">edit_note</span>Relire le QCM
     </a>
+  </div>
+  {% else %}
+  <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/50 bg-surface-container-low px-4 py-3">
+    <p class="text-sm text-on-surface-variant">
+      Vous préférez rédiger les questions vous-même ? Créez un QCM vierge depuis un cours publié pour cette classe, puis ajoutez vos questions et choix de réponse.
+    </p>
+    {% if course_count %}
+    <a class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/70 px-3.5 py-2 text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:prof_quiz_create' session.pk %}">
+      <span class="material-symbols-outlined text-[18px]">edit_note</span>Créer manuellement
+    </a>
+    {% else %}
+    <span class="inline-flex items-center gap-1.5 rounded-full border border-outline-variant/40 px-3.5 py-2 text-sm font-semibold text-on-surface-variant/60" title="Publiez d'abord un cours pour cette classe">
+      <span class="material-symbols-outlined text-[18px]">edit_note</span>Créer manuellement
+    </span>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -77,15 +105,9 @@
         <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.pass_score.id_for_label }}">Note de validation /20</label>
         {{ form.pass_score }}
       </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.opens_at.id_for_label }}">Ouverture (optionnel)</label>
-        {{ form.opens_at }}
-        {% for error in form.opens_at.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.closes_at.id_for_label }}">Fermeture (optionnel)</label>
-        {{ form.closes_at }}
-        {% for error in form.closes_at.errors %}<p class="mt-1 text-xs text-error">{{ error }}</p>{% endfor %}
+      <div class="rounded-md bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant sm:col-span-2">
+        <span class="font-semibold text-on-surface">Fenêtre d’accès :</span>
+        du {{ session.opens_at|date:"d/m/Y H:i" }} au {{ session.closes_at|date:"d/m/Y H:i" }}. Elle est définie par la session planifiée.
       </div>
       <div class="sm:col-span-2">
         <label class="mb-1 block text-sm font-semibold text-on-surface" for="{{ form.instructions.id_for_label }}">Consignes aux étudiants</label>
