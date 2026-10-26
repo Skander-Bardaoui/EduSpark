@@ -1,0 +1,18 @@
+{# Grille hebdomadaire. Contexte : grid, mode (admin | prof | student), can_edit. #}
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 {% if grid.show_saturday %}xl:grid-cols-6{% else %}xl:grid-cols-5{% endif %}">
+{% for day in grid.days %}
+<div class="min-h-[140px] rounded bg-surface-container/50 p-2 {% if day.is_today %}ring-2 ring-primary/40{% endif %}">
+<p class="flex flex-wrap items-center justify-center gap-1 px-1 pb-2 text-center text-xs font-bold text-on-surface">
+{{ day.label }} <span class="font-normal text-on-surface-variant">{{ day.date.day }}</span>
+{% if day.is_today %}<span class="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase text-on-primary">Aujourd'hui</span>{% endif %}
+</p>
+<div class="space-y-2">
+{% for slot in day.slots %}
+{% include "courses/_slot_card.html" %}
+{% empty %}
+<p class="rounded border border-dashed border-outline-variant/50 px-2 py-4 text-center text-[11px] text-outline">Libre</p>
+{% endfor %}
+</div>
+</div>
+{% endfor %}
+</div>

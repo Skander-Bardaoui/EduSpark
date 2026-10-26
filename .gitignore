@@ -28,6 +28,8 @@ db.sqlite3-journal
 backup_sqlite.json
 /staticfiles/
 /media/
+# Supports de cours téléversés (stockage protégé, voir PROTECTED_MEDIA_ROOT).
+protected_media/
 *.mo
 *.po~
 local_settings.py

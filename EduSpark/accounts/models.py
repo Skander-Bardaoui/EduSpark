@@ -281,6 +281,11 @@ class SchoolClass(models.Model):
     name = models.CharField("Nom", max_length=120)
     level = models.CharField("Niveau", max_length=60, blank=True, help_text="ex. 3e année, Master 1")
     program = models.CharField("Filière", max_length=120, blank=True)
+    study_program = models.ForeignKey(
+        "courses.Program", on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="school_classes", verbose_name="Filière du catalogue",
+        help_text="Filière créée dans « Départements & Filières » ; le libellé ci-dessus la suit.",
+    )
     academic_year = models.CharField(
         "Année universitaire", max_length=9, blank=True, help_text="ex. 2025-2026",
     )
@@ -302,6 +307,19 @@ class SchoolClass(models.Model):
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.academic_year) if self.academic_year else self.name
+
+    def clean(self):
+        if (
+            self.study_program_id and self.university_id
+            and self.study_program.university_id != self.university_id
+        ):
+            raise ValidationError({"study_program": "La filière doit appartenir à la même université."})
+
+    def save(self, *args, **kwargs):
+        if self.study_program_id:
+            # Le libellé texte historique suit la filière du catalogue.
+            self.program = self.study_program.name
+        super().save(*args, **kwargs)
 
 
 class StudentGroup(models.Model):
