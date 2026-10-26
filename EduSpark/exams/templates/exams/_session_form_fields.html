@@ -1,0 +1,14 @@
+{% for error in form.non_field_errors %}
+<p class="rounded-md bg-error-container px-3 py-2 text-[12px] font-semibold text-on-error-container">{{ error }}</p>
+{% endfor %}
+<div class="grid gap-3 sm:grid-cols-2">
+  {% for field in form %}
+  <label class="flex flex-col gap-1.5 {% if field.name == 'title' or field.name == 'room' %}sm:col-span-2{% endif %}">
+    <span class="text-xs font-bold uppercase tracking-wide text-on-surface-variant">{{ field.label }}{% if field.field.required %} *{% endif %}</span>
+    {{ field }}
+    {% for error in field.errors %}
+    <span class="text-[11px] font-semibold text-error">{{ error }}</span>
+    {% endfor %}
+  </label>
+  {% endfor %}
+</div>

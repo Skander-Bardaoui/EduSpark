@@ -11,3 +11,7 @@ requests==2.34.2
 # La variante "binary" embarque libpq : rien à compiler côté Python.
 # En production, préférer psycopg[c] (compilé localement, plus rapide).
 psycopg[binary]==3.3.6
+# Génération des PDF officiels (convocations, relevés de notes).
+reportlab==5.1.0
+# Traitement des pages de copies numérisées (rotation, recadrage).
+Pillow==13.0.0

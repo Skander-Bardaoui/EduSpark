@@ -15,25 +15,29 @@
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Relevés à signer" value="3" icon="workspace_premium" hint="Délibération le 6 novembre" %}
-{% include "portal/_stat_card.html" with label="Étudiants concernés" value="80" icon="group" icon_class="bg-surface-container text-secondary" hint="3 classes · 11 UE" %}
-{% include "portal/_stat_card.html" with label="Jurys actifs" value="3" icon="gavel" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="1 jury incomplet" %}
-{% include "portal/_stat_card.html" with label="Moyenne générale" value="13,7" suffix=" /20" icon="grade" hint="+0,4 vs semestre précédent" %}
+{% include "portal/_stat_card.html" with label="Relevés à signer" value=pending_count icon="workspace_premium" hint="PV en attente de votre signature" %}
+{% include "portal/_stat_card.html" with label="Étudiants concernés" value=student_total icon="group" icon_class="bg-surface-container text-secondary" hint="Effectifs des relevés" %}
+{% include "portal/_stat_card.html" with label="Jurys actifs" value=jury_total icon="gavel" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Membres invités ou confirmés" %}
+{% if records_average %}
+{% include "portal/_stat_card.html" with label="Moyenne générale" value=records_average|floatformat:1 suffix=" /20" icon="grade" hint="Moyenne des relevés de vos classes" %}
+{% else %}
+{% include "portal/_stat_card.html" with label="Moyenne générale" value="—" icon="grade" hint="Aucune valeur saisie" %}
+{% endif %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
 <div class="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Relevés de notes par UE</h2>
-<span class="text-xs text-on-surface-variant">Semestre 1 · 2026 – 2027</span>
+<span class="text-xs text-on-surface-variant">{{ semester }}</span>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[940px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">UE</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Étudiants</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Jury</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">UE</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Session</th><th class="px-5 py-3 font-bold">Notes</th><th class="px-5 py-3 font-bold">Moyenne</th><th class="px-5 py-3 font-bold">Jury</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF501 · Algorithmique avancée</p><p class="text-xs text-on-surface-variant">Coefficient 6 · 8 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">L3 Info</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">38</td><td class="px-5 py-3"><span class="font-bold text-on-surface">12,4</span></td><td class="px-5 py-3 text-on-surface-variant">{{ portal_user_last_name }} · Lambert</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF502 · Systèmes distribués</p><p class="text-xs text-on-surface-variant">Coefficient 5 · 6 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3"><span class="font-bold text-on-surface">13,1</span></td><td class="px-5 py-3 text-on-surface-variant">{{ portal_user_last_name }} · Traoré</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF503 · Réseaux de neurones</p><p class="text-xs text-on-surface-variant">Coefficient 4 · 5 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M1 IA</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">24</td><td class="px-5 py-3"><span class="font-bold text-on-surface">14,2</span></td><td class="px-5 py-3 text-on-surface-variant">{{ portal_user_last_name }} · Diallo</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF504 · Bases de données</p><p class="text-xs text-on-surface-variant">Coefficient 3 · 4 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3"><span class="font-bold text-on-surface">14,6</span></td><td class="px-5 py-3 text-on-surface-variant">Traoré · {{ portal_user_last_name }}</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
-<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">INF505 · Éthique de l'IA</p><p class="text-xs text-on-surface-variant">Coefficient 2 · 3 ECTS</p></td><td class="px-5 py-3 text-on-surface-variant">M2 Data</td><td class="px-5 py-3 text-on-surface-variant">S1 · 2026</td><td class="px-5 py-3 text-on-surface-variant">18</td><td class="px-5 py-3"><span class="font-bold text-on-surface">15,3</span></td><td class="px-5 py-3 text-on-surface-variant">Nguyen · {{ portal_user_last_name }}</td><td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+{% for row in rows %}
+<tr class="hover:bg-surface-container/40"><td class="px-5 py-3"><p class="font-semibold text-on-surface">{% if row.session.code %}{{ row.session.code }} · {% endif %}{{ row.session.title }}</p><p class="text-xs text-on-surface-variant">Coefficient {{ row.session.coefficient|floatformat:"-2" }} · {{ row.session.get_exam_type_display }}</p></td><td class="px-5 py-3 text-on-surface-variant">{{ row.session.school_class.name }}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.session.semester }}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.grade_count }}</td><td class="px-5 py-3">{% if row.average %}<span class="font-bold text-on-surface">{{ row.average|floatformat:1 }}</span>{% else %}<span class="text-on-surface-variant">—</span>{% endif %}</td><td class="px-5 py-3 text-on-surface-variant">{% for name in row.jury|slice:":2" %}{% if not forloop.first %} · {% endif %}{{ name }}{% empty %}Jury à compléter{% endfor %}</td><td class="px-5 py-3 text-right">{% if row.record.pv_signed %}{% include "portal/_badge.html" with label="Signé" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="À signer" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}</td></tr>
+{% empty %}
+<tr><td class="px-5 py-10 text-center text-on-surface-variant" colspan="7">Aucune épreuve planifiée pour vos enseignements.</td></tr>
+{% endfor %}
 </tbody>
 </table>
 </div>
@@ -45,28 +49,42 @@
 <a class="text-xs font-bold text-primary hover:underline" href="{% url 'exams:prof_exam_sessions' %}">Voir les sessions</a>
 </div>
 <ul class="divide-y divide-outline-variant/30">
-<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury L3 Informatique · S1</p><p class="text-xs text-on-surface-variant">6 novembre 2026 · 14h00 · Salle du conseil</p></div>{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}</li>
-<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury M1 Intelligence Artificielle · S1</p><p class="text-xs text-on-surface-variant">7 novembre 2026 · 09h00 · Salle du conseil</p></div>{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}</li>
-<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">Jury M2 Data Science · mémoires</p><p class="text-xs text-on-surface-variant">12 novembre 2026 · 09h00 · Amphi Turing</p></div>{% include "portal/_badge.html" with label="À compléter" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</li>
+{% for item in deliberations %}
+<li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div><p class="text-sm font-semibold text-on-surface">{{ item.label }}</p><p class="text-xs text-on-surface-variant">{{ item.detail }}</p></div>{% if item.confirmed %}{% include "portal/_badge.html" with label="Confirmé" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="À compléter" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}{% endif %}</li>
+{% empty %}
+<li class="px-5 py-8 text-center text-sm text-on-surface-variant">Tous les PV sont signés. Aucune délibération en attente.</li>
+{% endfor %}
 </ul>
 <div class="border-t border-outline-variant/40 px-5 py-4 text-right">
-<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-toast="Les 3 relevés en attente ont été signés électroniquement." type="button">Signer les relevés en attente</button>
+{% if pending_records %}
+<form method="post" action="{% url 'exams:prof_grade_sheets_sign' %}">
+{% csrf_token %}
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Signer les relevés en attente</button>
+</form>
+{% else %}
+<button class="rounded-full bg-surface-container px-5 py-2.5 text-xs font-bold text-on-surface-variant" type="button" disabled>Tous les relevés sont signés</button>
+{% endif %}
 </div>
 </section>
 <aside class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+{% if jury_context %}
 <div class="flex items-center justify-between gap-3">
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Composition du jury</h2>
-<span class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">M1 IA</span>
+<span class="rounded-full bg-primary-fixed px-2.5 py-1 text-[11px] font-bold text-primary">{{ jury_context.school_class.name }}</span>
 </div>
 <ul class="mt-4 space-y-3">
-<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">{{ portal_user_initials }}</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">{{ portal_user_name }}</p><p class="text-xs text-on-surface-variant">Présidence du jury</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
-<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-xs font-bold text-on-secondary">AD</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Amadou Diallo</p><p class="text-xs text-on-surface-variant">Examinateur · TP</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
-<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-tertiary-fixed text-xs font-bold text-on-tertiary-fixed">MT</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Mariam Traoré</p><p class="text-xs text-on-surface-variant">Examinatrice · Projet</p></div><span class="material-symbols-outlined text-[18px] text-primary">verified</span></li>
-<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-xs font-bold text-on-surface-variant">+</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Membre à désigner</p><p class="text-xs text-on-surface-variant">Soutenance de mémoire M2</p></div><button class="text-xs font-bold text-primary hover:underline" data-toast="Invitation envoyée aux membres disponibles." type="button">Inviter</button></li>
+{% for member in jury_context.members %}
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">{{ member.initials }}</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">{{ member.name }}</p><p class="text-xs text-on-surface-variant">{{ member.role_label }}{% if member.status == "invite" %} · Invité{% endif %}</p></div>{% if member.status == "confirme" %}<span class="material-symbols-outlined text-[18px] text-primary">verified</span>{% else %}<span class="material-symbols-outlined text-[18px] text-on-surface-variant">schedule</span>{% endif %}</li>
+{% endfor %}
+<li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-full bg-surface-container-high text-xs font-bold text-on-surface-variant">+</span><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold text-on-surface">Membre à désigner</p><p class="text-xs text-on-surface-variant">Enseignant de l'établissement</p></div><form method="post" action="{% url 'exams:prof_jury_invite' jury_context.record.pk %}">{% csrf_token %}<button class="text-xs font-bold text-primary hover:underline" type="submit">Inviter</button></form></li>
 </ul>
 <div class="mt-4 border-t border-outline-variant/40 pt-3">
 <p class="text-xs leading-relaxed text-on-surface-variant">Les délibérations suivent le barème officiel et l'échelle ECTS. Toute modification est journalisée.</p>
 </div>
+{% else %}
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Composition du jury</h2>
+<p class="mt-3 text-sm text-on-surface-variant">Aucune classe rattachée à vos enseignements.</p>
+{% endif %}
 </aside>
 </div>
 </div>

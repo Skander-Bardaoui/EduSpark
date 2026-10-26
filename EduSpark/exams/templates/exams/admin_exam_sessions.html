@@ -10,15 +10,15 @@
 <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Calendrier des épreuves de chaque classe de {{ portal_university.name }} pour le semestre 1.</p>
 </div>
 <div class="flex flex-wrap gap-2">
-<button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" data-toast="Calendrier des examens exporté." type="button"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</button>
-<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-toast="Formulaire de planification d'examen ouvert." type="button"><span class="material-symbols-outlined text-[18px]">add</span>Planifier une session</button>
+<a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exams:admin_exam_sessions_export' %}"><span class="material-symbols-outlined text-[18px]">download</span>Exporter</a>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" data-modal-open="#session-create-modal" type="button"><span class="material-symbols-outlined text-[18px]">add</span>Planifier une session</button>
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 {% include "portal/_stat_card.html" with label="Sessions programmées" value=session_count icon="event_available" hint=semester %}
 {% include "portal/_stat_card.html" with label="Convocations envoyées" value=convocation_count icon="forward_to_inbox" icon_class="bg-secondary-fixed text-on-secondary" hint="Sur les sessions à venir" %}
-{% include "portal/_stat_card.html" with label="Salles mobilisées" value=room_count icon="meeting_room" icon_class="bg-surface-container text-secondary" hint="Aucun conflit de salle" %}
-{% include "portal/_stat_card.html" with label="Conflits de salle" value="0" icon="check_circle" hint="Planning validé" %}
+{% include "portal/_stat_card.html" with label="Sujets publiés" value=published_subject_count icon="description" icon_class="bg-surface-container text-secondary" hint="Déposés par les enseignants" %}
+{% include "portal/_stat_card.html" with label="Conflits de salle" value=conflict_count icon=conflict_icon icon_class=conflict_icon_class hint=conflict_hint %}
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm" data-filter-scope>
 <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
@@ -33,17 +33,36 @@
 </div>
 </div>
 <div class="overflow-x-auto">
-<table class="w-full min-w-[960px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Date &amp; horaire</th><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Épreuve</th><th class="px-5 py-3 font-bold">Salle</th><th class="px-5 py-3 text-right font-bold">Statut</th></tr></thead>
+<table class="w-full min-w-[1024px] text-left">
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-4 py-3 font-bold">Date &amp; horaire</th><th class="px-4 py-3 font-bold">Classe</th><th class="px-4 py-3 font-bold">Épreuve</th><th class="px-4 py-3 font-bold">Salle</th><th class="px-4 py-3 font-bold">Statut</th><th class="px-4 py-3 text-right font-bold">Actions</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for session in sessions %}
-<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.tag }}">
-<td class="px-5 py-3"><p class="font-semibold text-on-surface">{{ session.date_label }}</p><p class="text-xs text-on-surface-variant">{{ session.start }} – {{ session.end }}</p></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.school_class.name }}</td>
-<td class="px-5 py-3 font-semibold text-on-surface">{{ session.course }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ session.room }}</td>
-<td class="px-5 py-3 text-right">{% if session.tag == 'convocation' %}{% include "portal/_badge.html" with label=session.status tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label=session.status tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<tr class="hover:bg-surface-container/40" data-filter-item data-tags="{{ session.status }}">
+<td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ session.date_label }}</p><p class="text-xs text-on-surface-variant">{{ session.time_label }}</p></td>
+<td class="px-4 py-3"><p class="text-on-surface-variant">{{ session.school_class.name }}</p><p class="text-xs text-on-surface-variant">{{ session.school_class.level }}</p></td>
+<td class="px-4 py-3"><p class="font-semibold text-on-surface">{{ session.title }}</p><p class="text-xs text-on-surface-variant">{{ session.get_exam_type_display }}</p>{% if session.subject %}{% if session.subject.is_published %}<p class="mt-1"><span class="inline-flex items-center gap-1 rounded-full bg-secondary-fixed px-2 py-0.5 text-[10px] font-bold uppercase text-on-secondary-fixed"><span class="material-symbols-outlined text-[12px]">description</span>Sujet publié</span></p>{% else %}<p class="mt-1"><span class="inline-flex items-center gap-1 rounded-full bg-surface-container px-2 py-0.5 text-[10px] font-bold uppercase text-on-surface-variant"><span class="material-symbols-outlined text-[12px]">description</span>Sujet en brouillon</span></p>{% endif %}{% else %}<p class="mt-1 text-[11px] text-on-surface-variant">Sujet non déposé</p>{% endif %}</td>
+<td class="px-4 py-3 text-on-surface-variant">{{ session.room }}</td>
+<td class="px-4 py-3">{% if session.is_convoked %}{% include "portal/_badge.html" with label="Convocation envoyée" tone_class="bg-primary-fixed text-primary" dot=True %}{% else %}{% include "portal/_badge.html" with label="Planifiée" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}</td>
+<td class="px-4 py-3">
+<div class="flex items-center justify-end gap-1.5 whitespace-nowrap">
+<a class="inline-flex h-8 items-center gap-1 rounded-full border border-outline-variant/70 px-3 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="?edit={{ session.pk }}"><span class="material-symbols-outlined text-[15px]">edit</span>Modifier</a>
+<form action="{% url 'exams:admin_exam_session_toggle_convocation' session.pk %}" class="inline" method="post">
+{% csrf_token %}
+{% if session.is_convoked %}
+<button class="inline-flex h-8 items-center gap-1 rounded-full border border-outline-variant/70 px-3 text-[11px] font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit"><span class="material-symbols-outlined text-[15px]">undo</span>Annuler</button>
+{% else %}
+<button class="inline-flex h-8 items-center gap-1 rounded-full bg-secondary-container px-3 text-[11px] font-bold text-on-secondary-container transition-colors hover:bg-secondary" type="submit"><span class="material-symbols-outlined text-[15px]">forward_to_inbox</span>Convoquer</button>
+{% endif %}
+</form>
+<form action="{% url 'exams:admin_exam_session_delete' session.pk %}" class="inline" method="post" onsubmit="return confirm('Supprimer la session « {{ session.title|escapejs }} » ?');">
+{% csrf_token %}
+<button class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-outline-variant/70 text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container" title="Supprimer" type="submit"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+</form>
+</div>
+</td>
 </tr>
+{% empty %}
+<tr><td class="px-5 py-12 text-center text-sm text-on-surface-variant" colspan="6">Aucune session planifiée. Utilisez « Planifier une session » pour commencer.</td></tr>
 {% endfor %}
 </tbody>
 </table>
@@ -51,5 +70,57 @@
 <p class="hidden px-5 py-10 text-center text-sm text-on-surface-variant" data-filter-empty>Aucune session ne correspond à ce filtre.</p>
 </section>
 </div>
+
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="session-create-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-2xl rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Planifier une session d'examen</h2><p class="text-xs text-on-surface-variant">Les conflits de salle et de classe sont vérifiés automatiquement. Les enseignants de la classe sont notifiés par e-mail pour préparer le sujet.</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form action="{% url 'exams:admin_exam_session_create' %}" class="flex flex-col gap-4 p-5" method="post">
+{% csrf_token %}
+{% include "exams/_session_form_fields.html" with form=create_form %}
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<button class="rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button">Annuler</button>
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Planifier la session</button>
+</div>
+</form>
+</div>
+</div>
+
+{% if edit_form %}
+<div class="fixed inset-0 z-[70] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="session-edit-modal">
+<button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
+<div class="relative z-10 w-full max-w-2xl rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Modifier la session</h2><p class="text-xs text-on-surface-variant">{{ edit_session.school_class.name }} · {{ edit_session.date_label }}</p></div>
+<button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
+</div>
+<form action="{% url 'exams:admin_exam_session_update' edit_session.pk %}" class="flex flex-col gap-4 p-5" method="post">
+{% csrf_token %}
+{% include "exams/_session_form_fields.html" with form=edit_form %}
+<div class="flex flex-wrap justify-end gap-2 border-t border-outline-variant/40 pt-4">
+<a class="inline-flex items-center rounded-full border border-outline-variant/70 px-4 py-2.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exams:admin_exam_sessions' %}">Annuler</a>
+<button class="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Enregistrer les modifications</button>
+</div>
+</form>
+</div>
+</div>
+{% endif %}
+
+{% if open_modal == 'create' %}
+<button class="hidden" data-modal-open="#session-create-modal" id="auto-open-session-modal" type="button"></button>
+{% elif open_modal == 'edit' %}
+<button class="hidden" data-modal-open="#session-edit-modal" id="auto-open-session-modal" type="button"></button>
+{% endif %}
 </main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(function () {
+  var trigger = document.getElementById('auto-open-session-modal');
+  if (trigger) trigger.click();
+})();
+</script>
 {% endblock %}
