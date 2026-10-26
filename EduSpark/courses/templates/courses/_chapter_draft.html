@@ -1,0 +1,23 @@
+<li class="rounded-2xl bg-surface-container-lowest p-4 shadow-sm transition-opacity" data-chapter>
+<fieldset class="flex flex-col gap-3">
+<legend class="sr-only">Chapitre <span data-chapter-legend>{{ number }}</span></legend>
+<div class="flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-on-primary shadow-sm" aria-hidden="true" data-chapter-number>{{ number }}</span>
+<span class="text-[13px] font-bold text-on-surface">Chapitre</span>
+</div>
+<div class="hidden items-center gap-1" data-chapter-move>
+<button class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-30" type="button" aria-label="Monter ce chapitre" title="Monter" data-chapter-up><span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_upward</span></button>
+<button class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-30" type="button" aria-label="Descendre ce chapitre" title="Descendre" data-chapter-down><span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_downward</span></button>
+</div>
+</div>
+{% if form.non_field_errors %}<div class="rounded-lg bg-error-container px-3 py-2 text-xs text-on-error-container" role="alert">{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+<div class="grid gap-3 sm:grid-cols-[1fr_9rem_7rem]">
+{% include "portal/_form_field.html" with field=form.title %}
+{% include "portal/_form_field.html" with field=form.duration_hours %}
+{% include "portal/_form_field.html" with field=form.ORDER %}
+{% include "portal/_form_field.html" with field=form.objectives wrapper_class="sm:col-span-3" %}
+</div>
+{% include "portal/_form_field.html" with field=form.DELETE %}
+</fieldset>
+</li>

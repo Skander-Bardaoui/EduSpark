@@ -12,7 +12,7 @@ from django.utils import timezone
 from accounts.models import SchoolClass
 from accounts.tenancy import Role
 
-from .models import Course, CoursePublication, ScheduleSlot, TeachingAssignment
+from ..models import Course, CoursePublication, ScheduleSlot, TeachingAssignment
 
 WEEKDAY_LABELS = ("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
 MONTH_LABELS = (

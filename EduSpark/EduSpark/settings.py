@@ -220,6 +220,31 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+# IA du module cours : génération d'un plan de cours (voir courses/services/ai.py).
+# Étape 1 « lecteur » : modèle local Ollama (les documents restent sur le serveur).
+# Étape 2 « rédacteur » : API Groq, Gemini ou Anthropic, qui ne reçoit que
+# titre, niveau et thèmes. AI_PROVIDER : groq | gemini | anthropic | fake (plan
+# fixe sans appel réseau, pour les tests et le travail hors ligne).
+AI_PROVIDER = os.environ.get('AI_PROVIDER', 'groq').strip().lower()
+AI_API_TIMEOUT = float(os.environ.get('AI_API_TIMEOUT', '60'))
+# Clé Groq propre au module cours : distincte de GROQ_API_KEY (test de langue du
+# module coaching), pour que chaque module ait sa clé et son quota.
+COURSES_GROQ_API_KEY = os.environ.get('COURSES_GROQ_API_KEY', '').strip()
+COURSES_GROQ_MODEL = os.environ.get('COURSES_GROQ_MODEL', 'openai/gpt-oss-120b').strip()
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '').strip()
+GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '').strip()
+ANTHROPIC_MODEL = os.environ.get('ANTHROPIC_MODEL', 'claude-sonnet-5-5')
+ANTHROPIC_EFFORT = os.environ.get('ANTHROPIC_EFFORT', 'medium')
+# Repli côté serveur si le modèle décline la demande (Claude API uniquement).
+ANTHROPIC_FALLBACKS = env_bool('ANTHROPIC_FALLBACKS', True)
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen2.5:3b')
+OLLAMA_KEEP_ALIVE = os.environ.get('OLLAMA_KEEP_ALIVE', '30m')
+AI_LOCAL_TIMEOUT = float(os.environ.get('AI_LOCAL_TIMEOUT', '120'))
+AI_LOCAL_TEXT_LIMIT = int(os.environ.get('AI_LOCAL_TEXT_LIMIT', '4000'))
+AI_RATE_LIMIT_PER_HOUR = int(os.environ.get('AI_RATE_LIMIT_PER_HOUR', '10'))
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
