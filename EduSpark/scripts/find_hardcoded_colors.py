@@ -40,6 +40,8 @@ KNOWN = [
     (re.compile(r"accounts/(login|signup)\.html$"), re.compile(r"shadow-\[|border-white|ring-white|from-\[#06164b\]|via-\[#06164b\]|to-\[#06164b\]"), "panneau photo (zone toujours claire)"),
     (re.compile(r"\.html$"), re.compile(r"shadow-\[[^\]]*rgba?\("), "ombre décorative"),
     (re.compile(r"courses/material_view\.html$"), re.compile(r"bg-black"), "bandes noires du lecteur vidéo"),
+    (re.compile(r"portal/_a11y_icon\.html$"), None, "symbole d'accessibilité (couleurs imposées)"),
+    (re.compile(r"portal/_a11y_head\.html$"), re.compile(r"#ffbf00|rgb\(0"), "focus renforcé jaune (accessibilité)"),
 ]
 
 

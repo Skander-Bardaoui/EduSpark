@@ -5,6 +5,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="web_dashboard" name="shell-type"/>
 {% include "includes/theme_init.html" %}
+{% include "portal/_a11y_head.html" %}
 <title>{% block title %}Hub Éducatif Multimodal{% endblock %}</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -69,6 +70,7 @@ main form label{font-size:13px;font-weight:600;}
 {% block content %}{% endblock %}
 </div>
 {% include "portal/_flash.html" %}
+{% include "portal/_a11y_panel.html" %}
 <div aria-atomic="true" aria-live="polite" class="fixed bottom-5 right-5 z-[80] flex w-80 max-w-[calc(100vw-2.5rem)] flex-col gap-2" id="portal-toasts"></div>
 <script>
 (function () {
@@ -430,6 +432,7 @@ main form label{font-size:13px;font-weight:600;}
   });
 })();
 </script>
+{% include "portal/_a11y_script.html" %}
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

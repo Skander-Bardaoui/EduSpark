@@ -40,6 +40,8 @@ class Profil(models.Model):
         max_length=20, choices=ROLE_CHOICES, default=ROLE_ETUDIANT,
         verbose_name="Rôle",
     )
+    # Préférences du menu Accessibilité (voir accounts/accessibility.py).
+    accessibility = models.JSONField(default=dict, blank=True, verbose_name="Accessibilité")
 
     class Meta:
         verbose_name = "Profil"

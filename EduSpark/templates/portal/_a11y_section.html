@@ -1,0 +1,13 @@
+{# Section « Accessibilité » des pages profil (mêmes réglages que le panneau de la barre du haut). #}
+<section aria-labelledby="profile-a11y-title" class="rounded bg-surface-container-lowest shadow-sm" id="profile-accessibility">
+<div class="flex items-center gap-3 border-b border-outline-variant/40 px-5 py-4">
+{% include "portal/_a11y_icon.html" with uid="profile" size=32 %}
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="profile-a11y-title">Accessibilité</h2>
+<p class="text-xs text-on-surface-variant">Taille du texte, thème, lecture à voix haute… Les mêmes réglages sont accessibles partout avec Alt+A.</p>
+</div>
+</div>
+<div class="p-5">
+{% include "portal/_a11y_settings.html" with prefix="profile" %}
+</div>
+</section>

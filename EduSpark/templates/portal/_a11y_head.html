@@ -1,0 +1,128 @@
+{# Menu Accessibilité : styles des réglages (classes a11y-* sur <html>) et application avant le premier rendu. À inclure dans <head>, après includes/theme_init.html. #}
+<style id="a11y-styles">
+html { --a11y-contrast: 1; }
+html.a11y-contrast { --a11y-contrast: 1.25; filter: contrast(var(--a11y-contrast)); }
+html.a11y-contrast .text-on-surface-variant,
+html.a11y-contrast .text-outline { color: rgb(var(--md-on-surface)) !important; }
+html.a11y-contrast [class*="border-outline-variant"] { border-color: rgb(var(--md-outline)) !important; }
+
+html.a11y-text-125 main { zoom: 1.25; }
+html.a11y-text-150 main { zoom: 1.5; }
+html.a11y-text-175 main { zoom: 1.75; }
+
+html.a11y-dyslexia body,
+html.a11y-dyslexia body *:not(.material-symbols-outlined) { font-family: "Atkinson Hyperlegible", Verdana, sans-serif !important; }
+
+html.a11y-spacing main *:not(.material-symbols-outlined) {
+  line-height: 1.8 !important;
+  letter-spacing: 0.06em !important;
+  word-spacing: 0.16em !important;
+}
+
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.a11y-links main a { text-decoration: underline !important; text-underline-offset: 0.2em; }
+
+html.a11y-focus :focus-visible {
+  outline: 4px solid #ffbf00 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 8px rgb(0 0 0 / 0.65) !important;
+}
+
+html.a11y-cursor,
+html.a11y-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M6 3l30 27H22l9 14-6 3-9-15-10 9z' fill='%23000' stroke='%23fff' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E") 6 3, auto !important;
+}
+html.a11y-cursor :is(a, button, summary, label, select, [role="switch"], [role="button"]),
+html.a11y-cursor :is(a, button, summary, label, select, [role="switch"], [role="button"]) * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M18 4a4 4 0 0 1 4 4v14l2-1a4 4 0 0 1 4 1 4 4 0 0 1 5 1 4 4 0 0 1 6 3v10c0 6-5 10-11 10h-4c-4 0-7-2-9-5l-7-11a4 4 0 0 1 6-5l0 0V8a4 4 0 0 1 4-4z' fill='%23000' stroke='%23fff' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E") 18 4, pointer !important;
+}
+
+#a11y-reading-guide { display: none; }
+html.a11y-guide #a11y-reading-guide { display: block; }
+</style>
+{{ accessibility_prefs|json_script:"a11y-prefs" }}
+<script>
+(function (root) {
+  'use strict';
+  var KEY = 'eduspark-a11y';
+  var DEFAULTS = {
+    text_size: 100, theme: 'auto', contrast: false, dyslexia_font: false, spacing: false,
+    reduce_motion: false, underline_links: false, strong_focus: false, big_cursor: false,
+    reading_guide: false, speech_rate: 1
+  };
+  var CHOICES = { text_size: [100, 125, 150, 175], theme: ['light', 'dark', 'auto'], speech_rate: [0.75, 1, 1.25] };
+  var CLASSES = {
+    contrast: 'a11y-contrast', dyslexia_font: 'a11y-dyslexia', spacing: 'a11y-spacing',
+    reduce_motion: 'a11y-reduce-motion', underline_links: 'a11y-links', strong_focus: 'a11y-focus',
+    big_cursor: 'a11y-cursor', reading_guide: 'a11y-guide'
+  };
+  var FONT_URL = 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap';
+
+  function clean(data) {
+    var out = {};
+    data = data && typeof data === 'object' ? data : {};
+    Object.keys(DEFAULTS).forEach(function (key) {
+      var value = data[key], def = DEFAULTS[key];
+      var ok = typeof def === 'boolean' ? typeof value === 'boolean' : CHOICES[key].indexOf(value) > -1;
+      out[key] = ok ? value : def;
+    });
+    return out;
+  }
+
+  function loadFont() {
+    if (document.getElementById('a11y-font')) return;
+    var link = document.createElement('link');
+    link.id = 'a11y-font';
+    link.rel = 'stylesheet';
+    link.href = FONT_URL;
+    document.head.appendChild(link);
+  }
+
+  // Thème : piloté par le thème partagé de la plateforme (includes/theme_init.html).
+  function applyTheme(theme) {
+    var pref = theme === 'auto' ? 'system' : theme;
+    try {
+      if (localStorage.getItem('eduspark-theme') !== pref) {
+        localStorage.setItem('eduspark-theme', pref);
+        window.dispatchEvent(new StorageEvent('storage', { key: 'eduspark-theme' }));
+      }
+    } catch (e) {}
+    var dark = pref === 'dark' || (pref === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    root.setAttribute('data-theme-pref', pref);
+    root.classList.toggle('a11y-dark', dark);
+  }
+
+  function apply(prefs) {
+    [125, 150, 175].forEach(function (size) { root.classList.toggle('a11y-text-' + size, prefs.text_size === size); });
+    Object.keys(CLASSES).forEach(function (key) { root.classList.toggle(CLASSES[key], prefs[key] === true); });
+    if (prefs.dyslexia_font) loadFont();
+    applyTheme(prefs.theme);
+  }
+
+  // Priorité : préférences du compte, puis celles de l'appareil, puis valeurs par défaut.
+  var account = null, local = null;
+  try { account = JSON.parse(document.getElementById('a11y-prefs').textContent); } catch (e) {}
+  try { local = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  var saved = account || local;
+  var prefs = clean(saved);
+  if (!saved) {
+    prefs.reduce_motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try {
+      var current = localStorage.getItem('eduspark-theme');
+      if (current === 'light' || current === 'dark') prefs.theme = current;
+    } catch (e) {}
+  }
+  apply(prefs);
+
+  window.EduSparkA11y = { KEY: KEY, DEFAULTS: DEFAULTS, clean: clean, apply: apply, prefs: prefs };
+})(document.documentElement);
+</script>

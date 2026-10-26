@@ -1,0 +1,20 @@
+{# Panneau latéral Accessibilité (dialogue modal) et guide de lecture. Inclus une fois dans portal/base.html. #}
+<div class="fixed inset-0 z-[90] hidden bg-scrim/50 backdrop-blur-[2px]" data-a11y-backdrop="" id="a11y-backdrop"></div>
+<aside aria-labelledby="a11y-panel-title" aria-modal="true" class="fixed inset-y-0 right-0 z-[95] hidden w-full flex-col border-l border-outline-variant/50 bg-surface-container-lowest shadow-2xl sm:w-[420px]" data-a11y-csrf="{{ csrf_token }}" data-a11y-panel="" data-a11y-url="{% url 'portal:accessibility_preferences' %}" id="a11y-panel" role="dialog" tabindex="-1">
+<header class="flex items-center justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div class="flex items-center gap-3">
+{% include "portal/_a11y_icon.html" with uid="panel" size=36 %}
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface" id="a11y-panel-title">Accessibilité</h2>
+<p class="text-xs text-on-surface-variant">Réglages enregistrés sur votre compte · Alt+A</p>
+</div>
+</div>
+<button aria-label="Fermer le menu Accessibilité" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface" data-a11y-close="" type="button">
+<span class="material-symbols-outlined text-[22px]">close</span>
+</button>
+</header>
+<div class="flex-1 overflow-y-auto px-5 py-4">
+{% include "portal/_a11y_settings.html" with prefix="panel" %}
+</div>
+</aside>
+<div aria-hidden="true" class="pointer-events-none fixed inset-x-0 z-[85] h-12 -translate-y-1/2 border-y-2 border-tertiary-fixed-dim/80 bg-tertiary-fixed/25" id="a11y-reading-guide" style="top:50%"></div>

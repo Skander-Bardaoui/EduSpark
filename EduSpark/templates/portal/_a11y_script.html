@@ -1,0 +1,204 @@
+{# Menu Accessibilité : interactions (inclus une seule fois en bas de portal/base.html, après _a11y_panel.html). #}
+<script>
+(function () {
+  'use strict';
+  var A = window.EduSparkA11y;
+  if (!A) return;
+  var root = document.documentElement;
+  var panel = document.getElementById('a11y-panel');
+  var backdrop = document.getElementById('a11y-backdrop');
+  var openers = document.querySelectorAll('[data-a11y-open]');
+  var guide = document.getElementById('a11y-reading-guide');
+  var prefs = A.prefs;
+  var saveTimer = null;
+  var lastOpener = null;
+
+  // ---- Affichage de l'état dans tous les blocs de réglages -----------------
+  function render() {
+    document.querySelectorAll('[data-a11y-switch]').forEach(function (btn) {
+      var on = prefs[btn.getAttribute('data-a11y-switch')] === true;
+      btn.setAttribute('aria-checked', String(on));
+      var knob = btn.querySelector('span');
+      if (knob) knob.classList.toggle('translate-x-5', on);
+    });
+    document.querySelectorAll('[data-a11y-radio]').forEach(function (input) {
+      input.checked = String(prefs[input.getAttribute('data-a11y-radio')]) === input.value;
+    });
+  }
+
+  function announce(message) {
+    document.querySelectorAll('[data-a11y-status]').forEach(function (el) {
+      el.textContent = '';
+      window.setTimeout(function () { el.textContent = message; }, 30);
+    });
+  }
+
+  // ---- Enregistrement : appareil tout de suite, compte après un court délai --
+  function saveServer() {
+    if (!panel) return;
+    var url = panel.getAttribute('data-a11y-url');
+    var csrf = panel.getAttribute('data-a11y-csrf');
+    fetch(url, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+      body: JSON.stringify(prefs)
+    }).then(function (response) {
+      if (!response.ok) throw new Error(response.status);
+      return response.json();
+    }).then(function () {
+      announce('Préférences enregistrées');
+    }).catch(function () {
+      announce('Préférences enregistrées sur cet appareil uniquement');
+    });
+  }
+
+  function update(changes) {
+    Object.keys(changes).forEach(function (key) { prefs[key] = changes[key]; });
+    prefs = A.clean(prefs);
+    A.prefs = prefs;
+    A.apply(prefs);
+    render();
+    try { localStorage.setItem(A.KEY, JSON.stringify(prefs)); } catch (e) {}
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(saveServer, 400);
+  }
+
+  document.addEventListener('click', function (e) {
+    var sw = e.target.closest('[data-a11y-switch]');
+    if (sw) {
+      var key = sw.getAttribute('data-a11y-switch');
+      var change = {};
+      change[key] = !prefs[key];
+      update(change);
+      return;
+    }
+    if (e.target.closest('[data-a11y-reset]')) {
+      var defaults = JSON.parse(JSON.stringify(A.DEFAULTS));
+      defaults.reduce_motion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      prefs = defaults;
+      update({});
+      return;
+    }
+    if (e.target.closest('[data-a11y-speak]')) { speak(); return; }
+    if (e.target.closest('[data-a11y-stop]')) { stopSpeaking(); return; }
+    if (e.target.closest('[data-a11y-open]')) { toggle(e.target.closest('[data-a11y-open]')); return; }
+    if (e.target.closest('[data-a11y-close]') || e.target === backdrop) close();
+  });
+
+  document.addEventListener('change', function (e) {
+    var input = e.target.closest('[data-a11y-radio]');
+    if (!input) return;
+    var key = input.getAttribute('data-a11y-radio');
+    var change = {};
+    change[key] = key === 'theme' ? input.value : parseFloat(input.value);
+    update(change);
+  });
+
+  // Le bouton de thème de la barre du haut met aussi à jour ce menu.
+  window.addEventListener('themechange', function (e) {
+    var pref = e.detail && e.detail.preference;
+    root.classList.toggle('a11y-dark', e.detail && e.detail.theme === 'dark');
+    var theme = pref === 'system' ? 'auto' : pref;
+    if (theme && theme !== prefs.theme) update({ theme: theme });
+  });
+
+  // ---- Panneau : dialogue modal, focus piégé, Échap, Alt+A ----------------
+  function focusable() {
+    return Array.prototype.filter.call(
+      panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'),
+      function (el) { return el.offsetParent !== null || el.type === 'radio'; }
+    );
+  }
+
+  function isOpen() { return panel && !panel.classList.contains('hidden'); }
+
+  function open(opener) {
+    if (!panel) return;
+    lastOpener = opener || document.activeElement;
+    panel.classList.remove('hidden');
+    panel.classList.add('flex');
+    backdrop.classList.remove('hidden');
+    document.body.classList.add('portal-modal-open');
+    openers.forEach(function (btn) { btn.setAttribute('aria-expanded', 'true'); });
+    var first = panel.querySelector('[data-a11y-close]');
+    (first || panel).focus();
+  }
+
+  function close() {
+    if (!isOpen()) return;
+    panel.classList.add('hidden');
+    panel.classList.remove('flex');
+    backdrop.classList.add('hidden');
+    document.body.classList.remove('portal-modal-open');
+    openers.forEach(function (btn) { btn.setAttribute('aria-expanded', 'false'); });
+    var target = lastOpener && document.contains(lastOpener) ? lastOpener : document.getElementById('a11y-button');
+    if (target) target.focus();
+  }
+
+  function toggle(opener) { if (isOpen()) close(); else open(opener); }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey && !e.ctrlKey && !e.metaKey && (e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) {
+      e.preventDefault();
+      toggle(document.getElementById('a11y-button'));
+      return;
+    }
+    if (!isOpen()) return;
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    var nodes = focusable();
+    // Un groupe de radios ne compte qu'une fois dans l'ordre de tabulation.
+    nodes = nodes.filter(function (el) { return el.type !== 'radio' || el.checked; });
+    if (!nodes.length) return;
+    var first = nodes[0], last = nodes[nodes.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
+  });
+
+  // ---- Lecture à voix haute (speechSynthesis du navigateur) ----------------
+  var synth = window.speechSynthesis;
+  if (!synth) {
+    document.querySelectorAll('[data-a11y-speak], [data-a11y-stop]').forEach(function (b) { b.disabled = true; });
+    document.querySelectorAll('[data-a11y-speech-unsupported]').forEach(function (p) { p.classList.remove('hidden'); });
+  }
+
+  function frenchVoice() {
+    var voices = synth.getVoices();
+    return voices.filter(function (v) { return /^fr(-|_|$)/i.test(v.lang); })[0] || null;
+  }
+
+  function speak() {
+    if (!synth) return;
+    var selection = String(window.getSelection ? window.getSelection() : '').trim();
+    var main = document.getElementById('main-content');
+    var text = selection || (main ? main.innerText : document.body.innerText);
+    text = text.replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    synth.cancel();
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'fr-FR';
+    utterance.rate = prefs.speech_rate;
+    var voice = frenchVoice();
+    if (voice) utterance.voice = voice;
+    synth.speak(utterance);
+    announce(selection ? 'Lecture de la sélection' : 'Lecture de la page');
+  }
+
+  function stopSpeaking() {
+    if (!synth) return;
+    synth.cancel();
+    announce('Lecture arrêtée');
+  }
+
+  // ---- Guide de lecture ---------------------------------------------------
+  document.addEventListener('mousemove', function (e) {
+    if (guide && root.classList.contains('a11y-guide')) guide.style.top = e.clientY + 'px';
+  }, { passive: true });
+
+  render();
+})();
+</script>
