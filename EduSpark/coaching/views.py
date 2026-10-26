@@ -927,6 +927,7 @@ def student_journal(request):
             "value": value,
             "current": index == 0,
         })
+    has_week_data = any(week["height"] for week in weeks)
     next_session = next_accepted_session(student)
     next_study = next_revision(student)
     last_entry = entries[0] if entries else None
@@ -956,6 +957,7 @@ def student_journal(request):
             best, "" if best == 1 else "s",
         ),
         "weeks": weeks,
+        "has_week_data": has_week_data,
         "today_percent": int(round((latest_confidence or 0) * 10)),
         "goal_stats": stats,
         "next_study_label": (

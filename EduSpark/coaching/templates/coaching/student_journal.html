@@ -26,11 +26,20 @@
 <div><h2 class="font-headline-sm text-headline-sm text-on-surface">Évolution de ma confiance</h2><p class="mt-0.5 text-xs text-on-surface-variant">Auto-évaluation hebdomadaire sur 100</p></div>
 {% include "portal/_badge.html" with label="8 dernières semaines" tone_class="bg-surface-container text-on-surface-variant" %}
 </div>
+{% if has_week_data %}
 <div class="mt-5 flex h-40 items-end gap-2">
 {% for week in weeks %}
-<div class="flex flex-1 flex-col items-center gap-2"><div class="flex w-full flex-1 items-end"><div class="w-full rounded-t {% if week.current %}bg-primary{% else %}bg-primary-fixed{% endif %}" style="height:{{ week.height }}%"></div></div><span class="text-[11px] {% if week.current %}font-bold text-primary{% else %}font-semibold text-on-surface-variant{% endif %}">{{ week.label }}</span></div>
+<div class="flex flex-1 flex-col items-center gap-2"><div class="flex h-32 w-full items-end"><div class="w-full rounded-t {% if week.current %}bg-primary{% else %}bg-primary-fixed{% endif %}" style="height:{{ week.height }}%" title="{{ week.value }} / 100"></div></div><span class="text-[11px] {% if week.current %}font-bold text-primary{% else %}font-semibold text-on-surface-variant{% endif %}">{{ week.label }}</span></div>
 {% endfor %}
 </div>
+{% else %}
+<div class="mt-5 flex h-40 flex-col items-center justify-center rounded-xl border border-dashed border-outline-variant/60 bg-surface-container-low/40 px-4 text-center">
+<span class="material-symbols-outlined text-[28px] text-outline">monitoring</span>
+<p class="mt-2 text-sm font-semibold text-on-surface">Pas encore de données de confiance</p>
+<p class="mt-1 text-xs text-on-surface-variant">Ajoutez une entrée de journal pour commencer à suivre votre évolution.</p>
+<button class="mt-3 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" data-modal-open="#journal-modal" type="button">Écrire une entrée</button>
+</div>
+{% endif %}
 <div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3 text-xs text-on-surface-variant"><span>Début du semestre</span><span class="font-semibold text-on-surface">Aujourd'hui : {{ today_percent }} / 100</span></div>
 </div>
 <section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
