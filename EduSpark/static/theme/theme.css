@@ -42,6 +42,7 @@
   --md-on-secondary-container: 255 251 255;  /* #fffbff */
   --md-on-secondary-fixed: 15 0 105;  /* #0f0069 */
   --md-on-secondary-fixed-variant: 51 35 204;  /* #3323cc */
+  --md-on-success-container: 6 95 70;  /* #065f46 */
   --md-on-surface: 6 22 75;  /* #06164b */
   --md-on-surface-variant: 66 71 84;  /* #424754 */
   --md-on-tertiary: 255 255 255;  /* #ffffff */
@@ -60,6 +61,7 @@
   --md-secondary-fixed: 226 223 255;  /* #e2dfff */
   --md-secondary-fixed-dim: 195 192 255;  /* #c3c0ff */
   --md-success: 21 128 61;  /* #15803d */
+  --md-success-container: 209 250 229;  /* #d1fae5 */
   --md-surface: 251 248 255;  /* #fbf8ff */
   --md-surface-bright: 251 248 255;  /* #fbf8ff */
   --md-surface-container: 236 237 255;  /* #ecedff */
@@ -75,6 +77,7 @@
   --md-tertiary-fixed: 255 223 159;  /* #ffdf9f */
   --md-tertiary-fixed-dim: 230 194 119;  /* #e6c277 */
   --md-warning: 217 119 6;  /* #d97706 */
+  --md-warning-container: 255 251 235;  /* #fffbeb */
 
   /* Rôles génériques (élévation : bg < surface-1 … surface-6) */
   --bg: var(--md-background);
@@ -182,6 +185,7 @@
     --md-on-secondary-container: 231 229 255;  /* #e7e5ff */
     --md-on-secondary-fixed: 218 214 255;  /* #dad6ff */
     --md-on-secondary-fixed-variant: 193 187 251;  /* #c1bbfb */
+    --md-on-success-container: 182 237 205;  /* #b6edcd */
     --md-on-surface: 230 234 244;  /* #e6eaf4 */
     --md-on-surface-variant: 182 189 206;  /* #b6bdce */
     --md-on-tertiary: 55 40 6;  /* #372806 */
@@ -200,6 +204,7 @@
     --md-secondary-fixed: 43 40 77;  /* #2b284d */
     --md-secondary-fixed-dim: 57 54 99;  /* #393663 */
     --md-success: 117 209 156;  /* #75d19c */
+    --md-success-container: 30 62 46;  /* #1e3e2e */
     --md-surface: 11 15 24;  /* #0b0f18 */
     --md-surface-bright: 42 50 68;  /* #2a3244 */
     --md-surface-container: 31 38 53;  /* #1f2635 */
@@ -215,6 +220,7 @@
     --md-tertiary-fixed: 67 55 30;  /* #43371e */
     --md-tertiary-fixed-dim: 226 185 90;  /* #e2b95a */
     --md-warning: 246 189 90;  /* #f6bd5a */
+    --md-warning-container: 61 48 26;  /* #3d301a */
     --surface-6: 47 56 75;  /* #2f384b : menus, modales, popovers */
     --edge-light: rgb(214 224 255 / 0.09);
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
@@ -253,6 +259,7 @@
     --md-on-secondary-container: 255 251 255;  /* #fffbff */
     --md-on-secondary-fixed: 15 0 105;  /* #0f0069 */
     --md-on-secondary-fixed-variant: 51 35 204;  /* #3323cc */
+    --md-on-success-container: 6 95 70;  /* #065f46 */
     --md-on-surface: 6 22 75;  /* #06164b */
     --md-on-surface-variant: 66 71 84;  /* #424754 */
     --md-on-tertiary: 255 255 255;  /* #ffffff */
@@ -271,6 +278,7 @@
     --md-secondary-fixed: 226 223 255;  /* #e2dfff */
     --md-secondary-fixed-dim: 195 192 255;  /* #c3c0ff */
     --md-success: 21 128 61;  /* #15803d */
+    --md-success-container: 209 250 229;  /* #d1fae5 */
     --md-surface: 251 248 255;  /* #fbf8ff */
     --md-surface-bright: 251 248 255;  /* #fbf8ff */
     --md-surface-container: 236 237 255;  /* #ecedff */
@@ -286,6 +294,7 @@
     --md-tertiary-fixed: 255 223 159;  /* #ffdf9f */
     --md-tertiary-fixed-dim: 230 194 119;  /* #e6c277 */
     --md-warning: 217 119 6;  /* #d97706 */
+    --md-warning-container: 255 251 235;  /* #fffbeb */
   }
   :root[data-theme="dark"][data-palette="admin"] [data-theme-scope="light"] {
     --md-on-primary-container: 254 252 255;  /* #fefcff */
@@ -356,6 +365,7 @@
     --md-on-secondary-container: 231 229 255;  /* #e7e5ff */
     --md-on-secondary-fixed: 218 214 255;  /* #dad6ff */
     --md-on-secondary-fixed-variant: 193 187 251;  /* #c1bbfb */
+    --md-on-success-container: 182 237 205;  /* #b6edcd */
     --md-on-surface: 230 234 244;  /* #e6eaf4 */
     --md-on-surface-variant: 182 189 206;  /* #b6bdce */
     --md-on-tertiary: 55 40 6;  /* #372806 */
@@ -374,6 +384,7 @@
     --md-secondary-fixed: 43 40 77;  /* #2b284d */
     --md-secondary-fixed-dim: 57 54 99;  /* #393663 */
     --md-success: 117 209 156;  /* #75d19c */
+    --md-success-container: 30 62 46;  /* #1e3e2e */
     --md-surface: 11 15 24;  /* #0b0f18 */
     --md-surface-bright: 42 50 68;  /* #2a3244 */
     --md-surface-container: 31 38 53;  /* #1f2635 */
@@ -389,6 +400,7 @@
     --md-tertiary-fixed: 67 55 30;  /* #43371e */
     --md-tertiary-fixed-dim: 226 185 90;  /* #e2b95a */
     --md-warning: 246 189 90;  /* #f6bd5a */
+    --md-warning-container: 61 48 26;  /* #3d301a */
     --surface-6: 47 56 75;  /* #2f384b : menus, modales, popovers */
     --edge-light: rgb(214 224 255 / 0.09);
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
