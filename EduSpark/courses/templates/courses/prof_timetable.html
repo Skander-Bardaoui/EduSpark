@@ -26,7 +26,15 @@
 <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3 py-1 text-[11px] font-bold text-primary"><span class="h-1.5 w-1.5 rounded-full bg-primary"></span>{{ next_session.when }}</span>
 </div>
 <div class="mt-4 flex flex-wrap gap-2">
-<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'courses:prof_subjects' %}"><span class="material-symbols-outlined text-[16px]">menu_book</span>Mes matières et cours</a>
+{% if next_can_record %}
+<form method="post" action="{% url 'coaching:prof_attendance_from_slot' next_session.slot.pk %}">
+{% csrf_token %}
+<input name="date" type="hidden" value="{{ next_attendance_date|date:'Y-m-d' }}"/>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">fact_check</span>Saisir les présences</button>
+</form>
+{% endif %}
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-surface-container-high" href="{% url 'coaching:prof_attendance' %}"><span class="material-symbols-outlined text-[16px]">fact_check</span>Toutes mes présences</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container px-4 py-2 text-xs font-bold text-primary transition-colors hover:bg-surface-container-high" href="{% url 'courses:prof_subjects' %}"><span class="material-symbols-outlined text-[16px]">menu_book</span>Mes matières et cours</a>
 </div>
 {% else %}
 <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Aucune séance</p>

@@ -326,7 +326,7 @@ class AssignmentTests(CoursesTestCase):
         response = self.client.post(reverse("courses:admin_assignment_create"), {
             "school_class": self.school_class.pk, "subject": self.subject.pk, "professor": self.prof.pk,
         })
-        self.assertContains(response, "Cette matière a déjà un professeur dans cette classe")
+        self.assertContains(response, "déjà affecté")
 
     def test_foreign_objects_are_not_selectable(self):
         response = self.client.post(reverse("courses:admin_assignment_create"), {

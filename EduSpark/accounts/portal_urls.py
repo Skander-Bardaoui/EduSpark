@@ -56,6 +56,8 @@ urlpatterns = [
          name="admin_class_detail"),
     path("administration/classes/<int:pk>/modifier/", class_views.SchoolClassUpdateView.as_view(),
          name="admin_class_update"),
+    path("administration/classes/<int:pk>/etudiants/affecter/", class_views.assign_class_student,
+         name="admin_class_assign_student"),
     path("administration/classes/<int:pk>/supprimer/", class_views.SchoolClassDeleteView.as_view(),
          name="admin_class_delete"),
     path("administration/classes/<int:pk>/groupes/nouveau/", class_views.StudentGroupCreateView.as_view(),

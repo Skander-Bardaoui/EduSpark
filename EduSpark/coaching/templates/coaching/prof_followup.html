@@ -192,6 +192,10 @@
                         {{ meta.alerts_count }} alerte{{ meta.alerts_count|pluralize }}
                       </span>
 {% endif %}
+<a class="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary-fixed-dim" href="{{ meta.sheets_url }}">
+<span class="material-symbols-outlined text-[14px]">note_alt</span>
+                        {% if meta.sheet_count %}{{ meta.sheet_count }} fiche{{ meta.sheet_count|pluralize }}{% else %}Créer une fiche{% endif %}
+                      </a>
 </div>
 <p class="text-[12px] text-on-surface-variant">{{ meta.program }} • {{ meta.class_name }}</p>
 </div>

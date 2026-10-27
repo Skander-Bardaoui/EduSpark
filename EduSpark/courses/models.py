@@ -303,9 +303,11 @@ class TeachingAssignment(models.Model):
         verbose_name_plural = "Affectations d'enseignement"
         constraints = [
             models.UniqueConstraint(
-                fields=("school_class", "subject"),
-                name="unique_assignment_per_class_subject",
-                violation_error_message="Cette matière a déjà un professeur dans cette classe.",
+                fields=("school_class", "subject", "professor"),
+                name="unique_assignment_per_class_subject_professor",
+                violation_error_message=(
+                    "Ce professeur est déjà affecté à cette matière pour cette classe."
+                ),
             ),
         ]
 
@@ -341,22 +343,6 @@ class TeachingAssignment(models.Model):
                     errors, "professor", self.professor, university_id,
                     "Le professeur doit appartenir à la même université que la classe.",
                 )
-            if "subject" not in errors:
-                clash = (
-                    TeachingAssignment.objects.filter(
-                        school_class_id=self.school_class_id,
-                        subject_id=self.subject_id,
-                    )
-                    .exclude(pk=self.pk)
-                    .select_related("professor__membership__user")
-                    .first()
-                )
-                if clash is not None:
-                    errors["subject"] = (
-                        "Cette matière a déjà un professeur dans cette classe (%s). "
-                        "Modifiez cette affectation pour remplacer l'enseignant."
-                        % clash.professor_name
-                    )
         if not errors:
             busy = self._professor_conflict()
             if busy:

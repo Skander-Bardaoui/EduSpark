@@ -1,0 +1,207 @@
+<style>
+.exam-page{
+  background:
+    radial-gradient(70rem 28rem at 100% -12%, rgba(75,65,225,.075), transparent 62%),
+    radial-gradient(60rem 24rem at -12% 108%, rgba(0,163,163,.06), transparent 60%),
+    #fbf8ff;
+}
+.exam-page-header{
+  position:relative;
+  overflow:hidden;
+  border-radius:1.5rem;
+  border:1px solid rgba(194,198,214,.52);
+  background:
+    radial-gradient(42rem 14rem at 100% -70%, rgba(75,65,225,.15), transparent 62%),
+    linear-gradient(128deg,#ffffff 0%,#f8f7ff 56%,#efefff 100%);
+  padding:1.35rem 1.5rem;
+  box-shadow:0 18px 48px -42px rgba(6,22,75,.6);
+}
+.exam-page-header::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:linear-gradient(180deg,#004191,#4b41e1 55%,#00a3a3);
+}
+.exam-page-header::after{
+  content:"";
+  position:absolute;
+  right:-4rem;
+  top:-5rem;
+  width:13rem;
+  height:13rem;
+  border-radius:9999px;
+  background:radial-gradient(circle,rgba(75,65,225,.14),transparent 68%);
+  pointer-events:none;
+}
+.exam-page-header > *{position:relative;z-index:1;}
+.exam-page-header h1{letter-spacing:-.03em;}
+.exam-page-header p{max-width:78ch;}
+.exam-page section{
+  border-radius:1.5rem;
+  border-color:rgba(194,198,214,.44);
+  box-shadow:0 18px 48px -44px rgba(6,22,75,.55);
+}
+.exam-page section > div:first-child{
+  border-top-left-radius:1.5rem;
+  border-top-right-radius:1.5rem;
+}
+.exam-page table thead{
+  background:linear-gradient(90deg,rgba(243,242,255,.95),rgba(236,236,255,.72));
+}
+.exam-page table tbody tr{transition:background-color .16s ease;}
+.exam-page table tbody tr:hover{background:rgba(243,242,255,.62);}
+.exam-page article.rounded-2xl,
+.exam-page .rounded-2xl[class*="shadow-sm"]{
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+}
+.exam-page article.rounded-2xl:hover,
+.exam-page .rounded-2xl[class*="shadow-sm"]:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 42px -36px rgba(6,22,75,.55);
+  border-color:rgba(0,65,145,.24);
+}
+.exam-page a[class*="bg-primary"],
+.exam-page button[class*="bg-primary"]{
+  box-shadow:0 12px 26px -20px rgba(0,65,145,.7);
+}
+.exam-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.exam-page select,
+.exam-page textarea{
+  border-color:rgba(194,198,214,.65);
+  background-color:#ffffff;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+.exam-page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):focus,
+.exam-page select:focus,
+.exam-page textarea:focus{
+  border-color:rgba(0,65,145,.55);
+  box-shadow:0 0 0 3px rgba(0,65,145,.09);
+  outline:none;
+}
+.exam-page .exam-sticky-header{
+  border-radius:1rem;
+  background:linear-gradient(120deg,rgba(255,255,255,.97),rgba(243,242,255,.94));
+  box-shadow:0 14px 34px -32px rgba(6,22,75,.6);
+}
+.planning-modal-shell{
+  isolation:isolate;
+  box-shadow:0 36px 90px -34px rgba(6,22,75,.72);
+}
+.planning-modal-head{
+  background:
+    radial-gradient(28rem 14rem at 88% -30%, rgba(159,143,255,.42), transparent 64%),
+    linear-gradient(122deg,#06164b 0%,#004191 52%,#4b41e1 100%);
+  border-bottom:1px solid rgba(255,255,255,.12);
+}
+.exam-page .session-form-step{
+  border-radius:1.15rem;
+  border:1px solid rgba(194,198,214,.46);
+  background:linear-gradient(180deg,#ffffff 0%,#fdfcff 100%);
+  padding:1rem;
+  box-shadow:0 14px 34px -34px rgba(6,22,75,.55);
+}
+.session-step-badge{
+  display:grid;
+  place-items:center;
+  width:2rem;
+  height:2rem;
+  flex:none;
+  border-radius:.75rem;
+  background:linear-gradient(135deg,#004191,#4b41e1);
+  color:#fff;
+  font-size:11px;
+  font-weight:800;
+  box-shadow:0 10px 20px -14px rgba(0,65,145,.85);
+}
+.audience-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.375rem;
+  border:1px solid rgba(194,198,214,.68);
+  border-radius:9999px;
+  background:#fff;
+  padding:.375rem .625rem;
+  font-size:10px;
+  font-weight:700;
+  color:#434751;
+  transition:border-color .16s ease,background-color .16s ease,color .16s ease,transform .16s ease;
+}
+.audience-chip:hover{
+  border-color:rgba(0,65,145,.35);
+  color:#004191;
+  transform:translateY(-1px);
+}
+.audience-chip.is-active{
+  border-color:#004191;
+  background:#004191;
+  color:#fff;
+  box-shadow:0 10px 22px -16px rgba(0,65,145,.8);
+}
+.audience-count{
+  display:inline-grid;
+  place-items:center;
+  min-width:1.15rem;
+  height:1.15rem;
+  padding:0 .25rem;
+  border-radius:9999px;
+  background:rgba(0,65,145,.08);
+  color:#004191;
+  font-size:9px;
+  font-weight:800;
+}
+.audience-chip.is-active .audience-count{
+  background:rgba(255,255,255,.18);
+  color:#fff;
+}
+.class-option{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:.625rem;
+  border:1px solid rgba(194,198,214,.62);
+  border-radius:.85rem;
+  background:#fff;
+  padding:.625rem .75rem;
+  cursor:pointer;
+  transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+.class-option:hover{
+  border-color:rgba(0,65,145,.3);
+  background:rgba(243,242,255,.6);
+  transform:translateY(-1px);
+}
+.class-option.is-selected{
+  border-color:rgba(0,65,145,.45);
+  background:linear-gradient(120deg,rgba(216,226,255,.55),rgba(236,236,255,.5));
+  box-shadow:0 10px 24px -22px rgba(0,65,145,.65);
+}
+.class-option input[type="checkbox"]{
+  width:1rem;
+  height:1rem;
+  flex:none;
+  accent-color:#004191;
+}
+.class-option .class-check{
+  opacity:0;
+  transform:scale(.8);
+  transition:opacity .16s ease,transform .16s ease;
+}
+.class-option.is-selected .class-check{
+  opacity:1;
+  transform:scale(1);
+}
+.criterion-editor summary{list-style:none;}
+.criterion-editor summary::-webkit-details-marker{display:none;}
+.criterion-editor[open] summary{color:#004191;}
+.criterion-editor[open] summary .material-symbols-outlined{transform:rotate(90deg);}
+.criterion-editor summary .material-symbols-outlined{transition:transform .16s ease;}
+@media (prefers-reduced-motion:reduce){
+  .exam-page article.rounded-2xl,
+  .exam-page .rounded-2xl[class*="shadow-sm"]{transition:none;}
+  .exam-page article.rounded-2xl:hover,
+  .exam-page .rounded-2xl[class*="shadow-sm"]:hover{transform:none;}
+  .audience-chip,.class-option{transition:none;}
+  .audience-chip:hover,.class-option:hover{transform:none;}
+}
+</style>

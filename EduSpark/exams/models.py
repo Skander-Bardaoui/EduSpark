@@ -1,16 +1,37 @@
 import re
-import uuid
 from datetime import datetime
 from decimal import Decimal
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-from accounts.models import ProfessorProfile, SchoolClass, StudentProfile, University
+from accounts.models import SchoolClass, StudentProfile, University
+from courses.storage import ProtectedMediaStorage
 
 DEFAULT_ACADEMIC_YEAR = "2025-2026"
+
+
+def copy_upload_path(instance, filename):
+    """Conservé pour la compatibilité des migrations historiques."""
+    return "exams/copies/%s_%s" % (uuid4().hex, filename)
+
+
+def copy_file_upload_path(instance, filename):
+    """Conservé pour la compatibilité des migrations historiques."""
+    return "exams/copy-files/%s_%s" % (uuid4().hex, filename)
+
+
+def subject_upload_path(instance, filename):
+    """Conservé pour la compatibilité des migrations historiques."""
+    return "exams/subjects/%s_%s" % (uuid4().hex, filename)
+
+
+def project_upload_path(instance, filename):
+    """Chemin aléatoire d'un projet étudiant, hors de MEDIA_ROOT."""
+    return "exams/projects/%s/%s.zip" % (instance.session_id, uuid4().hex)
 
 _WEEKDAYS = ("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche")
 _MONTHS = (
@@ -25,22 +46,20 @@ def semester_for(school_class):
 
 
 class ExamSession(models.Model):
-    """Épreuve planifiée pour une classe d'une université."""
+    """Session d'évaluation planifiée pour une classe.
 
-    TYPE_ECRIT = "ecrit"
+    Le type d'épreuve détermine le parcours : QCM en ligne, dépét d'un projet
+    ZIP ou tirage d'un sujet d'oral. La fenêtre ``opens_at`` / ``closes_at``
+    reste commune aux trois formats.
+    """
+
+    TYPE_QCM = "qcm"
+    TYPE_PROJECT = "projet"
     TYPE_ORAL = "oral"
-    TYPE_PROJET = "projet"
     TYPE_CHOICES = (
-        (TYPE_ECRIT, "Écrit"),
-        (TYPE_ORAL, "Oral"),
-        (TYPE_PROJET, "Projet"),
-    )
-
-    STATUS_PLANNED = "planifiee"
-    STATUS_CONVOKED = "convocation"
-    STATUS_CHOICES = (
-        (STATUS_PLANNED, "Planifiée"),
-        (STATUS_CONVOKED, "Convocation envoyée"),
+        (TYPE_QCM, "QCM en ligne"),
+        (TYPE_PROJECT, "Projet (dépét ZIP)"),
+        (TYPE_ORAL, "Examen oral"),
     )
 
     university = models.ForeignKey(
@@ -56,32 +75,16 @@ class ExamSession(models.Model):
         related_name="exam_sessions", verbose_name="Matière",
     )
     title = models.CharField("Épreuve", max_length=160)
-    code = models.CharField(
-        "Code UE", max_length=20, blank=True, help_text="ex. INF501",
-    )
-    coefficient = models.DecimalField(
-        "Coefficient", max_digits=4, decimal_places=2, default=1,
-    )
-    semester = models.CharField(
-        "Semestre", max_length=40, blank=True,
-        help_text="Renseigné automatiquement d'après la classe si vide.",
-    )
     exam_type = models.CharField(
-        "Type", max_length=20, choices=TYPE_CHOICES, default=TYPE_ECRIT,
+        "Type d'épreuve", max_length=20, choices=TYPE_CHOICES,
+        default=TYPE_QCM, blank=True,
     )
-    date = models.DateField("Date")
-    start_time = models.TimeField("Début")
-    end_time = models.TimeField("Fin")
-    room = models.CharField("Salle", max_length=80)
-    status = models.CharField(
-        "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_PLANNED,
+    instructions = models.TextField(
+        "Consignes", blank=True,
+        help_text="Consignes affichées aux étudiants pour cette épreuve.",
     )
-    convoked_at = models.DateTimeField("Convoquée le", null=True, blank=True)
-    plan_group = models.UUIDField(
-        "Groupe de planification", null=True, blank=True, editable=False,
-        db_index=True,
-        help_text="Identifiant commun aux épreuves planifiées ensemble pour plusieurs classes.",
-    )
+    opens_at = models.DateTimeField("Ouverture")
+    closes_at = models.DateTimeField("Fermeture")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="created_exam_sessions", verbose_name="Créée par",
@@ -90,12 +93,12 @@ class ExamSession(models.Model):
     updated_at = models.DateTimeField("Modifiée le", auto_now=True)
 
     class Meta:
-        ordering = ("date", "start_time", "school_class__name")
-        verbose_name = "Session d'examen"
-        verbose_name_plural = "Sessions d'examen"
+        ordering = ("opens_at", "school_class__name")
+        verbose_name = "Session QCM"
+        verbose_name_plural = "Sessions QCM"
 
     def __str__(self):
-        return "%s — %s (%s)" % (self.title, self.school_class, self.date)
+        return "%s — %s (%s)" % (self.title, self.school_class, self.date_label)
 
     def clean(self):
         if (
@@ -103,8 +106,8 @@ class ExamSession(models.Model):
             and self.school_class.university_id != self.university_id
         ):
             raise ValidationError("La classe et la session doivent appartenir à la même université.")
-        if self.start_time and self.end_time and self.end_time <= self.start_time:
-            raise ValidationError({"end_time": "L'heure de fin doit être postérieure à l'heure de début."})
+        if self.opens_at and self.closes_at and self.closes_at <= self.opens_at:
+            raise ValidationError({"closes_at": "La fermeture doit être postérieure à l'ouverture."})
         if (
             self.course_subject_id and self.university_id
             and self.course_subject.university_id != self.university_id
@@ -127,60 +130,80 @@ class ExamSession(models.Model):
     def save(self, *args, **kwargs):
         if self.school_class_id:
             self.university_id = self.school_class.university_id
-        if not self.semester and self.school_class_id:
-            self.semester = semester_for(self.school_class)
-        if not self.code:
-            match = re.search(r"\b([A-Z]{2,6})\s?(\d{2,4})\b", self.title or "")
-            if match:
-                self.code = "%s%s" % (match.group(1), match.group(2))
         super().save(*args, **kwargs)
 
     @property
+    def code(self):
+        if self.course_subject_id:
+            return self.course_subject.code
+        match = re.search(r"\b([A-Z]{2,6})\s?(\d{2,4})\b", self.title or "")
+        return "%s%s" % (match.group(1), match.group(2)) if match else ""
+
+    @property
+    def coefficient(self):
+        return self.course_subject.coefficient if self.course_subject_id else Decimal("1")
+
+    @property
+    def semester(self):
+        return semester_for(self.school_class)
+
+    @property
+    def is_qcm(self):
+        return self.exam_type == self.TYPE_QCM
+
+    @property
+    def is_project(self):
+        return self.exam_type == self.TYPE_PROJECT
+
+    @property
+    def is_oral(self):
+        return self.exam_type == self.TYPE_ORAL
+
+    @property
+    def type_label(self):
+        return self.get_exam_type_display()
+
+    @property
+    def date(self):
+        return timezone.localtime(self.opens_at).date()
+
+    @property
+    def start_time(self):
+        return timezone.localtime(self.opens_at).time()
+
+    @property
+    def end_time(self):
+        return timezone.localtime(self.closes_at).time()
+
+    @property
     def date_label(self):
+        day = self.date
         return "%s %d %s" % (
-            _WEEKDAYS[self.date.weekday()], self.date.day, _MONTHS[self.date.month - 1],
+            _WEEKDAYS[day.weekday()], day.day, _MONTHS[day.month - 1],
         )
 
     @property
     def time_label(self):
         return "%s – %s" % (
-            self.start_time.strftime("%H:%M"), self.end_time.strftime("%H:%M"),
+            timezone.localtime(self.opens_at).strftime("%H:%M"),
+            timezone.localtime(self.closes_at).strftime("%H:%M"),
         )
-
-    @property
-    def is_convoked(self):
-        return self.status == self.STATUS_CONVOKED
 
     def deposit_window(self):
-        """Début et fin de l'épreuve en datetimes aware."""
-        return (
-            timezone.make_aware(datetime.combine(self.date, self.start_time)),
-            timezone.make_aware(datetime.combine(self.date, self.end_time)),
-        )
+        return self.opens_at, self.closes_at
 
     @property
     def access_status(self):
-        """'before' | 'open' | 'after' — accès au sujet et au dépôt.
-
-        L'accès est strictement limité à la durée officielle de l'épreuve :
-        ni avant l'heure de début, ni après l'heure de fin.
-        """
-        start, end = self.deposit_window()
+        """'before' | 'open' | 'after' — état de la fenêtre QCM."""
         now = timezone.now()
-        if now < start:
+        if now < self.opens_at:
             return "before"
-        if now > end:
+        if now > self.closes_at:
             return "after"
         return "open"
 
     @property
-    def deposit_status(self):
-        """Alias d'accès au dépôt de copie (rétro-compatibilité)."""
-        return self.access_status
-
-    @property
-    def deposit_open(self):
-        """Le dépôt de copie est ouvert uniquement pendant la durée de l'épreuve."""
+    def is_open(self):
         return self.access_status == "open"
 
     @property
@@ -188,75 +211,11 @@ class ExamSession(models.Model):
         return "%s, %s" % (self.date_label, self.time_label)
 
 
-def subject_upload_path(instance, filename):
-    ext = filename.rsplit(".", 1)[-1].lower() or "pdf"
-    return "exam_subjects/%s/%s.%s" % (
-        instance.session_id, uuid.uuid4().hex, ext,
-    )
-
-
-class ExamSubject(models.Model):
-    """Sujet d'épreuve déposé puis publié par l'enseignant.
-
-    Le sujet n'est visible des étudiants qu'une fois publié, et uniquement
-    pendant la durée officielle de l'épreuve.
-    """
-
-    university = models.ForeignKey(
-        University, on_delete=models.CASCADE,
-        related_name="exam_subjects", verbose_name="Université",
-    )
-    session = models.OneToOneField(
-        ExamSession, on_delete=models.CASCADE,
-        related_name="subject", verbose_name="Épreuve",
-    )
-    file = models.FileField("Fichier PDF", upload_to=subject_upload_path)
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="uploaded_exam_subjects", verbose_name="Déposé par",
-    )
-    published_at = models.DateTimeField("Publié le", null=True, blank=True)
-    created_at = models.DateTimeField("Déposé le", auto_now_add=True)
-    updated_at = models.DateTimeField("Modifié le", auto_now=True)
-
-    class Meta:
-        verbose_name = "Sujet d'épreuve"
-        verbose_name_plural = "Sujets d'épreuve"
-
-    def __str__(self):
-        return "Sujet — %s" % self.session
-
-    def save(self, *args, **kwargs):
-        if self.session_id:
-            self.university_id = self.session.university_id
-        super().save(*args, **kwargs)
-
-    @property
-    def is_published(self):
-        return self.published_at is not None
-
-    @property
-    def availability_status(self):
-        """'draft' | 'before' | 'open' | 'after' — visibilité du sujet."""
-        if not self.is_published:
-            return "draft"
-        return self.session.access_status
-
-    @property
-    def is_available(self):
-        """Le sujet n'est téléchargeable que pendant la durée de l'épreuve."""
-        return self.availability_status == "open"
-
-    @property
-    def file_name(self):
-        return self.file.name.rsplit("/", 1)[-1] if self.file else ""
-
-
 class GradeRecord(models.Model):
     """Relevé officiel d'une classe pour un semestre.
 
-    Les valeurs du PV (effectif, admis, moyenne) alimentent les statistiques
-    de l'établissement et sont modifiables depuis la fiche du relevé.
+    Les compteurs sont recalculés depuis les notes QCM publiées : aucune
+    saisie manuelle n'est possible.
     """
 
     university = models.ForeignKey(
@@ -334,21 +293,8 @@ class GradeRecord(models.Model):
         return self.pv_signed and not self.transcript_published
 
 
-DEFAULT_CRITERIA = (
-    {"label": "Architecture & Rétropropagation", "weight": 5},
-    {"label": "Calcul du Gradient & Optimisation", "weight": 5},
-    {"label": "Régularisation & Prévention Surapprentissage", "weight": 5},
-    {"label": "Rigueur scientifique & Rédaction", "weight": 5},
-)
-
-
 class StudentGrade(models.Model):
-    """Note individuelle d'un étudiant pour une épreuve.
-
-    ``criteria`` conserve le détail critère par critère (libellé, barème,
-    points, appréciation) tel que saisi par le correcteur. La note globale
-    (``score``) est calculée à la validation.
-    """
+    """Note officielle d'un étudiant pour une session QCM."""
 
     STATUS_DRAFT = "brouillon"
     STATUS_VALIDATED = "validee"
@@ -377,7 +323,7 @@ class StudentGrade(models.Model):
     max_score = models.DecimalField(
         "Barème", max_digits=4, decimal_places=2, default=20,
     )
-    criteria = models.JSONField("Critères", default=list, blank=True)
+    is_absent = models.BooleanField("Absent", default=False)
     comment = models.TextField("Commentaire global", blank=True)
     status = models.CharField(
         "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT,
@@ -412,18 +358,8 @@ class StudentGrade(models.Model):
             raise ValidationError("L'étudiant et l'épreuve doivent appartenir à la même université.")
 
     @property
-    def criteria_total(self):
-        return sum(
-            (item.get("points") or 0)
-            for item in (self.criteria or [])
-        )
-
-    @property
     def max_total(self):
-        return sum(
-            (item.get("weight") or 0)
-            for item in (self.criteria or [])
-        ) or self.max_score
+        return self.max_score
 
     @property
     def score_label(self):
@@ -440,179 +376,10 @@ class StudentGrade(models.Model):
         return self.status == self.STATUS_PUBLISHED
 
 
-def copy_file_upload_path(instance, filename):
-    ext = filename.rsplit(".", 1)[-1].lower() or "pdf"
-    return "exam_copies/%s/%s.%s" % (
-        instance.session_id, uuid.uuid4().hex, ext,
-    )
-
-
-class ExamCopy(models.Model):
-    """Copie déposée par un étudiant pour une épreuve (PDF ou archive ZIP)."""
-
-    university = models.ForeignKey(
-        University, on_delete=models.CASCADE,
-        related_name="exam_copies", verbose_name="Université",
-    )
-    session = models.ForeignKey(
-        ExamSession, on_delete=models.CASCADE,
-        related_name="copies", verbose_name="Épreuve",
-    )
-    student = models.ForeignKey(
-        StudentProfile, on_delete=models.CASCADE,
-        related_name="exam_copies", verbose_name="Étudiant",
-    )
-    file = models.FileField(
-        "Copie (PDF/ZIP)", upload_to=copy_file_upload_path, blank=True,
-    )
-    original_name = models.CharField("Nom d'origine", max_length=255, blank=True)
-    file_size = models.PositiveBigIntegerField("Taille (octets)", default=0)
-    submitted_at = models.DateTimeField("Soumise le", null=True, blank=True)
-    created_at = models.DateTimeField("Créée le", auto_now_add=True)
-    updated_at = models.DateTimeField("Modifiée le", auto_now=True)
-
-    class Meta:
-        ordering = ("student__membership__user__last_name", "student__membership__user__first_name")
-        verbose_name = "Copie d'examen"
-        verbose_name_plural = "Copies d'examen"
-        constraints = [
-            models.UniqueConstraint(
-                fields=("session", "student"), name="unique_copy_per_session_student",
-            ),
-        ]
-
-    def __str__(self):
-        return "%s — %s" % (self.student, self.session.title)
-
-    def save(self, *args, **kwargs):
-        if self.session_id:
-            self.university_id = self.session.university_id
-        super().save(*args, **kwargs)
-
-    @property
-    def is_submitted(self):
-        return self.submitted_at is not None
-
-    @property
-    def page_count(self):
-        return self.pages.count()
-
-    @property
-    def has_file(self):
-        return bool(self.file)
-
-    @property
-    def has_content(self):
-        """Une copie contient soit un fichier PDF/ZIP, soit des pages scannées."""
-        return self.has_file or self.page_count > 0
-
-    @property
-    def file_extension(self):
-        name = (self.original_name or self.file.name or "").lower()
-        return name.rsplit(".", 1)[-1] if "." in name else ""
-
-    @property
-    def is_pdf(self):
-        return self.file_extension == "pdf"
-
-    @property
-    def is_zip(self):
-        return self.file_extension == "zip"
-
-
-def copy_upload_path(instance, filename):
-    ext = filename.rsplit(".", 1)[-1].lower() or "png"
-    return "exam_copies/%s/%s.%s" % (
-        instance.copy_id, uuid.uuid4().hex, ext,
-    )
-
-
-class ExamCopyPage(models.Model):
-    """Page numérisée d'une copie d'examen."""
-
-    copy = models.ForeignKey(
-        ExamCopy, on_delete=models.CASCADE, related_name="pages", verbose_name="Copie",
-    )
-    file = models.ImageField("Fichier", upload_to=copy_upload_path)
-    uploaded_at = models.DateTimeField("Téléversée le", auto_now_add=True)
-
-    class Meta:
-        ordering = ("pk",)
-        verbose_name = "Page de copie"
-        verbose_name_plural = "Pages de copie"
-
-    def __str__(self):
-        return "Page de %s" % self.copy
-
-
-class JuryMember(models.Model):
-    """Membre du jury d'un relevé de notes d'une classe."""
-
-    ROLE_PRESIDENT = "president"
-    ROLE_EXAMINER = "examinateur"
-    ROLE_CHOICES = (
-        (ROLE_PRESIDENT, "Présidence du jury"),
-        (ROLE_EXAMINER, "Examinateur"),
-    )
-
-    STATUS_INVITED = "invite"
-    STATUS_CONFIRMED = "confirme"
-    STATUS_CHOICES = (
-        (STATUS_INVITED, "Invité"),
-        (STATUS_CONFIRMED, "Confirmé"),
-    )
-
-    university = models.ForeignKey(
-        University, on_delete=models.CASCADE,
-        related_name="jury_members", verbose_name="Université",
-    )
-    grade_record = models.ForeignKey(
-        GradeRecord, on_delete=models.CASCADE,
-        related_name="jury_members", verbose_name="Relevé",
-    )
-    professor = models.ForeignKey(
-        ProfessorProfile, on_delete=models.CASCADE,
-        related_name="jury_memberships", verbose_name="Enseignant",
-    )
-    role_label = models.CharField(
-        "Rôle au jury", max_length=20, choices=ROLE_CHOICES, default=ROLE_EXAMINER,
-    )
-    status = models.CharField(
-        "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_INVITED,
-    )
-    invited_at = models.DateTimeField("Invité le", auto_now_add=True)
-    confirmed_at = models.DateTimeField("Confirmé le", null=True, blank=True)
-
-    class Meta:
-        ordering = ("role_label", "professor__membership__user__last_name")
-        verbose_name = "Membre de jury"
-        verbose_name_plural = "Membres de jury"
-        constraints = [
-            models.UniqueConstraint(
-                fields=("grade_record", "professor"),
-                name="unique_jury_member_per_record_professor",
-            ),
-        ]
-
-    def __str__(self):
-        return "%s — %s" % (self.professor, self.grade_record.school_class)
-
-    def save(self, *args, **kwargs):
-        if self.grade_record_id:
-            self.university_id = self.grade_record.university_id
-        super().save(*args, **kwargs)
-
-
-# ---------------------------------------------------------------------------
-# QCM générés par IA
-# ---------------------------------------------------------------------------
-
 class Quiz(models.Model):
-    """Questionnaire à choix multiple rattaché à une épreuve.
+    """Questionnaire à choix multiple rattaché à une session.
 
-    Le QCM est généré depuis le contenu du cours puis relu par l'enseignant.
-    Il n'est accessible aux étudiants que lorsqu'il est publié et que la
-    fenêtre d'ouverture est active.
+    La fenêtre d'accès est celle de la session : plus de dates dupliquées.
     """
 
     STATUS_DRAFT = "brouillon"
@@ -644,7 +411,7 @@ class Quiz(models.Model):
         "Durée (minutes)", default=60,
     )
     question_count = models.PositiveSmallIntegerField(
-        "Nombre de questions", default=30,
+        "Nombre de questions", default=0,
     )
     pass_score = models.DecimalField(
         "Note de validation", max_digits=4, decimal_places=2, default=10,
@@ -656,19 +423,11 @@ class Quiz(models.Model):
     status = models.CharField(
         "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT,
     )
-    opens_at = models.DateTimeField(
-        "Ouverture", null=True, blank=True,
-        help_text="Laisser vide pour utiliser l'horaire de l'épreuve.",
-    )
-    closes_at = models.DateTimeField(
-        "Fermeture", null=True, blank=True,
-        help_text="Laisser vide pour utiliser l'horaire de l'épreuve.",
-    )
     generated_by_ai = models.BooleanField("Généré par IA", default=False)
     ai_model = models.CharField("Modèle IA", max_length=80, blank=True)
-    source_chars = models.PositiveIntegerField(
-        "Caractères analysés", default=0,
-    )
+    source_chars = models.PositiveIntegerField("Caractères analysés", default=0)
+    ai_analysis = models.JSONField("Analyse IA", default=dict, blank=True)
+    ai_analysis_at = models.DateTimeField("Analysé le", null=True, blank=True)
     published_at = models.DateTimeField("Publié le", null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
@@ -678,7 +437,7 @@ class Quiz(models.Model):
     updated_at = models.DateTimeField("Modifié le", auto_now=True)
 
     class Meta:
-        ordering = ("session__date", "session__start_time")
+        ordering = ("session__opens_at",)
         verbose_name = "QCM"
         verbose_name_plural = "QCM"
 
@@ -691,10 +450,6 @@ class Quiz(models.Model):
             and self.course.university_id != self.university_id
         ):
             raise ValidationError("Le cours et le QCM doivent appartenir à la même université.")
-        if self.opens_at and self.closes_at and self.closes_at <= self.opens_at:
-            raise ValidationError({
-                "closes_at": "La fermeture doit être postérieure à l'ouverture.",
-            })
 
     def save(self, *args, **kwargs):
         if self.session_id:
@@ -702,9 +457,7 @@ class Quiz(models.Model):
         super().save(*args, **kwargs)
 
     def window(self):
-        """Bornes d'ouverture du QCM, avec repli sur l'horaire de l'épreuve."""
-        start, end = self.session.deposit_window()
-        return (self.opens_at or start, self.closes_at or end)
+        return self.session.deposit_window()
 
     @property
     def starts_at(self):
@@ -853,6 +606,8 @@ class QuizAttempt(models.Model):
         "Statut", max_length=20, choices=STATUS_CHOICES,
         default=STATUS_IN_PROGRESS,
     )
+    ai_feedback = models.JSONField("Feedback IA", default=dict, blank=True)
+    ai_feedback_at = models.DateTimeField("Feedback généré le", null=True, blank=True)
     created_at = models.DateTimeField("Créée le", auto_now_add=True)
     updated_at = models.DateTimeField("Modifiée le", auto_now=True)
 
@@ -878,6 +633,10 @@ class QuizAttempt(models.Model):
     @property
     def is_submitted(self):
         return self.submitted_at is not None
+
+    @property
+    def is_absent(self):
+        return self.status == self.STATUS_EXPIRED
 
     @property
     def is_expired(self):
@@ -937,3 +696,263 @@ class QuizAnswer(models.Model):
             and self.selected_choice
             and self.selected_choice.is_correct
         )
+
+class ProjectCriterion(models.Model):
+    """Critère d'évaluation d'un projet, pondéré pour le calcul de la note."""
+
+    session = models.ForeignKey(
+        ExamSession, on_delete=models.CASCADE,
+        related_name="project_criteria", verbose_name="Session",
+    )
+    label = models.CharField("Critère", max_length=180)
+    description = models.TextField("Attendu", blank=True)
+    weight = models.PositiveSmallIntegerField("Poids", default=1)
+    order = models.PositiveIntegerField("Ordre", default=0)
+    created_at = models.DateTimeField("Créé le", auto_now_add=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+        verbose_name = "Critère de projet"
+        verbose_name_plural = "Critères de projet"
+
+    def __str__(self):
+        return self.label
+
+    def save(self, *args, **kwargs):
+        self.label = (self.label or "").strip()
+        if self._state.adding and not self.order and self.session_id:
+            last = ProjectCriterion.objects.filter(
+                session_id=self.session_id,
+            ).aggregate(last=models.Max("order"))["last"]
+            self.order = (last or 0) + 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def ensure_defaults(cls, session):
+        """Crée une grille de départ si le professeur n'a encore rien défini."""
+        if session.project_criteria.exists():
+            return session.project_criteria.all()
+        defaults = (
+            ("Respect du cahier des charges", "Fonctionnalités demandées et contraintes respectées.", 3),
+            ("Qualité technique", "Code, structure, robustesse et bonnes pratiques.", 3),
+            ("Documentation", "README, commentaires et facilité de prise en main.", 2),
+            ("Présentation et lisibilité", "Organisation des fichiers et clarté de la livraison.", 2),
+        )
+        for order, (label, description, weight) in enumerate(defaults, start=1):
+            cls.objects.create(
+                session=session, label=label, description=description,
+                weight=weight, order=order,
+            )
+        return session.project_criteria.all()
+
+
+class ProjectSubmission(models.Model):
+    """Dépôt ZIP d'un étudiant pour une session de type projet."""
+
+    STATUS_SUBMITTED = "depose"
+    STATUS_AI_EVALUATED = "ia"
+    STATUS_MANUAL_REQUIRED = "manuel"
+    STATUS_GRADED = "note"
+    STATUS_CHOICES = (
+        (STATUS_SUBMITTED, "Déposé"),
+        (STATUS_AI_EVALUATED, "Évalué par IA"),
+        (STATUS_MANUAL_REQUIRED, "Notation manuelle requise"),
+        (STATUS_GRADED, "Noté"),
+    )
+
+    university = models.ForeignKey(
+        University, on_delete=models.CASCADE,
+        related_name="project_submissions", verbose_name="Université",
+    )
+    session = models.ForeignKey(
+        ExamSession, on_delete=models.CASCADE,
+        related_name="project_submissions", verbose_name="Session",
+    )
+    student = models.ForeignKey(
+        StudentProfile, on_delete=models.CASCADE,
+        related_name="project_submissions", verbose_name="Étudiant",
+    )
+    file = models.FileField(
+        "Archive ZIP", storage=ProtectedMediaStorage(),
+        upload_to=project_upload_path, max_length=255,
+    )
+    original_name = models.CharField("Nom d'origine", max_length=255, blank=True)
+    size = models.PositiveBigIntegerField("Taille (octets)", default=0)
+    submitted_at = models.DateTimeField("Déposé le", default=timezone.now)
+    updated_at = models.DateTimeField("Modifié le", auto_now=True)
+    status = models.CharField(
+        "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_SUBMITTED,
+    )
+    ai_result = models.JSONField("Évaluation IA", default=dict, blank=True)
+    ai_score = models.DecimalField(
+        "Note IA /20", max_digits=4, decimal_places=2, null=True, blank=True,
+    )
+    ai_model = models.CharField("Modèle IA", max_length=80, blank=True)
+    ai_evaluated_at = models.DateTimeField("Évalué par IA le", null=True, blank=True)
+    final_score = models.DecimalField(
+        "Note finale /20", max_digits=4, decimal_places=2, null=True, blank=True,
+    )
+    feedback = models.TextField("Commentaire du professeur", blank=True)
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="graded_project_submissions", verbose_name="Noté par",
+    )
+    graded_at = models.DateTimeField("Noté le", null=True, blank=True)
+
+    class Meta:
+        ordering = ("student__membership__user__last_name", "student__membership__user__first_name")
+        verbose_name = "Dépôt de projet"
+        verbose_name_plural = "Dépôts de projet"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("session", "student"), name="unique_project_submission_per_student",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s - %s" % (self.student, self.session.title)
+
+    def save(self, *args, **kwargs):
+        if self.session_id:
+            self.university_id = self.session.university_id
+        super().save(*args, **kwargs)
+
+    @property
+    def is_graded(self):
+        return self.final_score is not None
+
+    @property
+    def score_label(self):
+        value = self.final_score if self.final_score is not None else self.ai_score
+        if value is None:
+            return "-"
+        return ("%.2f" % value).rstrip("0").rstrip(".").replace(".", ",")
+
+    @property
+    def status_label(self):
+        return self.get_status_display()
+
+
+class OralTopic(models.Model):
+    """Sujet tiré au sort par un étudiant lors d'un examen oral."""
+
+    session = models.ForeignKey(
+        ExamSession, on_delete=models.CASCADE,
+        related_name="oral_topics", verbose_name="Session",
+    )
+    title = models.CharField("Sujet", max_length=200)
+    instructions = models.TextField("Consignes", blank=True)
+    duration_minutes = models.PositiveSmallIntegerField("Préparation (minutes)", default=10)
+    order = models.PositiveIntegerField("Ordre", default=0)
+    is_active = models.BooleanField("Actif", default=True)
+    created_at = models.DateTimeField("Créé le", auto_now_add=True)
+
+    class Meta:
+        ordering = ("order", "pk")
+        verbose_name = "Sujet d'oral"
+        verbose_name_plural = "Sujets d'oral"
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        self.title = (self.title or "").strip()
+        if self._state.adding and not self.order and self.session_id:
+            last = OralTopic.objects.filter(
+                session_id=self.session_id,
+            ).aggregate(last=models.Max("order"))["last"]
+            self.order = (last or 0) + 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def ensure_defaults(cls, session):
+        if session.oral_topics.exists():
+            return session.oral_topics.all()
+        subject = session.course_subject.name if session.course_subject_id else session.title
+        for index, letter in enumerate("ABC", start=1):
+            cls.objects.create(
+                session=session, order=index,
+                title="Sujet %s - %s" % (letter, subject),
+                instructions=(
+                    "Préparez une présentation de 10 minutes sur ce sujet, "
+                    "puis répondez aux questions du jury."
+                ),
+            )
+        return session.oral_topics.all()
+
+
+class OralAttempt(models.Model):
+    """Tirage et notation d'un étudiant pour un examen oral."""
+
+    STATUS_DRAWN = "tire"
+    STATUS_GRADED = "note"
+    STATUS_ABSENT = "absent"
+    STATUS_CHOICES = (
+        (STATUS_DRAWN, "Sujet tiré"),
+        (STATUS_GRADED, "Noté"),
+        (STATUS_ABSENT, "Absent"),
+    )
+
+    university = models.ForeignKey(
+        University, on_delete=models.CASCADE,
+        related_name="oral_attempts", verbose_name="Université",
+    )
+    session = models.ForeignKey(
+        ExamSession, on_delete=models.CASCADE,
+        related_name="oral_attempts", verbose_name="Session",
+    )
+    student = models.ForeignKey(
+        StudentProfile, on_delete=models.CASCADE,
+        related_name="oral_attempts", verbose_name="Étudiant",
+    )
+    topic = models.ForeignKey(
+        OralTopic, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="attempts", verbose_name="Sujet",
+    )
+    drawn_at = models.DateTimeField("Tiré le", default=timezone.now)
+    preparation_deadline = models.DateTimeField("Fin de préparation", null=True, blank=True)
+    notes = models.TextField("Notes du professeur", blank=True)
+    score = models.DecimalField(
+        "Note /20", max_digits=4, decimal_places=2, null=True, blank=True,
+    )
+    feedback = models.TextField("Commentaire", blank=True)
+    status = models.CharField(
+        "Statut", max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAWN,
+    )
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="graded_oral_attempts", verbose_name="Noté par",
+    )
+    graded_at = models.DateTimeField("Noté le", null=True, blank=True)
+
+    class Meta:
+        ordering = ("-drawn_at",)
+        verbose_name = "Passage oral"
+        verbose_name_plural = "Passages oraux"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("session", "student"), name="unique_oral_attempt_per_student",
+            ),
+        ]
+
+    def __str__(self):
+        return "%s - %s" % (self.student, self.session.title)
+
+    def save(self, *args, **kwargs):
+        if self.session_id:
+            self.university_id = self.session.university_id
+        super().save(*args, **kwargs)
+
+    @property
+    def is_graded(self):
+        return self.score is not None
+
+    @property
+    def score_label(self):
+        if self.score is None:
+            return "-"
+        return ("%.2f" % self.score).rstrip("0").rstrip(".").replace(".", ",")
+
+    @property
+    def status_label(self):
+        return self.get_status_display()

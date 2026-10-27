@@ -187,11 +187,6 @@ class SignUpForm(UserCreationForm):
         cleaned = super().clean()
         if not cleaned.get("password2") and cleaned.get("password1"):
             cleaned["password2"] = cleaned["password1"]
-        if cleaned.get("role") == "etudiant":
-            if not (cleaned.get("level") or "").strip():
-                self.add_error("level", "Choisissez votre niveau.")
-            if not (cleaned.get("section") or "").strip():
-                self.add_error("section", "Choisissez votre section.")
         return cleaned
 
     def clean_role(self):
@@ -218,10 +213,15 @@ class SignUpForm(UserCreationForm):
 
         university = self.cleaned_data["university"]
         role = Role.STUDENT if self.cleaned_data.get("role") == "etudiant" else Role.PROFESSOR
-        # Toute inscription est désormais validée par l'administration de
-        # l'université : aucun compte n'est activé automatiquement.
+        domain = email.rsplit("@", 1)[-1].lower()
+        official_domain = bool(university.email_domain) and (
+            domain == university.email_domain.strip().lower().lstrip("@")
+        )
+        # Les étudiants qui utilisent le domaine officiel sont activés
+        # immédiatement ; les autres inscriptions restent en attente.
         membership = Membership.objects.create(
-            user=user, university=university, role=role, is_active=False,
+            user=user, university=university, role=role,
+            is_active=role == Role.STUDENT and official_domain,
         )
         profile = membership.ensure_profile()
         if role == Role.STUDENT and profile is not None:
@@ -560,7 +560,7 @@ class SchoolClassForm(StyledFormMixin, forms.ModelForm):
         model = SchoolClass
         fields = (
             "name", "level", "section", "study_program", "program",
-            "academic_year", "description",
+            "academic_year", "description", "professors",
         )
 
     def __init__(self, *args, university=None, **kwargs):
@@ -595,6 +595,21 @@ class SchoolClassForm(StyledFormMixin, forms.ModelForm):
         else:
             self.fields.pop("study_program")
 
+        professors = self.fields.get("professors")
+        if professors is not None:
+            professors.queryset = ProfessorProfile.objects.filter(
+                membership__university=university,
+            ).select_related("membership__user").order_by(
+                "membership__user__last_name", "membership__user__first_name",
+            )
+            professors.required = False
+            professors.label = "Professeurs"
+            professors.widget = forms.CheckboxSelectMultiple()
+            professors.help_text = (
+                "Les professeurs qui enseignent déjà une matière de cette classe "
+                "ne peuvent pas être retirés ici."
+            )
+
     def clean(self):
         cleaned = super().clean()
         name = cleaned.get("name")
@@ -609,7 +624,31 @@ class SchoolClassForm(StyledFormMixin, forms.ModelForm):
             )
         if self.instance.pk:
             self._check_teaching_assignments(cleaned)
+            self._check_professors(cleaned)
         return cleaned
+
+    def _check_professors(self, cleaned):
+        professors = cleaned.get("professors")
+        if professors is None:
+            return
+        selected = {professor.pk for professor in professors}
+        assigned = self.instance.teaching_assignments.select_related(
+            "professor__membership__user",
+        )
+        blocked = [
+            assignment.professor for assignment in assigned
+            if assignment.professor_id not in selected
+        ]
+        if blocked:
+            names = ", ".join(
+                professor.user.get_full_name() or professor.user.email
+                for professor in blocked
+            )
+            self.add_error(
+                "professors",
+                "Impossible de retirer un professeur qui enseigne dans cette classe : %s."
+                % names,
+            )
 
     def _check_teaching_assignments(self, cleaned):
         """Les affectations du module cours doivent rester cohérentes avec la classe."""
@@ -646,15 +685,18 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
         ).select_related("membership__user")
         # On ne propose que les étudiants du niveau/section de la classe, ou
         # ceux qui y sont déjà rattachés (pour modifier un groupe existant).
-        matching = Q(level__iexact=school_class.level)
+        # Un étudiant sans niveau renseigné reste sélectionnable : il pourra
+        # être rattaché à la classe par l'administration.
+        matching = Q(level__iexact=school_class.level) | Q(level="")
         if school_class.section:
             matching &= Q(section__iexact=school_class.section)
         students = students.filter(
-            matching | Q(groups__school_class=school_class)
+            (matching & Q(groups__isnull=True))
+            | Q(groups__school_class=school_class)
         ).distinct()
         self.fields["students"].queryset = students
         self.fields["students"].help_text = (
-            "Seuls les étudiants du niveau et de la section de la classe sont proposés. "
+            "Les étudiants déjà affectés à une autre classe ne sont pas proposés. "
             "La classe ne peut pas dépasser %d étudiants." % MAX_STUDENTS_PER_CLASS
         )
 
@@ -671,23 +713,6 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
         capacity, students = cleaned.get("capacity"), cleaned.get("students")
         if students is not None and self.school_class is not None:
             selected_ids = [student.pk for student in students]
-            foreign_ids = list(
-                StudentGroup.objects.filter(students__pk__in=selected_ids)
-                .exclude(school_class=self.school_class)
-                .values_list("students__pk", flat=True)
-            )
-            if foreign_ids:
-                names = ", ".join(
-                    student.user.get_full_name() or student.user.email
-                    for student in StudentProfile.objects.filter(
-                        pk__in=foreign_ids,
-                    ).select_related("membership__user")[:3]
-                )
-                self.add_error(
-                    "students",
-                    "Ces étudiants appartiennent déjà à une autre classe : %s." % names,
-                )
-
             other_groups = StudentGroup.objects.filter(school_class=self.school_class)
             if self.instance.pk:
                 other_groups = other_groups.exclude(pk=self.instance.pk)
@@ -706,6 +731,81 @@ class StudentGroupForm(StyledFormMixin, forms.ModelForm):
                 "students",
                 "Le groupe dépasse sa capacité (%s / %s)." % (len(students), capacity),
             )
+        return cleaned
+
+
+class ClassStudentAssignForm(forms.Form):
+    """Affecte directement un étudiant sans groupe à un groupe de la classe."""
+
+    student = forms.ModelChoiceField(
+        label="Étudiant",
+        queryset=StudentProfile.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un étudiant.",
+            "invalid_choice": "Sélectionnez un étudiant valide.",
+        },
+    )
+    group = forms.ModelChoiceField(
+        label="Groupe",
+        queryset=StudentGroup.objects.none(),
+        error_messages={
+            "required": "Sélectionnez un groupe.",
+            "invalid_choice": "Sélectionnez un groupe valide.",
+        },
+    )
+
+    def __init__(self, *args, school_class=None, **kwargs):
+        self.school_class = school_class
+        super().__init__(*args, **kwargs)
+        students = StudentProfile.objects.filter(
+            university=school_class.university,
+            membership__is_active=True,
+            groups__isnull=True,
+        ).select_related("membership__user").order_by(
+            "membership__user__last_name", "membership__user__first_name",
+        )
+        self.fields["student"].queryset = students
+        self.fields["student"].label_from_instance = self._student_label
+        self.fields["group"].queryset = school_class.groups.order_by("name")
+        self.fields["group"].label_from_instance = self._group_label
+
+    def _student_label(self, student):
+        user = student.membership.user
+        name = user.get_full_name() or user.email
+        details = " · ".join(
+            value for value in (student.level, student.section) if value
+        )
+        return "%s — %s" % (name, details) if details else name
+
+    def _group_label(self, group):
+        total = group.students.count()
+        if group.capacity:
+            return "%s (%d/%d)" % (group.name, total, group.capacity)
+        return "%s (%d étudiant%s)" % (group.name, total, "" if total == 1 else "s")
+
+    def clean(self):
+        cleaned = super().clean()
+        student = cleaned.get("student")
+        group = cleaned.get("group")
+        if self.school_class is None:
+            return cleaned
+        if self.school_class.seats_left <= 0:
+            raise forms.ValidationError(
+                "La classe est complète (%d étudiants maximum)."
+                % MAX_STUDENTS_PER_CLASS
+            )
+        if group is not None and group.school_class_id != self.school_class.pk:
+            self.add_error("group", "Ce groupe n'appartient pas à cette classe.")
+        if student is not None and student.groups.exists():
+            self.add_error("student", "Cet étudiant appartient déjà à une classe.")
+        if group is not None and group.capacity:
+            if group.students.count() >= group.capacity:
+                self.add_error(
+                    "group",
+                    "Ce groupe est complet (%d/%d)." % (
+                        group.students.count(), group.capacity,
+                    ),
+                )
         return cleaned
 
 

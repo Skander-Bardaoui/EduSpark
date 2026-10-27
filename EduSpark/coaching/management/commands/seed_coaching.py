@@ -30,6 +30,7 @@ from coaching.models import (
     TutoringSession,
     TutoringSlot,
 )
+from coaching.meeting import generate_meeting_url
 from coaching.services import academic_year_for, sync_student_attendance
 
 PARIS = "Université Paris Cité"
@@ -772,10 +773,7 @@ class Command(BaseCommand):
                 ends_at=starts_at + timedelta(minutes=30),
                 mode=mode,
                 location=location,
-                meeting_url=(
-                    "https://visio.eduspark.example/seed-%s-%02d"
-                    % (professor.pk, index) if mode == TutoringSlot.MODE_VIDEO else ""
-                ),
+                meeting_url="",
                 status=status,
                 reference=reference,
                 created_by=professor.membership.user,
@@ -795,6 +793,11 @@ class Command(BaseCommand):
         session.school_class = school_class
         for field, value in values.items():
             setattr(session, field, value)
+        if (
+            session.status in (TutoringSession.STATUS_ACCEPTED, TutoringSession.STATUS_COMPLETED)
+            and not session.meeting_url
+        ):
+            session.meeting_url = generate_meeting_url()
         session.save()
         return session
 
