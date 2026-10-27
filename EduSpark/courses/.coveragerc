@@ -1,0 +1,19 @@
+# Couverture du module cours, depuis le dossier EduSpark/ :
+#   ..\.venv\Scripts\python.exe -m coverage run --rcfile=courses/.coveragerc manage.py test courses
+#   ..\.venv\Scripts\python.exe -m coverage report --rcfile=courses/.coveragerc
+#   ..\.venv\Scripts\python.exe -m coverage html --rcfile=courses/.coveragerc   (rapport HTML détaillé)
+[run]
+branch = True
+source = courses
+omit =
+    */migrations/*
+    */tests/*
+
+[report]
+skip_empty = True
+show_missing = True
+sort = Cover
+
+[html]
+directory = courses/docs/coverage_html
+title = Couverture du module cours

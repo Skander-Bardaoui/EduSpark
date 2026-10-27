@@ -1,0 +1,3 @@
+# Outils de développement du module cours (non nécessaires en production).
+#   ..\.venv\Scripts\python.exe -m pip install -r courses\requirements-dev.txt
+coverage==7.17.0
