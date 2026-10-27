@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+{% include "includes/theme_init.html" %}
 <title>Invitation — Hub Éducatif Multimodal</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -12,10 +13,10 @@
 {% include "portal/_tailwind_admin.html" %}
 <style>
 html,body{margin:0;padding:0;}
-:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid #004191;outline-offset:2px;}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{outline:2px solid rgb(var(--md-primary));outline-offset:2px;}
 </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-[#eef4ff] via-surface to-[#f6f1ff] font-body-md text-on-surface antialiased">
+<body class="min-h-screen bg-gradient-to-br from-[rgb(var(--page-tint-from))] via-surface to-[rgb(var(--page-tint-to))] font-body-md text-on-surface antialiased">
 <main class="mx-auto flex min-h-screen w-full max-w-[560px] flex-col justify-center px-4 py-10" id="main-content">
 <div class="mb-6 flex items-center justify-center gap-3">
 <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-lg"><span class="material-symbols-outlined text-[26px]">school</span></span>

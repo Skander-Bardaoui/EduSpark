@@ -185,6 +185,34 @@ class ValidateSyllabusTests(SimpleTestCase):
         with self.assertRaises(ai.LocalUnavailable):
             ai.clean_topics({"themes": []})
 
+    def test_clean_topics_drops_chinese_japanese_and_korean(self):
+        topics = ai.clean_topics({"topics": ["测试和验证软件", "Analyse statique", "テスト", "테스트", "Jira集成", "الاختبار"]})
+        self.assertEqual(topics, ["Analyse statique", "الاختبار"])
+
+
+class LocalReaderLanguageTests(SimpleTestCase):
+    def test_target_language_is_explicit_in_the_prompt(self):
+        with mock.patch("courses.services.ai.requests.post", return_value=ollama_response(["Graphes"])) as post:
+            self.assertEqual(ai.local_extract_topics("Documents", "en"), ["Graphes"])
+        messages = post.call_args.kwargs["json"]["messages"]
+        self.assertIn("rédigés en anglais", messages[0]["content"])
+        self.assertIn("chinois", messages[0]["content"])
+        self.assertTrue(messages[1]["content"].endswith("chaque thème rédigé en anglais."))
+
+    def test_chinese_answer_is_retried_with_a_language_reminder(self):
+        answers = [ollama_response(["测试和验证软件", "静态测试工具"]), ollama_response(["Test et validation"])]
+        with mock.patch("courses.services.ai.requests.post", side_effect=answers) as post:
+            self.assertEqual(ai.local_extract_topics("Documents"), ["Test et validation"])
+        retry = post.call_args_list[1].kwargs["json"]["messages"]
+        self.assertEqual([m["role"] for m in retry], ["system", "user", "assistant", "user"])
+        self.assertIn("pas en français", retry[-1]["content"])
+
+    def test_still_unusable_after_retry_falls_back_to_api_only(self):
+        answers = [ollama_response(["测试"]), ollama_response(["软件"])]
+        with mock.patch("courses.services.ai.requests.post", side_effect=answers), \
+                self.assertRaises(ai.LocalUnavailable):
+            ai.local_extract_topics("Documents")
+
 
 # ---------------------------------------------------------------------------
 # Pipeline

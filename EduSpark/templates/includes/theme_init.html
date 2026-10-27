@@ -1,0 +1,14 @@
+{% load static %}{# À inclure tout en haut du <head>, avant toute feuille de style : applique le thème choisi avant le premier rendu (pas de flash). Sans JavaScript, theme.css suit prefers-color-scheme. #}
+<script>
+(function (root) {
+  var pref = 'system';
+  try { pref = localStorage.getItem('eduspark-theme') || 'system'; } catch (e) {}
+  if (pref !== 'light' && pref !== 'dark') pref = 'system';
+  var dark = pref === 'dark' || (pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  root.setAttribute('data-theme-pref', pref);
+})(document.documentElement);
+</script>
+<link href="{% static 'theme/theme.css' %}" rel="stylesheet"/>
+<link href="{% static 'theme/components.css' %}" rel="stylesheet"/>
+<script defer src="{% static 'theme/theme.js' %}"></script>

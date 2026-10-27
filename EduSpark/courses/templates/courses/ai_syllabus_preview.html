@@ -13,6 +13,7 @@
 <span class="sr-only">Mode : </span>{{ mode_label }}
 </span>
 <span class="text-[12px] text-on-surface-variant">{{ course.subject.code }} · {{ course.title }}</span>
+{% if timings %}<span class="inline-flex items-center gap-1 text-[12px] text-on-surface-variant" data-ai-timings><span class="material-symbols-outlined text-[16px]" aria-hidden="true">timer</span>Généré en {{ timings.total|floatformat:1 }} s (analyse locale {{ timings.local|floatformat:1 }} s · rédaction {{ timings.api|floatformat:1 }} s)</span>{% endif %}
 </div>
 </div>
 <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{{ detail_url }}"><span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>Annuler</a>

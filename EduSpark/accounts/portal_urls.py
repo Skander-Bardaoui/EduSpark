@@ -1,10 +1,12 @@
 from django.urls import path
 
-from . import admin_views, class_views, invitation_views, member_views, portal_views
+from . import accessibility, admin_views, class_views, invitation_views, member_views, portal_views
 
 app_name = "portal"
 
 urlpatterns = [
+    # Préférences du menu Accessibilité (tous les rôles)
+    path("compte/accessibilite/", accessibility.accessibility_preferences, name="accessibility_preferences"),
     # Université courante
     path("universite/changer/", portal_views.university_switch, name="university_switch"),
     # Plateforme : universités

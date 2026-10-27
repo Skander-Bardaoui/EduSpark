@@ -1,0 +1,68 @@
+{# Réglages Accessibilité. Paramètre : prefix (ids uniques, le bloc peut apparaître deux fois). Tous les blocs [data-a11y-settings] restent synchronisés (portal/_a11y_script.html). #}
+<div class="flex flex-col gap-5" data-a11y-settings="">
+<fieldset class="flex flex-col gap-2">
+<legend class="mb-1 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Taille du texte</legend>
+<div class="grid grid-cols-4 gap-2">
+{% for value, label in a11y_text_sizes %}
+<label class="relative flex min-h-[44px] cursor-pointer items-center justify-center rounded-xl border border-outline-variant/70 bg-surface-container-low px-2 text-sm font-semibold text-on-surface transition-colors hover:border-primary/60 has-[:checked]:border-primary has-[:checked]:bg-primary-fixed has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary" for="{{ prefix }}-text-size-{{ forloop.counter }}">
+<input class="sr-only" data-a11y-radio="text_size" id="{{ prefix }}-text-size-{{ forloop.counter }}" name="{{ prefix }}-text_size" type="radio" value="{{ value|stringformat:'s' }}"/>
+{{ label }}
+</label>
+{% endfor %}
+</div>
+</fieldset>
+
+<fieldset class="flex flex-col gap-2">
+<legend class="mb-1 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Thème</legend>
+<div class="grid grid-cols-3 gap-2">
+{% for value, label, icon in a11y_themes %}
+<label class="relative flex min-h-[44px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-outline-variant/70 bg-surface-container-low px-2 text-sm font-semibold text-on-surface transition-colors hover:border-primary/60 has-[:checked]:border-primary has-[:checked]:bg-primary-fixed has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary" for="{{ prefix }}-theme-{{ value }}">
+<input class="sr-only" data-a11y-radio="theme" id="{{ prefix }}-theme-{{ value }}" name="{{ prefix }}-theme" type="radio" value="{{ value }}"/>
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">{{ icon }}</span>{{ label }}
+</label>
+{% endfor %}
+</div>
+</fieldset>
+
+<ul class="flex flex-col divide-y divide-outline-variant/40 rounded-2xl border border-outline-variant/50">
+{% for key, label, description in a11y_switches %}
+<li class="flex items-center justify-between gap-4 px-4 py-3">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface" id="{{ prefix }}-{{ key }}-label">{{ label }}</p>
+<p class="text-xs text-on-surface-variant" id="{{ prefix }}-{{ key }}-desc">{{ description }}</p>
+</div>
+<button aria-checked="false" aria-describedby="{{ prefix }}-{{ key }}-desc" aria-labelledby="{{ prefix }}-{{ key }}-label" class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full bg-outline-variant transition-colors aria-checked:bg-primary" data-a11y-switch="{{ key }}" role="switch" type="button">
+<span aria-hidden="true" class="ml-1 h-5 w-5 rounded-full bg-surface-container-lowest shadow transition-transform"></span>
+</button>
+</li>
+{% endfor %}
+</ul>
+
+<fieldset class="flex flex-col gap-2">
+<legend class="mb-1 text-xs font-bold uppercase tracking-wide text-on-surface-variant">Lecture à voix haute</legend>
+<div class="grid grid-cols-3 gap-2">
+{% for value, label in a11y_speech_rates %}
+<label class="relative flex min-h-[44px] cursor-pointer items-center justify-center rounded-xl border border-outline-variant/70 bg-surface-container-low px-2 text-sm font-semibold text-on-surface transition-colors hover:border-primary/60 has-[:checked]:border-primary has-[:checked]:bg-primary-fixed has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary" for="{{ prefix }}-speech-{{ forloop.counter }}">
+<input class="sr-only" data-a11y-radio="speech_rate" id="{{ prefix }}-speech-{{ forloop.counter }}" name="{{ prefix }}-speech_rate" type="radio" value="{{ value|stringformat:'s' }}"/>
+{{ label }} ({{ value|stringformat:'s' }}×)
+</label>
+{% endfor %}
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-primary px-4 text-sm font-bold text-on-primary transition-colors hover:bg-primary-container disabled:opacity-50" data-a11y-speak="" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">record_voice_over</span>Lire la sélection ou la page
+</button>
+<button class="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-outline-variant/70 px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high disabled:opacity-50" data-a11y-stop="" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">stop_circle</span>Arrêter
+</button>
+</div>
+<p class="hidden text-xs text-on-surface-variant" data-a11y-speech-unsupported="">La lecture à voix haute n'est pas disponible dans ce navigateur.</p>
+</fieldset>
+
+<div class="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/40 pt-4">
+<p aria-live="polite" class="min-h-[1.25rem] text-xs font-semibold text-on-surface-variant" data-a11y-status="" role="status"></p>
+<button class="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-outline-variant/70 px-4 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-high" data-a11y-reset="" type="button">
+<span aria-hidden="true" class="material-symbols-outlined text-[18px]">restart_alt</span>Réinitialiser
+</button>
+</div>
+</div>

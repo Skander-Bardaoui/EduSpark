@@ -286,6 +286,103 @@ cd EduSpark
 # avec pytest :  pip install pytest pytest-django  puis  pytest courses/tests/test_ai.py
 ```
 
+## Thème clair / sombre
+
+Toute la plateforme partage un seul système de thème, avec trois choix :
+**Système** (par défaut), **Clair** et **Sombre**. Le bouton se trouve dans la
+barre du haut du portail. Le choix est mémorisé dans le navigateur
+(`localStorage`, aucune donnée en base) et appliqué avant le premier rendu,
+sans flash. En mode Système, le thème suit l'OS en direct.
+
+### Architecture partagée (aucune dépendance Python entre modules)
+
+| Fichier | Rôle |
+| --- | --- |
+| `EduSpark/static/theme/theme.css` | Tokens : palette claire (inchangée) et sombre, en variables CSS `R G B` |
+| `EduSpark/static/theme/components.css` | Adaptations communes : ombres, edge lighting, menus et modales, formulaires, médias, transition |
+| `EduSpark/static/theme/theme.js` | Bouton Système → Clair → Sombre (< 2 Ko), annonce `aria-live`, événement `themechange` |
+| `EduSpark/templates/includes/theme_init.html` | Script anti-flash en tête de `<head>` + chargement du CSS et du JS |
+| `EduSpark/templates/includes/theme_toggle.html` | Bouton accessible (inclus dans `portal/_topbar.html`) |
+| `EduSpark/templates/includes/tailwind_theme_colors.html` | Couleurs Tailwind lues dans les variables (`rgb(var(--md-x) / <alpha-value>)`) |
+
+Les pages du portail (`portal/base.html`) chargent tout automatiquement. Les
+classes Tailwind existantes (`bg-surface-container-lowest`, `text-on-surface`,
+`text-primary`…) changent donc de valeur avec le thème, sans modification des
+templates.
+
+### Philosophie
+
+- **Nuances, pas de noir pur** : fond gris très sombre légèrement bleuté (teinte
+  froide), texte principal blanc cassé, texte secondaire moins contrasté.
+- **Élévation** : plus un élément est au premier plan, plus il est clair (fond <
+  champs < cartes < menus / modales). Les ombres sont renforcées en sombre, les
+  cartes, menus et modales ont un liseré lumineux de 1 px (*edge lighting*), et
+  l'overlay des modales assombrit l'arrière-plan. Un état sélectionné change de
+  fond **sans** liseré : c'est un état, pas une couche.
+- **Accents** éclaircis et désaturés en sombre. Un statut n'est jamais porté par
+  la couleur seule (icône ou texte).
+- **Impression / PDF** toujours en thème clair (les blocs sombres sont limités à
+  `@media screen`).
+
+### Tokens
+
+Rôles génériques (pour du CSS maison) : `--bg`, `--surface-1` … `--surface-6`,
+`--text`, `--text-muted`, `--border`, `--edge-light`, `--accent`,
+`--accent-contrast`, `--success`, `--warning`, `--danger`, `--info`,
+`--shadow-sm/md/lg`, `--overlay`. Classes Tailwind : la palette Material du
+portail (`surface…`, `on-surface…`, `primary…`, `outline…`) plus `scrim`
+(voile des modales), `hero-from/via/to` et `on-hero` (bandeaux dégradés
+sombres), `success`, `warning`, `info` et leurs conteneurs.
+
+Valeurs claires et sombres, échelle des surfaces et ratios de contraste :
+[`docs/theme-tokens.md`](docs/theme-tokens.md).
+
+### Comment mon module adopte le thème (5 étapes)
+
+1. **Hériter du portail** : `{% extends portal_base_template %}`. Une page hors
+   portail inclut `{% include "includes/theme_init.html" %}` juste après la
+   balise viewport.
+2. **Utiliser les classes par rôle**, jamais une couleur : `bg-surface-container-lowest`
+   plutôt que `bg-white`, `text-on-surface-variant` plutôt que `text-gray-600`,
+   `bg-scrim/60` pour un overlay de modale, `text-success` / `text-warning` pour
+   un statut (toujours avec une icône ou un texte).
+3. **Bandeau dégradé sombre** : `bg-gradient-to-br from-hero-from via-hero-via
+   to-hero-to text-on-hero`, et `bg-on-hero text-hero-via` pour un bouton clair
+   posé dessus.
+4. **Zone qui doit rester claire** (photo avec voile, aperçu inversé) : ajouter
+   `data-theme-scope="light"` sur son conteneur.
+5. **CSS ou JS maison** : `rgb(var(--text))`, `rgb(var(--md-primary) / .2)` ;
+   écouter `window.addEventListener('themechange', …)` pour redessiner un
+   graphique ou un calendrier.
+
+### Tester
+
+```powershell
+cd EduSpark
+..\.venv\Scripts\python.exe manage.py test EduSpark.tests      # gabarits, une page par module, multi-tenant
+..\.venv\Scripts\python.exe scripts/check_contrast.py         # échoue si une paire passe sous WCAG AA
+..\.venv\Scripts\python.exe scripts/find_hardcoded_colors.py  # inventaire des couleurs en dur restantes
+```
+
+Vérification manuelle de chaque module : clair puis sombre (bouton de la barre
+du haut), mobile, zoom 200 %, navigation au clavier seul (focus visible),
+`prefers-contrast: more` et `prefers-reduced-motion` (outils de rendu du
+navigateur), aperçu avant impression (toujours clair).
+
+### Limites connues
+
+- Tailwind est chargé par CDN, en JavaScript : sans JS, le portail n'est pas mis
+  en forme du tout. Le thème, lui, suit `prefers-color-scheme` sans JS.
+- Hors thème, volontairement : la landing page, `accounts/auth.html` (sombre par
+  conception) et les pages de réinitialisation du mot de passe (claires).
+- Écarts de contraste du thème clair conservés pour ne pas changer le rendu :
+  ambre `warning` sur `surface-container` (2,75:1, icônes des forums) et
+  `on-tertiary-container` sur `tertiary-container` du portail admin (2,2:1).
+- Quelques classes de champs définies en Python (`accounts/forms.py`) gardent une
+  ombre de focus `rgba(...)` en dur ; elles restent lisibles dans les deux thèmes.
+- Les universités n'ont pas encore de couleur ni de logo propre : si on en
+  ajoute, prévoir une variante éclaircie de la couleur d'accent pour le sombre.
+
 ## URL principales
 
 | URL | Description |

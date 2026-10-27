@@ -12,6 +12,7 @@ import logging
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Max
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -23,9 +24,13 @@ from accounts.models import SchoolClass
 from .forms import ChapterDraftFormSet, SyllabusRequestForm
 from .mixins import ProfessorMixin
 from .models import Chapter, Course
-from .services import ai
+from .services import ai, jobs
+from .tasks import STATUS_OK, STATUS_UNAVAILABLE, generate_syllabus_task
 
 logger = logging.getLogger(__name__)
+
+JOBS_SESSION_KEY = "courses_ai_jobs"
+MAX_JOBS = 10
 
 EYEBROW = "Cours"
 PREVIEW_TEMPLATE = "courses/ai_syllabus_preview.html"
@@ -71,14 +76,33 @@ class _SyllabusMixin(ProfessorMixin):
         })
         return context
 
-    def preview_context(self, formset, mode, topics=(), local_status=""):
+    def preview_context(self, formset, mode, topics=(), local_status="", timings=None):
         return self.get_context_data(
             formset=formset,
             mode=mode,
             mode_label=MODE_LABELS[mode],
             topics=list(topics),
             local_notice=LOCAL_NOTICES.get(local_status, ""),
+            timings=timings,
         )
+
+    def render_result(self, result):
+        """Aperçu modifiable à partir du résultat de la tâche de génération."""
+        course = self.get_course()
+        if result.get("status") != STATUS_OK:
+            messages.warning(self.request, UNAVAILABLE_MESSAGE)
+            return redirect("courses:prof_ai_syllabus_manual", pk=course.pk)
+        formset = ChapterDraftFormSet(initial=[
+            {
+                "title": chapter["title"],
+                "objectives": "\n".join(chapter["objectives"]),
+                "duration_hours": chapter["duration_hours"],
+            }
+            for chapter in result["chapters"]
+        ])
+        return TemplateResponse(self.request, PREVIEW_TEMPLATE, self.preview_context(
+            formset, result["mode"], result["topics"], result["local_status"], result.get("timings"),
+        ))
 
 
 class SyllabusGenerateView(_SyllabusMixin, FormView):
@@ -101,29 +125,79 @@ class SyllabusGenerateView(_SyllabusMixin, FormView):
     def form_valid(self, form):
         course = self.get_course()
         try:
-            result = ai.generate_syllabus(
-                form.cleaned_data["title"], form.cleaned_data["level"],
-                course_id=course.pk, options=form.options(), user_id=self.request.user.pk,
-            )
+            ai.check_rate_limit(self.request.user.pk)
         except ai.RateLimitExceeded as error:
             messages.warning(self.request, str(error))
             return redirect("courses:prof_ai_syllabus_manual", pk=course.pk)
-        except ai.AIUnavailable as error:
-            logger.warning("Plan de cours IA indisponible (cours %s) : %s", course.pk, error)
-            messages.warning(self.request, UNAVAILABLE_MESSAGE)
-            return redirect("courses:prof_ai_syllabus_manual", pk=course.pk)
 
-        formset = ChapterDraftFormSet(initial=[
-            {
-                "title": chapter["title"],
-                "objectives": "\n".join(chapter["objectives"]),
-                "duration_hours": chapter["duration_hours"],
-            }
-            for chapter in result["chapters"]
-        ])
-        return TemplateResponse(self.request, PREVIEW_TEMPLATE, self.preview_context(
-            formset, result["mode"], result["topics"], result["local_status"],
-        ))
+        args = (form.cleaned_data["title"], form.cleaned_data["level"], course.pk, form.options())
+        job_id = jobs.submit(generate_syllabus_task, *args)
+        job = jobs.get(job_id)
+        if jobs.is_ready(job):  # tâche déjà terminée (exécution immédiate des tests)
+            return self.render_result(job_result(job))
+        remember_job(self.request, job_id, course.pk)
+        return redirect("courses:prof_ai_syllabus_wait", pk=course.pk, job_id=job_id)
+
+
+def job_result(job):
+    """Résultat d'une tâche terminée ; une tâche en échec ou expirée est « indisponible »."""
+    result = job and job.get("result")
+    return result if isinstance(result, dict) else {"status": STATUS_UNAVAILABLE}
+
+
+def remember_job(request, job_id, course_id):
+    """Seul le professeur qui a lancé une génération peut en suivre le résultat."""
+    known = request.session.get(JOBS_SESSION_KEY, {})
+    known = dict(list(known.items())[-(MAX_JOBS - 1):])
+    known[str(job_id)] = course_id
+    request.session[JOBS_SESSION_KEY] = known
+
+
+class _JobMixin(_SyllabusMixin):
+    """Tâche de génération lancée par ce professeur, pour ce cours (sinon 404)."""
+
+    def get_job_id(self):
+        job_id = str(self.kwargs["job_id"])
+        if self.request.session.get(JOBS_SESSION_KEY, {}).get(job_id) != self.get_course().pk:
+            raise Http404("Génération inconnue")
+        return job_id
+
+    def job_urls(self, job_id):
+        pk = self.get_course().pk
+        return {
+            "status_url": reverse("courses:prof_ai_syllabus_status", args=[pk, job_id]),
+            "result_url": reverse("courses:prof_ai_syllabus_result", args=[pk, job_id]),
+            "manual_url": reverse("courses:prof_ai_syllabus_manual", args=[pk]),
+        }
+
+
+class SyllabusWaitView(_JobMixin, ContextMixin, TemplateResponseMixin, View):
+    """Page d'attente : la génération tourne en arrière-plan (courses.services.jobs)."""
+
+    template_name = "courses/ai_syllabus_wait.html"
+
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response(self.get_context_data(**self.job_urls(self.get_job_id())))
+
+
+class SyllabusStatusView(_JobMixin, View):
+    """État de la tâche en JSON, interrogé par la page d'attente."""
+
+    def get(self, request, *args, **kwargs):
+        job = jobs.get(self.get_job_id())
+        state = job["state"] if job else "EXPIRED"
+        return JsonResponse({"state": state, "ready": jobs.is_ready(job)})
+
+
+class SyllabusResultView(_JobMixin, ContextMixin, View):
+    """Affiche l'aperçu dès que la tâche est terminée (sinon retour à l'attente)."""
+
+    def get(self, request, *args, **kwargs):
+        job_id = self.get_job_id()
+        job = jobs.get(job_id)
+        if not jobs.is_ready(job):
+            return redirect("courses:prof_ai_syllabus_wait", pk=self.get_course().pk, job_id=job_id)
+        return self.render_result(job_result(job))
 
 
 class SyllabusManualView(_SyllabusMixin, ContextMixin, TemplateResponseMixin, View):

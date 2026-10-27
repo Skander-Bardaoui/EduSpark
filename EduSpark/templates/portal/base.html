@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <meta content="web_dashboard" name="shell-type"/>
+{% include "includes/theme_init.html" %}
+{% include "portal/_a11y_head.html" %}
 <title>{% block title %}Hub Éducatif Multimodal{% endblock %}</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
@@ -14,15 +16,15 @@
 {% block tailwind_config %}{% endblock %}
 <style>
 @layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}
-*{scrollbar-width:thin;scrollbar-color:rgba(0,65,145,.30) rgba(6,22,75,.05);}
+*{scrollbar-width:thin;scrollbar-color:rgb(var(--md-primary) / .30) rgb(var(--md-on-surface) / .05);}
 ::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:rgba(6,22,75,.05);}
-::-webkit-scrollbar-thumb{background:rgba(0,65,145,.28);border-radius:9999px;}
-::-webkit-scrollbar-thumb:hover{background:rgba(0,65,145,.45);}
-.portal-nav-scroll{scrollbar-width:thin;scrollbar-color:rgba(0,65,145,0.22) transparent;}
+::-webkit-scrollbar-track{background:rgb(var(--md-on-surface) / .05);}
+::-webkit-scrollbar-thumb{background:rgb(var(--md-primary) / .28);border-radius:9999px;}
+::-webkit-scrollbar-thumb:hover{background:rgb(var(--md-primary) / .45);}
+.portal-nav-scroll{scrollbar-width:thin;scrollbar-color:rgb(var(--md-primary) / .22) transparent;}
 .portal-nav-scroll::-webkit-scrollbar{width:6px;}
 .portal-nav-scroll::-webkit-scrollbar-track{background:transparent;}
-.portal-nav-scroll::-webkit-scrollbar-thumb{background:rgba(0,65,145,0.18);border-radius:9999px;}
+.portal-nav-scroll::-webkit-scrollbar-thumb{background:rgb(var(--md-primary) / .18);border-radius:9999px;}
 .portal-table-scroll,[data-table-scroll]{overflow-x:auto;overflow-y:hidden;scrollbar-gutter:stable;}
 .portal-group>summary{list-style:none;}
 .portal-group>summary::-webkit-details-marker{display:none;}
@@ -32,7 +34,7 @@
 #portal-sidebar.is-open{transform:translateX(0);}
 @media (min-width:1024px){#portal-sidebar{transform:none;}}
 body.portal-drawer-open,body.portal-modal-open{overflow:hidden;}
-:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid #004191;outline-offset:2px;}
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid rgb(var(--md-primary));outline-offset:2px;}
 h1,h2,h3,h4,h5,h6,p,li,dd,dt,td,th{overflow-wrap:break-word;}
 main button:not([role="switch"]):not([data-check-toggle]):not(.filter-chip):not(.tab-btn),
 main a[role="button"]:not(.filter-chip):not(.tab-btn){min-height:32px;}
@@ -49,9 +51,9 @@ main textarea{font-size:14px!important;min-height:44px;}
 main textarea{min-height:96px;padding-top:10px;padding-bottom:10px;}
 main form label{font-size:13px;font-weight:600;}
 .filter-chip{display:inline-flex;align-items:center;gap:.375rem;min-height:32px;font-size:12px!important;line-height:1.1;}
-.filter-chip.is-active{background-color:#004191!important;border-color:#004191!important;color:#ffffff!important;}
-.filter-chip.is-active .material-symbols-outlined{color:#ffffff!important;}
-.tab-btn.is-active{background-color:#ffffff!important;color:#004191!important;box-shadow:0 1px 3px rgba(6,22,75,.14);}
+.filter-chip.is-active{background-color:rgb(var(--md-primary))!important;border-color:rgb(var(--md-primary))!important;color:rgb(var(--md-on-primary))!important;}
+.filter-chip.is-active .material-symbols-outlined{color:rgb(var(--md-on-primary))!important;}
+.tab-btn.is-active{background-color:rgb(var(--md-surface-container-lowest))!important;color:rgb(var(--md-primary))!important;box-shadow:0 1px 3px rgb(var(--md-scrim) / .14);}
 [data-check-item].is-done{opacity:.7;}
 [data-modal]{z-index:60!important;padding:1rem;}
 [data-modal]>div:not([class~="absolute"]){max-height:calc(100dvh - 2rem);overflow-y:auto;}
@@ -68,6 +70,7 @@ main form label{font-size:13px;font-weight:600;}
 {% block content %}{% endblock %}
 </div>
 {% include "portal/_flash.html" %}
+{% include "portal/_a11y_panel.html" %}
 <div aria-atomic="true" aria-live="polite" class="fixed bottom-5 right-5 z-[80] flex w-80 max-w-[calc(100vw-2.5rem)] flex-col gap-2" id="portal-toasts"></div>
 <div aria-labelledby="portal-delete-title" aria-modal="true" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#06164b]/60 p-4 backdrop-blur-sm" data-modal id="portal-confirm-delete-modal" role="dialog">
 <button aria-label="Fermer" class="absolute inset-0 cursor-default" data-portal-delete-cancel type="button"></button>
@@ -567,6 +570,7 @@ main form label{font-size:13px;font-weight:600;}
   });
 })();
 </script>
+{% include "portal/_a11y_script.html" %}
 {% block page_scripts %}{% endblock %}
 </body>
 </html>

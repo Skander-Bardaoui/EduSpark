@@ -1,0 +1,54 @@
+{% load static %}<!DOCTYPE html>
+{# Gabarit des pages d'erreur (403, 404, 500). Autonome : pas de Tailwind ni de contexte requis, pour s'afficher même quand le reste du site est en panne. #}
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="noindex" name="robots"/>
+{% include "includes/theme_init.html" %}
+<title>{% block title %}Erreur{% endblock %} — Hub Éducatif Multimodal</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:rgb(var(--md-background));color:rgb(var(--md-on-surface));font:16px/1.6 Inter,"Segoe UI",system-ui,sans-serif}
+a{color:rgb(var(--md-primary))}
+:focus-visible{outline:3px solid rgb(var(--md-primary));outline-offset:3px;border-radius:6px}
+.skip{position:absolute;left:-999px;top:1rem}
+.skip:focus{left:1rem;background:rgb(var(--md-surface-container-lowest));padding:.5rem 1rem;z-index:10}
+header,footer{padding:1rem 1.5rem;display:flex;align-items:center;gap:.75rem}
+header{border-bottom:1px solid rgb(var(--md-outline-variant) / .5)}
+.brand{font-weight:800;font-size:1.05rem;text-decoration:none;color:rgb(var(--md-on-surface))}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+.card{width:100%;max-width:560px;background:rgb(var(--md-surface-container-lowest));border:1px solid rgb(var(--md-outline-variant) / .5);border-radius:1.25rem;padding:2rem;box-shadow:var(--shadow-md);text-align:center}
+.code{margin:0;font:700 .8rem/1 "JetBrains Mono",ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;color:rgb(var(--md-primary))}
+h1{margin:.5rem 0 .75rem;font-size:1.75rem;line-height:1.25}
+.lead{margin:0 0 1.5rem;color:rgb(var(--md-on-surface-variant))}
+.detail{margin:-.75rem 0 1.5rem;font-size:.9rem;color:rgb(var(--md-on-surface-variant))}
+.actions{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 1.25rem;border-radius:999px;font-weight:700;font-size:.9rem;text-decoration:none;border:1px solid transparent}
+.btn-primary{background:rgb(var(--md-primary));color:rgb(var(--md-on-primary))}
+.btn-secondary{border-color:rgb(var(--md-outline-variant));color:rgb(var(--md-on-surface))}
+footer{justify-content:center;font-size:.8rem;color:rgb(var(--md-on-surface-variant))}
+</style>
+</head>
+<body>
+<a class="skip" href="#main-content">Aller au contenu</a>
+<header>
+<a class="brand" href="/">Hub Éducatif Multimodal</a>
+</header>
+<main id="main-content">
+<section aria-labelledby="error-title" class="card">
+<p class="code">Erreur {% block code %}{% endblock %}</p>
+<h1 id="error-title">{% block heading %}{% endblock %}</h1>
+<p class="lead">{% block lead %}{% endblock %}</p>
+{% block detail %}{% endblock %}
+<nav aria-label="Que faire ensuite" class="actions">
+<a class="btn btn-primary" href="/">Retour à l'accueil</a>
+<a class="btn btn-secondary" href="javascript:history.back()">Page précédente</a>
+</nav>
+</section>
+</main>
+<footer>
+<p>EduSpark · Hub Éducatif Multimodal</p>
+</footer>
+</body>
+</html>

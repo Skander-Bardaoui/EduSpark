@@ -54,16 +54,16 @@
 </dl>
 {% if primary_class.description %}<p class="mt-4 border-t border-outline-variant/40 pt-4 text-sm leading-relaxed text-on-surface-variant">{{ primary_class.description|linebreaksbr }}</p>{% endif %}
 </div>
-<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-[#002752] via-primary to-[#001a3f] p-5 text-white shadow-sm">
-<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">Mon identité étudiante</p>
-<p class="mt-2 font-headline-sm text-headline-sm text-white">{{ portal_user_name }}</p>
-<p class="mt-1 text-sm text-white/70">{{ profile.student_number|default:"Matricule non renseigné" }}</p>
-<div class="mt-4 rounded bg-white/10 p-4 ring-1 ring-white/15">
-<div class="flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Promotion</span><span>{{ profile.promotion|default:"—" }}</span></div>
-<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Filière</span><span class="truncate text-right">{{ profile.program|default:"—" }}</span></div>
-<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-white/80"><span>Classes</span><span>{{ stats.classes }}</span></div>
+<div class="rounded border border-outline-variant/40 bg-gradient-to-br from-hero-from via-hero-via to-hero-to p-5 text-on-hero shadow-sm">
+<p class="text-[11px] font-bold uppercase tracking-[0.16em] text-on-hero/60">Mon identité étudiante</p>
+<p class="mt-2 font-headline-sm text-headline-sm text-on-hero">{{ portal_user_name }}</p>
+<p class="mt-1 text-sm text-on-hero/70">{{ profile.student_number|default:"Matricule non renseigné" }}</p>
+<div class="mt-4 rounded bg-on-hero/10 p-4 ring-1 ring-on-hero/15">
+<div class="flex items-center justify-between gap-2 text-xs font-semibold text-on-hero/80"><span>Promotion</span><span>{{ profile.promotion|default:"—" }}</span></div>
+<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-on-hero/80"><span>Filière</span><span class="truncate text-right">{{ profile.program|default:"—" }}</span></div>
+<div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-on-hero/80"><span>Classes</span><span>{{ stats.classes }}</span></div>
 </div>
-<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 font-label-md text-label-md font-bold text-primary transition-transform hover:scale-[1.01]" href="{% url 'portal:student_profile' %}">
+<a class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-on-hero px-4 py-2.5 font-label-md text-label-md font-bold text-hero-via transition-transform hover:scale-[1.01]" href="{% url 'portal:student_profile' %}">
 <span class="material-symbols-outlined text-[18px]">badge</span>Voir mon profil
 </a>
 </div>
