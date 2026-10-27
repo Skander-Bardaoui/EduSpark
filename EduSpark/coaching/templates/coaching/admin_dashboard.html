@@ -1,589 +1,158 @@
 {% extends "portal/base_admin.html" %}
-{% block title %}Mon Tableau de bord Admin — Hub Éducatif Multimodal{% endblock %}
+{% block title %}Tableau de bord administration — Suivi &amp; pilotage{% endblock %}
 {% block content %}
-<main class="relative min-h-[calc(100vh-4rem)] bg-surface px-4 py-5 sm:px-6 xl:px-8 w-full" id="main-content"><div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5 pb-16">
-<!-- Fil d'Ariane & Contexte temporel -->
-<div class="flex items-center justify-between gap-4 mb-3">
-<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-data-metric text-data-metric">
-<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
-<span>Dernière synchro : Aujourd'hui à 09:42</span>
+<main class="min-h-[calc(100vh-4rem)] w-full bg-surface px-4 pb-10 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-5">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<div class="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+<span>Pilotage académique</span><span>·</span><span>{{ university.name }}</span><span>·</span><span>{{ academic_year }}</span>
 </div>
+<h1 class="mt-1 font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Tableau de bord de supervision</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
+  Données réelles de l'établissement : affectation des référents, assiduité, alertes de persévérance et actions de remédiation.
+</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ today_label }}</p>
 </div>
-<!-- En-tête de page & Actions principales -->
-<header class="flex flex-col xl:flex-row xl:items-end justify-between gap-5 mb-6">
-<div class="flex flex-col gap-1 max-w-3xl">
-<div class="flex items-center gap-2">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Gouvernance Académique</span>
-<span class="inline-block w-1 h-1 rounded-full bg-outline-variant"></span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">{{ portal_university.name }} - Rentrée S2</span>
-</div>
-<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Tableau de bord de Supervision Établissement</h1>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Indicateurs d'activité en temps réel, gouvernance des cohortes et alertes académiques - Année 2024-2025.</p>
-</div>
-<!-- Boutons d'actions groupés -->
-<div class="flex flex-wrap items-center gap-2.5">
-<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md hover:bg-secondary-fixed-dim transition-all shadow-sm" id="toggleAiPanelBtn" type="button">
-<span class="material-symbols-outlined text-[18px] text-secondary">auto_awesome</span>
-<span>Assistant IA Pilotage</span>
-</button>
-<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-on-surface-variant">upload_file</span>
-<span>Importer CSV</span>
-</button>
-<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors" type="button">
-<span class="material-symbols-outlined text-[18px] text-on-surface-variant">add_box</span>
-<span>Créer une classe</span>
-</button>
-<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-md" type="button">
-<span class="material-symbols-outlined text-[18px]">person_add</span>
-<span>+ Inviter un utilisateur</span>
-</button>
+<div class="flex flex-wrap gap-2">
+<a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:admin_monitoring' %}">
+<span class="material-symbols-outlined text-[18px]">monitoring</span>Suivi &amp; alertes
+</a>
+<a class="inline-flex items-center gap-2 rounded-full bg-surface-container-high px-4 py-2.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-highest" href="{% url 'coaching:admin_perseverance' %}">
+<span class="material-symbols-outlined text-[18px]">how_to_reg</span>Attribution des référents
+</a>
 </div>
 </header>
-<!-- CARTES KPI HAUTES -->
-<section aria-label="Indicateurs clés de performance" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-<!-- KPI 1 -->
-<div class="flex flex-col justify-between p-4 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-start justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Étudiants Actifs</span>
-<span class="h-9 w-9 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
-<span class="material-symbols-outlined text-[20px]">group</span>
-</span>
-</div>
-<div class="mt-3">
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">14 820</span>
-<span class="font-data-metric text-data-metric text-tertiary-container font-semibold flex items-center">
-<span class="material-symbols-outlined text-sm">trending_up</span> +3.2%
-          </span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Répartis sur 4 Campus centraux</p>
-</div>
-</div>
-<!-- KPI 2 -->
-<div class="flex flex-col justify-between p-4 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-start justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Enseignants & Chercheurs</span>
-<span class="h-9 w-9 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]">school</span>
-</span>
-</div>
-<div class="mt-3">
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">1 240</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Dont <strong class="text-on-surface font-semibold">380</strong> vacataires extérieurs</p>
-</div>
-</div>
-<!-- KPI 3 -->
-<div class="flex flex-col justify-between p-4 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-start justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Invitations en attente</span>
-<span class="h-9 w-9 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
-<span class="material-symbols-outlined text-[20px]">mail</span>
-</span>
-</div>
-<div class="mt-3">
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">42</span>
-</div>
-<div class="flex items-center gap-1.5 mt-1 text-tertiary">
-<span class="material-symbols-outlined text-[16px]">schedule</span>
-<span class="font-label-sm text-label-sm font-semibold">12 expirant sous 48h</span>
-</div>
-</div>
-</div>
-<!-- KPI 4 -->
-<div class="flex flex-col justify-between p-4 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-start justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Sessions d'examen</span>
-<span class="h-9 w-9 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
-<span class="material-symbols-outlined text-[20px]">event_note</span>
-</span>
-</div>
-<div class="mt-3">
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold text-on-surface">28</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Session principale d'hiver</p>
-</div>
-</div>
-<!-- KPI 5 -->
-<div class="flex flex-col justify-between p-4 rounded bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
-<div class="flex items-start justify-between">
-<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Signaux Décrochage</span>
-<span class="h-9 w-9 rounded-full bg-error-container flex items-center justify-center text-error">
-<span class="material-symbols-outlined text-[20px]">warning</span>
-</span>
-</div>
-<div class="mt-3">
-<div class="flex items-baseline gap-2">
-<span class="font-data-metric text-[20px] font-bold text-error">18</span>
-<span class="font-label-sm text-label-sm uppercase font-semibold text-error px-2 py-0.5 rounded-full bg-error-container/60">Alerte</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Nécessite contact tuteur</p>
-</div>
-</div>
+
+<section aria-label="Indicateurs clés" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+{% include "portal/_stat_card.html" with label="Étudiants" value=student_profiles icon="group" hint=students_hint %}
+{% include "portal/_stat_card.html" with label="Enseignants" value=professor_profiles icon="school" icon_class="bg-surface-container-high text-primary" hint="Profils professeurs actifs" %}
+{% include "portal/_stat_card.html" with label="Affectation référents" value=allocation_rate suffix=" %" icon="how_to_reg" icon_class="bg-secondary-fixed text-secondary" hint=allocation_hint %}
+{% include "portal/_stat_card.html" with label="Alertes actives" value=summary.active_alerts icon="warning" icon_class="bg-error-container text-on-error-container" hint=active_alerts_hint %}
+{% include "portal/_stat_card.html" with label="Persévérance" value=summary.perseverance_rate suffix=" %" icon="trending_up" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=perseverance_hint %}
 </section>
-<!-- CONTENEUR PRINCIPAL FLEX AVEC PANNEAU IA LATÉRAL -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-<!-- COLONNE PRINCIPALE (8 ou 12 colonnes selon affichage du panneau IA) -->
-<div class="lg:col-span-8 flex flex-col gap-5" id="primaryDashboardContent">
-<!-- SECTION 1: SESSIONS D'EXAMENS & JURYS CRITIQUES -->
-<section aria-labelledby="exams-section-title" class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col gap-4">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-<div>
-<div class="flex items-center gap-2">
-<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="exams-section-title">Sessions d'examens & Jurys critiques</h2>
+
+<div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+<div class="flex min-w-0 flex-col gap-5 xl:col-span-8">
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cohortes suivies</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:admin_monitoring' %}">Voir le pilotage détaillé</a>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Semaine en cours · Déploiement des grilles d'évaluation multimodales</p>
-</div>
-<div class="flex items-center gap-2">
-<span class="font-data-metric text-data-metric text-on-surface-variant px-3 py-1 rounded bg-surface-container">4 jurys prioritaires</span>
-<button class="px-3.5 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-variant transition-colors flex items-center gap-1" type="button">
-<span>Voir tout l'agenda</span>
-<span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
-</div>
-</div>
-<!-- Table de données accessible -->
-<div class="overflow-x-auto">
-<table class="w-full text-left font-body-sm text-body-sm border-collapse">
-<thead>
-<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-<th class="py-2.5 px-3 rounded-l" scope="col">Code Session</th>
-<th class="py-2.5 px-3" scope="col">Intitulé</th>
-<th class="py-2.5 px-3" scope="col">Composante & Filière</th>
-<th class="py-2.5 px-3" scope="col">Date & Horaires</th>
-<th class="py-2.5 px-3" scope="col">Salles</th>
-<th class="py-2.5 px-3" scope="col">Statut</th>
-<th class="py-2.5 px-3 text-right rounded-r" scope="col">Actions</th>
-</tr>
+<div class="mt-3 overflow-x-auto">
+<table class="w-full min-w-[680px] text-left text-sm">
+<thead class="bg-surface-container-low text-[11px] uppercase tracking-wide text-on-surface-variant">
+<tr><th class="px-3 py-2">Classe</th><th class="px-3 py-2">Étudiants</th><th class="px-3 py-2">Alertes</th><th class="px-3 py-2">Vigilance haute</th><th class="px-3 py-2">Objectifs</th><th class="px-3 py-2">Assiduité</th><th class="px-3 py-2">Moyenne</th></tr>
 </thead>
 <tbody class="divide-y divide-surface-container">
-<tr class="hover:bg-surface-container-low/60 transition-colors">
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-primary font-bold">INFO-S402</td>
-<td class="py-2.5 px-3 font-title-md text-title-md text-on-surface">Algorithmique Distribuée</td>
-<td class="py-2.5 px-3 text-on-surface-variant">UFR Informatique (L3)</td>
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-on-surface">Jeu. 14 Mars · 08:30</td>
-<td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-surface-container-high font-data-metric text-data-metric text-on-surface">Amphi Turing</span></td>
-<td class="py-2.5 px-3">
-<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Validé
-                  </span>
-</td>
-<td class="py-2.5 px-3 text-right">
-<div class="flex items-center justify-end gap-1">
-<button aria-label="Gérer jurys INFO-S402" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
-<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
-</button>
-<button aria-label="Détails session INFO-S402" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
+{% for cohort in summary.cohorts %}
+<tr class="hover:bg-surface-container-low/60">
+<td class="px-3 py-2.5 font-semibold text-on-surface">{{ cohort.school_class.name }}</td>
+<td class="px-3 py-2.5">{{ cohort.students }}</td>
+<td class="px-3 py-2.5">{{ cohort.alerts }}</td>
+<td class="px-3 py-2.5 font-bold text-error">{{ cohort.high }}</td>
+<td class="px-3 py-2.5">{{ cohort.goal_progress }} %</td>
+<td class="px-3 py-2.5">{{ cohort.attendance }} %</td>
+<td class="px-3 py-2.5">{% if cohort.average != None %}{{ cohort.average }}{% else %}—{% endif %}</td>
 </tr>
-<tr class="hover:bg-surface-container-low/60 transition-colors">
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-primary font-bold">MATH-A201</td>
-<td class="py-2.5 px-3 font-title-md text-title-md text-on-surface">Topologie Générale & Mesure</td>
-<td class="py-2.5 px-3 text-on-surface-variant">UFR Mathématiques (M1)</td>
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-on-surface">Ven. 15 Mars · 14:00</td>
-<td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-surface-container-high font-data-metric text-data-metric text-on-surface">Salle 401-B</span></td>
-<td class="py-2.5 px-3">
-<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> À approuver
-                  </span>
-</td>
-<td class="py-2.5 px-3 text-right">
-<div class="flex items-center justify-end gap-1">
-<button aria-label="Gérer jurys MATH-A201" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
-<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
-</button>
-<button aria-label="Détails session MATH-A201" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-low/60 transition-colors">
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-primary font-bold">PHYS-Q109</td>
-<td class="py-2.5 px-3 font-title-md text-title-md text-on-surface">Physique Quantique Appliquée</td>
-<td class="py-2.5 px-3 text-on-surface-variant">UFR Physique (L2)</td>
-<td class="py-2.5 px-3 font-data-metric text-data-metric text-on-surface">Sam. 16 Mars · 09:00</td>
-<td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-surface-container-high font-data-metric text-data-metric text-on-surface">Amphi Curie</span></td>
-<td class="py-2.5 px-3">
-<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">
-<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span> En cours
-                  </span>
-</td>
-<td class="py-2.5 px-3 text-right">
-<div class="flex items-center justify-end gap-1">
-<button aria-label="Gérer jurys PHYS-Q109" class="p-1.5 rounded-full hover:bg-surface-container-high text-primary" title="Gérer jurys" type="button">
-<span class="material-symbols-outlined text-[18px]">how_to_reg</span>
-</button>
-<button aria-label="Détails session PHYS-Q109" class="p-1.5 rounded-full hover:bg-surface-container-high text-on-surface-variant" title="Détails" type="button">
-<span class="material-symbols-outlined text-[18px]">more_vert</span>
-</button>
-</div>
-</td>
-</tr>
+{% empty %}
+<tr><td class="px-3 py-6 text-center text-on-surface-variant" colspan="7">Aucune cohorte avec des étudiants pour cette année.</td></tr>
+{% endfor %}
 </tbody>
 </table>
 </div>
 </section>
-<!-- SECTION 2: FLUX D'ACTIVITÉ & INVITATIONS RÉCENTES (Split 2-columns) -->
-<section aria-labelledby="activity-section-title" class="grid grid-cols-1 md:grid-cols-2 gap-5">
-<h2 class="sr-only" id="activity-section-title">Flux d'activité, inscriptions récentes et alertes académiques</h2>
-<!-- Colonne 1: Dernières inscriptions & Rôles validés -->
-<div class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[20px]">person_check</span>
-<h3 class="font-title-md text-title-md text-on-surface">Inscriptions & Rôles validés</h3>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Alertes de persévérance</h2>
+<a class="text-xs font-bold text-primary hover:underline" href="{% url 'coaching:admin_monitoring' %}">Traiter les alertes</a>
 </div>
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">Dernières 24h</span>
+<div class="mt-3 flex flex-col gap-2">
+{% for row in alert_rows %}
+<div class="flex flex-col gap-2 rounded bg-surface-container-low p-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ row.alert.title }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.student_label }} · {{ row.class_label }} · {{ row.status_label }}</p>
 </div>
-<div class="space-y-2.5">
-<!-- Item 1 -->
-<div class="p-3 rounded bg-surface-container-low flex items-center justify-between gap-3">
-<div class="flex items-center gap-3 min-w-0">
-<div class="w-9 h-9 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold font-title-md shrink-0">
-                    AD
-                  </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface truncate">Pr. Antoine Delorme</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Enseignant Chercheur · Informatique</span>
+<div class="flex shrink-0 items-center gap-2">
+<span class="rounded-full px-2.5 py-1 text-[11px] font-bold {% if row.alert.priority == 'high' %}bg-error-container text-on-error-container{% else %}bg-surface-container text-on-surface-variant{% endif %}">{{ row.priority_label }}</span>
+{% if row.is_open %}
+<a class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary hover:bg-primary-container" href="{% url 'coaching:admin_monitoring' %}">Prendre en charge</a>
+{% endif %}
 </div>
 </div>
-<div class="flex flex-col items-end shrink-0">
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
-<span class="material-symbols-outlined text-sm">check_circle</span> Actif
-                  </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Hier 18:22</span>
-</div>
-</div>
-<!-- Item 2 -->
-<div class="p-3 rounded bg-surface-container-low flex items-center justify-between gap-3">
-<div class="flex items-center gap-3 min-w-0">
-<div class="w-9 h-9 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-bold font-title-md shrink-0">
-                    SM
-                  </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface truncate">Sara Mansouri</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Doctorante Monitrice · Physique</span>
-</div>
-</div>
-<div class="flex flex-col items-end shrink-0">
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-tertiary font-semibold">
-<span class="material-symbols-outlined text-sm">send</span> Invitation envoyée
-                  </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Aujourd'hui 08:15</span>
-</div>
-</div>
-<!-- Item 3 -->
-<div class="p-3 rounded bg-surface-container-low flex items-center justify-between gap-3">
-<div class="flex items-center gap-3 min-w-0">
-<div class="w-9 h-9 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold font-title-md shrink-0">
-                    TL
-                  </div>
-<div class="flex flex-col min-w-0">
-<span class="font-title-md text-title-md text-on-surface truncate">Théo Laurent</span>
-<span class="font-body-sm text-body-sm text-on-surface-variant">Délégué Master 2 · Mathématiques</span>
-</div>
-</div>
-<div class="flex flex-col items-end shrink-0">
-<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-semibold">
-<span class="material-symbols-outlined text-sm">check_circle</span> Actif
-                  </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">22 Janvier</span>
-</div>
-</div>
-</div>
-</div>
-<button class="w-full mt-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" type="button">
-<span class="material-symbols-outlined text-[18px]">manage_accounts</span>
-<span>Gérer l'annuaire complet</span>
-</button>
-</div>
-<!-- Colonne 2: Alertes Signalements & Décrochage de promotion -->
-<div class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col justify-between">
-<div>
-<div class="flex items-center justify-between mb-4">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-error text-[20px]">notification_important</span>
-<h3 class="font-title-md text-title-md text-on-surface">Alertes & Risques Décrochage</h3>
-</div>
-<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-bold">Priorité Haute</span>
-</div>
-<div class="space-y-2.5">
-<!-- Alerte 1 -->
-<div class="p-3.5 rounded bg-error-container/20 flex flex-col gap-2.5">
-<div class="flex items-start justify-between gap-2">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-error text-[18px]">person_alert</span>
-<span class="font-title-md text-title-md text-on-surface font-bold">Cohorte L1 Sciences Numériques (Gr. 3)</span>
-</div>
-<span class="font-data-metric text-data-metric text-error font-bold">4 absents répétitifs</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                  Tuteur référent assigné : <strong class="text-on-surface font-medium">Dr. Éléonore Vasseur</strong>
-</p>
-<div class="flex items-center justify-between pt-1">
-<span class="font-data-metric text-data-metric text-on-surface-variant">Détecté il y a 3h via assiduité TD</span>
-<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm hover:bg-primary-fixed transition-colors shadow-sm font-semibold" type="button">
-                    Contacter le responsable
-                  </button>
-</div>
-</div>
-<!-- Alerte 2 -->
-<div class="p-3.5 rounded bg-surface-container-low flex flex-col gap-2.5">
-<div class="flex items-start justify-between gap-2">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-tertiary text-[18px]">crisis_alert</span>
-<span class="font-title-md text-title-md text-on-surface font-bold">Licence Pro Médias Interactifs</span>
-</div>
-<span class="font-data-metric text-data-metric text-tertiary-container font-bold">Non-remise Devoir #2</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                  Tuteur référent assigné : <strong class="text-on-surface font-medium">Julien Mercier</strong>
-</p>
-<div class="flex items-center justify-between pt-1">
-<span class="font-data-metric text-data-metric text-on-surface-variant">Retard cumulé > 5 jours</span>
-<button class="px-3 py-1 rounded-full bg-surface-container-lowest text-primary font-label-sm text-label-sm hover:bg-primary-fixed transition-colors shadow-sm font-semibold" type="button">
-                    Contacter le responsable
-                  </button>
-</div>
-</div>
-</div>
-</div>
-<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm mt-4 pt-2">
-<span class="material-symbols-outlined text-[18px] text-tertiary">info</span>
-<span>Les signalements automatisés respectent le protocole RGPD de l'université.</span>
-</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune alerte active. Les cohortes sont stables.</p>
+{% endfor %}
 </div>
 </section>
-<!-- SECTION 3: STATISTIQUES GLOBALES DU CAMPUS -->
-<section aria-labelledby="stats-section-title" class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col gap-5">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-<div>
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[20px]">bar_chart</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="stats-section-title">Statistiques Globales : Taux de complétion des Syllabus</h2>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Affectation des référents par classe</h2>
+<span class="text-xs text-on-surface-variant">{{ academic_year }} · {{ pending_invitations }} invitation(s) en attente</span>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Pourcentage de validation des programmes pédagogiques avant transmission aux jurys</p>
+<div class="mt-3 flex flex-col gap-2">
+{% for row in allocation %}
+<div class="rounded bg-surface-container-low p-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div class="min-w-0">
+<p class="text-sm font-semibold text-on-surface">{{ row.school_class.name }}</p>
+<p class="text-xs text-on-surface-variant">{{ row.assigned }}/{{ row.students }} étudiants affectés{% if row.referent_names %} · {{ row.referent_names|join:", " }}{% endif %}</p>
 </div>
-<span class="font-label-sm text-label-sm px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold">Semestre 2</span>
+<span class="rounded-full px-2.5 py-1 text-[11px] font-bold {{ row.status_class }}">{{ row.status }}</span>
 </div>
-<!-- Graphique Visuel Barres Horizontales Stylisées -->
-<div class="space-y-3.5">
-<!-- UFR Informatique -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center text-body-sm font-body-sm">
-<span class="font-title-md text-title-md text-on-surface">UFR Informatique</span>
-<span class="font-data-metric text-data-metric text-primary font-bold">94% validé</span>
-</div>
-<div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden flex">
-<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="94" class="bg-primary h-full rounded-full transition-all duration-500" role="progressbar" style="width: 94%;"></div>
+<div class="mt-2 h-2 w-full overflow-hidden rounded-full bg-surface-container">
+<div class="h-2 rounded-full {% if row.rate >= 90 %}bg-primary{% else %}bg-error{% endif %}" style="width: {{ row.rate }}%;"></div>
 </div>
 </div>
-<!-- UFR Physique -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center text-body-sm font-body-sm">
-<span class="font-title-md text-title-md text-on-surface">UFR Physique</span>
-<span class="font-data-metric text-data-metric text-secondary font-bold">91% validé</span>
-</div>
-<div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden flex">
-<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="91" class="bg-secondary h-full rounded-full transition-all duration-500" role="progressbar" style="width: 91%;"></div>
-</div>
-</div>
-<!-- UFR Mathématiques -->
-<div class="flex flex-col gap-1.5">
-<div class="flex justify-between items-center text-body-sm font-body-sm">
-<span class="font-title-md text-title-md text-on-surface">UFR Mathématiques</span>
-<span class="font-data-metric text-data-metric text-tertiary-container font-bold">88% validé</span>
-</div>
-<div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden flex">
-<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="88" class="bg-tertiary-container h-full rounded-full transition-all duration-500" role="progressbar" style="width: 88%;"></div>
-</div>
-</div>
-</div>
-<!-- Tableau d'équivalence textuelle accessible complet pour lecteurs d'écran & conformité WCAG -->
-<div class="mt-2 p-4 rounded bg-surface-container-low">
-<h3 class="font-title-md text-title-md text-on-surface mb-2">Tableau récapitulatif d'accessibilité (Audits Pédagogiques)</h3>
-<div class="overflow-x-auto">
-<table class="w-full text-left font-body-sm text-body-sm">
-<caption class="sr-only">Taux de complétion des syllabus et nombre d'Unités d'Enseignement par département</caption>
-<thead>
-<tr class="text-on-surface-variant font-label-sm text-label-sm border-b border-surface-container-high pb-1">
-<th class="py-2" scope="col">Département</th>
-<th class="py-2" scope="col">Unités d'Enseignement</th>
-<th class="py-2" scope="col">Taux Validé</th>
-<th class="py-2" scope="col">Reste à valider</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-surface-container">
-<tr>
-<td class="py-2 font-medium text-on-surface">UFR Informatique</td>
-<td class="py-2 font-data-metric text-data-metric">64 UEs</td>
-<td class="py-2 font-data-metric text-data-metric text-primary font-bold">94%</td>
-<td class="py-2 text-on-surface-variant">4 UEs en révision</td>
-</tr>
-<tr>
-<td class="py-2 font-medium text-on-surface">UFR Physique</td>
-<td class="py-2 font-data-metric text-data-metric">52 UEs</td>
-<td class="py-2 font-data-metric text-data-metric text-secondary font-bold">91%</td>
-<td class="py-2 text-on-surface-variant">5 UEs en attente de visa</td>
-</tr>
-<tr>
-<td class="py-2 font-medium text-on-surface">UFR Mathématiques</td>
-<td class="py-2 font-data-metric text-data-metric">58 UEs</td>
-<td class="py-2 font-data-metric text-data-metric text-tertiary font-bold">88%</td>
-<td class="py-2 text-on-surface-variant">7 UEs sans responsable désigné</td>
-</tr>
-</tbody>
-</table>
-</div>
+{% empty %}
+<p class="rounded bg-surface-container-low p-4 text-sm text-on-surface-variant">Aucune classe pour cette année.</p>
+{% endfor %}
 </div>
 </section>
-<!-- Aperçu du Campus en direct & Activité Multimodale -->
-<section aria-labelledby="spaces-section-title" class="p-5 rounded bg-surface-container-lowest shadow-sm flex flex-col gap-4">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-[20px]">hub</span>
-<h2 class="font-headline-sm text-headline-sm text-on-surface" id="spaces-section-title">Hubs d'Apprentissage & Présence Connectée</h2>
+
 </div>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Campus Saint-Germain & Grands Moulins</span>
+
+<aside class="flex min-w-0 flex-col gap-5 xl:col-span-4">
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Activité récente</h2>
+<div class="mt-3 flex flex-col gap-3">
+{% for activity in activities %}
+<div class="border-l-2 {{ activity.border }} pl-3">
+<p class="text-xs font-bold {{ activity.tone }}">{{ activity.label }} <span class="font-normal text-outline">· {{ activity.when }}</span></p>
+<p class="mt-0.5 text-sm text-on-surface-variant">{{ activity.text }}</p>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="relative rounded overflow-hidden h-44 bg-surface-container flex flex-col justify-end p-4" data-theme-scope="light">
-<div class="absolute inset-0 bg-cover bg-center" data-alt="A modern university library amphitheater with students working on laptops, ambient natural lighting from large high windows, minimalist navy blue architectural details and wooden study booths." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAWuwHSpOh_9hnqgY6uWCBuYF2AJeCP5UGKGrF7vRmRQfxMx7NDIxUVxVx4V0BJMrhHZQfaaMG4NE8cvHUa2_kCTwW3XRPC9uaKx4HV3jOpFNdFbOru7UWIGV379Q3tGpa2gFJpkQUZ7dJams8By6eY7CITAQR0gvNKfGkhzHZuLRBarriybpj5YlkGrPsrubDQKVgn8Mabj9fQWEeGor-h9k11q18odqzEE4HnClQ')"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/30 to-transparent"></div>
-<div class="relative z-10 text-on-primary">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary-fixed">Espace Tiers-Lieu</span>
-<p class="font-title-md text-title-md font-bold">Amphithéâtre Buffon Multimodal</p>
-<div class="flex items-center gap-2 text-body-sm font-data-metric mt-1">
-<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
-<span>Affluence : 86% · 312 étudiants connectés</span>
-</div>
-</div>
-</div>
-<div class="relative rounded overflow-hidden h-44 bg-surface-container flex flex-col justify-end p-4" data-theme-scope="light">
-<div class="absolute inset-0 bg-cover bg-center" data-alt="A university computer science laboratory with dual monitors, soft warm amber task lamps, group collaboration pods with glass partitions, in a collegiate university research center." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBaUobkv7__R8silXXgxM04SRh1tDgkKgq16N15KZbNG_QTLTVrHNcb3YyEF9KUQYijf_Q_F5NshwDprSlhMbL5qR3AswL5WnGPTADyjmDASig9_WQ2pwXDJ00ffWQ1YFVl0TfeE-2cahN9qWibe4APJI8AFrPAaohutvbqXoCM_A_h7Dbdfn7J1udYSv3tUKceJlfT9wmWAJSTOdeopcFd-_XFkK3mH8iEfQFdBo4')"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-on-background/80 via-on-background/30 to-transparent"></div>
-<div class="relative z-10 text-on-primary">
-<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary-fixed">Laboratoire Informatique</span>
-<p class="font-title-md text-title-md font-bold">Plateforme de Calcul GPU Recherche</p>
-<div class="flex items-center gap-2 text-body-sm font-data-metric mt-1">
-<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span>
-<span>Charge serveur : 42% · Sessions TP actives</span>
-</div>
-</div>
-</div>
+{% empty %}
+<p class="text-sm text-on-surface-variant">Aucune activité récente.</p>
+{% endfor %}
 </div>
 </section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Remédiation</h2>
+<div class="mt-3 grid gap-2">
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Fiches ouvertes</span><span class="font-data-metric text-lg font-bold text-tertiary">{{ summary.open_sheets }}</span></div>
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Clôturées (30 j)</span><span class="font-data-metric text-lg font-bold text-primary">{{ summary.closed_recent }}</span></div>
+<div class="flex items-center justify-between rounded bg-surface-container-low px-3 py-2"><span class="text-sm">Étudiants suivis</span><span class="font-data-metric text-lg font-bold text-on-surface">{{ summary.followed }}</span></div>
 </div>
-<!-- COLONNE DROITE / AI SIDE PANEL (Standard Reusable Component) -->
-<aside aria-label="Assistant IA d'Analyse Institutionnelle" class="lg:col-span-4 flex flex-col gap-5" id="aiSidePanel">
-<!-- Carte Principale Assistant IA -->
-<div class="p-5 rounded bg-surface-container-low shadow-sm flex flex-col gap-5 sticky top-24">
-<!-- En-tête Assistant IA -->
-<div class="flex items-start justify-between">
-<div class="flex items-center gap-3">
-<div class="h-9 w-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
-<span class="material-symbols-outlined text-[20px]">auto_awesome</span>
+<a class="mt-3 inline-flex rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-on-primary hover:bg-primary-container" href="{% url 'coaching:admin_perseverance_export' %}">Exporter l'attribution (CSV)</a>
+</section>
+
+<section class="rounded bg-surface-container-lowest p-5 shadow-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Accès rapides</h2>
+<div class="mt-3 flex flex-col gap-2">
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:admin_perseverance' %}">Affecter un référent</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'coaching:admin_monitoring' %}">Pilotage &amp; alertes</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'portal:admin_students' %}">Étudiants &amp; inscriptions</a>
+<a class="rounded-full bg-surface-container px-4 py-2.5 text-center text-sm font-bold text-primary hover:bg-surface-container-high" href="{% url 'portal:admin_teachers' %}">Enseignants</a>
 </div>
-<div>
-<div class="flex items-center gap-1.5">
-<h2 class="font-headline-sm text-headline-sm text-on-surface">Assistant IA d'Analyse</h2>
-<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-bold uppercase">Beta</span>
-</div>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Pilotage Institutionnel & Synthèse</p>
-</div>
-</div>
-<button aria-label="Réduire le panneau IA" class="text-on-surface-variant hover:text-on-surface p-1 rounded-full hover:bg-surface-container-high transition-colors" id="closeAiPanelBtn" type="button">
-<span class="material-symbols-outlined text-[20px]">close</span>
-</button>
-</div>
-<!-- Objectif & Cible -->
-<div class="flex flex-col gap-3 p-4 rounded bg-surface-container-lowest">
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold" for="ai-objective-input">Objectif d'analyse</label>
-<div class="flex items-center gap-2 text-on-surface font-title-md text-title-md">
-<span class="material-symbols-outlined text-primary text-[18px]">psychology</span>
-<span id="ai-objective-input">Synthèse des alertes d'absentéisme et d'évaluation</span>
-</div>
-</div>
-<div class="flex flex-col gap-1 pt-2">
-<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold" for="ai-target-filter">Filtre appliqué</label>
-<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-body-sm text-body-sm w-fit">
-<span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
-<span class="font-medium" id="ai-target-filter">Département Sciences Fondamentales</span>
-</div>
-</div>
-<button class="w-full mt-2 py-2 px-4 rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container transition-all flex items-center justify-center gap-2 shadow-sm" type="button">
-<span class="material-symbols-outlined text-[18px]">bolt</span>
-<span>Générer la note de synthèse</span>
-</button>
-</div>
-<!-- AI Suggestion Card -->
-<div class="flex flex-col gap-3 p-4 rounded bg-surface-container-lowest shadow-sm">
-<div class="flex items-center justify-between text-on-surface-variant">
-<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider flex items-center gap-1 text-secondary">
-<span class="material-symbols-outlined text-[16px]">lightbulb</span> Suggestion Proactive
-            </span>
-<span class="font-data-metric text-data-metric text-on-surface-variant">Il y a 10 min</span>
-</div>
-<div class="p-3 rounded bg-surface-variant/40">
-<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
-<strong class="font-semibold text-primary">Rapport de conformité des syllabus :</strong> 6% des UEs de Licence 3 présentent un retard de validation de syllabus avant le début des jurys. Recommandation : envoyer un rappel automatisé aux 8 coordinateurs de matière identifiés.
-            </p>
-</div>
-<!-- Standard 3 Action buttons -->
-<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-<button class="py-1.5 px-2 rounded-full bg-primary text-on-primary font-label-sm text-label-sm hover:bg-primary-container transition-colors text-center font-bold" title="Sauvegarde dans les mémos d'administration" type="button">
-              Garder
-            </button>
-<button class="py-1.5 px-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm hover:bg-surface-variant transition-colors text-center font-bold" title="Éditer le plan d'action" type="button">
-              Modifier
-            </button>
-<button class="py-1.5 px-2 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm hover:bg-error-container hover:text-error transition-colors text-center font-bold" title="Ignorer cette suggestion" type="button">
-              Refuser
-            </button>
-</div>
-</div>
-<!-- Bannière de Fallback opérationnel -->
-<div class="p-3.5 rounded bg-surface-container-high flex items-start gap-3 text-on-surface-variant">
-<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
-<p class="font-body-sm text-body-sm text-on-surface">
-            L'IA est momentanément indisponible. Le pilotage manuel des données reste opérationnel sans interruption.
-          </p>
-</div>
-</div>
+</section>
 </aside>
 </div>
 </div>
-<script>
-  // Interaction fluide pour replier / afficher l'assistant IA
-  const toggleBtn = document.getElementById('toggleAiPanelBtn');
-  const closeBtn = document.getElementById('closeAiPanelBtn');
-  const aiSidePanel = document.getElementById('aiSidePanel');
-  const primaryDashboardContent = document.getElementById('primaryDashboardContent');
-
-  function toggleAiPanel() {
-    if (aiSidePanel.classList.contains('hidden')) {
-      aiSidePanel.classList.remove('hidden');
-      primaryDashboardContent.classList.remove('lg:col-span-12');
-      primaryDashboardContent.classList.add('lg:col-span-8');
-    } else {
-      aiSidePanel.classList.add('hidden');
-      primaryDashboardContent.classList.remove('lg:col-span-8');
-      primaryDashboardContent.classList.add('lg:col-span-12');
-    }
-  }
-
-  if (toggleBtn) toggleBtn.addEventListener('click', toggleAiPanel);
-  if (closeBtn) closeBtn.addEventListener('click', toggleAiPanel);
-</script></main>
+</main>
 {% endblock %}

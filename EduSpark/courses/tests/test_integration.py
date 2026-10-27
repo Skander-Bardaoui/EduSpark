@@ -106,26 +106,19 @@ class ClassFormTests(CoursesTestCase):
         self.school_class.refresh_from_db()
         self.assertIsNone(self.school_class.study_program)
 
-    def test_a_teaching_professor_cannot_be_unticked_from_the_class(self):
-        response = self.client.post(
-            reverse("portal:admin_class_update", args=[self.school_class.pk]),
-            self.payload(name=self.school_class.name, study_program=self.program.pk, professors=[self.prof.pk]),
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Mariam Traoré")
-        self.assertIn(self.prof2, self.school_class.professors.all())
+    def test_class_form_no_longer_lists_professors(self):
+        # Les enseignants d'une classe viennent uniquement des affectations du module cours.
+        form = self.client.get(reverse("portal:admin_class_update", args=[self.school_class.pk])).context["form"]
+        self.assertNotIn("professors", form.fields)
 
-    def test_a_professor_without_assignment_can_be_removed_from_the_class(self):
-        spare_user = make_user("spare@ut.test", "Paul", "Libre")
-        spare = join(spare_user, self.univ, Role.PROFESSOR).professor_profile
-        self.school_class.professors.add(spare)
+    def test_updating_the_class_keeps_its_teaching_professors(self):
         response = self.client.post(
             reverse("portal:admin_class_update", args=[self.school_class.pk]),
-            self.payload(name=self.school_class.name, study_program=self.program.pk,
-                         professors=[self.prof.pk, self.prof2.pk]),
+            self.payload(name=self.school_class.name, study_program=self.program.pk),
         )
         self.assertEqual(response.status_code, 302)
-        self.assertNotIn(spare, self.school_class.professors.all())
+        self.assertIn(self.prof, self.school_class.professors.all())
+        self.assertIn(self.prof2, self.school_class.professors.all())
 
     def test_class_detail_lists_subjects_and_teachers(self):
         response = self.client.get(reverse("portal:admin_class_detail", args=[self.school_class.pk]))

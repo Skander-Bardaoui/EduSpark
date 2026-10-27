@@ -1,0 +1,19 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Demande non retenue{% endblock %}
+{% block body %}
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Bonjour {{ student_first_name }},</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">
+  Votre demande de rendez-vous auprès de <strong>{{ professor_name }}</strong> pour le
+  <strong>{{ preferred_label }}</strong> n'a pas pu être retenue.
+</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fff6ea;border:1px solid #f2d5ae;border-radius:12px;margin:0 0 16px;">
+<tr><td style="padding:14px 16px;">
+<p style="margin:0;font-size:13px;line-height:1.6;color:#7a4b12;"><strong>Motif :</strong> {{ reason }}</p>
+</td></tr>
+</table>
+<p style="margin:0 0 10px;font-size:14px;line-height:1.6;color:#4b5a7a;"><strong>Motif initial :</strong> {{ topic }}</p>
+<p style="margin:0;font-size:14px;line-height:1.6;">
+  Vous pouvez choisir un autre créneau disponible. Votre référent reçoit votre nouvelle demande
+  et vous recevrez une confirmation par e-mail dès qu'elle sera acceptée.
+</p>
+{% endblock %}

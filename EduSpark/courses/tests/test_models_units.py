@@ -81,8 +81,12 @@ class AssignmentValidationTests(CoursesTestCase):
     def test_replacing_professor_busy_on_a_transferred_slot_is_refused(self):
         make_slot(self.assign, weekday=0, start="08:30", end="10:00")
         other_prof = join(make_user("remplacant@ut.test"), self.univ, Role.PROFESSOR).professor_profile
-        TeachingAssignment.objects.create(school_class=self.class_gl, subject=self.subject_gl, professor=other_prof)
-        make_slot(TeachingAssignment.objects.get(professor=other_prof), weekday=0, start="09:00", end="11:00")
+        # Une matière n'a qu'un professeur par classe : le remplaçant enseigne une autre matière.
+        other_subject = Subject.objects.create(program=self.program_gl, name="Tests logiciels", code="GEN402",
+                                               semester=1)
+        busy = TeachingAssignment.objects.create(school_class=self.class_gl, subject=other_subject,
+                                                 professor=other_prof)
+        make_slot(busy, weekday=0, start="09:00", end="11:00")
         assignment = TeachingAssignment.objects.get(pk=self.assign.pk)
         assignment.professor = other_prof
         with self.assertRaisesMessage(ValidationError, "déjà occupé sur un créneau de cette matière"):

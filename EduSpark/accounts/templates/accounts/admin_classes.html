@@ -53,7 +53,7 @@
 </div>
 <div class="overflow-x-auto">
 <table class="w-full min-w-[960px] text-left">
-<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Filière</th><th class="px-5 py-3 font-bold">Promotion</th><th class="px-5 py-3 font-bold">Niveau</th><th class="px-5 py-3 font-bold">Effectif</th><th class="px-5 py-3 font-bold">Groupes</th><th class="px-5 py-3 font-bold">Responsable</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
+<thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant"><tr><th class="px-5 py-3 font-bold">Classe</th><th class="px-5 py-3 font-bold">Filière</th><th class="px-5 py-3 font-bold">Promotion</th><th class="px-5 py-3 font-bold">Niveau</th><th class="px-5 py-3 font-bold">Section</th><th class="px-5 py-3 font-bold">Effectif</th><th class="px-5 py-3 font-bold">Groupes</th><th class="px-5 py-3 font-bold">Responsable</th><th class="px-5 py-3 text-right font-bold">Actions</th></tr></thead>
 <tbody class="divide-y divide-outline-variant/30 text-sm">
 {% for school_class in classes %}
 <tr class="hover:bg-surface-container/40">
@@ -61,7 +61,8 @@
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.program|default:"—" }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.academic_year|default:"—" }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.level|default:"—" }}</td>
-<td class="px-5 py-3 text-on-surface-variant">{{ school_class.student_count }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ school_class.section|default:"—" }}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ school_class.student_count }} / {{ max_students }}</td>
 <td class="px-5 py-3 text-on-surface-variant">{{ school_class.group_count }}</td>
 <td class="px-5 py-3 text-on-surface-variant">
 {% for professor in school_class.professors.all|slice:":1" %}{{ professor.user.get_full_name|default:professor.user.email }}{% if school_class.professor_count > 1 %} +{{ school_class.professor_count|add:"-1" }}{% endif %}{% empty %}—{% endfor %}
@@ -74,7 +75,7 @@
 </td>
 </tr>
 {% empty %}
-<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="8">Aucune classe ne correspond à votre recherche. <a class="font-bold text-primary hover:underline" href="{% url 'portal:admin_class_create' %}">Créer une classe</a></td></tr>
+<tr><td class="px-5 py-10 text-center text-sm text-on-surface-variant" colspan="9">Aucune classe ne correspond à votre recherche. <a class="font-bold text-primary hover:underline" href="{% url 'portal:admin_class_create' %}">Créer une classe</a></td></tr>
 {% endfor %}
 </tbody>
 </table>

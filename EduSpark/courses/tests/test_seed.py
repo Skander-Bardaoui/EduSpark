@@ -104,12 +104,12 @@ class SeedCoursesTests(ProtectedMediaMixin, TestCase):
         self.assertContains(library, "Polycopié — Parcours de graphes")
         self.assertContains(library, "Plan du cours et bibliographie")
 
-    def test_other_group_sees_the_practical_session_instead(self):
+    def test_other_group_does_not_see_the_td_of_group_a(self):
         seed()
         client = self.login("yanis.leroy@u-paris.fr")  # groupe TP B
         timetable = client.get(reverse("courses:student_timetable"))
-        self.assertContains(timetable, "Salle machine B204")
-        self.assertNotContains(timetable, "Salle 105")
+        self.assertContains(timetable, "Amphi A")  # cours magistral : toute la classe
+        self.assertNotContains(timetable, "Salle 105")  # TD du groupe A
 
     def test_each_role_reaches_its_pages(self):
         seed()

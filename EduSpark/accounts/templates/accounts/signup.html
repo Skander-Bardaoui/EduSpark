@@ -179,9 +179,36 @@
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">account_balance</span>
 {{ form.university }}{% if form.university.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.university.errors %}{{ e }} {% endfor %}</p>{% endif %}
 </div>
+            <p class="font-label-sm text-label-sm text-on-surface-variant flex items-start gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">info</span>
+              Toute inscription est vérifiée par l'administration de l'université avant activation du compte.
+            </p>
+</div>
+<!-- Niveau et section (étudiants) -->
+<div class="space-y-1" id="student-academic-fields">
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+<div class="space-y-1">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="level">
+              Niveau
+            </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">stairs</span>
+{{ form.level }}{% if form.level.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.level.errors %}{{ e }} {% endfor %}</p>{% endif %}
+</div>
+</div>
+<div class="space-y-1">
+<label class="block font-label-sm text-label-sm font-semibold text-on-surface" for="section">
+              Section
+            </label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">groups_3</span>
+{{ form.section }}{% if form.section.errors %}<p class="font-label-sm text-label-sm text-error">{% for e in form.section.errors %}{{ e }} {% endfor %}</p>{% endif %}
+</div>
+</div>
+</div>
 <p class="font-label-sm text-label-sm text-on-surface-variant flex items-start gap-1">
 <span class="material-symbols-outlined text-[14px] text-tertiary">info</span>
-              Étudiant avec le domaine officiel de l'université : accès immédiat. Autres inscriptions : validation par l'administration.
+              Choisissez le niveau et la section de votre classe : l'administration vous y affectera après validation. Si l'université n'utilise pas de sections, indiquez « Unique ».
             </p>
 </div>
 <!-- Mot de passe & Indicateur de Complexité -->
@@ -243,13 +270,21 @@
 </div>
 </div>
 </div>
+<datalist id="level-options"></datalist>
+<datalist id="section-options"></datalist>
+{{ class_options|json_script:"class-options" }}
 <script>
   (function() {
     // Gestion du sélecteur de rôle
     const roleButtons = document.querySelectorAll('.role-btn');
     const roleInput = document.getElementById('roleInput');
-    const setRole = (val) => { if (roleInput) roleInput.value = val; };
+    const academicFields = document.getElementById('student-academic-fields');
+    const toggleAcademic = (val) => {
+      if (academicFields) academicFields.classList.toggle('hidden', val !== 'etudiant');
+    };
+    const setRole = (val) => { if (roleInput) roleInput.value = val; toggleAcademic(val); };
     const initialRole = roleInput ? roleInput.value : 'etudiant';
+    toggleAcademic(initialRole);
     roleButtons.forEach(b => { const active = b.dataset.role === initialRole; b.classList.toggle('bg-surface-container-lowest', active); b.classList.toggle('text-primary', active); b.classList.toggle('shadow-sm', active); b.classList.toggle('font-bold', active); b.classList.toggle('text-on-surface-variant', !active); b.setAttribute('aria-pressed', active); });
     roleButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -320,6 +355,32 @@
           strengthText.className = 'font-data-metric text-data-metric text-primary font-bold';
         }
       });
+    }
+
+    // Suggestions de niveaux / sections selon l'université choisie
+    const optionsNode = document.getElementById('class-options');
+    const universitySelect = document.getElementById('university');
+    const levelOptions = document.getElementById('level-options');
+    const sectionOptions = document.getElementById('section-options');
+    const classOptions = optionsNode ? JSON.parse(optionsNode.textContent || '{}') : {};
+
+    const fillOptions = (list, values) => {
+      if (!list) return;
+      list.innerHTML = '';
+      (values || []).forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        list.appendChild(option);
+      });
+    };
+    const refreshAcademicOptions = () => {
+      const data = universitySelect ? classOptions[universitySelect.value] : null;
+      fillOptions(levelOptions, data ? data.levels : []);
+      fillOptions(sectionOptions, data ? data.sections : []);
+    };
+    if (universitySelect) {
+      universitySelect.addEventListener('change', refreshAcademicOptions);
+      refreshAcademicOptions();
     }
   })();
 </script></main><footer class="w-full bg-surface-container-low py-space-md"><div class="w-full px-margin-mobile md:px-margin flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm"><span>© 2025 EduSpark — Hub Éducatif &amp; Créatif Multimodal. Tous droits réservés.</span><div class="flex items-center gap-space-md"><a class="hover:text-on-surface transition-colors" data-path="confidentialite" href="#">Confidentialité</a><a class="hover:text-on-surface transition-colors" data-path="conditions" href="#">Conditions d'utilisation</a><a class="hover:text-on-surface transition-colors" data-path="aide" href="#">Assistance</a></div></div></footer><script>(function(){try{if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.querySelectorAll('video').forEach(function(v){v.pause();v.removeAttribute('autoplay');});}}catch(e){}})();</script></body></html>

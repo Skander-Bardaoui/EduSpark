@@ -58,6 +58,10 @@ Aucun secret n'est écrit dans `settings.py` : la configuration vient du fichier
 | `DJANGO_LANGUAGE_CODE`, `DJANGO_TIME_ZONE` | Internationalisation | `en-us`, `UTC` |
 | `DJANGO_EMAIL_BACKEND` | Backend e-mail (console par défaut en dev) | console |
 | `DJANGO_EMAIL_HOST`, `DJANGO_EMAIL_PORT`, `DJANGO_EMAIL_HOST_USER`, `DJANGO_EMAIL_HOST_PASSWORD`, `DJANGO_EMAIL_USE_TLS` | SMTP de production | — |
+| `GROQ_API_KEY` | Plan d'étude IA, examinateur et bilan du test de langue | — |
+| `GROQ_MODEL` | Modèle Groq utilisé | `openai/gpt-oss-120b` |
+| `ELEVENLABS_API_KEY` | Transcription temps réel du test de langue (facultatif) | — (repli navigateur) |
+| `OPENAI_API_KEY` | Voix de l'examinateur (facultatif) | — (repli navigateur) |
 
 Les variables déjà définies dans l'environnement du système sont prioritaires
 sur celles de `.env`.

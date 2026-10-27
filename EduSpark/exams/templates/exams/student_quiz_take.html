@@ -1,0 +1,122 @@
+{% extends "portal/base_student.html" %}
+{% block title %}QCM en cours — {{ quiz.session.title }}{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[980px] flex-col gap-5 px-4 py-6 sm:px-6">
+  <header class="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest/95 px-4 py-3 shadow-sm backdrop-blur">
+    <div class="min-w-0">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-primary">QCM en cours</p>
+      <h1 class="truncate font-headline-sm text-headline-sm text-on-surface">{{ quiz.session.title }}</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 rounded-full bg-surface-container-high px-4 py-2">
+        <span class="material-symbols-outlined text-[18px] text-primary">timer</span>
+        <span class="font-data-metric text-lg font-bold text-on-surface" id="quiz-timer">--:--</span>
+      </div>
+      <span class="hidden text-xs text-on-surface-variant sm:inline" id="save-status">Sauvegarde automatique activée</span>
+    </div>
+  </header>
+
+  <form action="{% url 'exams:student_quiz_submit' attempt.pk %}" data-remaining="{{ remaining_seconds }}" data-result-url="{% url 'exams:student_quiz_result' attempt.pk %}" data-save-url="{% url 'exams:student_quiz_save' attempt.pk %}" id="quiz-form" method="post">
+    {% csrf_token %}
+    {% for row in question_rows %}
+    {% with question=row.question %}
+    <article class="mb-4 rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+      <div class="mb-3 flex items-start justify-between gap-3">
+        <span class="inline-flex items-center gap-2 rounded-full bg-primary-fixed px-3 py-1 text-xs font-bold text-primary">Question {{ forloop.counter }}</span>
+        <span class="font-data-metric text-xs text-on-surface-variant">{{ question.points }} pt</span>
+      </div>
+      <p class="mb-4 text-base font-semibold text-on-surface">{{ question.prompt }}</p>
+      <div class="flex flex-col gap-2">
+        {% for choice in question.choices.all %}
+        <label class="flex cursor-pointer items-center gap-3 rounded border border-outline-variant/40 bg-surface px-4 py-3 transition-colors hover:bg-surface-container">
+          <input class="h-4 w-4 text-primary" name="q_{{ question.pk }}" type="radio" value="{{ choice.pk }}"{% if row.selected == choice.pk %} checked{% endif %}/>
+          <span class="text-sm text-on-surface">{{ choice.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </article>
+    {% endwith %}
+    {% endfor %}
+
+    <div class="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded border border-outline-variant/40 bg-surface-container-lowest/95 px-4 py-3 shadow-lg backdrop-blur">
+      <p class="text-xs text-on-surface-variant">Vos réponses sont sauvegardées automatiquement toutes les 15 secondes.</p>
+      <button class="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-container" onclick="return confirm('Soumettre définitivement votre QCM ? Vous ne pourrez plus modifier vos réponses.');" type="submit">
+        <span class="material-symbols-outlined text-[20px]">send</span>
+        Soumettre le QCM
+      </button>
+    </div>
+  </form>
+</div>
+</main>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+  (function initQuiz() {
+    const form = document.getElementById('quiz-form');
+    if (!form) return;
+    const timerEl = document.getElementById('quiz-timer');
+    const statusEl = document.getElementById('save-status');
+    const saveUrl = form.dataset.saveUrl;
+    const resultUrl = form.dataset.resultUrl;
+    let remaining = parseInt(form.dataset.remaining || '0', 10);
+    let submitted = false;
+
+    function format(seconds) {
+      const safe = Math.max(0, seconds);
+      const minutes = Math.floor(safe / 60);
+      const rest = safe % 60;
+      return String(minutes).padStart(2, '0') + ':' + String(rest).padStart(2, '0');
+    }
+
+    function update() {
+      timerEl.textContent = format(remaining);
+      timerEl.classList.toggle('text-error', remaining <= 60);
+    }
+
+    function submitNow() {
+      if (submitted) return;
+      submitted = true;
+      form.submit();
+    }
+
+    async function save() {
+      if (submitted) return;
+      statusEl.textContent = 'Sauvegarde…';
+      try {
+        const response = await fetch(saveUrl, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json();
+        if (data.submitted) {
+          submitted = true;
+          window.location.href = resultUrl;
+          return;
+        }
+        remaining = parseInt(data.remaining_seconds, 10);
+        statusEl.textContent = 'Réponses sauvegardées';
+        update();
+      } catch (error) {
+        statusEl.textContent = 'Sauvegarde indisponible';
+      }
+    }
+
+    setInterval(function tick() {
+      if (submitted) return;
+      remaining -= 1;
+      update();
+      if (remaining <= 0) submitNow();
+    }, 1000);
+
+    setInterval(save, 15000);
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') save();
+    });
+    form.addEventListener('submit', function () { submitted = true; });
+    update();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes notifications — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+<div class="min-w-0">
+<p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Suivi &amp; progression</p>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes notifications</h1>
+<p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Les messages de votre tuteur référent : accusez réception et répondez pour rester dans le rythme.</p>
+</div>
+</header>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{% include "portal/_stat_card.html" with label="Non lues" value=unread_count icon="notifications_active" hint=unread_hint %}
+{% include "portal/_stat_card.html" with label="Messages reçus" value=total_count icon="mark_email_unread" icon_class="bg-surface-container text-secondary" hint=read_hint %}
+{% include "portal/_stat_card.html" with label="Mes réponses" value=replied_count icon="reply" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint=reply_hint %}
+</div>
+<section class="flex flex-col gap-4">
+{% for item in items %}
+<article class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm {% if item.notification.is_unread %}border-primary/40 bg-primary-fixed/10{% endif %}">
+<div class="flex flex-col gap-3 p-5 sm:flex-row sm:items-start">
+<span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">{{ item.tutor_initials }}</span>
+<div class="min-w-0 flex-1">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<p class="font-title-md text-title-md font-bold text-on-surface">{{ item.notification.title }}</p>
+{% if item.notification.is_unread %}{% include "portal/_badge.html" with label="Non lue" tone_class="bg-primary-fixed text-primary" %}{% else %}{% include "portal/_badge.html" with label="Lue" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+</div>
+<p class="mt-0.5 text-xs text-on-surface-variant">{{ item.tutor_name }} · {{ item.when_label }}</p>
+<p class="mt-3 whitespace-pre-line font-body-sm text-body-sm leading-relaxed text-on-surface">{{ item.notification.message }}</p>
+{% if item.notification.reply %}
+<div class="mt-3 rounded border border-secondary/30 bg-secondary-fixed/20 px-3 py-2">
+<p class="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-secondary"><span class="material-symbols-outlined text-[15px]">reply</span>Ma réponse{% if item.replied_label %} · {{ item.replied_label }}{% endif %}</p>
+<p class="mt-1 whitespace-pre-line text-xs leading-relaxed text-on-surface-variant">{{ item.notification.reply }}</p>
+</div>
+{% endif %}
+<div class="mt-4 flex flex-wrap items-center gap-2">
+{% if item.notification.is_unread %}
+<form action="{% url 'coaching:student_notification_read' item.notification.pk %}" method="post">
+{% csrf_token %}
+<button class="inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-3.5 py-2 text-xs font-bold text-on-surface transition-colors hover:bg-surface-container" type="submit"><span class="material-symbols-outlined text-[16px]">mark_email_read</span>Marquer comme lue</button>
+</form>
+{% endif %}
+</div>
+<form action="{% url 'coaching:student_notification_reply' item.notification.pk %}" class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start" data-validate-form method="post" novalidate>
+{% csrf_token %}
+<div class="min-w-0 flex-1" data-field-wrap>
+<textarea aria-label="Répondre à {{ item.tutor_name }}" class="min-h-11 w-full rounded border border-outline-variant/70 bg-surface px-3 py-2 text-xs text-on-surface outline-none transition-colors focus:border-primary" data-required-message="Rédigez une réponse pour votre tuteur." data-words-min="2" maxlength="500" minlength="5" name="reply" placeholder="Répondre à mon tuteur…" required rows="2">{{ item.notification.reply }}</textarea>
+</div>
+<button class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[16px]">send</span>{% if item.notification.reply %}Mettre à jour{% else %}Répondre{% endif %}</button>
+</form>
+</div>
+</div>
+</article>
+{% empty %}
+<div class="flex flex-col items-center gap-2 rounded border border-outline-variant/40 bg-surface-container-lowest px-4 py-14 text-center shadow-sm">
+<span class="material-symbols-outlined text-[36px] text-outline">notifications_off</span>
+<p class="text-sm font-semibold text-on-surface">Aucune notification pour le moment</p>
+<p class="mt-1 max-w-sm text-xs text-on-surface-variant">Les relances de votre tuteur référent apparaîtront ici. Pensez à écrire votre journal de progression régulièrement.</p>
+<div class="mt-4 flex flex-wrap justify-center gap-2">
+<a class="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" href="{% url 'coaching:student_journal' %}"><span class="material-symbols-outlined text-[16px]">menu_book</span>Ouvrir mon journal</a>
+</div>
+</div>
+{% endfor %}
+</section>
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+{% include "coaching/_form_validation.html" %}
+{% endblock %}

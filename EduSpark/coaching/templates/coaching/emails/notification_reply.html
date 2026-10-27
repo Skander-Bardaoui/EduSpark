@@ -1,0 +1,24 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Réponse de {{ student_name }}{% endblock %}
+{% block body %}
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">Bonjour {{ professor_first_name }},</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">
+  <strong>{{ student_name }}</strong> a répondu à votre relance
+  « {{ notification_title }} ».
+</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f2f6ff;border:1px solid #d7e2fb;border-radius:12px;margin:0 0 12px;">
+<tr><td style="padding:14px 16px;">
+<p style="margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#5b6b8c;font-weight:700;">Votre message</p>
+<p style="margin:0;font-size:13px;line-height:1.6;color:#4b5a7a;">{{ original_message }}</p>
+</td></tr>
+</table>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eefbf2;border:1px solid #c9ecd4;border-radius:12px;margin:0 0 16px;">
+<tr><td style="padding:14px 16px;">
+<p style="margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:#2f6b43;font-weight:700;">Sa réponse</p>
+<p style="margin:0;font-size:14px;line-height:1.6;color:#14213d;">{{ reply }}</p>
+</td></tr>
+</table>
+<p style="margin:0;font-size:14px;line-height:1.6;">
+  Poursuivez l'échange dans votre espace de suivi ou proposez un rendez-vous de tutorat.
+</p>
+{% endblock %}

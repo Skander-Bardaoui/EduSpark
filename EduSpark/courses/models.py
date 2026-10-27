@@ -303,9 +303,9 @@ class TeachingAssignment(models.Model):
         verbose_name_plural = "Affectations d'enseignement"
         constraints = [
             models.UniqueConstraint(
-                fields=("school_class", "subject", "professor"),
-                name="unique_assignment_per_class_subject_professor",
-                violation_error_message="Ce professeur est déjà affecté à cette matière pour cette classe.",
+                fields=("school_class", "subject"),
+                name="unique_assignment_per_class_subject",
+                violation_error_message="Cette matière a déjà un professeur dans cette classe.",
             ),
         ]
 
@@ -341,6 +341,22 @@ class TeachingAssignment(models.Model):
                     errors, "professor", self.professor, university_id,
                     "Le professeur doit appartenir à la même université que la classe.",
                 )
+            if "subject" not in errors:
+                clash = (
+                    TeachingAssignment.objects.filter(
+                        school_class_id=self.school_class_id,
+                        subject_id=self.subject_id,
+                    )
+                    .exclude(pk=self.pk)
+                    .select_related("professor__membership__user")
+                    .first()
+                )
+                if clash is not None:
+                    errors["subject"] = (
+                        "Cette matière a déjà un professeur dans cette classe (%s). "
+                        "Modifiez cette affectation pour remplacer l'enseignant."
+                        % clash.professor_name
+                    )
         if not errors:
             busy = self._professor_conflict()
             if busy:
@@ -377,8 +393,22 @@ class TeachingAssignment(models.Model):
             self.school_class.professors.add(self.professor)
             original = getattr(self, "_original_key", None)
             current = (self.school_class_id, self.subject_id, self.professor_id)
-            if original is not None and original != current:
-                purge_publications(*original)
+            if original is not None:
+                old_class_id, _old_subject_id, old_professor_id = original
+                moved = (
+                    old_class_id != self.school_class_id
+                    or old_professor_id != self.professor_id
+                )
+                if moved:
+                    still_assigned = TeachingAssignment.objects.filter(
+                        school_class_id=old_class_id, professor_id=old_professor_id,
+                    ).exclude(pk=self.pk).exists()
+                    if not still_assigned:
+                        old_class = SchoolClass.objects.filter(pk=old_class_id).first()
+                        if old_class is not None:
+                            old_class.professors.remove(old_professor_id)
+                if original != current:
+                    purge_publications(*original)
             self._original_key = current
 
 

@@ -1,0 +1,110 @@
+{% extends portal_base_template %}
+{% block title %}{{ thread.title }} — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5 sm:px-6 xl:px-8">
+<a class="inline-flex w-fit items-center gap-1 text-xs font-bold text-on-surface-variant hover:text-primary" href="{{ back_url }}"><span class="material-symbols-outlined text-[16px]">arrow_back</span>{{ forum.title }}</a>
+
+<article class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-sm {% if thread.is_hidden %}opacity-70{% endif %}">
+<div class="mb-2 flex flex-wrap items-center gap-1.5">
+{% if thread.is_pinned %}{% include "portal/_badge.html" with label="Épinglée" tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if thread.is_resolved %}{% include "portal/_badge.html" with label="Résolue" tone_class="bg-secondary-fixed text-on-secondary-fixed" dot=True %}{% endif %}
+{% if thread.is_hidden %}{% include "portal/_badge.html" with label="Masquée aux étudiants" tone_class="bg-error-container text-on-error-container" %}{% endif %}
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">{{ thread.title }}</h1>
+<p class="mt-1 text-xs text-outline">{% firstof thread.author.get_full_name thread.author.email "Compte supprimé" %} · {{ thread.created_at|date:"d/m/Y à H:i" }}</p>
+<div class="mt-4 whitespace-pre-line text-body-md leading-relaxed text-on-surface">{{ thread.body }}</div>
+
+<div class="mt-5 flex flex-wrap items-center gap-2 border-t border-outline-variant/40 pt-4 text-xs font-bold">
+{% if is_author or can_manage %}{% if not thread.is_resolved or not has_solution or can_validate %}
+<form method="post" action="{% url 'community:thread_toggle_resolved' thread.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container" type="submit">{% if thread.is_resolved %}Rouvrir{% else %}Marquer comme résolue{% endif %}</button></form>
+{% endif %}{% endif %}
+{% if is_author %}<a class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container" href="{% url 'community:thread_edit' thread.pk %}">Modifier</a>{% endif %}
+{% if is_author or can_manage %}<a class="rounded-full border border-error/40 px-3 py-1.5 text-error hover:bg-error-container" href="{% url 'community:thread_delete' thread.pk %}">Supprimer</a>{% endif %}
+{% if can_manage %}
+<form method="post" action="{% url 'community:thread_toggle_pin' thread.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container" type="submit">{% if thread.is_pinned %}Désépingler{% else %}Épingler{% endif %}</button></form>
+<form method="post" action="{% url 'community:thread_toggle_hidden' thread.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container" type="submit">{% if thread.is_hidden %}Rendre visible{% else %}Masquer{% endif %}</button></form>
+{% endif %}
+{% if not is_author %}<a class="ml-auto inline-flex items-center gap-1 text-outline hover:text-error" href="{% url 'community:report_create' 'question' thread.pk %}"><span class="material-symbols-outlined text-[16px]">flag</span>Signaler</a>{% endif %}
+</div>
+</article>
+
+<section aria-labelledby="replies-title" class="flex flex-col gap-3">
+<h2 class="font-title-md text-title-md text-on-surface" id="replies-title">{{ replies|length }} réponse{{ replies|length|pluralize }}</h2>
+{% for r in replies %}
+<article class="rounded-2xl border bg-surface-container-lowest p-5 shadow-sm {% if r.is_solution %}border-secondary/60 ring-1 ring-secondary/30{% else %}border-outline-variant/40{% endif %} {% if r.is_hidden %}opacity-60{% endif %}" id="reponse-{{ r.pk }}">
+<div class="mb-2 flex flex-wrap items-center gap-1.5">
+{% if r.is_solution %}<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-secondary-fixed px-2.5 py-1 font-label-sm text-label-sm text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">verified</span>Solution validée{% if r.validated_by %} par Pr. {{ r.validator_name }}{% endif %}</span>{% endif %}
+{% if r.ai_assisted %}{% include "portal/_badge.html" with label="Brouillon IA relu" tone_class="bg-primary-fixed text-primary" %}{% endif %}
+{% if r.is_hidden %}{% include "portal/_badge.html" with label="Masquée aux étudiants" tone_class="bg-error-container text-on-error-container" %}{% endif %}
+<span class="text-xs text-outline">{% firstof r.author.get_full_name r.author.email "Compte supprimé" %} · {{ r.created_at|date:"d/m/Y à H:i" }}</span>
+</div>
+<div class="whitespace-pre-line text-body-md leading-relaxed text-on-surface">{{ r.body }}</div>
+<div class="mt-3 flex flex-wrap items-center gap-2 text-xs font-bold">
+{% if can_validate %}
+<form method="post" action="{% url 'community:reply_mark_solution' r.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-on-surface-variant hover:bg-surface-container" type="submit">{% if r.is_solution %}Retirer ma validation{% else %}Valider comme solution{% endif %}</button></form>
+{% endif %}
+{% if r.author_id == request.user.pk %}<a class="rounded-full border border-outline-variant/70 px-3 py-1 text-on-surface-variant hover:bg-surface-container" href="{% url 'community:reply_edit' r.pk %}">Modifier</a>{% endif %}
+{% if r.author_id == request.user.pk or can_manage %}<a class="rounded-full border border-error/40 px-3 py-1 text-error hover:bg-error-container" href="{% url 'community:reply_delete' r.pk %}">Supprimer</a>{% endif %}
+{% if can_manage %}<form method="post" action="{% url 'community:reply_toggle_hidden' r.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1 text-on-surface-variant hover:bg-surface-container" type="submit">{% if r.is_hidden %}Rendre visible{% else %}Masquer{% endif %}</button></form>{% endif %}
+{% if r.author_id != request.user.pk and not r.is_hidden %}<a class="ml-auto inline-flex items-center gap-1 text-outline hover:text-error" href="{% url 'community:report_create' 'reponse' r.pk %}"><span class="material-symbols-outlined text-[16px]">flag</span>Signaler</a>{% endif %}
+</div>
+</article>
+{% empty %}
+<p class="rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-5 py-6 text-center text-sm text-on-surface-variant">Aucune réponse pour le moment.</p>
+{% endfor %}
+</section>
+
+<section class="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm" aria-labelledby="reply-title">
+<h2 class="mb-3 font-title-md text-title-md text-on-surface" id="reply-title">Votre réponse</h2>
+{% if can_post %}
+<form id="reply-form" method="post" action="{% url 'community:reply_create' thread.pk %}">
+{% csrf_token %}
+{{ reply_form.ai_assisted }}
+{{ reply_form.body }}
+<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+<div class="flex min-w-0 flex-col gap-1">
+<button class="inline-flex w-fit items-center gap-2 rounded-full border border-secondary/50 bg-secondary-fixed/40 px-4 py-2 text-xs font-bold text-secondary transition-colors hover:bg-secondary-fixed" data-ai-url="{% url 'community:thread_ai_suggestion' thread.pk %}" id="ai-suggest" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>Suggérer une réponse</button>
+<p class="text-xs text-on-surface-variant" id="ai-status" role="status">{% if not ai_configured %}L'assistant IA n'est pas configuré sur ce serveur : vous pouvez répondre vous-même.{% else %}L'assistant propose un brouillon que vous relisez et modifiez avant de publier.{% endif %}</p>
+</div>
+<button class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit"><span class="material-symbols-outlined text-[18px]">send</span>Publier la réponse</button>
+</div>
+</form>
+{% else %}
+<p class="text-sm text-on-surface-variant">Ce forum est verrouillé : on ne peut plus répondre.</p>
+{% endif %}
+</section>
+</div>
+</main>
+{% if can_post %}
+<script>
+(function () {
+  const button = document.getElementById('ai-suggest');
+  const status = document.getElementById('ai-status');
+  const form = document.getElementById('reply-form');
+  const body = form.querySelector('textarea[name=body]');
+  const flag = form.querySelector('input[name=ai_assisted]');
+  const token = form.querySelector('input[name=csrfmiddlewaretoken]').value;
+  button.addEventListener('click', async () => {
+    if (body.value.trim() && !confirm('Remplacer le texte actuel par la suggestion de l’assistant ?')) return;
+    button.disabled = true;
+    status.textContent = 'L’assistant rédige un brouillon…';
+    try {
+      const response = await fetch(button.dataset.aiUrl, { method: 'POST', headers: { 'X-CSRFToken': token } });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) throw new Error(data.error || 'Suggestion impossible pour le moment.');
+      body.value = data.text;
+      flag.value = 'True';
+      status.textContent = 'Brouillon inséré : relisez-le et corrigez-le avant de publier.';
+      body.focus();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -6,7 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .forms import SchoolClassForm, StudentGroupForm
-from .models import SchoolClass, StudentGroup, StudentProfile
+from .models import MAX_STUDENTS_PER_CLASS, SchoolClass, StudentGroup, StudentProfile
 from .tenancy import Role, TenantRequiredMixin, TenantScopedMixin
 from .view_mixins import (
     GenericDeleteMixin, GenericFormMixin, SearchFilterMixin, SuccessMessageMixin, distinct_choices,
@@ -20,8 +20,8 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
     template_name = "accounts/admin_classes.html"
     context_object_name = "classes"
     allowed_roles = ADMIN
-    search_fields = ("name", "level", "program", "academic_year")
-    search_placeholder = "Nom, niveau, filière, année…"
+    search_fields = ("name", "level", "section", "program", "academic_year")
+    search_placeholder = "Nom, niveau, section, filière, année…"
 
     def get_queryset(self):
         return super().get_queryset().prefetch_related(
@@ -37,6 +37,8 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
         return [
             {"param": "filiere", "lookup": "program", "label": "Filière",
              "choices": distinct_choices(base, "program")},
+            {"param": "section", "lookup": "section", "label": "Section",
+             "choices": distinct_choices(base, "section")},
             {"param": "annee", "lookup": "academic_year", "label": "Année",
              "choices": distinct_choices(base, "academic_year")},
         ]
@@ -64,6 +66,7 @@ class SchoolClassListView(TenantScopedMixin, SearchFilterMixin, ListView):
                 ).distinct().count(),
                 "levels": len(levels),
             },
+            "max_students": MAX_STUDENTS_PER_CLASS,
             "level_breakdown": levels,
             "recent_groups": groups.select_related("school_class").annotate(
                 student_total=Count("students", distinct=True),
@@ -88,15 +91,23 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
         context = super().get_context_data(**kwargs)
         school_class = self.object
         groups = list(school_class.groups.all())
+        ungrouped_filters = {
+            "university": school_class.university,
+            "membership__is_active": True,
+            "level__iexact": school_class.level,
+            "groups__isnull": True,
+        }
+        if school_class.section:
+            ungrouped_filters["section__iexact"] = school_class.section
         context.update({
             "groups": groups,
             "professors": school_class.professors.all(),
-            "students": StudentProfile.objects.filter(
-                university=school_class.university, groups__school_class=school_class,
-            ).select_related("membership__user").distinct(),
+            "students": school_class.student_queryset().select_related("membership__user"),
             "ungrouped": StudentProfile.objects.filter(
-                university=school_class.university,
-            ).exclude(groups__school_class=school_class).select_related("membership__user").distinct(),
+                **ungrouped_filters,
+            ).select_related("membership__user").distinct(),
+            "max_students": MAX_STUDENTS_PER_CLASS,
+            "seats_left": school_class.seats_left,
         })
         return context
 
@@ -104,6 +115,7 @@ class SchoolClassDetailView(TenantScopedMixin, DetailView):
 class SchoolClassCreateView(TenantScopedMixin, GenericFormMixin, SuccessMessageMixin, CreateView):
     model = SchoolClass
     form_class = SchoolClassForm
+    template_name = "accounts/admin_class_form.html"
     allowed_roles = ADMIN
     page_title = "Nouvelle classe"
     page_icon = "layers"
@@ -123,6 +135,7 @@ class SchoolClassCreateView(TenantScopedMixin, GenericFormMixin, SuccessMessageM
 class SchoolClassUpdateView(TenantScopedMixin, GenericFormMixin, SuccessMessageMixin, UpdateView):
     model = SchoolClass
     form_class = SchoolClassForm
+    template_name = "accounts/admin_class_form.html"
     allowed_roles = ADMIN
     page_icon = "layers"
     success_message = "Classe mise à jour."

@@ -45,9 +45,9 @@
 {% for row in request_rows %}
 <tr class="hover:bg-surface-container/40" data-tutoring-row>
 <td class="px-5 py-3"><div class="flex items-center gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-[11px] font-extrabold text-on-primary">{{ row.student_initials }}</span><div><p class="font-semibold text-on-surface">{{ row.student_name }}</p><p class="text-xs text-on-surface-variant">{{ row.student_email }}</p></div></div></td>
-<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.session.topic }}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.preferred_label }}</td><td class="px-5 py-3">{% include "portal/_badge.html" with label=row.priority_meta.label tone_class=row.priority_meta.badge %}</td>
+<td class="px-5 py-3 text-on-surface-variant">{{ row.class_name }}</td><td class="px-5 py-3 text-on-surface-variant"><span class="block">{{ row.session.topic }}</span>{% if row.comment %}<span class="mt-1 flex items-start gap-1 text-xs"><span class="material-symbols-outlined shrink-0 text-[14px] text-primary">comment</span><span>{{ row.comment|linebreaksbr }}</span></span>{% endif %}</td><td class="px-5 py-3 text-on-surface-variant">{{ row.preferred_label }}</td><td class="px-5 py-3">{% include "portal/_badge.html" with label=row.priority_meta.label tone_class=row.priority_meta.badge %}</td>
 <td class="px-5 py-3 text-right"><div class="flex justify-end gap-2 whitespace-nowrap" data-tutoring-actions>
-<form method="post" action="{% url 'coaching:prof_request_accept' row.session.pk %}">{% csrf_token %}<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Accepter</button></form>
+<form method="post" action="{% url 'coaching:prof_request_accept' row.session.pk %}">{% csrf_token %}<button class="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Confirmer</button></form>
 <form method="post" action="{% url 'coaching:prof_request_decline' row.session.pk %}">{% csrf_token %}<button class="rounded-full border border-outline-variant/70 px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" type="submit">Refuser</button></form>
 </div></td>
 </tr>
@@ -101,7 +101,7 @@
 <button aria-label="Fermer" class="absolute inset-0 cursor-default" data-modal-close type="button"></button>
 <div class="relative z-10 w-full max-w-md rounded border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
 <div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
-<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Ouvrir un créneau</h2><p class="text-xs text-on-surface-variant">Visible par vos étudiants référents.</p></div>
+<div><h2 class="font-headline-sm text-headline-sm text-on-surface">Ouvrir un créneau</h2><p class="text-xs text-on-surface-variant">Visible par les étudiants de vos classes et vos étudiants suivis.</p></div>
 <button aria-label="Fermer" class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close type="button"><span class="material-symbols-outlined">close</span></button>
 </div>
 <form class="space-y-3 p-5" data-future-datetime data-lead-minutes="15" data-validate-form id="slot-form" method="post" action="{% url 'coaching:prof_slot_create' %}" novalidate>

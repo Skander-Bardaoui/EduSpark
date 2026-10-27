@@ -32,6 +32,8 @@ export class RealtimeTranscriber {
     this.error = null;
     this.socket = null;
     this.sampleRate = DEFAULT_SAMPLE_RATE;
+    this.recognition = null;
+    this.browserActive = false;
   }
 
   setStatus(status) {
@@ -40,6 +42,18 @@ export class RealtimeTranscriber {
   }
 
   teardown() {
+    if (this.recognition) {
+      this.browserActive = false;
+      try {
+        this.recognition.onend = null;
+        this.recognition.onerror = null;
+        this.recognition.onresult = null;
+        this.recognition.stop();
+      } catch (error) {
+        // Already stopped.
+      }
+      this.recognition = null;
+    }
     const socket = this.socket;
     if (!socket) {
       return;
@@ -58,6 +72,72 @@ export class RealtimeTranscriber {
     this.teardown();
     this.onPartial('');
     this.setStatus('idle');
+  }
+
+  connectBrowser() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      this.error = 'La transcription temps réel et la reconnaissance vocale du navigateur ne sont pas disponibles.';
+      this.onError(this.error);
+      this.setStatus('error');
+      return;
+    }
+
+    this.browserActive = true;
+    const recognition = new SpeechRecognition();
+    recognition.lang = this.languageCode === 'fr' ? 'fr-FR' : 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const text = result[0] ? result[0].transcript : '';
+        if (result.isFinal) {
+          final += text;
+        } else {
+          interim += text;
+        }
+      }
+      if (interim) {
+        this.onPartial(interim);
+      }
+      if (final.trim()) {
+        this.onCommitted(final.trim());
+        this.onPartial('');
+      }
+    };
+
+    recognition.onerror = (event) => {
+      if (event.error === 'no-speech' || event.error === 'aborted') {
+        return;
+      }
+      this.error = 'La reconnaissance vocale du navigateur a échoué (' + event.error + ').';
+      this.onError(this.error);
+    };
+
+    recognition.onend = () => {
+      if (this.browserActive) {
+        try {
+          recognition.start();
+        } catch (error) {
+          // Restart is best effort.
+        }
+      }
+    };
+
+    this.recognition = recognition;
+    try {
+      recognition.start();
+      this.setStatus('connected');
+    } catch (error) {
+      this.error = 'Impossible de démarrer la reconnaissance vocale du navigateur.';
+      this.onError(this.error);
+      this.setStatus('error');
+    }
   }
 
   async connect(sampleRate) {
@@ -147,15 +227,19 @@ export class RealtimeTranscriber {
         }
       };
     } catch (error) {
-      console.error('[RealtimeTranscriber] failed to connect:', error);
+      // Sans clé ElevenLabs (ou en cas de panne), on bascule sur la
+      // reconnaissance vocale native du navigateur : le test reste utilisable
+      // avec la seule clé Groq pour l'examinateur et le bilan.
+      console.warn('[RealtimeTranscriber] ElevenLabs indisponible, fallback navigateur :', error);
       this.teardown();
-      this.error = error instanceof Error ? error.message : 'Impossible de se connecter à la transcription';
-      this.onError(this.error);
-      this.setStatus('error');
+      this.connectBrowser();
     }
   }
 
   sendAudioChunk(chunk) {
+    if (this.browserActive) {
+      return;
+    }
     const socket = this.socket;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       return;

@@ -248,6 +248,22 @@ OLLAMA_KEEP_ALIVE = os.environ.get('OLLAMA_KEEP_ALIVE', '30m')
 AI_LOCAL_TIMEOUT = float(os.environ.get('AI_LOCAL_TIMEOUT', '120'))
 AI_LOCAL_TEXT_LIMIT = int(os.environ.get('AI_LOCAL_TEXT_LIMIT', '4000'))
 AI_RATE_LIMIT_PER_HOUR = int(os.environ.get('AI_RATE_LIMIT_PER_HOUR', '10'))
+# --- Intelligence artificielle (module coaching) ---------------------------
+# Aucune clé n'est écrite ici : tout vient de .env (voir .env.example).
+# GROQ sert au plan d'étude IA, à l'examinateur du test de langue, à
+# l'évaluation du bilan et à la génération des QCM d'examen. ELEVENLABS fournit la transcription temps réel et
+# OPENAI la voix de l'examinateur; si elles manquent, le navigateur prend le
+# relais (Web Speech API).
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '').strip()
+GROQ_MODEL = (
+    os.environ.get('GROQ_MODEL', '').strip()
+    or 'openai/gpt-oss-120b'
+)
+ELEVENLABS_API_KEY = os.environ.get('ELEVENLABS_API_KEY', '').strip()
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '').strip()
+# Le plan d'étude reste proposé dans l'interface; il renvoie un message clair
+# quand la clé manque au lieu d'échouer silencieusement.
+AI_STUDY_PLANNER_ENABLED = bool(GROQ_API_KEY)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

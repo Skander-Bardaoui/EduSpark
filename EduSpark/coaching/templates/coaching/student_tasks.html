@@ -79,10 +79,67 @@
 <li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">priority_high</span>Traitez d'abord la tâche prioritaire du jour.</li>
 <li class="flex gap-2"><span class="material-symbols-outlined text-[16px] text-primary">bedtime</span>Gardez une soirée libre avant chaque examen.</li>
 </ul>
-<button class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline" data-toast="Guide de méthodologie ouvert." type="button">Ouvrir le guide<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
+<button aria-haspopup="dialog" class="mt-4 inline-flex items-center gap-1 rounded-full text-xs font-bold text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40" data-modal-open="#productivity-guide" type="button">Ouvrir le guide<span class="material-symbols-outlined text-[16px]">arrow_forward</span></button>
 </div>
 </aside>
 </section>
+</div>
+<div aria-labelledby="productivity-guide-title" aria-modal="true" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" data-modal="" id="productivity-guide" role="dialog">
+<div class="absolute inset-0 bg-[#06164b]/50 backdrop-blur-sm" data-modal-close=""></div>
+<div class="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface-container-lowest shadow-2xl">
+<div class="flex items-start justify-between gap-3 border-b border-outline-variant/40 px-5 py-4">
+<div>
+<p class="font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Méthodologie</p>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="productivity-guide-title">Guide de productivité</h2>
+<p class="mt-1 text-xs text-on-surface-variant">Trois routines simples pour travailler régulièrement sans vous épuiser.</p>
+</div>
+<button aria-label="Fermer le guide" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container" data-modal-close="" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button>
+</div>
+<div class="flex flex-col gap-4 overflow-y-auto px-5 py-4">
+<div class="grid gap-3 sm:grid-cols-2">
+<article class="rounded border border-outline-variant/40 bg-surface-container-low p-4">
+<div class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-[20px]">timer</span><h3 class="text-sm font-bold">La session de 25 minutes</h3></div>
+<p class="mt-2 text-xs leading-relaxed text-on-surface-variant">Choisissez une seule révision, coupez les notifications et travaillez 25 minutes. Notez toute pensée parasite sur papier pour ne pas interrompre votre concentration.</p>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-low p-4">
+<div class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-[20px]">priority_high</span><h3 class="text-sm font-bold">La priorité avant tout</h3></div>
+{% if guide_priority_task %}
+<p class="mt-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Votre priorité actuelle</p>
+<p class="mt-1 text-sm font-bold text-on-surface">{{ guide_priority_task.title }}</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ guide_priority_task.get_horizon_display }} · {{ guide_priority_task.get_priority_display }}{% if guide_priority_task.due_at %} · avant le {{ guide_priority_task.due_at|date:"d/m/Y" }}{% endif %}</p>
+<p class="mt-2 text-xs leading-relaxed text-on-surface-variant">Commencez par elle, même 15 minutes. Une tâche prioritaire terminée libère plus d'énergie que plusieurs petites tâches.</p>
+{% else %}
+<p class="mt-2 text-xs leading-relaxed text-on-surface-variant">Aucune tâche en attente : profitez-en pour avancer sur un objectif de révision ou préparer la semaine suivante.</p>
+{% endif %}
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-low p-4">
+<div class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-[20px]">bedtime</span><h3 class="text-sm font-bold">Préserver la veille</h3></div>
+{% if guide_exam %}
+<p class="mt-1 text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">Prochain examen</p>
+<p class="mt-1 text-sm font-bold text-on-surface">{{ guide_exam.title }}</p>
+<p class="mt-1 text-xs text-on-surface-variant">{{ guide_exam_label }}{% if guide_exam.location %} · {{ guide_exam.location }}{% endif %}</p>
+{% endif %}
+<p class="mt-2 text-xs leading-relaxed text-on-surface-variant">La veille, arrêtez les révisions intensives en fin d'après-midi. Préparez vos affaires, relisez uniquement vos fiches clés et couchez-vous à une heure raisonnable.</p>
+</article>
+<article class="rounded border border-outline-variant/40 bg-surface-container-low p-4" id="productivity-timer">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-[20px]">av_timer</span><h3 class="text-sm font-bold">Minuteur Pomodoro</h3></div>
+<span class="rounded-full bg-primary-fixed px-2 py-0.5 text-[11px] font-bold text-primary">25 min</span>
+</div>
+<p aria-live="polite" class="mt-3 text-center font-data-metric text-[32px] font-bold tabular-nums text-on-surface" id="pomodoro-display">25:00</p>
+<p class="text-center text-[11px] text-on-surface-variant" id="pomodoro-status">Prêt à démarrer une session.</p>
+<div class="mt-3 flex gap-2">
+<button class="flex-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary" id="pomodoro-start" type="button">Démarrer</button>
+<button class="rounded-full border border-outline-variant/60 px-3 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container focus:outline-none focus:ring-2 focus:ring-primary" id="pomodoro-reset" type="button">Réinitialiser</button>
+</div>
+</article>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2 border-t border-outline-variant/40 px-5 py-3">
+<p class="text-[11px] text-on-surface-variant">Astuce : enchaînez 25 minutes de travail puis 5 minutes de pause.</p>
+<button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-primary" data-modal-close="" type="button">Fermer le guide</button>
+</div>
+</div>
 </div>
 </main>
 {% endblock %}
@@ -140,6 +197,75 @@
 
   update();
   applyFilter();
+})();
+
+(function () {
+  var modal = document.getElementById('productivity-guide');
+  var display = document.getElementById('pomodoro-display');
+  var status = document.getElementById('pomodoro-status');
+  var startBtn = document.getElementById('pomodoro-start');
+  var resetBtn = document.getElementById('pomodoro-reset');
+  if (!modal || !display || !startBtn || !resetBtn) return;
+
+  var total = 25 * 60;
+  var remaining = total;
+  var timerId = null;
+
+  function render() {
+    var minutes = Math.floor(remaining / 60);
+    var seconds = remaining % 60;
+    display.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+  }
+
+  function stop(label) {
+    if (timerId) {
+      window.clearInterval(timerId);
+      timerId = null;
+    }
+    startBtn.textContent = remaining > 0 ? 'Reprendre' : 'Démarrer';
+    if (label && status) status.textContent = label;
+  }
+
+  function tick() {
+    remaining -= 1;
+    if (remaining <= 0) {
+      remaining = 0;
+      render();
+      stop('Session terminée. Prenez 5 minutes de pause.');
+      if (window.portalToast) window.portalToast('Session Pomodoro terminée — pause de 5 minutes.', 'success');
+      return;
+    }
+    render();
+  }
+
+  startBtn.addEventListener('click', function () {
+    if (timerId) {
+      stop('Session en pause.');
+      return;
+    }
+    if (remaining <= 0) remaining = total;
+    timerId = window.setInterval(tick, 1000);
+    startBtn.textContent = 'Pause';
+    if (status) status.textContent = 'Concentration active : restez sur une seule tâche.';
+  });
+
+  resetBtn.addEventListener('click', function () {
+    remaining = total;
+    render();
+    stop('Minuteur réinitialisé à 25 minutes.');
+    startBtn.textContent = 'Démarrer';
+  });
+
+  modal.addEventListener('click', function (event) {
+    if (event.target.closest('[data-modal-close]')) stop('Session en pause.');
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+      stop('Session en pause.');
+    }
+  });
+
+  render();
 })();
 </script>
 {% endblock %}

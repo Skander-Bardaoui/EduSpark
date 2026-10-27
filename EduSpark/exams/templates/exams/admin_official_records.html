@@ -15,7 +15,7 @@
 </div>
 </header>
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-{% include "portal/_stat_card.html" with label="Jurys programmés" value=jury_count icon="gavel" hint="Une délibération par classe" %}
+{% include "portal/_stat_card.html" with label="Relevés de classe" value=record_count icon="gavel" hint="Une délibération par classe" %}
 {% include "portal/_stat_card.html" with label="Relevés publiés" value=published_count icon="workspace_premium" icon_class="bg-surface-container text-secondary" hint="Consultables par les étudiants" %}
 {% include "portal/_stat_card.html" with label="PV à signer" value=pending_count icon="draw" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Après clôture des notes" %}
 {% include "portal/_stat_card.html" with label="Litiges ouverts" value="0" icon="check_circle" hint="Aucune réclamation en cours" %}
@@ -24,7 +24,7 @@
 <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
 <div>
 <h2 class="font-headline-sm text-headline-sm text-on-surface">Relevés par classe</h2>
-<p class="text-xs text-on-surface-variant"><span data-filter-count>{{ jury_count }}</span> relevés affichés · {{ semester }}</p>
+<p class="text-xs text-on-surface-variant"><span data-filter-count>{{ record_count }}</span> relevés affichés · {{ semester }}</p>
 </div>
 <div class="flex flex-wrap gap-2">
 <button aria-pressed="true" class="filter-chip is-active rounded-full border border-outline-variant/60 px-3.5 py-1.5 text-xs font-semibold transition-colors" data-filter-value="all" type="button">Tous</button>

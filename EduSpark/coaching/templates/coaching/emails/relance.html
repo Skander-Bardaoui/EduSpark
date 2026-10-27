@@ -1,0 +1,16 @@
+{% extends "coaching/emails/base_email.html" %}
+{% block heading %}Un message de {{ professor_name }}{% endblock %}
+{% block body %}
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Bonjour {{ student_first_name }},</p>
+<p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#33415c;">{{ professor_name }} vous a adressé une relance dans votre espace de suivi EduSpark.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9ff;border:1px solid #e2eafc;border-radius:14px;">
+<tr>
+<td style="padding:20px 22px;">
+<p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2457d6;">Objet</p>
+<p style="margin:0 0 16px;font-size:17px;font-weight:700;line-height:1.4;color:#14213d;">{{ notification_subject }}</p>
+<p style="margin:0;font-size:14px;line-height:1.75;color:#33415c;">{{ notification_message|linebreaksbr }}</p>
+</td>
+</tr>
+</table>
+<p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#5b6b8c;">Vous pouvez répondre à ce message depuis votre espace, ou directement à cet e-mail.</p>
+{% endblock %}

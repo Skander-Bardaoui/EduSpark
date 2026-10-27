@@ -101,10 +101,12 @@ class AssignmentTests(CoursesTestCase):
                 school_class=self.school_class, subject=self.subject, professor=self.prof,
             )
 
-    def test_two_professors_can_share_a_subject_in_a_class(self):
-        TeachingAssignment.objects.create(
-            school_class=self.school_class, subject=self.subject, professor=self.prof2,
-        )
+    def test_a_subject_has_a_single_professor_per_class(self):
+        duplicate = TeachingAssignment(school_class=self.school_class, subject=self.subject, professor=self.prof2)
+        with self.assertRaisesMessage(ValidationError, "Cette matière a déjà un professeur dans cette classe"):
+            duplicate.full_clean()
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            duplicate.save()
 
     def test_assignment_rejects_subject_of_another_program(self):
         assignment = TeachingAssignment(
@@ -268,9 +270,8 @@ class CourseTests(CoursesTestCase):
     def test_changing_the_subject_keeps_only_the_classes_where_the_new_subject_is_taught(self):
         course = self.make_course()  # INF501, publié pour la L3 où le professeur enseigne aussi INF504 ci-dessous
         self.publish(course)
-        TeachingAssignment.objects.create(
-            school_class=self.school_class, subject=self.subject2, professor=self.prof,
-        )
+        # Une matière n'a qu'un professeur par classe : on confie INF504 à ce professeur.
+        TeachingAssignment.objects.filter(pk=self.assign2.pk).update(professor=self.prof)
         course = Course.objects.get(pk=course.pk)
         course.subject = self.subject2
         course.save()
