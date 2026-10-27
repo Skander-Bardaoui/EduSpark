@@ -1,0 +1,104 @@
+{% extends "portal/base_student.html" %}
+{% block title %}S'entraîner — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative min-h-[calc(100vh-4rem)] bg-background px-4 pb-8 pt-6 sm:px-6 xl:px-8" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-space-lg">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Exercices adaptatifs</p>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">S'entraîner</h1>
+    <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Des séries ciblées, recommandées à partir de votre profil et vos dernières évaluations.</p>
+  </div>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "portal/_stat_card.html" with label="Tentatives effectuées" value=solved_count icon="task_alt" hint="Toutes séries" %}
+  {% include "portal/_stat_card.html" with label="Taux de réussite" value=success_rate suffix="%" icon="insights" icon_class="bg-surface-container text-secondary" hint="Réussi + Parfait" %}
+  {% include "portal/_stat_card.html" with label="Séries disponibles" value=series_list|length icon="library_books" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Publiées par vos profs" %}
+  {% include "portal/_stat_card.html" with label="Matières" value=subjects|length icon="category" hint="Thématiques couvertes" %}
+</div>
+
+<!-- Filtres -->
+<form method="get" class="flex flex-wrap items-center gap-3">
+  <label class="sr-only" for="subject-filter">Filtrer par matière</label>
+  <select class="rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2 text-body-sm text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" id="subject-filter" name="subject">
+    <option value="">Toutes les matières</option>
+    {% for subj in subjects %}
+    <option value="{{ subj }}" {% if filter_subject == subj %}selected{% endif %}>{{ subj }}</option>
+    {% endfor %}
+  </select>
+  <button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary hover:bg-primary-container" type="submit">Filtrer</button>
+  {% if filter_subject %}
+  <a class="rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container" href="{% url 'exercises:student_practice' %}">Réinitialiser</a>
+  {% endif %}
+</form>
+
+<!-- Séries -->
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">Séries recommandées</h2>
+      <p class="mt-0.5 text-xs text-on-surface-variant">{{ series_list|length }} série{{ series_list|length|pluralize }} disponible{{ series_list|length|pluralize }}</p>
+    </div>
+  </div>
+  {% if series_list %}
+  <div class="grid gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
+    {% for serie in series_list %}
+    <article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-sm">
+      <div class="flex items-start justify-between gap-2">
+        <span class="flex h-9 w-9 items-center justify-center rounded bg-surface-container text-primary">
+          <span class="material-symbols-outlined text-[19px]">library_books</span>
+        </span>
+        {% if serie.rubric %}{% include "portal/_badge.html" with label=serie.rubric.name tone_class="bg-secondary-fixed text-on-secondary-fixed" %}{% endif %}
+      </div>
+      <h3 class="font-title-md text-title-md mt-3 text-on-surface">{{ serie.name }}</h3>
+      <p class="mt-1 text-xs text-on-surface-variant">{{ serie.subject|default:"Général" }} · {{ serie.exercise_count }} exercice{{ serie.exercise_count|pluralize }}</p>
+      {% if serie.description %}
+      <p class="mt-2 text-xs text-on-surface-variant">{{ serie.description|truncatechars:100 }}</p>
+      {% endif %}
+      <a class="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container"
+        href="{% url 'exercises:student_practice' %}?subject={{ serie.subject|urlencode }}">
+        Voir la série<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="px-5 py-14 text-center">
+    <span class="material-symbols-outlined text-[40px] text-outline">library_books</span>
+    <p class="mt-2 text-sm text-on-surface-variant">Aucune série disponible{% if filter_subject %} pour cette matière{% endif %}.</p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Tentatives récentes -->
+{% if recent_attempts %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Tentatives récentes</h2>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[700px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr><th class="px-5 py-3 font-bold">Série</th><th class="px-5 py-3 font-bold">Score</th><th class="px-5 py-3 font-bold">Durée</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 text-right font-bold">Résultat</th></tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for attempt in recent_attempts %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3 font-semibold text-on-surface">{{ attempt.series.name }}</td>
+          <td class="px-5 py-3 font-semibold text-on-surface">{{ attempt.score }}/{{ attempt.max_score }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ attempt.duration_minutes }} min</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ attempt.created_at|date:"j M Y" }}</td>
+          <td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label=attempt.get_result_display tone_class=attempt.result_badge_class %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+</div>
+</main>
+{% endblock %}

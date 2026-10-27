@@ -1,0 +1,98 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Catégories d'exercices — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Administration</p>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Catégories d'exercices</h1>
+    <p class="mt-1 font-body-md text-body-md text-on-surface-variant">Gérer les catégories et niveaux pour votre université.</p>
+  </div>
+  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
+    href="{% url 'exercises:admin_category_create' %}">
+    <span class="material-symbols-outlined text-[18px]">add</span>Nouvelle catégorie
+  </a>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "portal/_stat_card.html" with label="Total catégories" value=total icon="category" %}
+  {% include "portal/_stat_card.html" with label="Actives" value=active_count icon="check_circle" icon_class="bg-primary-fixed text-primary" %}
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="rounded border border-primary/30 bg-primary-fixed/20 text-primary px-5 py-3 text-sm font-medium">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-4">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Toutes les catégories</h2>
+  </div>
+  {% if categories %}
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[700px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="px-5 py-3 font-bold">Catégorie</th>
+          <th class="px-5 py-3 font-bold">Département</th>
+          <th class="px-5 py-3 font-bold">Statut</th>
+          <th class="px-5 py-3 text-right font-bold">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for cat in categories %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-2">
+              <span class="flex h-8 w-8 items-center justify-center rounded bg-surface-container text-primary">
+                <span class="material-symbols-outlined text-[18px]">{{ cat.icon }}</span>
+              </span>
+              <div>
+                <p class="font-semibold text-on-surface">{{ cat.name }}</p>
+                {% if cat.description %}<p class="text-xs text-on-surface-variant">{{ cat.description|truncatechars:60 }}</p>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ cat.department|default:"—" }}</td>
+          <td class="px-5 py-3">
+            {% if cat.is_active %}{% include "portal/_badge.html" with label="Active" tone_class="bg-primary-fixed text-primary" %}
+            {% else %}{% include "portal/_badge.html" with label="Inactive" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+          </td>
+          <td class="px-5 py-3 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high"
+                href="{% url 'exercises:admin_category_update' cat.pk %}">Modifier</a>
+              <form method="post" action="{% url 'exercises:admin_category_delete' cat.pk %}" class="inline">
+                {% csrf_token %}
+                <button class="rounded-full bg-error-container px-3 py-1.5 text-xs font-bold text-on-error-container transition-colors hover:opacity-80 del-cat" type="submit" data-name="{{ cat.name }}">Supprimer</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="px-5 py-14 text-center">
+    <span class="material-symbols-outlined text-[40px] text-outline">category</span>
+    <p class="mt-2 text-sm text-on-surface-variant">Aucune catégorie. <a class="font-bold text-primary hover:underline" href="{% url 'exercises:admin_category_create' %}">Créer la première</a>.</p>
+  </div>
+  {% endif %}
+</section>
+
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+document.querySelectorAll('button.del-cat').forEach(function (btn) {
+  btn.closest('form').addEventListener('submit', function (e) {
+    if (!confirm('Supprimer la catégorie « ' + btn.getAttribute('data-name') + ' » ?')) e.preventDefault();
+  });
+});
+</script>
+{% endblock %}

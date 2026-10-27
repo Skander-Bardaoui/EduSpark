@@ -1,0 +1,230 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Banque d'exercices — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Exercices</p>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Banque d'exercices</h1>
+    <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Vos exercices réutilisables, classés par matière, type et niveau de difficulté.</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary" href="{% url 'exercises:prof_assignments' %}">
+      <span class="material-symbols-outlined text-[18px]">assignment</span>Devoirs créés
+    </a>
+    <button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-secondary/40 hover:text-secondary"
+      onclick="document.getElementById('ai-drawer').classList.remove('translate-x-full')" type="button">
+      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>Générer avec l'IA
+    </button>
+    <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'exercises:prof_exercise_create' %}">
+      <span class="material-symbols-outlined text-[18px]">add</span>Nouvel exercice
+    </a>
+  </div>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "portal/_stat_card.html" with label="Exercices disponibles" value=total icon="quiz" hint="Banque personnelle" %}
+  {% include "portal/_stat_card.html" with label="Publiés" value=published icon="public" icon_class="bg-surface-container text-secondary" hint="Visibles par les étudiants" %}
+  {% include "portal/_stat_card.html" with label="QCM" value=qcm_count icon="checklist" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Auto-corrigés" %}
+  {% include "portal/_stat_card.html" with label="Générés par IA" value=ai_count icon="auto_awesome" hint="À relire avant publication" %}
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="rounded border {% if message.tags == 'error' %}border-error/30 bg-error-container/20 text-error{% else %}border-primary/30 bg-primary-fixed/20 text-primary{% endif %} px-5 py-3 text-sm font-medium">
+    {{ message }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+    <div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">Catalogue personnel</h2>
+      <p class="text-xs text-on-surface-variant">{{ exercises|length }} exercice{{ exercises|length|pluralize }} affiché{{ exercises|length|pluralize }}</p>
+    </div>
+    <form method="get" class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+        <input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none transition-colors focus:border-primary sm:w-56" name="q" placeholder="Rechercher…" type="search" value="{{ q }}"/>
+      </label>
+      <div class="flex flex-wrap gap-2">
+        <select class="rounded-full border border-outline-variant/60 bg-surface px-3 py-2 text-xs text-on-surface outline-none focus:border-primary" name="type">
+          <option value="">Type</option>
+          <option value="qcm" {% if filter_type == "qcm" %}selected{% endif %}>QCM</option>
+          <option value="vrai_faux" {% if filter_type == "vrai_faux" %}selected{% endif %}>Vrai/Faux</option>
+          <option value="trou" {% if filter_type == "trou" %}selected{% endif %}>Texte à trous</option>
+          <option value="code" {% if filter_type == "code" %}selected{% endif %}>Code</option>
+          <option value="redaction" {% if filter_type == "redaction" %}selected{% endif %}>Rédaction</option>
+          <option value="probleme" {% if filter_type == "probleme" %}selected{% endif %}>Problème</option>
+        </select>
+        <select class="rounded-full border border-outline-variant/60 bg-surface px-3 py-2 text-xs text-on-surface outline-none focus:border-primary" name="difficulty">
+          <option value="">Difficulté</option>
+          <option value="facile" {% if filter_difficulty == "facile" %}selected{% endif %}>Facile</option>
+          <option value="moyen" {% if filter_difficulty == "moyen" %}selected{% endif %}>Moyen</option>
+          <option value="difficile" {% if filter_difficulty == "difficile" %}selected{% endif %}>Difficile</option>
+          <option value="expert" {% if filter_difficulty == "expert" %}selected{% endif %}>Expert</option>
+        </select>
+        <select class="rounded-full border border-outline-variant/60 bg-surface px-3 py-2 text-xs text-on-surface outline-none focus:border-primary" name="status">
+          <option value="">Statut</option>
+          <option value="brouillon" {% if filter_status == "brouillon" %}selected{% endif %}>Brouillon</option>
+          <option value="publie" {% if filter_status == "publie" %}selected{% endif %}>Publié</option>
+          <option value="archive" {% if filter_status == "archive" %}selected{% endif %}>Archivé</option>
+        </select>
+        <button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary transition-colors hover:bg-primary-container" type="submit">Filtrer</button>
+        {% if q or filter_type or filter_difficulty or filter_status %}
+          <a class="rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container" href="{% url 'exercises:prof_exercise_bank' %}">Réinitialiser</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if exercises %}
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[900px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="px-5 py-3 font-bold">Exercice</th>
+          <th class="px-5 py-3 font-bold">Matière</th>
+          <th class="px-5 py-3 font-bold">Type</th>
+          <th class="px-5 py-3 font-bold">Difficulté</th>
+          <th class="px-5 py-3 font-bold">Durée</th>
+          <th class="px-5 py-3 font-bold">Statut</th>
+          <th class="px-5 py-3 text-right font-bold">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for exercise in exercises %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3">
+            <p class="font-semibold text-on-surface">{{ exercise.title }}</p>
+            <p class="text-xs text-on-surface-variant">
+              {{ exercise.subject|default:"" }}{% if exercise.level %} · {{ exercise.level }}{% endif %}
+              {% if exercise.ai_generated %}<span class="ml-1 font-bold text-secondary">· IA</span>{% endif %}
+            </p>
+          </td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ exercise.subject|default:"—" }}</td>
+          <td class="px-5 py-3">{% include "portal/_badge.html" with label=exercise.get_exercise_type_display tone_class=exercise.get_type_display_class %}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ exercise.get_difficulty_display }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ exercise.duration_minutes }} min</td>
+          <td class="px-5 py-3">
+            {% if exercise.status == "publie" %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" %}
+            {% elif exercise.status == "archive" %}{% include "portal/_badge.html" with label="Archivé" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+            {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+          </td>
+          <td class="px-5 py-3 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a class="rounded-full bg-surface-container px-3 py-1.5 text-xs font-bold text-on-surface-variant transition-colors hover:bg-surface-container-high" href="{% url 'exercises:prof_exercise_update' exercise.pk %}">Modifier</a>
+              <form method="post" action="{% url 'exercises:prof_exercise_delete' exercise.pk %}" class="inline" id="del-ex-{{ exercise.pk }}">
+                {% csrf_token %}
+                <button class="rounded-full bg-error-container px-3 py-1.5 text-xs font-bold text-on-error-container transition-colors hover:opacity-80 supprimer" type="submit" data-title="{{ exercise.title }}">Supprimer</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="px-5 py-14 text-center">
+    <span class="material-symbols-outlined text-[40px] text-outline">quiz</span>
+    <p class="mt-2 text-sm text-on-surface-variant">
+      {% if q or filter_type or filter_difficulty or filter_status %}Aucun exercice ne correspond à ces filtres.
+      {% else %}Votre banque est vide. <a class="font-bold text-primary hover:underline" href="{% url 'exercises:prof_exercise_create' %}">Créer le premier exercice</a>.{% endif %}
+    </p>
+  </div>
+  {% endif %}
+</section>
+
+</div>
+</main>
+
+<!-- Drawer IA -->
+<aside aria-labelledby="ai-drawer-title" aria-modal="true" role="dialog"
+  class="fixed inset-y-0 right-0 w-full sm:w-[460px] bg-surface-container-lowest shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+  id="ai-drawer">
+  <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4 bg-surface-container-low">
+    <div class="flex items-center gap-2">
+      <span class="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-on-secondary">
+        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+      </span>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface" id="ai-drawer-title">Générer avec l'IA</h2>
+    </div>
+    <button class="rounded-full p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container" onclick="document.getElementById('ai-drawer').classList.add('translate-x-full')" type="button" aria-label="Fermer">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5">
+    <p class="mb-4 text-sm text-on-surface-variant">L'IA génère un exercice complet avec ses questions. Il sera créé en brouillon pour que vous puissiez le relire avant publication.</p>
+    <form id="ai-gen-form" method="post" action="{% url 'exercises:prof_exercise_ai_generate' %}">
+      {% csrf_token %}
+      <div class="flex flex-col gap-4">
+        {% for field in ai_form %}
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<p class="text-xs text-error">{{ field.errors|join:", " }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mt-6">
+        <button class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-secondary px-5 py-3 font-label-md text-label-md text-on-secondary transition-colors hover:opacity-90" id="ai-gen-btn" type="submit">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>Générer l'exercice
+        </button>
+      </div>
+    </form>
+    <div class="mt-4 hidden rounded bg-surface-container p-4 text-sm leading-relaxed" id="ai-result"></div>
+  </div>
+</aside>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  /* Confirm delete */
+  document.querySelectorAll('button.supprimer').forEach(function (btn) {
+    btn.closest('form').addEventListener('submit', function (e) {
+      if (!confirm('Supprimer l\'exercice « ' + btn.getAttribute('data-title') + ' » ? Cette action est irréversible.')) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  /* AI generation (AJAX) */
+  var form = document.getElementById('ai-gen-form');
+  var btn = document.getElementById('ai-gen-btn');
+  var result = document.getElementById('ai-result');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Génération…';
+    result.classList.add('hidden');
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      result.classList.remove('hidden');
+      if (data.ok) {
+        result.innerHTML = '<p class="font-bold text-primary mb-1">✓ ' + data.questions_count + ' questions générées !</p>' +
+          '<a class="inline-flex items-center gap-1 font-bold text-primary hover:underline" href="' + data.edit_url + '">' +
+          '<span class="material-symbols-outlined text-[16px]">edit</span>Relire et publier l\'exercice</a>';
+      } else {
+        result.innerHTML = '<p class="text-error">' + (data.error || 'Erreur inconnue.') + '</p>';
+      }
+    })
+    .catch(function () { result.classList.remove('hidden'); result.innerHTML = '<p class="text-error">Erreur réseau.</p>'; })
+    .finally(function () {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1">auto_awesome</span>Générer l\'exercice';
+    });
+  });
+})();
+</script>
+{% endblock %}

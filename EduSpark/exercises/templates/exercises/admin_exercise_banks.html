@@ -1,0 +1,81 @@
+{% extends "portal/base_admin.html" %}
+{% block title %}Banques d'exercices — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Administration</p>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Banques d'exercices</h1>
+    <p class="mt-1 font-body-md text-body-md text-on-surface-variant">Vue agrégée de tous les exercices de l'université.</p>
+  </div>
+  <a class="inline-flex items-center gap-2 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-4 py-2.5 font-label-md text-label-md text-on-surface-variant shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+    href="{% url 'exercises:admin_categories' %}">
+    <span class="material-symbols-outlined text-[18px]">category</span>Gérer les catégories
+  </a>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "portal/_stat_card.html" with label="Total exercices" value=total icon="quiz" %}
+  {% include "portal/_stat_card.html" with label="Publiés" value=published icon="public" icon_class="bg-primary-fixed text-primary" %}
+  {% include "portal/_stat_card.html" with label="Générés par IA" value=ai_count icon="auto_awesome" icon_class="bg-secondary-fixed text-on-secondary-fixed" %}
+</div>
+
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="flex flex-col gap-3 border-b border-outline-variant/40 px-5 py-4 xl:flex-row xl:items-center xl:justify-between">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Tous les exercices</h2>
+    <form method="get" class="flex gap-2">
+      <label class="relative block">
+        <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+        <input class="w-full rounded-full border border-outline-variant/60 bg-surface py-2 pl-9 pr-3 text-sm text-on-surface outline-none focus:border-primary sm:w-56" name="q" placeholder="Rechercher…" type="search" value="{{ q }}"/>
+      </label>
+      <button class="rounded-full bg-primary px-4 py-2 text-xs font-bold text-on-primary" type="submit">OK</button>
+      {% if q %}<a class="rounded-full border border-outline-variant/60 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container" href="{% url 'exercises:admin_exercise_banks' %}">×</a>{% endif %}
+    </form>
+  </div>
+  {% if exercises %}
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[900px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="px-5 py-3 font-bold">Exercice</th>
+          <th class="px-5 py-3 font-bold">Auteur</th>
+          <th class="px-5 py-3 font-bold">Matière</th>
+          <th class="px-5 py-3 font-bold">Type</th>
+          <th class="px-5 py-3 font-bold">Statut</th>
+          <th class="px-5 py-3 font-bold">Date</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for ex in exercises %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3">
+            <p class="font-semibold text-on-surface">{{ ex.title }}</p>
+            {% if ex.ai_generated %}<p class="text-xs text-secondary font-bold">· Généré par IA</p>{% endif %}
+          </td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ ex.author.get_full_name|default:ex.author.username }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ ex.subject|default:"—" }}</td>
+          <td class="px-5 py-3">{% include "portal/_badge.html" with label=ex.get_exercise_type_display tone_class=ex.get_type_display_class %}</td>
+          <td class="px-5 py-3">
+            {% if ex.status == "publie" %}{% include "portal/_badge.html" with label="Publié" tone_class="bg-primary-fixed text-primary" %}
+            {% elif ex.status == "archive" %}{% include "portal/_badge.html" with label="Archivé" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+            {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+          </td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ ex.updated_at|date:"j M Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="px-5 py-14 text-center">
+    <span class="material-symbols-outlined text-[40px] text-outline">quiz</span>
+    <p class="mt-2 text-sm text-on-surface-variant">{% if q %}Aucun exercice trouvé.{% else %}Aucun exercice créé pour cette université.{% endif %}</p>
+  </div>
+  {% endif %}
+</section>
+
+</div>
+</main>
+{% endblock %}

@@ -1,0 +1,314 @@
+{% extends "portal/base_student.html" %}
+{% block title %}Mes Devoirs — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="relative px-4 pb-8 pt-6 sm:px-6 xl:px-8 bg-background min-h-[calc(100vh-4rem)]" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col">
+
+<!-- En-tête -->
+<section class="flex flex-col gap-space-sm mb-space-lg">
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+    <div>
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Mes Devoirs &amp; Entraînement</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-1">Suivi de vos travaux, devoirs et séries d'entraînement.</p>
+    </div>
+    <button aria-controls="ai-panel-drawer" aria-expanded="false"
+      class="inline-flex items-center gap-2 h-11 px-space-md rounded-full bg-secondary text-on-secondary font-label-md text-label-md hover:opacity-95 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary"
+      onclick="document.getElementById('ai-panel-drawer').classList.remove('translate-x-full')" type="button">
+      <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+      <span>Générer un entraînement IA</span>
+    </button>
+  </div>
+
+  <!-- Stats rapides -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md mt-space-sm">
+    <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Travaux à rendre</span>
+        <span class="font-data-metric text-[20px] font-bold text-primary">{{ urgent_count }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Devoirs ouverts</span>
+      </div>
+      <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[26px]">alarm</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">En cours</span>
+        <span class="font-data-metric text-[20px] font-bold text-secondary">{{ in_draft_count }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Brouillon actif</span>
+      </div>
+      <div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
+        <span class="material-symbols-outlined text-[26px]">pending_actions</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Devoirs notés</span>
+        <span class="font-data-metric text-[20px] font-bold text-on-surface">{{ graded_count }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Corrigés disponibles</span>
+      </div>
+      <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+        <span class="material-symbols-outlined text-[26px]" style="font-variation-settings:'FILL' 1">task_alt</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex items-center justify-between">
+      <div>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Total devoirs</span>
+        <span class="font-data-metric text-[20px] font-bold text-on-surface">{{ total_assignments }}</span>
+        <span class="font-body-sm text-body-sm text-on-surface-variant block mt-0.5">Cette université</span>
+      </div>
+      <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-secondary">
+        <span class="material-symbols-outlined text-[26px]">assignment</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="mb-4 rounded border border-primary/30 bg-primary-fixed/20 text-primary px-5 py-3 text-sm font-medium">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- Liste des devoirs -->
+<section aria-label="Liste des devoirs" class="flex flex-col gap-space-md mb-space-xl">
+  {% for assignment, submission in assignments_with_sub %}
+  <article class="bg-surface-container-lowest p-space-lg rounded shadow-xs relative overflow-hidden flex flex-col xl:flex-row gap-space-lg justify-between
+    {% if assignment.is_overdue and not submission %}border-l-4 border-error{% endif %}">
+
+    <div class="flex-1 flex flex-col gap-space-xs">
+      <div class="flex flex-wrap items-center gap-space-xs">
+        {% if assignment.is_overdue and not submission %}
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[16px]">priority_high</span>Urgent — Échéance dépassée
+          </span>
+        {% elif assignment.status == "ouvert" %}
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[16px]">radio_button_checked</span>Ouvert
+          </span>
+        {% elif assignment.status == "correction" %}
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[16px]">draw</span>En correction
+          </span>
+        {% else %}
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+            <span class="material-symbols-outlined text-[16px]">check_circle</span>Terminé
+          </span>
+        {% endif %}
+
+        {% if assignment.subject %}
+          <span class="px-3 py-1 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">{{ assignment.subject }}</span>
+        {% endif %}
+        <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Coeff. {{ assignment.coefficient }}</span>
+
+        {% if submission %}
+          {% if submission.status == "corrige" %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm">
+              <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">grade</span>
+              Note : {{ submission.grade|default:"—" }}/20
+            </span>
+          {% elif submission.status == "rendu" %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-highest text-primary font-label-sm text-label-sm">
+              <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 1">check_circle</span>Rendu
+            </span>
+          {% elif submission.status == "brouillon" %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">
+              <span class="material-symbols-outlined text-[16px]">draft</span>Brouillon ({{ submission.progress_pct }}%)
+            </span>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <h2 class="font-headline-sm text-headline-sm text-on-surface mt-1">{{ assignment.title }}</h2>
+      {% if assignment.instructions %}
+        <p class="font-body-md text-body-md text-on-surface-variant max-w-3xl">{{ assignment.instructions|truncatechars:180 }}</p>
+      {% endif %}
+
+      {% if assignment.deadline %}
+      <div class="flex items-center gap-1.5 mt-space-sm text-body-sm font-body-sm text-on-surface-variant">
+        <span class="material-symbols-outlined text-[18px] text-outline">event</span>
+        <span>Échéance : <strong>{{ assignment.deadline|date:"j F Y à H\hi" }}</strong></span>
+      </div>
+      {% endif %}
+
+      {% if submission and submission.status == "brouillon" %}
+      <div class="mt-space-sm max-w-xl">
+        <div aria-label="Progression" aria-valuemax="100" aria-valuemin="0" aria-valuenow="{{ submission.progress_pct }}"
+          class="w-full h-2 rounded-full bg-surface-container overflow-hidden" role="progressbar">
+          <div class="h-full bg-secondary rounded-full transition-all" style="width:{{ submission.progress_pct }}%"></div>
+        </div>
+        <p class="text-xs text-on-surface-variant mt-1">{{ submission.progress_pct }}% complété</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="flex xl:flex-col items-center xl:items-end justify-center gap-space-sm min-w-[220px]">
+      {% if assignment.status == "ouvert" and submission.status != "rendu" and submission.status != "corrige" %}
+        <a class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-xs"
+          href="{% url 'exercises:student_assignment_detail' assignment.pk %}">
+          <span class="material-symbols-outlined text-[20px]">{% if submission and submission.status == "brouillon" %}edit_document{% else %}folder_open{% endif %}</span>
+          <span>{% if submission and submission.status == "brouillon" %}Reprendre{% else %}Commencer{% endif %}</span>
+        </a>
+      {% else %}
+        <a class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-all flex items-center justify-center gap-2"
+          href="{% url 'exercises:student_assignment_detail' assignment.pk %}">
+          <span class="material-symbols-outlined text-[20px]">visibility</span><span>Voir le devoir</span>
+        </a>
+      {% endif %}
+      <a class="w-full xl:w-auto min-h-[44px] px-space-md py-2.5 rounded-full bg-surface-container-low text-primary hover:bg-surface-container-high transition-all font-label-md text-label-md flex items-center justify-center gap-2"
+        href="{% url 'exercises:student_assignment_pdf' assignment.pk %}" target="_blank">
+        <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span><span>PDF</span>
+      </a>
+    </div>
+  </article>
+  {% empty %}
+  <div class="bg-surface-container-lowest p-space-xl rounded shadow-xs text-center">
+    <span class="material-symbols-outlined text-[40px] text-outline">assignment</span>
+    <p class="mt-2 text-sm text-on-surface-variant">Aucun devoir ouvert pour le moment.</p>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- Séries recommandées -->
+{% if series_list %}
+<section aria-label="Séries recommandées" class="flex flex-col gap-space-md mb-space-xl">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface">Séries recommandées</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">Entraînez-vous sur les séries publiées.</p>
+    </div>
+    <a class="font-label-md text-label-md text-primary hover:underline flex items-center gap-1" href="{% url 'exercises:student_practice' %}">
+      <span>Voir tout</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+    {% for serie in series_list|slice:":6" %}
+    <div class="bg-surface-container-lowest p-space-lg rounded shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
+      <div>
+        <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-space-sm">
+          <span class="material-symbols-outlined text-[22px]">library_books</span>
+        </div>
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">{{ serie.subject|default:"Général" }}</span>
+        <h3 class="font-title-md text-title-md text-on-surface mt-1">{{ serie.name }}</h3>
+        {% if serie.description %}<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">{{ serie.description|truncatechars:100 }}</p>{% endif %}
+      </div>
+      <div class="mt-space-lg pt-space-md flex items-center justify-between">
+        <span class="font-data-metric text-data-metric text-on-surface-variant">{{ serie.exercise_count }} exercice{{ serie.exercise_count|pluralize }}</span>
+        <a class="min-h-[44px] px-space-md rounded-full bg-surface-container-high text-primary hover:bg-surface-container-highest font-label-md text-label-md transition-colors flex items-center gap-1"
+          href="{% url 'exercises:student_practice' %}">Voir<span class="material-symbols-outlined text-[16px]">arrow_forward</span></a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Tentatives récentes -->
+{% if recent_attempts %}
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm mb-space-xl">
+  <div class="flex items-center justify-between border-b border-outline-variant/40 px-5 py-4">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Tentatives récentes</h2>
+    <a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:student_practice' %}">Tout l'historique</a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[600px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr><th class="px-5 py-3 font-bold">Série</th><th class="px-5 py-3 font-bold">Score</th><th class="px-5 py-3 font-bold">Durée</th><th class="px-5 py-3 font-bold">Date</th><th class="px-5 py-3 text-right font-bold">Résultat</th></tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for attempt in recent_attempts %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3 font-semibold text-on-surface">{{ attempt.series.name }}</td>
+          <td class="px-5 py-3 font-semibold text-on-surface">{{ attempt.score }}/{{ attempt.max_score }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ attempt.duration_minutes }} min</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ attempt.created_at|date:"j M Y" }}</td>
+          <td class="px-5 py-3 text-right">{% include "portal/_badge.html" with label=attempt.get_result_display tone_class=attempt.result_badge_class %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+</div>
+</main>
+
+<!-- Drawer IA -->
+<aside aria-labelledby="ai-drawer-title" aria-modal="true" role="dialog"
+  class="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-surface-container-lowest shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+  id="ai-panel-drawer">
+  <div class="p-space-lg bg-surface-container-low flex items-center justify-between border-b border-outline-variant/40">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-on-secondary">
+        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+      </div>
+      <h2 class="font-headline-sm text-headline-sm text-on-surface" id="ai-drawer-title">Génération IA</h2>
+    </div>
+    <button class="rounded-full p-1.5 text-on-surface-variant hover:bg-surface-container transition-colors"
+      onclick="document.getElementById('ai-panel-drawer').classList.add('translate-x-full')" aria-label="Fermer" type="button">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-space-lg">
+    <p class="mb-4 text-sm text-on-surface-variant">Générez un devoir d'entraînement personnalisé par IA selon votre matière et votre niveau. Il apparaîtra dans « Mes Devoirs » et vous pourrez y travailler immédiatement.</p>
+    <form id="student-ai-gen-form" method="post" action="{% url 'exercises:student_assignment_generate_ia' %}">
+      {% csrf_token %}
+      <div class="flex flex-col gap-4">
+        {% for field in ai_form %}
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-bold uppercase tracking-wide text-on-surface-variant" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mt-6">
+        <button class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-secondary px-5 py-3 font-label-md text-label-md text-on-secondary transition-colors hover:opacity-90" id="student-ai-gen-btn" type="submit">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+          Générer mon devoir
+        </button>
+      </div>
+    </form>
+    <div class="mt-4 hidden rounded bg-surface-container p-4 text-sm leading-relaxed" id="student-ai-result"></div>
+  </div>
+</aside>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  var form = document.getElementById('student-ai-gen-form');
+  var btn = document.getElementById('student-ai-gen-btn');
+  var result = document.getElementById('student-ai-result');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span> Génération en cours…';
+    result.classList.add('hidden');
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      result.classList.remove('hidden');
+      if (data.ok) {
+        result.innerHTML = '<p class="font-bold text-primary mb-1">✓ Devoir créé avec ' + data.questions_count + ' questions !</p>' +
+          '<a class="inline-flex items-center gap-1 font-bold text-primary hover:underline" href="' + data.detail_url + '">' +
+          '<span class="material-symbols-outlined text-[16px]">arrow_forward</span>Commencer le devoir maintenant</a>';
+      } else {
+        result.innerHTML = '<p class="text-error">' + (data.error || 'Erreur inconnue.') + '</p>';
+      }
+    })
+    .catch(function () { result.classList.remove('hidden'); result.innerHTML = '<p class="text-error">Erreur réseau.</p>'; })
+    .finally(function () {
+      btn.disabled = false;
+      btn.innerHTML = '<span class="material-symbols-outlined text-[18px]" style="font-variation-settings:\'FILL\' 1">auto_awesome</span>Générer mon devoir';
+    });
+  });
+})();
+</script>
+{% endblock %}

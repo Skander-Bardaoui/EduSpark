@@ -1,0 +1,152 @@
+{% extends "portal/base_prof.html" %}
+{% block title %}Séries & Barèmes — Hub Éducatif Multimodal{% endblock %}
+{% block content %}
+<main class="w-full min-h-[calc(100vh-4rem)] bg-surface" id="main-content">
+<div class="mx-auto flex w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 xl:px-8">
+
+<header class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+  <div class="min-w-0">
+    <p class="mb-1 font-label-sm text-label-sm font-bold uppercase tracking-[0.16em] text-primary">Exercices</p>
+    <h1 class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">Séries &amp; Barèmes</h1>
+    <p class="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">Grilles d'évaluation réutilisables et séries d'entraînement.</p>
+  </div>
+  <a class="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container" href="{% url 'exercises:prof_rubric_create' %}">
+    <span class="material-symbols-outlined text-[18px]">add</span>Créer un barème
+  </a>
+</header>
+
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "portal/_stat_card.html" with label="Barèmes actifs" value=active_count icon="checklist" hint="Utilisables dans les devoirs" %}
+  {% include "portal/_stat_card.html" with label="Critères évalués" value=criteria_count icon="rule" icon_class="bg-surface-container text-secondary" hint="Critères au total" %}
+  {% include "portal/_stat_card.html" with label="Séries d'exercices" value=series_count icon="library_books" icon_class="bg-tertiary-fixed text-on-tertiary-fixed" hint="Séries créées" %}
+  {% include "portal/_stat_card.html" with label="Échelle appliquée" value="0 – 20" icon="grade" hint="Conversion ECTS automatique" %}
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="rounded border border-primary/30 bg-primary-fixed/20 text-primary px-5 py-3 text-sm font-medium">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- Cartes de barèmes -->
+{% if rubrics %}
+<section class="grid gap-4 lg:grid-cols-3">
+  {% for rubric in rubrics %}
+  <article class="flex flex-col rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded bg-primary text-on-primary">
+          <span class="material-symbols-outlined text-[20px]">{{ rubric.icon }}</span>
+        </span>
+        <div>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">{{ rubric.name }}</h2>
+          <p class="text-xs text-on-surface-variant">{{ rubric.subject|default:"—" }}{% if rubric.level %} · {{ rubric.level }}{% endif %}</p>
+        </div>
+      </div>
+      {% if rubric.status == "actif" %}{% include "portal/_badge.html" with label="Actif" tone_class="bg-primary-fixed text-primary" %}
+      {% elif rubric.status == "archive" %}{% include "portal/_badge.html" with label="Archivé" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+      {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+    </div>
+    <ul class="mt-4 flex-1 space-y-2.5 text-sm">
+      {% for crit in rubric.criteria.all|slice:":5" %}
+      <li class="flex items-start justify-between gap-3">
+        <span class="text-on-surface-variant">{{ crit.name }}</span>
+        <span class="font-bold text-on-surface">{{ crit.points }} pts</span>
+      </li>
+      {% empty %}
+      <li class="text-xs text-on-surface-variant italic">Aucun critère défini.</li>
+      {% endfor %}
+    </ul>
+    <div class="mt-4 flex items-center justify-between border-t border-outline-variant/40 pt-3 gap-2">
+      <span class="text-xs text-on-surface-variant">Total : <strong>{{ rubric.total_points }} pts</strong> · Utilisé {{ rubric.usage_count }}×</span>
+      <div class="flex gap-2">
+        <a class="text-xs font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubric_update' rubric.pk %}">Modifier</a>
+        <form method="post" action="{% url 'exercises:prof_rubric_delete' rubric.pk %}" class="inline">
+          {% csrf_token %}
+          <button class="text-xs font-bold text-error hover:underline del-rubric" type="submit" data-name="{{ rubric.name }}">Supprimer</button>
+        </form>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<div class="rounded border border-outline-variant/40 bg-surface-container-lowest px-5 py-14 text-center shadow-sm">
+  <span class="material-symbols-outlined text-[40px] text-outline">checklist</span>
+  <p class="mt-2 text-sm text-on-surface-variant">Aucun barème. <a class="font-bold text-primary hover:underline" href="{% url 'exercises:prof_rubric_create' %}">Créer le premier</a>.</p>
+</div>
+{% endif %}
+
+<!-- Séries d'exercices -->
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest shadow-sm">
+  <div class="border-b border-outline-variant/40 px-5 py-4">
+    <h2 class="font-headline-sm text-headline-sm text-on-surface">Séries d'exercices</h2>
+    <p class="text-xs text-on-surface-variant">Regroupements utilisés pour l'entraînement et les révisions.</p>
+  </div>
+  {% if series_list %}
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[720px] text-left">
+      <thead class="bg-surface-container/70 text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr>
+          <th class="px-5 py-3 font-bold">Série</th>
+          <th class="px-5 py-3 font-bold">Matière</th>
+          <th class="px-5 py-3 font-bold">Exercices</th>
+          <th class="px-5 py-3 font-bold">Barème associé</th>
+          <th class="px-5 py-3 text-right font-bold">Visibilité</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30 text-sm">
+        {% for serie in series_list %}
+        <tr class="hover:bg-surface-container/40">
+          <td class="px-5 py-3 font-semibold text-on-surface">{{ serie.name }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ serie.subject|default:"—" }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ serie.exercise_count }}</td>
+          <td class="px-5 py-3 text-on-surface-variant">{{ serie.rubric.name|default:"—" }}</td>
+          <td class="px-5 py-3 text-right">
+            {% if serie.visibility == "publiee" %}{% include "portal/_badge.html" with label="Publiée" tone_class="bg-primary-fixed text-primary" %}
+            {% elif serie.visibility == "privee" %}{% include "portal/_badge.html" with label="Privée" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}
+            {% else %}{% include "portal/_badge.html" with label="Brouillon" tone_class="bg-surface-container text-on-surface-variant" %}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="px-5 py-8 text-sm text-center text-on-surface-variant">Aucune série créée.</p>
+  {% endif %}
+</section>
+
+<!-- Échelle de notation -->
+<section class="rounded border border-outline-variant/40 bg-surface-container-lowest p-5 shadow-sm">
+  <h2 class="font-headline-sm text-headline-sm text-on-surface">Échelle de notation</h2>
+  <p class="mt-1 text-xs text-on-surface-variant">Conversion appliquée aux relevés et jurys.</p>
+  <div class="overflow-x-auto">
+    <table class="mt-4 w-full min-w-[420px] text-left text-sm">
+      <thead class="text-[11px] uppercase tracking-wider text-on-surface-variant">
+        <tr><th class="pb-2 font-bold">Note</th><th class="pb-2 font-bold">Mention</th><th class="pb-2 text-right font-bold">ECTS</th></tr>
+      </thead>
+      <tbody class="divide-y divide-outline-variant/30">
+        <tr><td class="py-2.5 font-bold text-on-surface">18 – 20</td><td class="py-2.5 text-on-surface-variant">Excellent</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="A" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+        <tr><td class="py-2.5 font-bold text-on-surface">16 – 17,9</td><td class="py-2.5 text-on-surface-variant">Très bien</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="A" tone_class="bg-primary-fixed text-primary" %}</td></tr>
+        <tr><td class="py-2.5 font-bold text-on-surface">14 – 15,9</td><td class="py-2.5 text-on-surface-variant">Bien</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="B" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+        <tr><td class="py-2.5 font-bold text-on-surface">12 – 13,9</td><td class="py-2.5 text-on-surface-variant">Assez bien</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="C" tone_class="bg-secondary-fixed text-on-secondary-fixed" %}</td></tr>
+        <tr><td class="py-2.5 font-bold text-on-surface">10 – 11,9</td><td class="py-2.5 text-on-surface-variant">Passable</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="D" tone_class="bg-tertiary-fixed text-on-tertiary-fixed" %}</td></tr>
+        <tr><td class="py-2.5 font-bold text-on-surface">&lt; 10</td><td class="py-2.5 text-on-surface-variant">Insuffisant</td><td class="py-2.5 text-right">{% include "portal/_badge.html" with label="F" tone_class="bg-error-container text-on-error-container" %}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+</main>
+{% endblock %}
+{% block page_scripts %}
+<script>
+document.querySelectorAll('button.del-rubric').forEach(function (btn) {
+  btn.closest('form').addEventListener('submit', function (e) {
+    if (!confirm('Supprimer le barème « ' + btn.getAttribute('data-name') + ' » ?')) e.preventDefault();
+  });
+});
+</script>
+{% endblock %}
