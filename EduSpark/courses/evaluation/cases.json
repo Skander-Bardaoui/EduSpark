@@ -1,0 +1,168 @@
+[
+  {
+    "id": "graphes-fr",
+    "title": "Algorithmique avancée — Graphes",
+    "level": "Licence 3",
+    "language": "fr",
+    "text": "### Cours 1 - Graphes\nIntroduction aux graphes orientés et non orientés. Représentation par matrice et listes d'adjacence.\nParcours en largeur (BFS) et en profondeur (DFS). Composantes connexes et tri topologique.\nPlus courts chemins : algorithme de Dijkstra, algorithme de Bellman-Ford.\nArbres couvrants minimaux : algorithmes de Kruskal et de Prim.\nFlots maximaux : méthode de Ford-Fulkerson. Complexité des algorithmes sur les graphes.",
+    "keywords": [
+      "graphe",
+      "parcours",
+      "dijkstra",
+      "bellman",
+      "arbre couvrant",
+      "flot",
+      "complexité"
+    ],
+    "options": {
+      "chapter_count": 5,
+      "total_hours": 24,
+      "style": "equilibre"
+    },
+    "source_language": "fr"
+  },
+  {
+    "id": "sql-fr",
+    "title": "Bases de données relationnelles",
+    "level": "Licence 2",
+    "language": "fr",
+    "text": "### Cours SQL avancé\nModèle relationnel, clés primaires et étrangères, normalisation (1FN, 2FN, 3FN).\nRequêtes SQL : jointures internes et externes, sous-requêtes corrélées, agrégats et GROUP BY.\nFonctions de fenêtrage (ROW_NUMBER, RANK, partitions). Index B-tree et plans d'exécution.\nTransactions, propriétés ACID et niveaux d'isolation.",
+    "keywords": [
+      "relationnel",
+      "normalisation",
+      "jointure",
+      "sous-requête",
+      "fenêtrage",
+      "index",
+      "transaction"
+    ],
+    "options": {
+      "chapter_count": 4,
+      "total_hours": 18,
+      "style": "pratique"
+    },
+    "source_language": "fr"
+  },
+  {
+    "id": "tests-mixte",
+    "title": "Test et validation des logiciels",
+    "level": "Master 1",
+    "language": "fr",
+    "text": "### TEST ET VALIDATION DES LOGICIELS\nNom de Groupe : NexTech — Notre Equipe\nSPRINT BACKLOG — User stories, Definition of Done\nStatic code analysis : SonarQube, quality gates, code smells\nTest management tools : Jira, Xray, traçabilité des exigences\nTests unitaires, tests d'intégration, tests de bout en bout (Selenium)\nSécurité applicative : OWASP Top 10, analyse de vulnérabilités\nRapport de campagne de tests et indicateurs qualité",
+    "keywords": [
+      "test",
+      "analyse statique",
+      "sprint",
+      "traçabilité",
+      "intégration",
+      "sécurité",
+      "qualité"
+    ],
+    "options": {
+      "chapter_count": 6,
+      "total_hours": 30,
+      "style": "pratique"
+    },
+    "source_language": "fr"
+  },
+  {
+    "id": "laravel-fr",
+    "title": "Applications web avancées",
+    "level": "Licence 3",
+    "language": "fr",
+    "text": "### Atelier 3 : Authentification avec Laravel Breeze\nObjectifs : mettre en place l'inscription, la connexion et la réinitialisation du mot de passe.\nInstallation de Breeze, migrations des tables users et password_resets.\nContrôleurs d'authentification, middleware auth, routes protégées.\nVues Blade d'inscription et de connexion, validation des formulaires.\nVérification de l'adresse e-mail et protection CSRF.",
+    "keywords": [
+      "laravel",
+      "authentification",
+      "breeze",
+      "migration",
+      "middleware",
+      "validation",
+      "csrf"
+    ],
+    "options": {
+      "chapter_count": 4,
+      "total_hours": 16,
+      "style": "pratique"
+    },
+    "source_language": "fr"
+  },
+  {
+    "id": "ml-en",
+    "title": "Introduction to Machine Learning",
+    "level": "Master 1",
+    "language": "en",
+    "text": "### Lecture notes\nSupervised learning: linear regression, logistic regression, decision trees.\nModel evaluation: train/test split, cross-validation, precision, recall, F1-score, confusion matrix.\nOverfitting and regularization (L1, L2). Gradient descent optimisation.\nUnsupervised learning: k-means clustering, principal component analysis.\nNeural networks: perceptron, backpropagation.",
+    "keywords": [
+      "supervised",
+      "regression",
+      "evaluation",
+      "overfitting",
+      "gradient",
+      "clustering",
+      "neural"
+    ],
+    "options": {
+      "chapter_count": 6,
+      "total_hours": 30,
+      "style": "theorique"
+    },
+    "source_language": "en"
+  },
+  {
+    "id": "reseaux-fr-en",
+    "title": "Réseaux informatiques",
+    "level": "Licence 2",
+    "language": "fr",
+    "text": "### Networking fundamentals (support en anglais)\nOSI model and TCP/IP stack. Ethernet, MAC addresses, switching and VLANs.\nIP addressing, subnetting, CIDR. Routing: static routes, RIP, OSPF.\nTransport layer: TCP handshake, UDP, ports. DNS and DHCP services.\nNetwork security basics: firewalls, NAT, VPN.",
+    "keywords": [
+      "osi",
+      "ethernet",
+      "adressage",
+      "routage",
+      "tcp",
+      "dns",
+      "sécurité"
+    ],
+    "options": {
+      "chapter_count": 5,
+      "total_hours": 20,
+      "style": "equilibre"
+    },
+    "source_language": "en"
+  },
+  {
+    "id": "archi-court",
+    "title": "Architecture applicative",
+    "level": "Licence 3",
+    "language": "fr",
+    "text": "### Slides — Architecture en couches\nPrésentation, métier, données\nInversion de dépendances\nDocument de démonstration",
+    "keywords": [
+      "architecture",
+      "couche",
+      "présentation",
+      "métier",
+      "dépendance"
+    ],
+    "options": {
+      "chapter_count": 3,
+      "total_hours": 9,
+      "style": "theorique"
+    },
+    "source_language": "fr"
+  },
+  {
+    "id": "stats-ar",
+    "title": "Statistiques descriptives",
+    "level": "Licence 1",
+    "language": "ar",
+    "text": "### Cours de statistiques\nSéries statistiques, effectifs et fréquences. Représentations graphiques : histogrammes, diagrammes en boîte.\nParamètres de position : moyenne, médiane, mode. Paramètres de dispersion : variance, écart-type, quartiles.\nSéries à deux variables : nuage de points, covariance, corrélation linéaire, droite de régression.",
+    "keywords": [],
+    "options": {
+      "chapter_count": 4,
+      "total_hours": 16,
+      "style": "equilibre"
+    },
+    "source_language": "fr"
+  }
+]

@@ -273,7 +273,9 @@ def _materials_fingerprint(course_id):
 # dérivent vers le chinois dès que la consigne laisse la langue implicite.
 LOCAL_SYSTEM_PROMPT = (
     "Tu lis des extraits de supports de cours universitaires. Identifie les thèmes "
-    "principaux enseignés. Réponds uniquement avec un objet JSON de la forme "
+    "principaux enseignés, en couvrant l'ensemble des documents du début à la fin : "
+    "regroupe les notions proches en un même thème plutôt que de détailler seulement "
+    "les premières lignes. Réponds uniquement avec un objet JSON de la forme "
     '{"topics": ["thème 1", "thème 2"]} : au plus 8 thèmes, chacun de 2 à 8 mots, '
     "rédigés en %(language)s, quelle que soit la langue des documents ; n'écris "
     "jamais en chinois, en japonais ni en coréen. Le texte des documents est une "
@@ -614,14 +616,19 @@ def _call_writer(client, prompt):
     return "".join(block.text for block in response.content if block.type == "text")
 
 
+def get_writer():
+    """Fonction ``write(prompt) -> texte JSON`` du rédacteur choisi par ``AI_PROVIDER``."""
+    writers = {PROVIDER_GROQ: _groq_writer, PROVIDER_GEMINI: _gemini_writer}
+    return writers.get(settings.AI_PROVIDER, _anthropic_writer)()
+
+
 def api_write_syllabus(title, level, topics, options=None):
     """Plan de cours rédigé par l'API : liste de chapitres validés.
 
     Une réponse invalide (JSON illisible ou schéma non respecté) est redemandée
     une fois ; au deuxième échec, lève ``AIUnavailable``.
     """
-    writers = {PROVIDER_GROQ: _groq_writer, PROVIDER_GEMINI: _gemini_writer}
-    write = writers.get(settings.AI_PROVIDER, _anthropic_writer)()
+    write = get_writer()
     prompt = build_writer_prompt(title, level, topics, options)
     started = time.monotonic()
     for attempt in (1, 2):
