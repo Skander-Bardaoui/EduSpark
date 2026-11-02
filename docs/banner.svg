@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="300" viewBox="0 0 1280 300" role="img" aria-labelledby="t">
+  <title id="t">EduSpark — Multimodal education &amp; creativity hub</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08080C"/>
+      <stop offset="55%" stop-color="#0B0B12"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8B5CF6">
+        <animate attributeName="stop-color" values="#8B5CF6;#C084FC;#8B5CF6" dur="7s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#C084FC">
+        <animate attributeName="stop-color" values="#C084FC;#8B5CF6;#C084FC" dur="7s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <radialGradient id="orbA" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C084FC" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#C084FC" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="44" height="44" patternUnits="userSpaceOnUse">
+      <path d="M 44 0 L 0 0 0 44" fill="none" stroke="#FFFFFF" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="300" fill="url(#bg)"/>
+  <rect width="1280" height="300" fill="url(#grid)"/>
+
+  <g>
+    <circle cx="1080" cy="60" r="190" fill="url(#orbA)">
+      <animate attributeName="opacity" values="0.55;0.95;0.55" dur="9s" repeatCount="indefinite"/>
+    </circle>
+    <animateTransform attributeName="transform" type="translate" values="0 0; -26 14; 0 0" dur="16s" repeatCount="indefinite"/>
+  </g>
+  <g>
+    <circle cx="190" cy="260" r="150" fill="url(#orbB)">
+      <animate attributeName="opacity" values="0.35;0.7;0.35" dur="11s" repeatCount="indefinite"/>
+    </circle>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 30 -18; 0 0" dur="18s" repeatCount="indefinite"/>
+  </g>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g>
+      <circle cx="66" cy="58" r="5" fill="#8B5CF6">
+        <animate attributeName="opacity" values="1;0.25;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <text x="84" y="64" font-size="13" letter-spacing="4" fill="#9CA3AF">SKANDER BARDAOUI</text>
+    </g>
+    <text x="62" y="146" font-size="58" font-weight="700" fill="#F8FAFC">EduSpark</text>
+    <text x="64" y="191" font-size="22" fill="#CBD5E1">Multimodal education &amp; creativity hub</text>
+    <g><rect x="64" y="232" rx="16" width="86" height="34" fill="rgba(255,255,255,0.06)" stroke="#8B5CF6" stroke-opacity="0.45"/><text x="107.0" y="254" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#E5E7EB" fill-opacity="0.9">Django</text></g><g><rect x="162" y="232" rx="16" width="86" height="34" fill="rgba(255,255,255,0.06)" stroke="#8B5CF6" stroke-opacity="0.45"/><text x="205.0" y="254" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#E5E7EB" fill-opacity="0.9">Python</text></g><g><rect x="260" y="232" rx="16" width="110" height="34" fill="rgba(255,255,255,0.06)" stroke="#8B5CF6" stroke-opacity="0.45"/><text x="315.0" y="254" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#E5E7EB" fill-opacity="0.9">PostgreSQL</text></g><g><rect x="382" y="232" rx="16" width="86" height="34" fill="rgba(255,255,255,0.06)" stroke="#8B5CF6" stroke-opacity="0.45"/><text x="425.0" y="254" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#E5E7EB" fill-opacity="0.9">Docker</text></g>
+  </g>
+
+  <rect x="0" y="292" width="320" height="4" fill="url(#accent)" rx="2">
+    <animate attributeName="x" values="-320;1280" dur="9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.25;1;0.25" dur="9s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="0" y="297" width="1280" height="1" fill="#FFFFFF" fill-opacity="0.08"/>
+</svg>
